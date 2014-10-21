@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=Deepin
+Comment=Deepin Desktop Environment
+Exec=/usr/bin/startdde -wm gala
+TryExec=/usr/bin/startdde

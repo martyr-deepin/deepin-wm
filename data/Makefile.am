@@ -5,6 +5,9 @@ SUBDIRS = \
 stylesdir = $(pkgdatadir)
 styles_DATA = gala.css texture.png close.png
 
+xsessionsdir = $(datadir)/xsessions
+xsessions_DATA = deepin-test.desktop
+
 applicationsdir = $(datadir)/applications
 applications_DATA = gala.desktop gala-multitaskingview.desktop
 
@@ -25,6 +28,7 @@ gschemas.compiled: Makefile $(gsettings_SCHEMAS:.xml=.valid)
 all-local: gschemas.compiled
 
 EXTRA_DIST = \
+	deepin-test.desktop \
 	gala.css \
 	gala.desktop \
 	gala-multitaskingview.desktop.in \
@@ -34,6 +38,7 @@ EXTRA_DIST = \
 	$(NULL)
 
 CLEANFILES = \
+	$(xsessions_DATA) \
 	$(applications_DATA) \
 	$(styles_DATA) \
 	$(gsettings_SCHEMAS) \
