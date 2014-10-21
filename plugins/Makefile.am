@@ -1,5 +1,4 @@
 SUBDIRS = \
-	notify \
 	zoom \
 	$(NULL)
 
