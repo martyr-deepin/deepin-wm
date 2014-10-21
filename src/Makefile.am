@@ -48,6 +48,7 @@ gala_VALASOURCES = \
 	Background/BackgroundManager.vala \
 	Background/SlideShow.vala \
 	Background/SystemBackground.vala \
+	Widgets/DeepinWindowSwitcher.vala \
 	Widgets/IconGroup.vala \
 	Widgets/IconGroupContainer.vala \
 	Widgets/MonitorClone.vala \

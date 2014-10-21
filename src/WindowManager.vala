@@ -49,6 +49,7 @@ namespace Gala
 		Meta.PluginInfo info;
 
 		WindowSwitcher? winswitcher = null;
+		DeepinWindowSwitcher? deepin_winswitcher = null;
 		ActivatableComponent? workspace_view = null;
 		ActivatableComponent? window_overview = null;
 
@@ -237,6 +238,12 @@ namespace Gala
 
 				KeyBinding.set_custom_handler ("switch-applications", winswitcher.handle_switch_windows);
 				KeyBinding.set_custom_handler ("switch-applications-backward", winswitcher.handle_switch_windows);
+
+				deepin_winswitcher = new DeepinWindowSwitcher (this);
+				ui_group.add_child (deepin_winswitcher);
+
+				KeyBinding.set_custom_handler ("switch-windows", deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows-backward", deepin_winswitcher.handle_switch_windows);
 			}
 
 			if (plugin_manager.window_overview_provider == null

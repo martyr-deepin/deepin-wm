@@ -25,6 +25,7 @@ gala_doc_files = \
 	$(top_srcdir)/src/Background/BackgroundManager.vala \
 	$(top_srcdir)/src/Background/SlideShow.vala \
 	$(top_srcdir)/src/Background/SystemBackground.vala \
+	$(top_srcdir)/src/Widgets/DeepinWindowSwitcher.vala \
 	$(top_srcdir)/src/Widgets/IconGroup.vala \
 	$(top_srcdir)/src/Widgets/IconGroupContainer.vala \
 	$(top_srcdir)/src/Widgets/MonitorClone.vala \
