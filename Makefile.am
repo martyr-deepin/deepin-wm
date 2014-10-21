@@ -29,3 +29,20 @@ distclean-local:
 	if test "x$(srcdir)" = "x."; then :; else \
 		rm -f ChangeLog; \
 	fi
+
+ChangeLog:
+	@echo Creating $@
+	@if test -d "$(srcdir)/.bzr"; then \
+		(bzr log --gnu -n1) | fmt --split-only --width=80 > $@.tmp \
+		&& mv -f $@.tmp $@ \
+		|| ($(RM) $@.tmp; \
+			echo Failed to generate ChangeLog, your ChangeLog may be outdated >&2; \
+			(test -f $@ || echo git-log is required to generate this file >> $@)); \
+	else \
+		test -f $@ || \
+		(echo A git checkout and git-log is required to generate ChangeLog >&2 && \
+		echo A git checkout and git-log is required to generate this file >> $@); \
+	fi
+
+.PHONY: ChangeLog
+
