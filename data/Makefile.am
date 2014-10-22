@@ -38,9 +38,7 @@ EXTRA_DIST = \
 	$(NULL)
 
 CLEANFILES = \
-	$(xsessions_DATA) \
-	$(applications_DATA) \
-	$(styles_DATA) \
+	gala-multitaskingview.desktop \
 	$(gsettings_SCHEMAS) \
 	gschemas.compiled \
 	data/org.pantheon.desktop.gala.gschema.xml \
