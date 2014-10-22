@@ -1,0 +1,9 @@
+[org.gnome.mutter]
+auto-maximize=false
+
+[org.pantheon.desktop.gala.appearance]
+button-layout='menu:minimize,maximize,close'
+
+[org.pantheon.desktop.gala.keybindings]
+cycle-workspaces-next=['<Super>Tab']
+cycle-workspaces-previous=['<Super><Shift>Tab']
