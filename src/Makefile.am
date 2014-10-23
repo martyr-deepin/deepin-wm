@@ -58,6 +58,19 @@ gala_VALASOURCES = \
 	Widgets/WindowOverview.vala \
 	Widgets/WindowSwitcher.vala \
 	Widgets/WorkspaceClone.vala \
+	Granite/style-classes.vala \
+	Granite/Drawing/Color.vala \
+	Granite/Drawing/BufferSurface.vala \
+	Granite/Drawing/Utilities.vala \
+	Granite/Widgets/Utils.vala \
+	Granite/Services/Paths.vala \
+	Granite/Services/System.vala \
+	Granite/Services/SimpleCommand.vala \
+	Granite/Services/Logger.vala \
+	Granite/Services/ContractorProxy.vala \
+	Granite/Services/Contractor.vala \
+	Granite/Services/Settings.vala \
+	Granite/Services/IconFactory.vala \
 	$(NULL)
 
 nodist_gala_SOURCES = \

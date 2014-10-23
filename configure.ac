@@ -106,7 +106,6 @@ GALA_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  libbamf3 \
                  clutter-1.0 \
                  clutter-gtk-1.0 \
-                 granite \
                  libmutter >= $MUTTER_MIN_VERSION \
                  gee-0.8 \
                  gnome-desktop-3.0 \
@@ -120,10 +119,10 @@ GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg libmutter \
                       --pkg clutter-1.0 \
                       --pkg clutter-gtk-1.0 \
-                      --pkg granite \
                       --pkg gee-0.8 \
                       --pkg gdesktopenums-3.0 \
                       --pkg gnome-desktop-3.0 \
+                      --pkg posix \
                       --pkg xfixes-4.0 \
                       --pkg plank"
 

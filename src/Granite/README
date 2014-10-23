@@ -1,0 +1,2 @@
+Source files from granite that used by gala to fix gtk-3.12 depends
+issue, and should be removed later.
