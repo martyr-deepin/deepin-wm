@@ -169,12 +169,6 @@ namespace Gala
 			screen.get_display ().add_keybinding ("cycle-workspaces-previous", KeybindingSettings.get_default ().schema, 0, () => {
 				cycle_workspaces (-1);
 			});
-			screen.get_display ().add_keybinding ("preview-workspace", KeybindingSettings.get_default ().schema, 0, () => {
-				if (workspace_view.is_opened ())
-					workspace_view.close ();
-				else
-					workspace_view.open ();
-			});
 
 			screen.get_display ().overlay_key.connect (() => {
 				try {
@@ -265,6 +259,12 @@ namespace Gala
 					hints.@set ("all-windows", true);
 					window_overview.open (hints);
 				}
+			});
+			screen.get_display ().add_keybinding ("preview-workspace", KeybindingSettings.get_default ().schema, 0, () => {
+				if (workspace_view.is_opened ())
+					workspace_view.close ();
+				else
+					workspace_view.open ();
 			});
 
 			update_input_area ();

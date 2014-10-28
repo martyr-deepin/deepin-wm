@@ -511,7 +511,13 @@ namespace Gala
 
 		bool keybinding_filter (KeyBinding binding)
 		{
-			var action = Prefs.get_keybinding_action (binding.get_name ());
+			var name = binding.get_name ();
+			switch (name) {
+			case "preview-workspace":
+				return false;
+			}
+
+			var action = Prefs.get_keybinding_action (name);
 			switch (action) {
 				case KeyBindingAction.WORKSPACE_LEFT:
 				case KeyBindingAction.WORKSPACE_RIGHT:
@@ -523,4 +529,3 @@ namespace Gala
 		}
 	}
 }
-
