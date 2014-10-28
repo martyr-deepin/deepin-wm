@@ -576,16 +576,37 @@ namespace Gala
 
 		bool keybinding_filter (KeyBinding binding)
 		{
-			var action = Prefs.get_keybinding_action (binding.get_name ());
+			var name = binding.get_name ();
+			switch (name) {
+			case "preview-workspace":
+				return false;
+			}
+
+			var action = Prefs.get_keybinding_action (name);
 			switch (action) {
-				case KeyBindingAction.WORKSPACE_LEFT:
-				case KeyBindingAction.WORKSPACE_RIGHT:
-				case KeyBindingAction.SHOW_DESKTOP:
-					return false;
-				default:
-					return true;
+			case KeyBindingAction.WORKSPACE_1:
+			case KeyBindingAction.WORKSPACE_2:
+			case KeyBindingAction.WORKSPACE_3:
+			case KeyBindingAction.WORKSPACE_4:
+			case KeyBindingAction.WORKSPACE_5:
+			case KeyBindingAction.WORKSPACE_6:
+			case KeyBindingAction.WORKSPACE_7:
+			case KeyBindingAction.WORKSPACE_8:
+			case KeyBindingAction.WORKSPACE_9:
+			case KeyBindingAction.WORKSPACE_10:
+			case KeyBindingAction.WORKSPACE_11:
+			case KeyBindingAction.WORKSPACE_12:
+			case KeyBindingAction.WORKSPACE_LEFT:
+			case KeyBindingAction.WORKSPACE_RIGHT:
+			case KeyBindingAction.WORKSPACE_UP:
+			case KeyBindingAction.WORKSPACE_DOWN:
+#if HAS_MUTTER314
+			case KeyBindingAction.WORKSPACE_LAST:
+#endif
+				return false;
+			default:
+				return true;
 			}
 		}
 	}
 }
-

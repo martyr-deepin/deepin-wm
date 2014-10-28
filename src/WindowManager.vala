@@ -257,7 +257,8 @@ namespace Gala
 					window_overview.open (hints);
 				}
 			});
-			screen.get_display ().add_keybinding ("preview-workspace", KeybindingSettings.get_default ().schema, 0, () => {
+			display.add_keybinding ("preview-workspace", keybinding_schema, 0, () => {
+				stdout.printf ("preview...\n"); // TODO test
 				if (workspace_view.is_opened ())
 					workspace_view.close ();
 				else
