@@ -14,7 +14,7 @@
 		<value nick='grid' value='0'/>
 		<value nick='natural' value='1'/>
 	</enum>
-	
+
 	<schema path="/org/pantheon/desktop/gala/behavior/" id="org.pantheon.desktop.gala.behavior" gettext-domain="gala">
 		<key enum="GalaActionType" name="hotcorner-topleft">
 			<default>'none'</default>
@@ -44,7 +44,7 @@
 		<key type="s" name="hotcorner-custom-command">
 			<default>''</default>
 			<summary>The command that will be executed for the hotcorner action 'custom-command' or multiple</summary>
-			<description>If you just put a single command, it will be used for every hotcorner assigned to 
+			<description>If you just put a single command, it will be used for every hotcorner assigned to
 				'custom-command'. If you instead use the pattern
 				'hotcorner-topleft:command;;hotcorner-bottomright:command' the specific commands will be used
 				per hotcorner. Possible identifiers are 'hotcorner-[topleft; topright; bottomleft; bottomright]'
@@ -82,7 +82,7 @@
 			<description>When launching the window-switcher, gala iterates over this list and attempts to find a window matching the names. If it does, it will hide this window and fade it back in, once the the switcher is closed.</description>
 		</key>
 	</schema>
-	
+
 	<schema path="/org/pantheon/desktop/gala/keybindings/" id="org.pantheon.desktop.gala.keybindings" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="as" name="switch-to-workspace-first">
 			<default><![CDATA[['<Super>Home']]]></default>
@@ -131,8 +131,12 @@
 			<default><![CDATA[['<Super><Shift>Tab']]]></default>
 			<summary>Cycle to the next workspace to the right or to back to the first</summary>
 		</key>
+		<key type="as" name="preview-workspace">
+			<default><![CDATA[['<Super>s']]]></default>
+			<summary>Preview all workspace</summary>
+		</key>
 	</schema>
-	
+
 	<schema path="/org/pantheon/desktop/gala/appearance/" id="org.pantheon.desktop.gala.appearance" gettext-domain="gala">
 		<key type="b" name="attach-modal-dialogs">
 			<default>false</default>
@@ -154,7 +158,7 @@
 			<summary>The opacity of the windows located in the background in the alt-tab-switcher.</summary>
 		</key>
 	</schema>
-	
+
 	<schema path="/org/pantheon/desktop/gala/animations/" id="org.pantheon.desktop.gala.animations" gettext-domain="gala">
 		<key type="b" name="enable-animations">
 			<default>true</default>
@@ -185,7 +189,7 @@
 			<summary>Duration of the menu mapping animation</summary>
 		</key>
 	</schema>
-	
+
 	<schema path="/org/pantheon/desktop/gala/shadows/" id="org.pantheon.desktop.gala.shadows" gettext-domain="gala">
 		<key type="as" name="normal-focused">
 			<default>['20', '-1', '0', '15', '220']</default>

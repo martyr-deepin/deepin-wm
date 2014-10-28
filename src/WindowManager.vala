@@ -169,6 +169,12 @@ namespace Gala
 			screen.get_display ().add_keybinding ("cycle-workspaces-previous", KeybindingSettings.get_default ().schema, 0, () => {
 				cycle_workspaces (-1);
 			});
+			screen.get_display ().add_keybinding ("preview-workspace", KeybindingSettings.get_default ().schema, 0, () => {
+				if (workspace_view.is_opened ())
+					workspace_view.close ();
+				else
+					workspace_view.open ();
+			});
 
 			screen.get_display ().overlay_key.connect (() => {
 				try {
@@ -225,25 +231,18 @@ namespace Gala
 				ui_group.add_child ((Clutter.Actor) workspace_view);
 			}
 
-			KeyBinding.set_custom_handler ("show-desktop", () => {
-				if (workspace_view.is_opened ())
-					workspace_view.close ();
-				else
-					workspace_view.open ();
-			});
-
 			if (plugin_manager.window_switcher_provider == null) {
 				winswitcher = new WindowSwitcher (this);
 				ui_group.add_child (winswitcher);
 
-				KeyBinding.set_custom_handler ("switch-applications", winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-applications-backward", winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows", winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows-backward", winswitcher.handle_switch_windows);
 
 				deepin_winswitcher = new DeepinWindowSwitcher (this);
 				ui_group.add_child (deepin_winswitcher);
 
-				KeyBinding.set_custom_handler ("switch-windows", deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-windows-backward", deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-applications", deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-applications-backward", deepin_winswitcher.handle_switch_windows);
 			}
 
 			if (plugin_manager.window_overview_provider == null
