@@ -41,6 +41,7 @@ namespace Gala
 		Meta.Plugin.manager_set_plugin_type (new WindowManagerGala ().get_type ());
 
 		Meta.set_wm_name ("Mutter(Gala)");
+		Meta.Prefs.set_force_fullscreen (false);
 
 		/**
 		 * Prevent Meta.init () from causing gtk to load gail and at-bridge
