@@ -166,7 +166,7 @@ namespace Gala
 
 		private BackgroundSettings ()
 		{
-			base ("org.gnome.desktop.background");
+			base ("com.deepin.dde.personalization");
 		}
 
 		public static BackgroundSettings get_default ()
