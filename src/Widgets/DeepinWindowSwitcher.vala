@@ -434,10 +434,6 @@ namespace Gala
 				var win = metawindows.nth_data (0);
 				if (win.minimized)
 					win.unminimize ();
-				else {
-					Utils.bell (screen);
-					return;
-				}
 			}
 
 			workspace.window_added.connect (add_window);
