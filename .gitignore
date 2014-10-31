@@ -48,3 +48,4 @@ debian/autoreconf.before
 debian/deepin-wm*
 debian/files
 debian/tmp/
+_*
