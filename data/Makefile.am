@@ -45,3 +45,8 @@ CLEANFILES = \
 	data/org.pantheon.desktop.gala.gschema.xml.in \
 	$(NULL)
 
+# rename data file with prefix 'deepin'
+install-data-hook:
+	mv $(DESTDIR)$(applicationsdir)/gala.desktop $(DESTDIR)$(applicationsdir)/deepin-wm.desktop
+	mv $(DESTDIR)$(applicationsdir)/gala-multitaskingview.desktop $(DESTDIR)$(applicationsdir)/deepin-wm-multitaskingview.desktop
+	mv $(DESTDIR)$(gsettingsschemadir)/org.pantheon.desktop.gala.gschema.xml $(DESTDIR)$(gsettingsschemadir)/com.deepin.dde.wm.gala.gschema.xml

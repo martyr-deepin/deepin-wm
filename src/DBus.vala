@@ -17,7 +17,7 @@
 
 namespace Gala
 {
-	[DBus (name="org.pantheon.gala")]
+	[DBus (name="com.deepin.gala")]
 	public class DBus
 	{
 		static DBus? instance;
@@ -28,13 +28,13 @@ namespace Gala
 		{
 			wm = _wm;
 
-			Bus.own_name (BusType.SESSION, "org.pantheon.gala", BusNameOwnerFlags.NONE,
+			Bus.own_name (BusType.SESSION, "com.deepin.gala", BusNameOwnerFlags.NONE,
 				(connection) => {
 					if (instance == null)
 						instance = new DBus ();
 
 					try {
-						connection.register_object ("/org/pantheon/gala", instance);
+						connection.register_object ("/com/deepin/gala", instance);
 					} catch (Error e) { warning (e.message); }
 				},
 				() => {},

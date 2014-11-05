@@ -95,3 +95,5 @@ EXTRA_DIST = \
 	$(gala_VALASOURCES) \
 	$(NULL)
 
+install-data-hook:
+	mv $(DESTDIR)$(galadir)/gala $(DESTDIR)$(galadir)/deepin-wm

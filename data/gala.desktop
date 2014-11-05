@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=Gala
-Exec=gala
+Name=Deepin Window Manager
+Exec=deepin-wm
 NoDisplay=true
 # name of loadable control center module
 X-GNOME-WMSettingsModule=metacity
@@ -12,4 +12,4 @@ X-GnomeWMSettingsLibrary=metacity
 X-GNOME-Autostart-Phase=WindowManager
 X-GNOME-Provides=windowmanager
 X-GNOME-Autostart-Notify=true
-X-Ubuntu-Gettext-Domain=gala
+X-Ubuntu-Gettext-Domain=deepin-wm

@@ -19,13 +19,12 @@ Build-Depends: debhelper (>= 9),
                libplank-dev (>= 0.3.0),
                valac (>= 0.22.0)
 Standards-Version: 3.9.5
-Homepage: https://launchpad.net/gala
+Homepage: https://gitcafe.com/Deepin/deepin-wm https://launchpad.net/gala
 
 Package: deepin-wm
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
 Provides: x-window-manager
-Conflicts: gala
 Description: Deepin Window Manager
  deepin-wm(fork of gala) is a window & compositing manager based on libmutter. It manages the
  various windows a user has open.

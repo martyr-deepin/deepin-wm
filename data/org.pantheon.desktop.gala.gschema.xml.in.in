@@ -15,7 +15,7 @@
 		<value nick='natural' value='1'/>
 	</enum>
 
-	<schema path="/org/pantheon/desktop/gala/behavior/" id="org.pantheon.desktop.gala.behavior" gettext-domain="gala">
+	<schema path="/com/deepin/dde/wm/gala/behavior/" id="com.deepin.dde.wm.gala.behavior" gettext-domain="@GETTEXT_PACKAGE@">
 		<key enum="GalaActionType" name="hotcorner-topleft">
 			<default>'none'</default>
 			<summary>Action for the top left corner</summary>
@@ -83,7 +83,7 @@
 		</key>
 	</schema>
 
-	<schema path="/org/pantheon/desktop/gala/keybindings/" id="org.pantheon.desktop.gala.keybindings" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema path="/com/deepin/dde/wm/gala/keybindings/" id="com.deepin.dde.wm.gala.keybindings" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="as" name="switch-to-workspace-first">
 			<default><![CDATA[['<Super>Home']]]></default>
 			<summary>Shortcut to move to first workspace</summary>
@@ -137,7 +137,7 @@
 		</key>
 	</schema>
 
-	<schema path="/org/pantheon/desktop/gala/appearance/" id="org.pantheon.desktop.gala.appearance" gettext-domain="gala">
+	<schema path="/com/deepin/dde/wm/gala/appearance/" id="com.deepin.dde.wm.gala.appearance" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="b" name="attach-modal-dialogs">
 			<default>false</default>
 			<summary>Attach modal dialogs</summary>
@@ -159,7 +159,7 @@
 		</key>
 	</schema>
 
-	<schema path="/org/pantheon/desktop/gala/animations/" id="org.pantheon.desktop.gala.animations" gettext-domain="gala">
+	<schema path="/com/deepin/dde/wm/gala/animations/" id="com.deepin.dde.wm.gala.animations" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="b" name="enable-animations">
 			<default>true</default>
 			<summary>Enable Animations</summary>
@@ -190,7 +190,7 @@
 		</key>
 	</schema>
 
-	<schema path="/org/pantheon/desktop/gala/shadows/" id="org.pantheon.desktop.gala.shadows" gettext-domain="gala">
+	<schema path="/com/deepin/dde/wm/gala/shadows/" id="com.deepin.dde.wm.gala.shadows" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="as" name="normal-focused">
 			<default>['20', '-1', '0', '15', '220']</default>
 			<summary>Defines the shadow of normal focused windows</summary>

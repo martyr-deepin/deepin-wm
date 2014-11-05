@@ -28,8 +28,8 @@ m4_define([gala_version], m4_if(gala_released, [1],
 m4_define([gala_major_minor_version], gala_major_version.gala_minor_version)
 m4_define([gala_module_version], gala_lt_current)
 
-AC_INIT([gala], gala_version,
-        [https://bugs.launchpad.net/gala], [gala],
+AC_INIT([deepin-wm], gala_version,
+        [https://bugs.launchpad.net/gala], [deepin-wm],
         [https://launchpad.net/gala])
 AC_DEFINE(RELEASE_NAME, "Window Manager.", Codename of this release)
 AC_DEFINE(VERSION_INFO, m4_if(gala_released, [1], "Release", "Development"), Version info for package)

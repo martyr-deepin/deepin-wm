@@ -3,7 +3,7 @@ Type=Application
 _Name=Multitasking View
 _Comment=View all open windows and workspaces
 GenericName=Multitasking View
-Icon=multitasking-view
+Icon=deepin-multitasking-view
 Terminal=false
 Categories=Gnome;Gtk
-Exec=dbus-send --session --dest=org.pantheon.gala --print-reply /org/pantheon/gala org.pantheon.gala.PerformAction int32:1
+Exec=dbus-send --session --dest=com.deepin.gala --print-reply /com/deepin/gala com.deepin.gala.PerformAction int32:1

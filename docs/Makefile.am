@@ -54,7 +54,7 @@ valadoc_flags_gala = \
 
 html: $(libgala_doc_files) $(gala_doc_files) Makefile
 	$(AM_V_GEN)$(VALADOC) \
-		-o gala/ \
+		-o deepin-wm/ \
 		--doclet=html \
 		--internal \
 		$(valadoc_flags_gala) \
@@ -62,7 +62,7 @@ html: $(libgala_doc_files) $(gala_doc_files) Makefile
 
 libhtml: $(libgala_doc_files) Makefile
 	$(AM_V_GEN)$(VALADOC) \
-		-o libgala/ \
+		-o libdeepin-wm/ \
 		--doclet=html \
 		$(valadoc_flags_gala) \
 		$(filter %.vala,$^)
@@ -71,5 +71,5 @@ libhtml: $(libgala_doc_files) Makefile
 
 distclean-local: distclean-docs
 distclean-docs:
-	rm -rf gala libgala
+	rm -rf deepin-wm libdeepin-wm
 

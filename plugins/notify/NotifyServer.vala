@@ -78,7 +78,7 @@ namespace Gala.Plugins.Notify
 			var locale = Intl.setlocale (LocaleCategory.MESSAGES, null);
 			ca_context = CanberraGtk.context_get ();
 			ca_context.change_props (Canberra.PROP_APPLICATION_NAME, "Gala",
-			                         Canberra.PROP_APPLICATION_ID, "org.pantheon.gala",
+			                         Canberra.PROP_APPLICATION_ID, "com.deepin.gala",
 			                         Canberra.PROP_APPLICATION_NAME, "start-here",
 			                         Canberra.PROP_APPLICATION_LANGUAGE, locale,
 			                         null);
@@ -134,7 +134,7 @@ namespace Gala.Plugins.Notify
 			throw new DBusError.FAILED ("");
 		}
 
-		public new uint32 notify (string app_name, uint32 replaces_id, string app_icon, string summary, 
+		public new uint32 notify (string app_name, uint32 replaces_id, string app_icon, string summary,
 			string body, string[] actions, HashTable<string, Variant> hints, int32 expire_timeout, BusName sender)
 		{
 			Variant? variant;
@@ -477,4 +477,3 @@ namespace Gala.Plugins.Notify
 		}
 	}
 }
-
