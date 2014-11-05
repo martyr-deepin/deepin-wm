@@ -106,7 +106,7 @@ GALA_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  libbamf3 \
                  clutter-1.0 \
                  clutter-gtk-1.0 \
-                 libmutter >= $MUTTER_MIN_VERSION \
+                 libdeepin-mutter >= $MUTTER_MIN_VERSION \
                  gee-0.8 \
                  gnome-desktop-3.0 \
                  plank >= $PLANK_MIN_VERSION"
@@ -116,7 +116,7 @@ GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gtk+-3.0 \
                       --pkg gdk-x11-3.0 \
                       --pkg libbamf3 \
-                      --pkg libmutter \
+                      --pkg libdeepin-mutter \
                       --pkg clutter-1.0 \
                       --pkg clutter-gtk-1.0 \
                       --pkg gee-0.8 \
@@ -140,25 +140,25 @@ AC_SUBST([PLUGIN_LDFLAGS])
 # -----------------------------------------------------------
 
 # 3.10
-PKG_CHECK_MODULES(MUTTER310, [libmutter >= 3.9], [have_mutter310=yes], [have_mutter310=no])
+PKG_CHECK_MODULES(MUTTER310, [libdeepin-mutter >= 3.9], [have_mutter310=yes], [have_mutter310=no])
 if test "x$have_mutter310" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER310, [libmutter >= 3.10.4])
+    PKG_CHECK_MODULES(MUTTER310, [libdeepin-mutter >= 3.10.4])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER310"
     MUTTER_API="3.10"
 fi
 
 # 3.12
-PKG_CHECK_MODULES(MUTTER312, [libmutter >= 3.11], [have_mutter312=yes], [have_mutter312=no])
+PKG_CHECK_MODULES(MUTTER312, [libdeepin-mutter >= 3.11], [have_mutter312=yes], [have_mutter312=no])
 if test "x$have_mutter312" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER312, [libmutter >= 3.12.2])
+    PKG_CHECK_MODULES(MUTTER312, [libdeepin-mutter >= 3.12.2])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER312"
     MUTTER_API="3.12"
 fi
 
 # 3.14
-PKG_CHECK_MODULES(MUTTER314, [libmutter >= 3.13], [have_mutter314=yes], [have_mutter314=no])
+PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.13], [have_mutter314=yes], [have_mutter314=no])
 if test "x$have_mutter314" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER314, [libmutter >= 3.14.0])
+    PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.14.0])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER314"
     MUTTER_API="3.14"
 fi
