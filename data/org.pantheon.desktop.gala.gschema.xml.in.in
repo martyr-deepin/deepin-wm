@@ -144,7 +144,7 @@
 			<description>When true, instead of having independent titlebars, modal dialogs appear attached to the titlebar of the parent window and are moved together with the parent window.</description>
 		</key>
 		<key type="s" name="button-layout">
-			<default>'close:maximize'</default>
+			<default>'menu:minimize,maximize,close'</default>
 			<summary>Arrangement of buttons on the titlebar</summary>
 			<description>Arrangement of buttons on the titlebar. The value should be a string, such as "menu:minimize,maximize,spacer,close"; the colon separates the left corner of the window from the right corner, and the button names are comma-separated. Duplicate buttons are not allowed. Unknown button names are silently ignored so that buttons can be added in future metacity versions without breaking older versions. A special spacer tag can be used to insert some space between two adjacent buttons.</description>
 		</key>
