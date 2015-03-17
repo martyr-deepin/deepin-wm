@@ -1,3 +1,9 @@
+deepin-wm (0.2.0) trusty; urgency=medium
+
+  * Update from upstream.
+
+ -- 宋文武 <songwenwu@linuxdeepin.com>  Tue, 21 Oct 2014 14:57:50 +0800
+
 deepin-wm (0.1.0) trusty; urgency=medium
 
   * Fork from gala.

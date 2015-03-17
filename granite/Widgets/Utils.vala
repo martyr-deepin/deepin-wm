@@ -1,38 +1,38 @@
-/***
-    Copyright (C) 2012-2013 Granite Developers
-
-    This program or library is free software; you can redistribute it
-    and/or modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 3 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-    Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General
-    Public License along with this library; if not, write to the
-    Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-    Boston, MA 02110-1301 USA.
-***/
+/*
+ *  Copyright (C) 2012-2013 Granite Developers
+ *
+ *  This program or library is free software; you can redistribute it
+ *  and/or modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 3 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General
+ *  Public License along with this library; if not, write to the
+ *  Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+ *  Boston, MA 02110-1301 USA.
+ */
 
 public enum Granite.TextStyle {
     /**
      * Highest level header
      */
     TITLE,
-
+    
     /**
      * Second highest header
      */
     H1,
-
+    
     /**
      * Third highest header
      */
     H2,
-
+    
     /**
      * Fourth Highest Header
      */
@@ -89,13 +89,13 @@ namespace Granite.DateTime {
             }
         }
     }
-
+    
     private static bool is_clock_format_12h () {
         var h24_settings = new Settings ("org.gnome.desktop.interface");
         var format = h24_settings.get_string ("clock-format");
         return (format.contains ("12h"));
     }
-
+    
     public static string get_default_date_format (bool with_weekday = false, bool with_day = true, bool with_year = false) {
         if (with_weekday == true && with_day == true && with_year == true) {
             /// TRANSLATORS: a GLib.DateTime format showing the weekday, date, and year
@@ -138,7 +138,7 @@ namespace Granite.Widgets.Utils {
 
     /**
      * Applies the stylesheet to the widget
-     *
+     * 
      * @param widget widget to apply style to
      * @param stylesheet style to apply to screen
      * @param class_name class name to add style to
@@ -162,7 +162,7 @@ namespace Granite.Widgets.Utils {
     /**
      * Applies a stylesheet to the given screen. This will affects all the
      * widgets which are part of that screen.
-     *
+     * 
      * @param screen Screen to apply style to
      * @param stylesheet style to apply to screen
      * @param priority priorty of change
@@ -204,7 +204,7 @@ namespace Granite.Widgets.Utils {
 
     /**
      * This method applies given text style to given label
-     *
+     * 
      * @param text_style text style to apply
      * @param label label to apply style to
      */
@@ -227,7 +227,7 @@ namespace Granite.Widgets.Utils {
     }
 
     const string WM_SETTINGS_PATH = "org.gnome.desktop.wm.preferences";
-    const string PANTHEON_SETTINGS_PATH = "com.deepin.dde.wm.gala.appearance";
+    const string PANTHEON_SETTINGS_PATH = "org.pantheon.desktop.gala.appearance";
     const string WM_BUTTON_LAYOUT_KEY = "button-layout";
 
     /**
@@ -270,7 +270,7 @@ namespace Granite.Widgets.Utils {
     /**
      * This methods returns the schema used by {@link Granite.Widgets.Utils.get_default_close_button_position}
      * to determine the close button placement. It will first check for the pantheon/gala schema and then fallback
-     * to the default gnome one. If neither is available, NULL is returned. Make sure to check for this case,
+     * to the default gnome one. If neither is available, NULL is returned. Make sure to check for this case, 
      * as otherwise your program may crash on startup.
      *
      * @return the schema name

@@ -1,5 +1,4 @@
 SUBDIRS = \
-	maskcorners \
 	zoom \
 	$(NULL)
 

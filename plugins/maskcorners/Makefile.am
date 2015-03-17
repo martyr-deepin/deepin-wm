@@ -46,6 +46,9 @@ libgala_maskcorners_la_vala.stamp: $(libgala_maskcorners_la_VALASOURCES) $(top_b
 	$(AM_V_VALA)$(VALAC) \
 		$(libgala_maskcorners_la_VALAFLAGS) \
 		-C \
+		../../granite/Drawing/BufferSurface.vala \
+		../../granite/Services/Settings.vala \
+		../../granite/Drawing/Color.vala \
 		$(filter %.vala %.c,$^)
 	$(AM_V_at)touch $@
 

@@ -20,7 +20,7 @@ using Meta;
 
 namespace Gala
 {
-	public class WindowSwitcher : Clutter.Actor
+	public class DeepinWindowSwitcher : Clutter.Actor
 	{
 		const int MIN_DELTA = 100;
 
@@ -49,7 +49,7 @@ namespace Gala
 		float dock_width = 0.0f;
 		int n_dock_items = 0;
 
-		public WindowSwitcher (WindowManager wm)
+		public DeepinWindowSwitcher (WindowManager wm)
 		{
 			Object (wm: wm);
 		}
@@ -98,7 +98,7 @@ namespace Gala
 			visible = false;
 		}
 
-		~WindowSwitcher ()
+		~DeepinWindowSwitcher ()
 		{
 			if (monitor != null)
 				monitor.cancel ();

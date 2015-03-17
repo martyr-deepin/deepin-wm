@@ -1,4 +1,5 @@
+granite/Widgets/Utils.c
+src/Utils.c
 data/org.pantheon.desktop.gala.gschema.xml.in
 src/WindowManager.c
-src/Granite/Widgets/Utils.c
 src/Widgets/WindowMenu.c
