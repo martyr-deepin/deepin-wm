@@ -73,7 +73,7 @@ namespace Gala
 
 		public bool overview_mode { get; construct; }
 
-		DragDropAction drag_action;
+		DragDropAction? drag_action = null;
 		Clone? clone = null;
 
 		Actor prev_parent = null;
@@ -122,16 +122,8 @@ namespace Gala
 				close_window ();
 				return true;
 			});
-			enter_event.connect (() => {
-				close_button.opacity = 255;
-				return false;
-			});
-			leave_event.connect (() => {
-				close_button.opacity = 0;
-				return false;
-			});
 
-			window_icon = new Utils.WindowIcon (window, WINDOW_ICON_SIZE);
+			window_icon = new WindowIcon (window, WINDOW_ICON_SIZE);
 			window_icon.opacity = 0;
 			window_icon.set_pivot_point (0.5f, 0.5f);
 
@@ -267,10 +259,8 @@ namespace Gala
 		void on_all_workspaces_changed ()
 		{
 			// we don't display windows that are on all workspaces
-			if (window.on_all_workspaces) {
-				WindowListener.get_default ().listen_on_window (window);
+			if (window.on_all_workspaces)
 				unmanaged ();
-			}
 		}
 
 		/**
@@ -387,6 +377,25 @@ namespace Gala
 			clone.allocate (alloc, flags);
 		}
 
+		public override bool button_press_event (Clutter.ButtonEvent event)
+		{
+			return true;
+		}
+
+		public override	bool enter_event (Clutter.CrossingEvent event)
+		{
+			close_button.opacity = 255;
+
+			return false;
+		}
+		
+		public override	bool leave_event (Clutter.CrossingEvent event)
+		{
+			close_button.opacity = 0;
+
+			return false;
+		}
+
 		/**
 		 * Place the widgets, that is the close button and the WindowIcon of the window,
 		 * at their positions inside the actor for a given width and height.
@@ -453,7 +462,7 @@ namespace Gala
 		 */
 		void unmanaged ()
 		{
-			if (drag_action.dragging)
+			if (drag_action != null && drag_action.dragging)
 				drag_action.cancel ();
 
 			if (clone != null)

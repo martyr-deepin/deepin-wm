@@ -66,6 +66,9 @@ namespace Gala
 		Gee.HashSet<Meta.WindowActor> unmaximizing = new Gee.HashSet<Meta.WindowActor> ();
 		Gee.HashSet<Meta.WindowActor> mapping = new Gee.HashSet<Meta.WindowActor> ();
 		Gee.HashSet<Meta.WindowActor> destroying = new Gee.HashSet<Meta.WindowActor> ();
+#if HAS_MUTTER314
+		Gee.HashSet<Meta.WindowActor> unminimizing = new Gee.HashSet<Meta.WindowActor> ();
+#endif
 
 		public WindowManagerGala ()
 		{
@@ -88,9 +91,12 @@ namespace Gala
 		bool show_stage ()
 		{
 			var screen = get_screen ();
+			var display = screen.get_display ();
 
 			DBus.init (this);
+#if !HAS_MUTTER314
 			BackgroundCache.init (screen);
+#endif
 			WindowListener.init (screen);
 
 			// Due to a bug which enables access to the stage when using multiple monitors
@@ -122,7 +128,11 @@ namespace Gala
 			 * +-- top window group
 		     */
 
+#if HAS_MUTTER314
+			var system_background = new SystemBackground (screen);
+#else
 			var system_background = new SystemBackground ();
+#endif
 			system_background.add_constraint (new Clutter.BindConstraint (stage,
 				Clutter.BindCoordinate.ALL, 0));
 			stage.insert_child_below (system_background, null);
@@ -135,7 +145,11 @@ namespace Gala
 			stage.remove_child (window_group);
 			ui_group.add_child (window_group);
 
+#if HAS_MUTTER314
+			background_group = new BackgroundContainer (screen);
+#else
 			background_group = new BackgroundManager (screen);
+#endif
 			window_group.add_child (background_group);
 			window_group.set_child_below_sibling (background_group, null);
 
@@ -145,32 +159,18 @@ namespace Gala
 
 			/*keybindings*/
 
-			screen.get_display ().add_keybinding ("switch-to-workspace-first", KeybindingSettings.get_default ().schema, 0, () => {
-				screen.get_workspace_by_index (0).activate (screen.get_display ().get_current_time ());
-			});
-			screen.get_display ().add_keybinding ("switch-to-workspace-last", KeybindingSettings.get_default ().schema, 0, () => {
-				screen.get_workspace_by_index (screen.n_workspaces - 1).activate (screen.get_display ().get_current_time ());
-			});
-			screen.get_display ().add_keybinding ("move-to-workspace-first", KeybindingSettings.get_default ().schema, 0, () => {
-				var workspace = screen.get_workspace_by_index (0);
-				var window = screen.get_display ().get_focus_window ();
-				window.change_workspace (workspace);
-				workspace.activate_with_focus (window, screen.get_display ().get_current_time ());
-			});
-			screen.get_display ().add_keybinding ("move-to-workspace-last", KeybindingSettings.get_default ().schema, 0, () => {
-				var workspace = screen.get_workspace_by_index (screen.get_n_workspaces () - 1);
-				var window = screen.get_display ().get_focus_window ();
-				window.change_workspace (workspace);
-				workspace.activate_with_focus (window, screen.get_display ().get_current_time ());
-			});
-			screen.get_display ().add_keybinding ("cycle-workspaces-next", KeybindingSettings.get_default ().schema, 0, () => {
-				cycle_workspaces (1);
-			});
-			screen.get_display ().add_keybinding ("cycle-workspaces-previous", KeybindingSettings.get_default ().schema, 0, () => {
-				cycle_workspaces (-1);
-			});
+			var keybinding_schema = KeybindingSettings.get_default ().schema;
 
-			screen.get_display ().overlay_key.connect (() => {
+			display.add_keybinding ("switch-to-workspace-first", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_switch_to_workspace_end);
+			display.add_keybinding ("switch-to-workspace-last", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_switch_to_workspace_end);
+			display.add_keybinding ("move-to-workspace-first", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_move_to_workspace_end);
+			display.add_keybinding ("move-to-workspace-last", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_move_to_workspace_end);
+			display.add_keybinding ("cycle-workspaces-next", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_cycle_workspaces);
+			display.add_keybinding ("cycle-workspaces-previous", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_cycle_workspaces);
+			display.add_keybinding ("switch-input-source", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_switch_input_source);
+			display.add_keybinding ("switch-input-source-backward", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_switch_input_source);
+
+			display.overlay_key.connect (() => {
 				try {
 					Process.spawn_command_line_async (
 						BehaviorSettings.get_default ().overlay_action);
@@ -193,13 +193,13 @@ namespace Gala
 
 			KeyBinding.set_custom_handler ("switch-to-workspace-up", () => {});
 			KeyBinding.set_custom_handler ("switch-to-workspace-down", () => {});
-			KeyBinding.set_custom_handler ("switch-to-workspace-left", handle_switch_to_workspace);
-			KeyBinding.set_custom_handler ("switch-to-workspace-right", handle_switch_to_workspace);
+			KeyBinding.set_custom_handler ("switch-to-workspace-left", (Meta.KeyHandlerFunc) handle_switch_to_workspace);
+			KeyBinding.set_custom_handler ("switch-to-workspace-right", (Meta.KeyHandlerFunc) handle_switch_to_workspace);
 
 			KeyBinding.set_custom_handler ("move-to-workspace-up", () => {});
 			KeyBinding.set_custom_handler ("move-to-workspace-down", () => {});
-			KeyBinding.set_custom_handler ("move-to-workspace-left",  (d, s, w) => move_window (w, MotionDirection.LEFT) );
-			KeyBinding.set_custom_handler ("move-to-workspace-right", (d, s, w) => move_window (w, MotionDirection.RIGHT) );
+			KeyBinding.set_custom_handler ("move-to-workspace-left", (Meta.KeyHandlerFunc) handle_move_to_workspace);
+			KeyBinding.set_custom_handler ("move-to-workspace-right", (Meta.KeyHandlerFunc) handle_move_to_workspace);
 
 			KeyBinding.set_custom_handler ("switch-group", () => {});
 			KeyBinding.set_custom_handler ("switch-group-backward", () => {});
@@ -229,14 +229,14 @@ namespace Gala
 				winswitcher = new WindowSwitcher (this);
 				ui_group.add_child (winswitcher);
 
-				KeyBinding.set_custom_handler ("switch-windows", winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-windows-backward", winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
 
 				deepin_winswitcher = new DeepinWindowSwitcher (this);
 				ui_group.add_child (deepin_winswitcher);
 
-				KeyBinding.set_custom_handler ("switch-applications", deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-applications-backward", deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-applications-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
 			}
 
 			if (plugin_manager.window_overview_provider == null
@@ -245,13 +245,13 @@ namespace Gala
 				ui_group.add_child ((Clutter.Actor) window_overview);
 			}
 
-			screen.get_display ().add_keybinding ("expose-windows", KeybindingSettings.get_default ().schema, 0, () => {
+			display.add_keybinding ("expose-windows", keybinding_schema, 0, () => {
 				if (window_overview.is_opened ())
 					window_overview.close ();
 				else
 					window_overview.open ();
 			});
-			screen.get_display ().add_keybinding ("expose-all-windows", KeybindingSettings.get_default ().schema, 0, () => {
+			display.add_keybinding ("expose-all-windows", keybinding_schema, 0, () => {
 				if (window_overview.is_opened ())
 					window_overview.close ();
 				else {
@@ -321,6 +321,82 @@ namespace Gala
 			hot_corner.y = y;
 		}
 
+		[CCode (instance_pos = -1)]
+		void handle_switch_input_source (Meta.Display display, Meta.Screen screen, Meta.Window? window,
+#if HAS_MUTTER314
+			Clutter.KeyEvent event, Meta.KeyBinding binding)
+#else
+			X.Event event, Meta.KeyBinding binding)
+#endif
+		{
+			var keyboard_input_settings = new GLib.Settings ("org.gnome.desktop.input-sources");
+
+			var n_sources = (uint) keyboard_input_settings.get_value ("sources").n_children ();
+			if (n_sources < 2)
+				return;
+
+			var new_index = 0U;
+			var current_index = keyboard_input_settings.get_uint ("current");
+
+			if (binding.get_name () == "switch-input-source")
+				new_index = (current_index + 1) % n_sources;
+			else
+				new_index = (current_index - 1 + n_sources) % n_sources;
+
+			keyboard_input_settings.set_uint ("current", new_index);
+		}
+
+		[CCode (instance_pos = -1)]
+		void handle_cycle_workspaces (Meta.Display display, Meta.Screen screen, Meta.Window? window,
+#if HAS_MUTTER314
+			Clutter.KeyEvent event, Meta.KeyBinding binding)
+#else
+			X.Event event, Meta.KeyBinding binding)
+#endif
+		{
+			var direction = (binding.get_name () == "cycle-workspaces-next" ? 1 : -1);
+			var index = screen.get_active_workspace_index () + direction;
+			if (index < 0)
+				index = screen.get_n_workspaces () - 1;
+			else if (index > screen.get_n_workspaces () - 1)
+				index = 0;
+
+			screen.get_workspace_by_index (index).activate (display.get_current_time ());
+		}
+
+		[CCode (instance_pos = -1)]
+		void handle_move_to_workspace (Meta.Display display, Meta.Screen screen, Meta.Window? window,
+#if HAS_MUTTER314
+			Clutter.KeyEvent event, Meta.KeyBinding binding)
+#else
+			X.Event event, Meta.KeyBinding binding)
+#endif
+		{
+			if (window == null)
+				return;
+
+			var direction = (binding.get_name () == "move-to-workspace-left" ? MotionDirection.LEFT : MotionDirection.RIGHT);
+			move_window (window, direction);
+		}
+
+		[CCode (instance_pos = -1)]
+		void handle_move_to_workspace_end (Meta.Display display, Meta.Screen screen, Meta.Window? window,
+#if HAS_MUTTER314
+			Clutter.KeyEvent event, Meta.KeyBinding binding)
+#else
+			X.Event event, Meta.KeyBinding binding)
+#endif
+		{
+			if (window == null)
+				return;
+
+			var index = (binding.get_name () == "move-to-workspace-first" ? 0 : screen.get_n_workspaces () - 1);
+			var workspace = screen.get_workspace_by_index (index);
+			window.change_workspace (workspace);
+			workspace.activate_with_focus (window, display.get_current_time ());
+		}
+
+		[CCode (instance_pos = -1)]
 		void handle_switch_to_workspace (Meta.Display display, Meta.Screen screen, Meta.Window? window,
 #if HAS_MUTTER314
 			Clutter.KeyEvent event, Meta.KeyBinding binding)
@@ -330,6 +406,18 @@ namespace Gala
 		{
 			var direction = (binding.get_name () == "switch-to-workspace-left" ? MotionDirection.LEFT : MotionDirection.RIGHT);
 			switch_to_next_workspace (direction);
+		}
+
+		[CCode (instance_pos = -1)]
+		void handle_switch_to_workspace_end (Meta.Display display, Meta.Screen screen, Meta.Window? window,
+#if HAS_MUTTER314
+			Clutter.KeyEvent event, Meta.KeyBinding binding)
+#else
+			X.Event event, Meta.KeyBinding binding)
+#endif
+		{
+			var index = (binding.get_name () == "switch-to-workspace-first" ? 0 : screen.n_workspaces - 1);
+			screen.get_workspace_by_index (index).activate (display.get_current_time ());
 		}
 
 		/**
@@ -402,18 +490,6 @@ namespace Gala
 			}
 
 			return list.to_array ();
-		}
-
-		void cycle_workspaces (int direction)
-		{
-			var screen = get_screen ();
-			var index = screen.get_active_workspace_index () + direction;
-			if (index < 0)
-				index = screen.get_n_workspaces () - 1;
-			else if (index > screen.get_n_workspaces () - 1)
-				index = 0;
-
-			screen.get_workspace_by_index (index).activate (screen.get_display ().get_current_time ());
 		}
 
 		/**
@@ -622,17 +698,34 @@ namespace Gala
 		}
 
 #if HAS_MUTTER314
+		WindowMenu? window_menu = null;
+
 		public override void show_window_menu (Meta.Window window, Meta.WindowMenuType menu, int x, int y)
 		{
-			//TODO implement window/app menus, their implementation where removed with mutter 3.13+
+#if false
+			// Spawning native menus inside mutter appears to be no longer working, mouse
+			// event are apparently never delivered to the menu. Until this is fixed, we
+			// disable windowmenus all together
+
+			var time = get_screen ().get_display ().get_current_time_roundtrip ();
+
 			switch (menu) {
-			case WindowMenuType.WM:
-				message ("TODO: show window menu for %s at %ix%i\n", window.get_description (), x, y);
-				break;
-			case WindowMenuType.APP:
-				message ("TODO: show app menu for %s at %ix%i\n", window.get_description (), x, y);
-				break;
+				case WindowMenuType.WM:
+					if (window_menu == null)
+						window_menu = new WindowMenu ();
+
+					window_menu.current_window = window;
+					window_menu.show_all ();
+					window_menu.popup (null, null, (menu, out menu_x, out menu_y, out push_in) => {
+						menu_x = x;
+						menu_y = y;
+					}, Gdk.BUTTON_SECONDARY, time);
+					break;
+				case WindowMenuType.APP:
+					// FIXME we don't have any sort of app menus
+					break;
 			}
+#endif
 		}
 
 		public override void show_window_menu_for_rect (Meta.Window window, Meta.WindowMenuType menu, Meta.Rectangle rect)
@@ -647,9 +740,12 @@ namespace Gala
 
 		public override void minimize (WindowActor actor)
 		{
-			if (!AnimationSettings.get_default ().enable_animations ||
-				AnimationSettings.get_default ().minimize_duration == 0 ||
-				actor.get_meta_window ().window_type != WindowType.NORMAL) {
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.minimize_duration;
+
+			if (!animation_settings.enable_animations
+				|| duration == 0
+				|| actor.get_meta_window ().window_type != WindowType.NORMAL) {
 				minimize_completed (actor);
 				return;
 			}
@@ -673,7 +769,7 @@ namespace Gala
 				actor.scale_center_x = anchor_x;
 				actor.scale_center_y = anchor_y;
 
-				actor.animate (Clutter.AnimationMode.EASE_IN_EXPO, AnimationSettings.get_default ().minimize_duration,
+				actor.animate (Clutter.AnimationMode.EASE_IN_EXPO, duration,
 					scale_x:scale_x, scale_y:scale_y,opacity:0).completed.connect (() => {
 
 					actor.scale_center_x = actor.scale_center_y = 0;
@@ -688,7 +784,7 @@ namespace Gala
 				actor.scale_center_x = width / 2.0f - actor.x;
 				actor.scale_center_y = height - actor.y;
 
-				actor.animate (Clutter.AnimationMode.EASE_IN_EXPO, AnimationSettings.get_default ().minimize_duration,
+				actor.animate (Clutter.AnimationMode.EASE_IN_EXPO, duration,
 					scale_x : 0.0f, scale_y : 0.0f, opacity : 0).completed.connect (() => {
 
 					actor.set_pivot_point (0, 0);
@@ -701,41 +797,95 @@ namespace Gala
 			}
 		}
 
-		//stolen from original mutter plugin
 		public override void maximize (WindowActor actor, int ex, int ey, int ew, int eh)
 		{
-			float x, y, width, height;
-			actor.get_size (out width, out height);
-			actor.get_position (out x, out y);
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.snap_duration;
 
-			if (!AnimationSettings.get_default ().enable_animations ||
-				AnimationSettings.get_default ().snap_duration == 0 ||
-				(x == ex && y == ey && ew == width && eh == height)) {
+			if (!animation_settings.enable_animations
+				|| duration == 0) {
 				maximize_completed (actor);
 				return;
 			}
 
-			if (actor.get_meta_window ().window_type == WindowType.NORMAL) {
-				maximizing.add (actor);
+			var window = actor.get_meta_window ();
 
-				float scale_x  = (float)ew  / width;
-				float scale_y  = (float)eh / height;
-				float anchor_x = (float)(x - ex) * width  / (ew - width);
-				float anchor_y = (float)(y - ey) * height / (eh - height);
+			if (window.window_type == WindowType.NORMAL) {
+				Meta.Rectangle fallback = { (int) actor.x, (int) actor.y, (int) actor.width, (int) actor.height };
+				var window_geometry = WindowListener.get_default ().get_unmaximized_state_geometry (window);
+				var old_inner_rect = window_geometry != null ? window_geometry.inner : fallback;
+				var old_outer_rect = window_geometry != null ? window_geometry.outer : fallback;
 
-				//reset the actor's anchors
-				actor.scale_gravity = actor.anchor_gravity = Clutter.Gravity.NORTH_WEST;
-
-				actor.move_anchor_point (anchor_x, anchor_y);
-				actor.animate (Clutter.AnimationMode.EASE_IN_OUT_SINE, AnimationSettings.get_default ().snap_duration,
-					scale_x:scale_x, scale_y:scale_y).get_timeline ().completed.connect ( () => {
-
-					actor.anchor_gravity = Clutter.Gravity.NORTH_WEST;
-					actor.set_scale (1.0, 1.0);
-
-					maximizing.remove (actor);
+				var old_actor = Utils.get_window_actor_snapshot (actor, old_inner_rect, old_outer_rect);
+				if (old_actor == null) {
 					maximize_completed (actor);
+					return;
+				}
+
+				old_actor.set_position (old_inner_rect.x, old_inner_rect.y);
+
+				ui_group.add_child (old_actor);
+
+				// FIMXE that's a hacky part. There is a short moment right after maximized_completed
+				//       where the texture is screwed up and shows things it's not supposed to show,
+				//       resulting in flashing. Waiting here transparently shortly fixes that issue. There
+				//       appears to be no signal that would inform when that moment happens.
+				//       We can't spend arbitrary amounts of time transparent since the overlay fades away,
+				//       about a third has proven to be a solid time. So this fix will only apply for
+				//       durations >= FLASH_PREVENT_TIMEOUT*3
+				const int FLASH_PREVENT_TIMEOUT = 80;
+				var delay = 0;
+				if (FLASH_PREVENT_TIMEOUT <= duration / 3) {
+					actor.opacity = 0;
+					delay = FLASH_PREVENT_TIMEOUT;
+					Timeout.add (FLASH_PREVENT_TIMEOUT, () => {
+						actor.opacity = 255;
+						return false;
+					});
+				}
+
+				var scale_x = (double) ew / old_inner_rect.width;
+				var scale_y = (double) eh / old_inner_rect.height;
+
+				old_actor.save_easing_state ();
+				old_actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
+				old_actor.set_easing_duration (duration);
+				old_actor.x = ex;
+				old_actor.y = ey;
+				old_actor.scale_x = scale_x;
+				old_actor.scale_y = scale_y;
+
+				// the opacity animation is special, since we have to wait for the
+				// FLASH_PREVENT_TIMEOUT to be done before we can safely fade away
+				old_actor.save_easing_state ();
+				old_actor.set_easing_delay (delay);
+				old_actor.set_easing_duration (duration - delay);
+				old_actor.opacity = 0;
+				old_actor.restore_easing_state ();
+
+				old_actor.get_transition ("x").stopped.connect (() => {
+					old_actor.destroy ();
+					actor.translation_x = 0;
+					actor.translation_y = 0;
 				});
+				old_actor.restore_easing_state ();
+
+				maximize_completed (actor);
+
+				actor.scale_gravity = Clutter.Gravity.NORTH_WEST;
+				actor.translation_x = old_inner_rect.x - ex;
+				actor.translation_y = old_inner_rect.y - ey;
+				actor.scale_x = 1.0 / scale_x;
+				actor.scale_y = 1.0 / scale_y;
+
+				actor.save_easing_state ();
+				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
+				actor.set_easing_duration (duration);
+				actor.scale_x = 1;
+				actor.scale_y = 1;
+				actor.translation_x = 0;
+				actor.translation_y = 0;
+				actor.restore_easing_state ();
 
 				return;
 			}
@@ -743,9 +893,57 @@ namespace Gala
 			maximize_completed (actor);
 		}
 
+#if HAS_MUTTER314
+		public override void unminimize (WindowActor actor)
+		{
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+
+			if (!animation_settings.enable_animations) {
+				actor.show ();
+				unminimize_completed (actor);
+				return;
+			}
+
+			var window = actor.get_meta_window ();
+
+			actor.detach_animation ();
+			actor.show ();
+
+			switch (window.window_type) {
+				case WindowType.NORMAL:
+					var duration = animation_settings.minimize_duration;
+					if (duration == 0) {
+						unminimize_completed (actor);
+						return;
+					}
+
+					unminimizing.add (actor);
+
+					actor.scale_gravity = Clutter.Gravity.SOUTH;
+					actor.scale_x = 0.01f;
+					actor.scale_y = 0.1f;
+					actor.opacity = 0;
+					actor.animate (Clutter.AnimationMode.EASE_OUT_EXPO, duration,
+						scale_x:1.0f, scale_y:1.0f, opacity:255)
+						.completed.connect ( () => {
+
+						unminimizing.remove (actor);
+						unminimize_completed (actor);
+					});
+
+					break;
+				default:
+					unminimize_completed (actor);
+					break;
+			}
+		}
+#endif
+
 		public override void map (WindowActor actor)
 		{
-			if (!AnimationSettings.get_default ().enable_animations) {
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+
+			if (!animation_settings.enable_animations) {
 				actor.show ();
 				map_completed (actor);
 				return;
@@ -758,7 +956,8 @@ namespace Gala
 
 			switch (window.window_type) {
 				case WindowType.NORMAL:
-					if (AnimationSettings.get_default ().open_duration == 0) {
+					var duration = animation_settings.open_duration;
+					if (duration == 0) {
 						map_completed (actor);
 						return;
 					}
@@ -769,7 +968,7 @@ namespace Gala
 					actor.scale_x = 0.01f;
 					actor.scale_y = 0.1f;
 					actor.opacity = 0;
-					actor.animate (Clutter.AnimationMode.EASE_OUT_EXPO, AnimationSettings.get_default ().open_duration,
+					actor.animate (Clutter.AnimationMode.EASE_OUT_EXPO, duration,
 						scale_x:1.0f, scale_y:1.0f, opacity:255)
 						.completed.connect ( () => {
 
@@ -780,7 +979,8 @@ namespace Gala
 				case WindowType.MENU:
 				case WindowType.DROPDOWN_MENU:
 				case WindowType.POPUP_MENU:
-					if (AnimationSettings.get_default ().menu_duration == 0) {
+					var duration = animation_settings.menu_duration;
+					if (duration == 0) {
 						map_completed (actor);
 						return;
 					}
@@ -792,7 +992,7 @@ namespace Gala
 					actor.scale_x = 0.9f;
 					actor.scale_y = 0.9f;
 					actor.opacity = 0;
-					actor.animate (Clutter.AnimationMode.EASE_OUT_QUAD, AnimationSettings.get_default ().menu_duration,
+					actor.animate (Clutter.AnimationMode.EASE_OUT_QUAD, duration,
 						scale_x:1.0f, scale_y:1.0f, opacity:255)
 						.completed.connect ( () => {
 
@@ -830,9 +1030,10 @@ namespace Gala
 
 		public override void destroy (WindowActor actor)
 		{
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 			var window = actor.get_meta_window ();
 
-			if (!AnimationSettings.get_default ().enable_animations) {
+			if (!animation_settings.enable_animations) {
 				destroy_completed (actor);
 
 				// only NORMAL windows have icons
@@ -846,7 +1047,8 @@ namespace Gala
 
 			switch (window.window_type) {
 				case WindowType.NORMAL:
-					if (AnimationSettings.get_default ().close_duration == 0) {
+					var duration = animation_settings.close_duration;
+					if (duration == 0) {
 						destroy_completed (actor);
 						return;
 					}
@@ -855,7 +1057,7 @@ namespace Gala
 
 					actor.scale_gravity = Clutter.Gravity.CENTER;
 					actor.show ();
-					actor.animate (Clutter.AnimationMode.LINEAR, AnimationSettings.get_default ().close_duration,
+					actor.animate (Clutter.AnimationMode.LINEAR, duration,
 						scale_x:0.8f, scale_y:0.8f, opacity:0)
 						.completed.connect ( () => {
 
@@ -882,14 +1084,15 @@ namespace Gala
 				case WindowType.MENU:
 				case WindowType.DROPDOWN_MENU:
 				case WindowType.POPUP_MENU:
-					if (AnimationSettings.get_default ().menu_duration == 0) {
+					var duration = animation_settings.menu_duration;
+					if (duration == 0) {
 						destroy_completed (actor);
 						return;
 					}
 
 					destroying.add (actor);
 
-					actor.animate (Clutter.AnimationMode.EASE_OUT_QUAD, AnimationSettings.get_default ().menu_duration,
+					actor.animate (Clutter.AnimationMode.EASE_OUT_QUAD, duration,
 						scale_x:0.8f, scale_y:0.8f, opacity:0)
 						.completed.connect ( () => {
 
@@ -905,33 +1108,73 @@ namespace Gala
 
 		public override void unmaximize (Meta.WindowActor actor, int ex, int ey, int ew, int eh)
 		{
-			if (!AnimationSettings.get_default ().enable_animations || AnimationSettings.get_default ().snap_duration == 0) {
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.snap_duration;
+
+			if (!animation_settings.enable_animations
+				|| duration == 0) {
 				unmaximize_completed (actor);
 				return;
 			}
 
-			if (actor.get_meta_window ().window_type == WindowType.NORMAL) {
-				unmaximizing.add (actor);
+			var window = actor.get_meta_window ();
 
-				float x, y, width, height;
-				actor.get_size (out width, out height);
-				actor.get_position (out x, out y);
+			if (window.window_type == WindowType.NORMAL) {
+				float offset_x, offset_y, offset_width, offset_height;
+				var unmaximized_window_geometry = WindowListener.get_default ().get_unmaximized_state_geometry (window);
 
-				float scale_x  = (float)ew  / width;
-				float scale_y  = (float)eh / height;
-				float anchor_x = (float)(x - ex) * width  / (ew - width);
-				float anchor_y = (float)(y - ey) * height / (eh - height);
+				if (unmaximized_window_geometry != null) {
+					offset_x = unmaximized_window_geometry.outer.x - unmaximized_window_geometry.inner.x;
+					offset_y = unmaximized_window_geometry.outer.y - unmaximized_window_geometry.inner.y;
+					offset_width = unmaximized_window_geometry.outer.width - unmaximized_window_geometry.inner.width;
+					offset_height = unmaximized_window_geometry.outer.height - unmaximized_window_geometry.inner.height;
+				} else {
+					offset_x = 0;
+					offset_y = 0;
+					offset_width = 0;
+					offset_height = 0;
+				}
 
-				actor.move_anchor_point (anchor_x, anchor_y);
-				actor.animate (Clutter.AnimationMode.EASE_IN_OUT_SINE, AnimationSettings.get_default ().snap_duration,
-					scale_x:scale_x, scale_y:scale_y).completed.connect ( () => {
-					actor.move_anchor_point_from_gravity (Clutter.Gravity.NORTH_WEST);
-					actor.animate (Clutter.AnimationMode.LINEAR, 1, scale_x:1.0f,
-						scale_y:1.0f);//just scaling didnt want to work..
+				Meta.Rectangle old_rect = { (int) actor.x, (int) actor.y, (int) actor.width, (int) actor.height };
+				var old_actor = Utils.get_window_actor_snapshot (actor, old_rect, old_rect);
 
-					unmaximizing.remove (actor);
+				if (old_actor == null) {
 					unmaximize_completed (actor);
+					return;
+				}
+
+				old_actor.set_position (old_rect.x, old_rect.y);
+
+				ui_group.add_child (old_actor);
+
+				var scale_x = (double) (ew - offset_width) / old_rect.width;
+				var scale_y = (double) (eh - offset_height) / old_rect.height;
+
+				old_actor.animate (Clutter.AnimationMode.EASE_IN_OUT_QUAD, duration,
+						x: (ex - offset_x),
+						y: (ey - offset_y),
+						opacity: 0,
+						scale_x: scale_x,
+						scale_y: scale_y).completed.connect (() => {
+					old_actor.destroy ();
 				});
+
+				var maximized_x = actor.x;
+				var maximized_y = actor.y;
+				unmaximize_completed (actor);
+				actor.scale_gravity = Clutter.Gravity.NORTH_WEST;
+				actor.x = ex;
+				actor.y = ey;
+				actor.translation_x = -ex + offset_x * (float) (1.0 / scale_x) + maximized_x;
+				actor.translation_y = -ey + offset_y * (float) (1.0 / scale_y) + maximized_y;
+				actor.scale_x = 1.0 / scale_x;
+				actor.scale_y = 1.0 / scale_y;
+
+				actor.animate (Clutter.AnimationMode.EASE_IN_OUT_QUAD, duration,
+						scale_x: 1.0,
+						scale_y: 1.0,
+						translation_x: 0.0,
+						translation_y: 0.0);
 
 				return;
 			}
@@ -966,6 +1209,10 @@ namespace Gala
 		{
 			if (end_animation (ref mapping, actor))
 				map_completed (actor);
+#if HAS_MUTTER314
+			if (end_animation (ref unminimizing, actor))
+				unminimize_completed (actor);
+#endif
 			if (end_animation (ref minimizing, actor))
 				minimize_completed (actor);
 			if (end_animation (ref maximizing, actor))
@@ -983,8 +1230,11 @@ namespace Gala
 
 		public override void switch_workspace (int from, int to, MotionDirection direction)
 		{
-			if (!AnimationSettings.get_default ().enable_animations
-				|| AnimationSettings.get_default ().workspace_switch_duration == 0
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var animation_duration = animation_settings.workspace_switch_duration;
+
+			if (!animation_settings.enable_animations
+				|| animation_duration == 0
 				|| (direction != MotionDirection.LEFT && direction != MotionDirection.RIGHT)) {
 				switch_workspace_completed ();
 				return;
@@ -1050,6 +1300,9 @@ namespace Gala
 			var docks = new List<WindowActor> ();
 
 			foreach (var actor in Compositor.get_window_actors (screen)) {
+				if (actor.is_destroyed ())
+					continue;
+
 				var window = actor.get_meta_window ();
 
 				if (!window.showing_on_its_workspace () ||
@@ -1102,7 +1355,7 @@ namespace Gala
 			// the display stack
 			foreach (var window in docks) {
 				if (!to_has_fullscreened) {
-					var clone = new InternalUtils.SafeWindowClone (window.get_meta_window ());
+					var clone = new SafeWindowClone (window.get_meta_window ());
 					clone.x = window.x;
 					clone.y = window.y;
 
@@ -1137,7 +1390,6 @@ namespace Gala
 			in_group.width = out_group.width = move_primary_only ? monitor_geom.width : screen_width;
 			in_group.height = out_group.height = move_primary_only ? monitor_geom.height : screen_height;
 
-			var animation_duration = AnimationSettings.get_default ().workspace_switch_duration;
 			var animation_mode = Clutter.AnimationMode.EASE_OUT_CUBIC;
 
 			out_group.set_easing_mode (animation_mode);
@@ -1178,14 +1430,27 @@ namespace Gala
 
 				// to maintain the correct order of monitor, we need to insert the Background
 				// back manually
+#if HAS_MUTTER314
+				if (actor is BackgroundManager) {
+					var background = (BackgroundManager) actor;
+#else
 				if (actor is Background) {
 					var background = (Background) actor;
+#endif
 
 					background.get_parent ().remove_child (background);
+#if HAS_MUTTER314
+					background_group.insert_child_at_index (background, background.monitor_index);
+#else
 					background_group.insert_child_at_index (background, background.monitor);
+#endif
 					background.x = background.steal_data<int> ("prev-x");
 					continue;
+#if HAS_MUTTER314
+				} else if (actor is Meta.BackgroundGroup) {
+#else
 				} else if (actor is BackgroundManager) {
+#endif
 					actor.x = 0;
 					// thankfully mutter will take care of stacking it at the right place for us
 					clutter_actor_reparent (actor, window_group);

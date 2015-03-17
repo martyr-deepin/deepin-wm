@@ -15,9 +15,6 @@ applications_DATA = gala.desktop gala-multitaskingview.desktop
 
 gsettings_SCHEMAS = org.pantheon.desktop.gala.gschema.xml
 
-%.gschema.xml.in: %.gschema.xml.in.in Makefile
-	$(AM_V_GEN) sed -e 's|@GETTEXT_PACKAGE[@]|$(GETTEXT_PACKAGE)|g' $< > $@ || rm $@
-
 @INTLTOOL_XML_RULE@
 
 @GSETTINGS_RULES@
@@ -39,10 +36,9 @@ EXTRA_DIST = \
 
 CLEANFILES = \
 	gala-multitaskingview.desktop \
-	$(gsettings_SCHEMAS) \
 	gschemas.compiled \
-	data/org.pantheon.desktop.gala.gschema.xml \
-	data/org.pantheon.desktop.gala.gschema.xml.in \
+	org.pantheon.desktop.gala.gschema.xml \
+	org.pantheon.desktop.gala.gschema.xml.in \
 	$(NULL)
 
 # rename data file with prefix 'deepin'

@@ -28,41 +28,6 @@ namespace Gala
 
 	public class InternalUtils
 	{
-		/**
-		 * A clone for a MetaWindowActor that will guard against the
-		 * meta_window_appears_focused crash by disabling painting the clone
-		 * as soon as it gets unavailable.
-		 */
-		public class SafeWindowClone : Clutter.Clone
-		{
-			public Window window { get; construct; }
-
-			public SafeWindowClone (Window window)
-			{
-				var actor = (WindowActor) window.get_compositor_private ();
-				Object (window: window, source: actor);
-			}
-
-			construct
-			{
-				if (source != null)
-					window.unmanaged.connect (reset_source);
-			}
-
-			~SafeWindowClone ()
-			{
-				window.unmanaged.disconnect (reset_source);
-			}
-
-			void reset_source ()
-			{
-				// actually destroying the clone will be handled somewhere else, we just need
-				// to make sure the clone doesn't attempt to draw a clone of a window that
-				// has been destroyed
-				source = null;
-			}
-		}
-
 		public static bool workspaces_only_on_primary ()
 		{
 			return Prefs.get_dynamic_workspaces ()
@@ -153,12 +118,27 @@ namespace Gala
 			Util.set_stage_input_region (screen, xregion);
 		}
 
+		public static string get_system_background_path ()
+		{
+			var filename = AppearanceSettings.get_default ().workspace_switcher_background;
+			var default_file = Config.PKGDATADIR + "/texture.png";
+
+			if (filename == "") {
+				filename = default_file;
+			} else if (!FileUtils.test (filename, FileTest.IS_REGULAR)) {
+				warning ("Failed to load %s", filename);
+				filename = default_file;
+			}
+
+			return filename;
+		}
+
 		/**
 		 * Inserts a workspace at the given index. To ensure the workspace is not immediately
 		 * removed again when in dynamic workspaces, the window is first placed on it.
 		 *
 		 * @param index  The index at which to insert the workspace
-		 * @param window A window that should be moved to the new workspace
+		 * @param new_window A window that should be moved to the new workspace
 		 */
 		public static void insert_workspace_with_window (int index, Window new_window)
 		{

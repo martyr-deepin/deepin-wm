@@ -41,7 +41,7 @@ namespace Gala
 			base (Config.SCHEMA + ".behavior");
 		}
 
-		public static BehaviorSettings get_default ()
+		public static unowned BehaviorSettings get_default ()
 		{
 			if (instance == null)
 				instance = new BehaviorSettings ();
@@ -59,7 +59,7 @@ namespace Gala
 			base (Config.SCHEMA + ".keybindings");
 		}
 
-		public static KeybindingSettings get_default ()
+		public static unowned KeybindingSettings get_default ()
 		{
 			if (instance == null)
 				instance = new KeybindingSettings ();
@@ -74,6 +74,7 @@ namespace Gala
 		public bool attach_modal_dialogs { get; set; }
 		public bool dim_parents { get; set; }
 		public double alt_tab_window_opacity { get; set; }
+		public string workspace_switcher_background { get; set; }
 
 		static AppearanceSettings? instance = null;
 
@@ -82,7 +83,7 @@ namespace Gala
 			base (Config.SCHEMA + ".appearance");
 		}
 
-		public static AppearanceSettings get_default ()
+		public static unowned AppearanceSettings get_default ()
 		{
 			if (instance == null)
 				instance = new AppearanceSettings ();
@@ -106,7 +107,7 @@ namespace Gala
 			base (Config.SCHEMA + ".shadows");
 		}
 
-		public static ShadowSettings get_default ()
+		public static unowned ShadowSettings get_default ()
 		{
 			if (instance == null)
 				instance = new ShadowSettings ();
@@ -144,7 +145,7 @@ namespace Gala
 			base (Config.SCHEMA + ".animations");
 		}
 
-		public static AnimationSettings get_default ()
+		public static unowned AnimationSettings get_default ()
 		{
 			if (instance == null)
 				instance = new AnimationSettings ();
@@ -169,7 +170,7 @@ namespace Gala
 			base ("com.deepin.dde.personalization");
 		}
 
-		public static BackgroundSettings get_default ()
+		public static unowned BackgroundSettings get_default ()
 		{
 			if (instance == null)
 				instance = new BackgroundSettings ();

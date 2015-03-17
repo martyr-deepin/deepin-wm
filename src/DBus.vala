@@ -44,7 +44,11 @@ namespace Gala
 		private DBus ()
 		{
 			if (wm.background_group != null)
+#if HAS_MUTTER314
+				(wm.background_group as BackgroundContainer).changed.connect (() => background_changed ());
+#else
 				(wm.background_group as BackgroundManager).changed.connect (() => background_changed ());
+#endif
 			else
 				assert_not_reached ();
 		}
@@ -94,7 +98,7 @@ namespace Gala
 		 *                         relative to the monitor you picked. Values will be clamped
 		 *                         to its dimensions
 		 * @param reference_y      Y coordinate
-		 * @param refenrece_width  Width of the rectangle
+		 * @param reference_width  Width of the rectangle
 		 * @param reference_height Height of the rectangle
 		 */
 		public async ColorInformation get_background_color_information (int monitor,

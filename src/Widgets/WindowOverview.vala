@@ -80,10 +80,11 @@ namespace Gala
 
 		public override void key_focus_out ()
 		{
-			close ();
+			if (!contains (get_stage ().key_focus))
+				close ();
 		}
 
-		public override bool button_release_event (Clutter.ButtonEvent event)
+		public override bool button_press_event (Clutter.ButtonEvent event)
 		{
 			if (event.button == 1)
 				close ();
