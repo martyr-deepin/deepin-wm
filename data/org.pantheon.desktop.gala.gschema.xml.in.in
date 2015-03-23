@@ -15,7 +15,7 @@
 		<value nick='natural' value='1'/>
 	</enum>
 
-	<schema path="/com/deepin/dde/wm/gala/behavior/" id="com.deepin.dde.wm.gala.behavior" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema path="/com/deepin/wrap/pantheon/desktop/gala/behavior/" id="com.deepin.wrap.pantheon.desktop.gala.behavior" gettext-domain="@GETTEXT_PACKAGE@">
 	
 		<key enum="GalaActionType" name="hotcorner-topleft">
 			<default>'none'</default>
@@ -84,7 +84,7 @@
 		</key>
 	</schema>
 
-	<schema path="/com/deepin/dde/wm/gala/keybindings/" id="com.deepin.dde.wm.gala.keybindings" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema path="/com/deepin/wrap/pantheon/desktop/gala/keybindings/" id="com.deepin.wrap.pantheon.desktop.gala.keybindings" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="as" name="switch-to-workspace-first">
 			<default><![CDATA[['<Super>Home']]]></default>
 			<_summary>Shortcut to move to first workspace</_summary>
@@ -146,7 +146,7 @@
 		</key>
 	</schema>
 
-	<schema path="/com/deepin/dde/wm/gala/appearance/" id="com.deepin.dde.wm.gala.appearance" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema path="/com/deepin/wrap/pantheon/desktop/gala/appearance/" id="com.deepin.wrap.pantheon.desktop.gala.appearance" gettext-domain="@GETTEXT_PACKAGE@">
 	
 		<key type="b" name="attach-modal-dialogs">
 			<default>false</default>
@@ -173,7 +173,7 @@
 		</key>
 	</schema>
 
-	<schema path="/com/deepin/dde/wm/gala/animations/" id="com.deepin.dde.wm.gala.animations" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema path="/com/deepin/wrap/pantheon/desktop/gala/animations/" id="com.deepin.wrap.pantheon.desktop.gala.animations" gettext-domain="@GETTEXT_PACKAGE@">
 	
 		<key type="b" name="enable-animations">
 			<default>true</default>
@@ -205,7 +205,7 @@
 		</key>
 	</schema>
 
-	<schema path="/com/deepin/dde/wm/gala/shadows/" id="com.deepin.dde.wm.gala.shadows" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema path="/com/deepin/wrap/pantheon/desktop/gala/shadows/" id="com.deepin.wrap.pantheon.desktop.gala.shadows" gettext-domain="@GETTEXT_PACKAGE@">
 	
 		<key type="as" name="normal-focused">
 			<default>['20', '-1', '0', '15', '220']</default>
@@ -234,7 +234,7 @@
 		</key>
 	</schema>
 	
-	<schema path="/org/pantheon/desktop/gala/notifications/" id="org.pantheon.desktop.gala.notifications" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema path="/com/deepin/wrap/pantheon/esktop/gala/notifications/" id="com.deepin.wrap.pantheon.desktop.gala.notifications" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="b" name="do-not-disturb">
 			<default>false</default>
 			<_summary>Disable all notifications</_summary>
@@ -254,7 +254,7 @@
 		</key>
 	</schema>
 	
-	<schema path="/org/pantheon/desktop/gala/mask-corners/" id="org.pantheon.desktop.gala.mask-corners" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema path="/com/deepin/wrap/pantheon/esktop/gala/mask-corners/" id="com.deepin.wrap.pantheon.desktop.gala.mask-corners" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="b" name="enable">
 			<default>true</default>
 			<_summary>Enable rounded corner mask</_summary>

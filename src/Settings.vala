@@ -167,7 +167,7 @@ namespace Gala
 
 		private BackgroundSettings ()
 		{
-			base ("com.deepin.dde.personalization");
+			base ("com.deepin.wrap.gnome.desktop.background");
 		}
 
 		public static unowned BackgroundSettings get_default ()

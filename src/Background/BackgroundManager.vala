@@ -19,7 +19,7 @@ namespace Gala
 {
 	public class BackgroundManager : Meta.BackgroundGroup
 	{
-		const string BACKGROUND_SCHEMA = "org.gnome.desktop.background";
+		const string BACKGROUND_SCHEMA = "com.deepin.wrap.gnome.desktop.background";
 		const int FADE_ANIMATION_TIME = 1000;
 
 		public signal void changed ();

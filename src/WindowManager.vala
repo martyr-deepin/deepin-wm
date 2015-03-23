@@ -229,12 +229,13 @@ namespace Gala
 				winswitcher = new WindowSwitcher (this);
 				ui_group.add_child (winswitcher);
 
-				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
-
 				deepin_winswitcher = new DeepinWindowSwitcher (this);
 				ui_group.add_child (deepin_winswitcher);
 
+				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+
+				// TODO
 				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
 				KeyBinding.set_custom_handler ("switch-applications-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
 			}
@@ -329,7 +330,7 @@ namespace Gala
 			X.Event event, Meta.KeyBinding binding)
 #endif
 		{
-			var keyboard_input_settings = new GLib.Settings ("org.gnome.desktop.input-sources");
+			var keyboard_input_settings = new GLib.Settings ("com.deepin.wrap.gnome.desktop.input-sources");
 
 			var n_sources = (uint) keyboard_input_settings.get_value ("sources").n_children ();
 			if (n_sources < 2)

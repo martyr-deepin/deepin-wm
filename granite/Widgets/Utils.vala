@@ -91,7 +91,7 @@ namespace Granite.DateTime {
     }
     
     private static bool is_clock_format_12h () {
-        var h24_settings = new Settings ("org.gnome.desktop.interface");
+        var h24_settings = new Settings ("com.deepin.wrap.gnome.desktop.interface");
         var format = h24_settings.get_string ("clock-format");
         return (format.contains ("12h"));
     }
@@ -226,8 +226,8 @@ namespace Granite.Widgets.Utils {
         style_context.add_provider (style_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }
 
-    const string WM_SETTINGS_PATH = "org.gnome.desktop.wm.preferences";
-    const string PANTHEON_SETTINGS_PATH = "org.pantheon.desktop.gala.appearance";
+    const string WM_SETTINGS_PATH = "com.deepin.wrap.gnome.desktop.wm.preferences";
+    const string PANTHEON_SETTINGS_PATH = "com.deepin.wrap.pantheon.desktop.gala.appearance";
     const string WM_BUTTON_LAYOUT_KEY = "button-layout";
 
     /**

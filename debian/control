@@ -23,7 +23,7 @@ Homepage: https://gitcafe.com/Deepin/deepin-wm https://launchpad.net/gala
 
 Package: deepin-wm
 Architecture: any
-Depends: gsettings-desktop-schemas, ${misc:Depends}, ${shlibs:Depends}
+Depends: dde-daemon, ${misc:Depends}, ${shlibs:Depends}
 Provides: x-window-manager 
 Description: Deepin Window Manager
  deepin-wm(fork of gala) is a window & compositing manager based on libmutter. It manages the
