@@ -8,6 +8,9 @@ styles_DATA = gala.css texture.png close.png
 xsessionsdir = $(datadir)/xsessions
 xsessions_DATA = deepin-test.desktop
 
+xsessionbindir = $(bindir)
+xsessionbin_DATA = startdde-test
+
 applicationsdir = $(datadir)/applications
 applications_DATA = gala.desktop gala-multitaskingview.desktop
 
@@ -26,6 +29,7 @@ all-local: gschemas.compiled
 
 EXTRA_DIST = \
 	deepin-test.desktop \
+	startdde-test \
 	gala.css \
 	gala.desktop \
 	gala-multitaskingview.desktop.in \
@@ -43,6 +47,7 @@ CLEANFILES = \
 
 # rename data file with prefix 'deepin'
 install-data-hook:
+	chmod 0755 $(DESTDIR)$(bindir)/startdde-test
 	mv $(DESTDIR)$(applicationsdir)/gala.desktop $(DESTDIR)$(applicationsdir)/deepin-wm.desktop
 	mv $(DESTDIR)$(applicationsdir)/gala-multitaskingview.desktop $(DESTDIR)$(applicationsdir)/deepin-wm-multitaskingview.desktop
 	mv $(DESTDIR)$(gsettingsschemadir)/org.pantheon.desktop.gala.gschema.xml $(DESTDIR)$(gsettingsschemadir)/com.deepin.wrap.pantheon.desktop.gala.gschema.xml
