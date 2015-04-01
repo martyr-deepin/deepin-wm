@@ -3,11 +3,11 @@ include $(top_srcdir)/Makefile.common
 VAPIDIR = $(top_srcdir)/vapi
 
 BUILT_SOURCES = \
-	libgala_la_vala.stamp \
+	libdeepin_wm_la_vala.stamp \
 	$(NULL)
 
-libgalaincludedir = $(includedir)/gala
-nodist_libgalainclude_HEADERS = gala.h
+libdeepin_wmincludedir = $(includedir)/gala
+nodist_libdeepin_wminclude_HEADERS = gala.h
 
 vapidir = $(datadir)/vala/vapi
 nodist_vapi_DATA = \
@@ -19,15 +19,15 @@ pkgconfigdir = $(libdir)/pkgconfig
 nodist_pkgconfig_DATA = gala.pc
 
 
-lib_LTLIBRARIES = libgala.la
+lib_LTLIBRARIES = libdeepin-wm.la
 
-libgala_la_CFLAGS = \
+libdeepin_wm_la_CFLAGS = \
 	$(GALA_CORE_CFLAGS) \
 	-include config.h \
 	-w \
 	$(NULL)
 
-libgala_la_LDFLAGS = \
+libdeepin_wm_la_LDFLAGS = \
 	$(AM_LDLAGS) \
 	$(GALA_CORE_LDFLAGS) \
 	-no-undefined \
@@ -36,17 +36,17 @@ libgala_la_LDFLAGS = \
 	-export-symbols-regex '^gala_.*' \
 	$(NULL)
 
-libgala_la_VALAFLAGS = \
+libdeepin_wm_la_VALAFLAGS = \
 	$(GALA_CORE_VALAFLAGS) \
 	--vapidir $(VAPIDIR) \
 	$(VAPIDIR)/config.vapi \
 	$(NULL)
 
-libgala_la_LIBADD = \
+libdeepin_wm_la_LIBADD = \
 	$(GALA_CORE_LIBS) \
 	$(NULL)
 
-libgala_la_VALASOURCES = \
+libdeepin_wm_la_VALASOURCES = \
 	ActivatableComponent.vala \
 	Plugin.vala \
 	Utils.vala \
@@ -54,16 +54,16 @@ libgala_la_VALASOURCES = \
 	WindowManager.vala \
 	$(NULL)
 
-nodist_libgala_la_SOURCES = \
+nodist_libdeepin_wm_la_SOURCES = \
 	$(BUILT_SOURCES) \
-	$(libgala_la_VALASOURCES:.vala=.c) \
+	$(libdeepin_wm_la_VALASOURCES:.vala=.c) \
 	$(NULL)
 
-gala.h gala.vapi: libgala_la_vala.stamp
+gala.h gala.vapi: libdeepin_wm_la_vala.stamp
 
-libgala_la_vala.stamp: $(libgala_la_VALASOURCES) Makefile
+libdeepin_wm_la_vala.stamp: $(libdeepin_wm_la_VALASOURCES) Makefile
 	$(AM_V_VALA)$(VALAC) \
-		$(libgala_la_VALAFLAGS) \
+		$(libdeepin_wm_la_VALAFLAGS) \
 		--basedir $(srcdir) \
 		--directory $(builddir) \
 		-C \
@@ -74,13 +74,19 @@ libgala_la_vala.stamp: $(libgala_la_VALASOURCES) Makefile
 	$(AM_V_at)touch $@
 
 CLEANFILES = \
-	$(nodist_libgala_la_SOURCES) \
+	$(nodist_libdeepin_wm_la_SOURCES) \
 	gala.vapi \
 	gala.h \
 	$(NULL)
 
 EXTRA_DIST = \
-	$(libgala_la_VALASOURCES) \
+	$(libdeepin_wm_la_VALASOURCES) \
 	gala.deps \
 	$(NULL)
 
+install-data-hook:
+	mv $(DESTDIR)$(includedir)/gala/gala.h $(DESTDIR)$(includedir)/gala/deepin-wm.h
+	mv $(DESTDIR)$(includedir)/gala $(DESTDIR)$(includedir)/deepin-wm
+	mv $(DESTDIR)$(vapidir)/gala.deps $(DESTDIR)$(vapidir)/deepin-wm.deps
+	mv $(DESTDIR)$(vapidir)/gala.vapi $(DESTDIR)$(vapidir)/deepin-wm.vapi
+	mv $(DESTDIR)$(pkgconfigdir)/gala.pc $(DESTDIR)$(pkgconfigdir)/deepin-wm.pc

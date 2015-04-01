@@ -6,8 +6,3 @@ usr/share/deepin-wm
 usr/share/glib-2.0
 usr/share/icons
 usr/share/locale
-usr/include
-usr/lib/*/lib*.so
-usr/lib/*/pkgconfig
-usr/share/vala
-usr/lib/*/lib*.so.*

@@ -27,7 +27,7 @@ gala_CFLAGS = \
 gala_LDADD = \
 	-lm \
 	$(GALA_CORE_LIBS) \
-	$(top_builddir)/lib/libgala.la \
+	$(top_builddir)/lib/libdeepin-wm.la \
 	$(NULL)
 
 gala_VALASOURCES = \

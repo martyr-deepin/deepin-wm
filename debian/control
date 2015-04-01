@@ -23,8 +23,11 @@ Homepage: https://gitcafe.com/Deepin/deepin-wm https://launchpad.net/gala
 
 Package: deepin-wm
 Architecture: any
-Depends: dde-daemon, ${misc:Depends}, ${shlibs:Depends}
-Provides: x-window-manager 
+Depends: dde-daemon,
+         libdeepin-wm0 (= ${binary:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Provides: x-window-manager
 Description: Deepin Window Manager
  deepin-wm(fork of gala) is a window & compositing manager based on libmutter. It manages the
  various windows a user has open.
@@ -36,7 +39,9 @@ Package: deepin-wm-dbg
 Architecture: any
 Section: debug
 Priority: extra
-Depends: deepin-wm (= ${binary:Version}), ${misc:Depends}
+Depends: deepin-wm (= ${binary:Version}),
+         libdeepin-wm0 (= ${binary:Version}),
+         ${misc:Depends}
 Description: Deepin Window Manager (debugging symbols)
  deepin-wm(fork of gala) is a window & compositing manager based on libmutter. It manages the
  various windows a user has open.
@@ -45,3 +50,34 @@ Description: Deepin Window Manager (debugging symbols)
  providing accessibility features like zoom, and more.
  .
  This package contains debugging symbols for deepin-wm.
+
+Package: libdeepin-wm0
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Multi-Arch: same
+Description: Library to build plugins for Deepin Window Manager
+ deepin-wm(fork of gala) is a window & compositing manager based on libmutter. It manages the
+ various windows a user has open.
+ It takes care of behaviors such as moving windows around, window switching,
+ window overview, animating windows, maximization, multiple workspaces,
+ providing accessibility features like zoom, and more.
+ .
+ This package contains the shared library used for deepin-wm.
+
+Package: libdeepin-wm-dev
+Architecture: any
+Section: libdevel
+Depends: libclutter-gtk-1.0-dev,
+         libdeepin-wm0 (= ${binary:Version}),
+         libgdk-pixbuf2.0-dev,
+         libglib2.0-dev (>= 2.32),
+         libdeepin-mutter-dev (>= 3.8.4),
+         ${misc:Depends}
+Description: Library to build plugins for Deepin Window Manager (development files)
+ deepin-wm(fork of gala) is a window & compositing manager based on libmutter. It manages the
+ various windows a user has open.
+ It takes care of behaviors such as moving windows around, window switching,
+ window overview, animating windows, maximization, multiple workspaces,
+ providing accessibility features like zoom, and more.
+ .
+ This package contains the development files used for deepin-wm.

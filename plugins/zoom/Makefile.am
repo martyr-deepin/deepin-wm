@@ -11,7 +11,7 @@ libgala_zoom_ladir = $(pkglibdir)/plugins
 libgala_zoom_la_LDFLAGS = \
 	$(PLUGIN_LDFLAGS) \
 	$(GALA_CORE_LDFLAGS) \
-	$(top_builddir)/lib/libgala.la \
+	$(top_builddir)/lib/libdeepin-wm.la \
 	$(NULL)
 
 libgala_zoom_la_CFLAGS = \
