@@ -14,8 +14,8 @@ find . -type f | grep -v "${grep_ignore_files}" | xargs grep -P '(org.gnome|org.
 echo "==> replace gsettings path"
 for f in $(find . -type f | grep -v "${grep_ignore_files}" | xargs grep -l -P '(org.gnome|org.pantheon).[^A-Z]'); do
   echo "  -> ${f}"
-  sed -e 's=org\.gnome\.[^A-Z]=com.deepin.wrap.gnome.=g' \
-      -e 's=org\.pantheon\.[^A-Z]=com.deepin.wrap.pantheon.=g' \
-      -e 's=/org/gnome/[^A-Z]=/com/deepin/wrap/gnome/=g' \
-      -e 's=/org/pantheon/[^A-Z]=/com/deepin/wrap/pantheon/=g' -i "${f}"
+  sed -e 's=org\.gnome\.\([^A-Z]\)=com.deepin.wrap.gnome.\1=g' \
+      -e 's=org\.pantheon\.\([^A-Z]\)=com.deepin.wrap.pantheon.\1=g' \
+      -e 's=/org/gnome/\([^A-Z]\)=/com/deepin/wrap/gnome/\1=g' \
+      -e 's=/org/pantheon/\([^A-Z]\)=/com/deepin/wrap/pantheon/\1=g' -i "${f}"
 done
