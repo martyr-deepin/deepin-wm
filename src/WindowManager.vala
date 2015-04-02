@@ -1316,6 +1316,16 @@ namespace Gala
 					// all other windows will be collected below
 					if (window.window_type == WindowType.DOCK) {
 						docks.append (actor);
+					} else if (window.window_type == WindowType.DESKTOP) {
+						var clone = new SafeWindowClone (window);
+						clone.x = actor.x;
+						clone.y = actor.y;
+						in_group.insert_child_at_index (clone, 0);
+						tmp_actors.insert (clone, 0);
+
+						windows.insert (actor, 0);
+						parents.insert (actor.get_parent (), 0);
+						clutter_actor_reparent (actor, out_group);
 					} else {
 						// windows that are on all workspaces will be faded out and back in
 						windows.append (actor);
