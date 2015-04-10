@@ -48,7 +48,6 @@ namespace Gala
 
 		Meta.PluginInfo info;
 
-		WindowSwitcher? winswitcher = null;
 		DeepinWindowSwitcher? deepin_winswitcher = null;
 		ActivatableComponent? workspace_view = null;
 		ActivatableComponent? window_overview = null;
@@ -226,18 +225,15 @@ namespace Gala
 			}
 
 			if (plugin_manager.window_switcher_provider == null) {
-				winswitcher = new WindowSwitcher (this);
-				ui_group.add_child (winswitcher);
-
 				deepin_winswitcher = new DeepinWindowSwitcher (this);
 				ui_group.add_child (deepin_winswitcher);
 
-				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-
-				// TODO
 				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
 				KeyBinding.set_custom_handler ("switch-applications-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-group", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-group-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
 			}
 
 			if (plugin_manager.window_overview_provider == null

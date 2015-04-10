@@ -3,7 +3,7 @@ SUBDIRS = \
 	$(NULL)
 
 stylesdir = $(pkgdatadir)
-styles_DATA = gala.css texture.png close.png
+styles_DATA = deepin-wm.css gala.css texture.png close.png
 
 xsessionsdir = $(datadir)/xsessions
 xsessions_DATA = deepin-test.desktop
@@ -30,6 +30,7 @@ all-local: gschemas.compiled
 EXTRA_DIST = \
 	deepin-test.desktop \
 	startdde-test \
+	deepin-wm.css \
 	gala.css \
 	gala.desktop \
 	gala-multitaskingview.desktop.in \
