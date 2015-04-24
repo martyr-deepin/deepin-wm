@@ -37,12 +37,6 @@ namespace Gala
 			if (system_background == null) {
 				system_background = new Meta.Background (meta_screen);
 				system_background.set_color (DEFAULT_BACKGROUND_COLOR);
-
-#if HAS_MUTTER316
-				system_background.set_file (File.new_for_path (path), GDesktop.BackgroundStyle.WALLPAPER);
-#else
-				system_background.set_filename (path, GDesktop.BackgroundStyle.WALLPAPER);
-#endif
 			}
 
 			background = system_background;
@@ -70,4 +64,3 @@ namespace Gala
 		}
 	}
 }
-

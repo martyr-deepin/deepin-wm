@@ -29,7 +29,7 @@ namespace Gala
 
 		public WindowManager wm { get; construct; }
 
-		Gtk.StyleContext? style_context = null;
+		static Gtk.StyleContext? style_context = null;
 
 		DeepinWindowSwitcherItem? current_item = null;
 
@@ -52,7 +52,9 @@ namespace Gala
 
 		construct
 		{
-			style_context = DeepinUtils.new_css_style_context("deepin-window-switcher");
+			if (style_context == null) {
+				style_context = DeepinUtils.new_css_style_context("deepin-window-switcher");
+			}
 
 			popup = new Actor ();
 			popup.opacity = 0;

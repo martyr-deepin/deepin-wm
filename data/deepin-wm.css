@@ -15,6 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+.deepin-window-manager {
+    background: rgba(105,105,105,1.0);
+}
+
 .deepin-window-switcher {
     background: rgba(0,0,0,0.6);
     border-radius: 4px;
@@ -27,4 +31,23 @@
 
 .deepin-window-switcher-item:selected {
     background: rgba(1,189,255,1.0);
+}
+
+.deepin-workspace-thumb:selected {
+    background: rgba(1,189,255,1.0);
+    border-radius: 5px;
+}
+
+.deepin-workspace-thumb-title {
+    background: rgba(255,255,255,0.6);
+    border-radius: 4px;
+}
+
+.deepin-workspace-thumb-title:selected {
+    background: rgba(1,189,255,1.0);
+}
+
+.deepin-window-clone:selected {
+    border: 5px solid rgba(1,189,255,1.0);
+    border-radius: 5px;
 }

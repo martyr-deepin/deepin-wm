@@ -48,7 +48,7 @@ namespace Gala
 
 		Meta.PluginInfo info;
 
-		DeepinWindowSwitcher? deepin_winswitcher = null;
+		DeepinWindowSwitcher? winswitcher = null;
 		ActivatableComponent? workspace_view = null;
 		ActivatableComponent? window_overview = null;
 
@@ -132,11 +132,13 @@ namespace Gala
 #else
 			var system_background = new SystemBackground ();
 #endif
+			system_background.background.set_color (DeepinUtils.get_css_background_color ("deepin-window-manager"));
 			system_background.add_constraint (new Clutter.BindConstraint (stage,
 				Clutter.BindCoordinate.ALL, 0));
 			stage.insert_child_below (system_background, null);
 
 			ui_group = new Clutter.Actor ();
+
 			ui_group.reactive = true;
 			stage.add_child (ui_group);
 
@@ -218,20 +220,20 @@ namespace Gala
 
 			if (plugin_manager.workspace_view_provider == null
 				|| (workspace_view = (plugin_manager.get_plugin (plugin_manager.workspace_view_provider) as ActivatableComponent)) == null) {
-				workspace_view = new MultitaskingView (this);
+				workspace_view = new DeepinMultitaskingView (this);
 				ui_group.add_child ((Clutter.Actor) workspace_view);
 			}
 
 			if (plugin_manager.window_switcher_provider == null) {
-				deepin_winswitcher = new DeepinWindowSwitcher (this);
-				ui_group.add_child (deepin_winswitcher);
+				winswitcher = new DeepinWindowSwitcher (this);
+				ui_group.add_child (winswitcher);
 
-				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-applications-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-group", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-group-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-applications-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-group", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-group-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
 			}
 
 			if (plugin_manager.window_overview_provider == null
@@ -1317,14 +1319,15 @@ namespace Gala
 					if (window.window_type == WindowType.DOCK) {
 						docks.prepend (actor);
 					} else if (window.window_type == WindowType.DESKTOP) {
+						// TODO: fix desktop flash issue when switching workspace
 						var clone = new SafeWindowClone (window);
 						clone.x = actor.x;
 						clone.y = actor.y;
 						in_group.insert_child_at_index (clone, 0);
-						tmp_actors.insert (clone, 0);
+						tmp_actors.prepend (clone);
 
-						windows.insert (actor, 0);
-						parents.insert (actor.get_parent (), 0);
+						windows.prepend (actor);
+						parents.prepend (actor.get_parent ());
 						clutter_actor_reparent (actor, out_group);
 					} else {
 						// windows that are on all workspaces will be faded out and back in
