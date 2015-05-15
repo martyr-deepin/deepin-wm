@@ -32,7 +32,7 @@ namespace Gala
 			style_path.append_type (typeof (Gtk.Window));
 
 			var style_context = new Gtk.StyleContext ();
-			style_context.add_provider (css_provider, Gtk.STYLE_PROVIDER_PRIORITY_FALLBACK);
+			style_context.add_provider (css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
 			style_context.add_class (class_name);
 			style_context.set_path (style_path);
 
