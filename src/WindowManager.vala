@@ -1242,6 +1242,8 @@ namespace Gala
 			var primary = screen.get_primary_monitor ();
 			var move_primary_only = InternalUtils.workspaces_only_on_primary ();
 			var monitor_geom = screen.get_monitor_geometry (primary);
+			var clone_offset_x = move_primary_only ? monitor_geom.x : 0;
+			var clone_offset_y = move_primary_only ? monitor_geom.y : 0;
 
 			screen.get_size (out screen_width, out screen_height);
 
@@ -1256,10 +1258,10 @@ namespace Gala
 			parents = new List<Clutter.Actor> ();
 			tmp_actors = new List<Clutter.Clone> ();
 
-			tmp_actors.append (main_container);
-			tmp_actors.append (in_group);
-			tmp_actors.append (out_group);
-			tmp_actors.append (static_windows);
+			tmp_actors.prepend (main_container);
+			tmp_actors.prepend (in_group);
+			tmp_actors.prepend (out_group);
+			tmp_actors.prepend (static_windows);
 
 			window_group.add_child (main_container);
 
@@ -1271,24 +1273,27 @@ namespace Gala
 			} else
 				wallpaper = background_group;
 
-			windows.append (wallpaper);
-			parents.append (wallpaper.get_parent ());
+			windows.prepend (wallpaper);
+			parents.prepend (wallpaper.get_parent ());
 
 			var wallpaper_clone = new Clutter.Clone (wallpaper);
-			tmp_actors.append (wallpaper_clone);
+			tmp_actors.prepend (wallpaper_clone);
 
+			// pack all containers
 			clutter_actor_reparent (wallpaper, main_container);
 			main_container.add_child (wallpaper_clone);
 			main_container.add_child (out_group);
 			main_container.add_child (in_group);
 			main_container.add_child (static_windows);
 
+			// if we have a move action, pack that window to the static ones
 			if (moving != null) {
 				var moving_actor = (WindowActor) moving.get_compositor_private ();
 
-				windows.append (moving_actor);
-				parents.append (moving_actor.get_parent ());
+				windows.prepend (moving_actor);
+				parents.prepend (moving_actor.get_parent ());
 
+				moving_actor.set_translation (-clone_offset_x, -clone_offset_y, 0);
 				clutter_actor_reparent (moving_actor, static_windows);
 			}
 
@@ -1296,6 +1301,7 @@ namespace Gala
 			var from_has_fullscreened = false;
 			var docks = new List<WindowActor> ();
 
+			// collect all windows and put them in the appropriate containers
 			foreach (var actor in Compositor.get_window_actors (screen)) {
 				if (actor.is_destroyed ())
 					continue;
@@ -1311,7 +1317,7 @@ namespace Gala
 					// only collect docks here that need to be displayed on both workspaces
 					// all other windows will be collected below
 					if (window.window_type == WindowType.DOCK) {
-						docks.append (actor);
+						docks.prepend (actor);
 					} else if (window.window_type == WindowType.DESKTOP) {
 						var clone = new SafeWindowClone (window);
 						clone.x = actor.x;
@@ -1324,11 +1330,12 @@ namespace Gala
 						clutter_actor_reparent (actor, out_group);
 					} else {
 						// windows that are on all workspaces will be faded out and back in
-						windows.append (actor);
-						parents.append (actor.get_parent ());
+						windows.prepend (actor);
+						parents.prepend (actor.get_parent ());
 						clutter_actor_reparent (actor, static_windows);
 
-						actor.save_easing_state ();
+						actor.set_translation (-clone_offset_x, -clone_offset_y, 0);
+ 						actor.save_easing_state ();
 						actor.set_easing_duration (300);
 						actor.opacity = 0;
 						actor.restore_easing_state ();
@@ -1340,6 +1347,7 @@ namespace Gala
 				if (window.get_workspace () == workspace_from) {
 					windows.append (actor);
 					parents.append (actor.get_parent ());
+					actor.set_translation (-clone_offset_x, -clone_offset_y, 0);
 					clutter_actor_reparent (actor, out_group);
 
 					if (window.fullscreen)
@@ -1348,6 +1356,7 @@ namespace Gala
 				} else if (window.get_workspace () == workspace_to) {
 					windows.append (actor);
 					parents.append (actor.get_parent ());
+					actor.set_translation (-clone_offset_x, -clone_offset_y, 0);
 					clutter_actor_reparent (actor, in_group);
 
 					if (window.fullscreen)
@@ -1363,16 +1372,17 @@ namespace Gala
 			foreach (var window in docks) {
 				if (!to_has_fullscreened) {
 					var clone = new SafeWindowClone (window.get_meta_window ());
-					clone.x = window.x;
-					clone.y = window.y;
+					clone.x = window.x - clone_offset_x;
+					clone.y = window.y - clone_offset_y;
 
 					in_group.add_child (clone);
-					tmp_actors.append (clone);
+					tmp_actors.prepend (clone);
 				}
 
 				if (!from_has_fullscreened) {
-					windows.append (window);
-					parents.append (window.get_parent ());
+					windows.prepend (window);
+					parents.prepend (window.get_parent ());
+					window.set_translation (-clone_offset_x, -clone_offset_y, 0);
 
 					clutter_actor_reparent (window, out_group);
 				}
@@ -1380,7 +1390,7 @@ namespace Gala
 
 			main_container.clip_to_allocation = true;
 			main_container.x = move_primary_only ? monitor_geom.x : 0;
-			main_container.y = move_primary_only ? monitor_geom.x : 0;
+			main_container.y = move_primary_only ? monitor_geom.y : 0;
 			main_container.width = move_primary_only ? monitor_geom.width : screen_width;
 			main_container.height = move_primary_only ? monitor_geom.height : screen_height;
 
@@ -1411,10 +1421,10 @@ namespace Gala
 			wallpaper.set_easing_duration (animation_duration);
 
 			out_group.x = x2;
-			in_group.x = move_primary_only ? monitor_geom.x : 0;
+			in_group.x = 0;
 
 			wallpaper.x = x2;
-			wallpaper_clone.x = move_primary_only ? monitor_geom.x : 0;
+			wallpaper_clone.x = 0;
 			wallpaper.restore_easing_state ();
 
 			var transition = in_group.get_transition ("x");
@@ -1434,6 +1444,7 @@ namespace Gala
 
 			for (var i = 0; i < windows.length (); i++) {
 				var actor = windows.nth_data (i);
+				actor.set_translation (0, 0, 0);
 
 				// to maintain the correct order of monitor, we need to insert the Background
 				// back manually
