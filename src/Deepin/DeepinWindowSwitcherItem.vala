@@ -25,37 +25,117 @@ namespace Gala
 	 */
 	public class DeepinWindowSwitcherItemShape : Actor
 	{
-		static Gtk.StyleContext style_context;
+		public string style_class { get; construct; }
 
-		public DeepinWindowSwitcherItemShape ()
+		protected AnimationMode progress_mode = AnimationMode.EASE_IN_OUT_QUAD;
+
+		static Gdk.RGBA? bg_color_normal = null;
+		static Gdk.RGBA? bg_color_selected = null;
+		static int? border_radius = null;
+
+		Gdk.RGBA _bg_color;
+		Gdk.RGBA bg_color {
+			get {
+				return _bg_color;
+			}
+			set {
+				_bg_color = value;
+				content.invalidate ();
+			}
+		}
+
+		Timeline timeline;
+
+		bool _active = false;
+		public bool active {
+			get {
+				return _active;
+			}
+			set {
+				if (_active == value) {
+					return;
+				}
+
+				_active = value;
+
+				if (timeline.is_playing ()) {
+					timeline.pause ();
+				}
+
+				if (get_easing_duration () > 0) {
+					timeline.duration = get_easing_duration ();
+					timeline.progress_mode = get_easing_mode ();
+					timeline.direction = _active ? TimelineDirection.FORWARD: TimelineDirection.BACKWARD;
+					timeline.start ();
+				} else {
+					bg_color = _active ? bg_color_selected : bg_color_normal;
+				}
+			}
+		}
+
+		public DeepinWindowSwitcherItemShape (string style_class)
 		{
-			Object ();
+			Object (style_class: style_class);
 		}
 
 		construct
 		{
-			if (style_context == null) {
-				style_context = DeepinUtils.new_css_style_context ("deepin-window-switcher-item-shape-selected");
+			if (bg_color_normal == null) {
+				bg_color_normal = DeepinUtils.get_css_background_color (style_class);
+			}
+			if (bg_color_selected == null) {
+				bg_color_selected = DeepinUtils.get_css_background_color (style_class, Gtk.StateFlags.SELECTED);
+			}
+			if (border_radius == null) {
+				border_radius = DeepinUtils.get_css_border_radius (style_class);
 			}
 
+			timeline = new Timeline (200);
+			timeline.new_frame.connect (on_new_frame);
+
 			var canvas = new Canvas ();
-			canvas.draw.connect (on_draw);
+			canvas.draw.connect (on_draw_content);
 
 			content = canvas;
 			notify["allocation"].connect (() => canvas.set_size ((int) width, (int) height));
+
+			bg_color = bg_color_normal;
 		}
 
-		bool on_draw (Cairo.Context cr, int width, int height)
+		~DeepinWindowSwitcherItemShape ()
+		{
+			timeline.new_frame.disconnect (on_new_frame);
+			if (timeline.is_playing ()) {
+				timeline.stop ();
+			}
+		}
+
+		bool on_draw_content (Cairo.Context cr, int width, int height)
 		{
 			// clear the content
 			cr.set_operator (Cairo.Operator.CLEAR);
 			cr.paint ();
 			cr.set_operator (Cairo.Operator.OVER);
 
-			style_context.render_background (cr, 0, 0, width, height);
-			style_context.render_frame (cr, 0, 0, width, height);
+			cr.set_source_rgba (bg_color.red, bg_color.green, bg_color.blue, bg_color.alpha);
+			Granite.Drawing.Utilities.cairo_rounded_rectangle (cr, 0, 0, (int) width, (int) height, border_radius);
+			cr.fill ();
 
 			return false;
+		}
+
+		void on_new_frame (int msecs)
+		{
+			double percent = 1.0f;
+			if (timeline.duration != 0) {
+				percent = (double) msecs / (double) timeline.duration;
+			}
+			double red, green, blue, alpha;
+			red = bg_color_normal.red + (bg_color_selected.red - bg_color_normal.red) * percent;
+			green = bg_color_normal.green + (bg_color_selected.green - bg_color_normal.green) * percent;
+			blue = bg_color_normal.blue + (bg_color_selected.blue - bg_color_normal.blue) * percent;
+			alpha = bg_color_normal.alpha + (bg_color_selected.alpha - bg_color_normal.alpha) * percent;
+			bg_color = {red, green, blue, alpha};
 		}
 	}
 
@@ -80,43 +160,13 @@ namespace Gala
 
 		public Meta.Window window { get; construct; }
 
-		bool _active = false;
-		/**
-		 * When active fades a white border around the window in. Used for the visually
-		 * indicating the current window.
-		 */
-		public bool active {
-			get {
-				return _active;
-			}
-			set {
-				_active = value;
-
-				active_shape.save_easing_state ();
-				active_shape.set_easing_duration (280);
-				active_shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
-
-				if (_active) {
-					active_shape.opacity = 255;
-					active_shape.scale_x = 1.033;
-					active_shape.scale_y = 1.033;
-				} else {
-					active_shape.opacity = 76;
-					active_shape.scale_x = 1.0;
-					active_shape.scale_y = 1.0;
-				}
-
-				active_shape.restore_easing_state ();
-			}
-		}
-
 		uint shadow_update_timeout_id = 0;
 		bool enable_shadow = false;
 
 		Actor? clone_container = null; // container for clone to add shadow effect
 		Clone? clone = null;
 		GtkClutter.Texture window_icon;
-		Actor active_shape;
+		DeepinWindowSwitcherItemShape active_shape;
 
 		public DeepinWindowSwitcherItem (Meta.Window window)
 		{
@@ -135,7 +185,7 @@ namespace Gala
 			window_icon = new WindowIcon (window, ICON_PREFER_SIZE);
 			window_icon.set_pivot_point (0.5f, 0.5f);
 
-			active_shape = new DeepinWindowSwitcherItemShape ();
+			active_shape = new DeepinWindowSwitcherItemShape ("deepin-window-switcher-item");
 			active_shape.set_pivot_point (0.5f, 0.5f);
 
 			add_child (window_icon);
@@ -354,6 +404,29 @@ namespace Gala
 
 			if (enable_shadow) {
 				update_shadow_async (0, (int) clone_width, (int) clone_height);
+			}
+		}
+
+		public void set_active (bool value, bool animate = true)
+		{
+			if (animate) {
+				active_shape.save_easing_state ();
+				active_shape.set_easing_duration (280);
+				active_shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
+			}
+
+			active_shape.active = value;
+
+			if (value) {
+				active_shape.scale_x = 1.033;
+				active_shape.scale_y = 1.033;
+			} else {
+				active_shape.scale_x = 1.0;
+				active_shape.scale_y = 1.0;
+			}
+
+			if (animate) {
+				active_shape.restore_easing_state ();
 			}
 		}
 	}

@@ -39,6 +39,30 @@ namespace Gala
 			return style_context;
 		}
 
+		public static Gdk.RGBA get_css_background_color (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		{
+			var style_context = new_css_style_context (class_name);
+			var value = style_context.get_property (Gtk.STYLE_PROPERTY_BACKGROUND_COLOR, flags);
+			return (Gdk.RGBA) value;
+		}
+
+		public static int get_css_border_radius (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		{
+			var style_context = new_css_style_context (class_name);
+			var value = style_context.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS, flags);
+			return (int) value;
+		}
+
+		public static Clutter.Color convert_gdk_rgba_to_clutter_color (Gdk.RGBA rgba)
+		{
+			return {
+				(uint8) (rgba.red * 255),
+				(uint8) (rgba.green * 255),
+				(uint8) (rgba.blue * 255),
+				(uint8) (rgba.alpha * 255)
+			};
+		}
+
 		public static bool is_window_in_tab_list (Meta.Window window)
 		{
 			var workspace = window.get_screen ().get_active_workspace ();

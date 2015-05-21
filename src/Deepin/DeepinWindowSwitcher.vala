@@ -144,22 +144,12 @@ namespace Gala
 
 		void show_popup ()
 		{
-			// show popup window and enable animation for it
-			popup.save_easing_state ();
-			popup.set_easing_duration (250);
-			popup.set_easing_mode (AnimationMode.EASE_OUT_CUBIC);
 			popup.opacity = 255;
 		}
 
 		void hide_popup ()
 		{
-			if (popup.opacity == 0) {
-				return;
-			}
-
-			// hide popup window and disable animation for it
 			popup.opacity = 0;
-			popup.restore_easing_state ();
 		}
 
 		bool on_clicked_item (Clutter.ButtonEvent event) {
@@ -468,14 +458,19 @@ namespace Gala
 
 		void dim_items ()
 		{
+			// show animation only when popup window shown
+			bool animate = (popup.visible && popup.opacity != 0) ? true : false;
+
 			var window_opacity = (int) Math.floor (AppearanceSettings.get_default ().alt_tab_window_opacity * 255);
 
 			foreach (var actor in window_clones.get_children ()) {
 				unowned SafeWindowClone clone = (SafeWindowClone) actor;
 
-				actor.save_easing_state ();
-				actor.set_easing_duration (250);
-				actor.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+				if (animate) {
+					actor.save_easing_state ();
+					actor.set_easing_duration (250);
+					actor.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+				}
 
 				if (clone.window == current_item.window) {
 					window_clones.set_child_above_sibling (actor, null);
@@ -486,15 +481,17 @@ namespace Gala
 					actor.opacity = window_opacity;
 				}
 
-				actor.restore_easing_state ();
+				if (animate) {
+					actor.restore_easing_state ();
+				}
 			}
 
 			foreach (var actor in item_container.get_children ()) {
 				unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem) actor;
 				if (item == current_item) {
-					item.active = true;
+					item.set_active (true, animate);
 				} else {
-					item.active = false;
+					item.set_active (false, animate);
 				}
 			}
 		}

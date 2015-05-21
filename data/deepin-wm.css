@@ -20,7 +20,11 @@
     border-radius: 4px;
 }
 
-.deepin-window-switcher-item-shape-selected {
-    background: rgba(255,255,255,1.0);
+.deepin-window-switcher-item {
+    background: rgba(255,255,255,0.3);
     border-radius: 4px;
+}
+
+.deepin-window-switcher-item:selected {
+    background: rgba(1,189,255,1.0);
 }
