@@ -44,7 +44,10 @@ namespace Gala
 			}
 		}
 
-		Timeline timeline;
+		Gdk.RGBA _bg_color_from;
+		Gdk.RGBA _bg_color_to;
+
+		Timeline? timeline = null;
 
 		bool _active = false;
 		public bool active {
@@ -58,14 +61,21 @@ namespace Gala
 
 				_active = value;
 
-				if (timeline.is_playing ()) {
-					timeline.pause ();
+				if (timeline != null && timeline.is_playing ()) {
+					timeline.stop ();
 				}
-
 				if (get_easing_duration () > 0) {
-					timeline.duration = get_easing_duration ();
+					timeline = new Timeline (get_easing_duration ());
 					timeline.progress_mode = get_easing_mode ();
-					timeline.direction = _active ? TimelineDirection.FORWARD: TimelineDirection.BACKWARD;
+					timeline.new_frame.connect (on_new_frame);
+
+					if (value) {
+						_bg_color_from = bg_color;
+						_bg_color_to = bg_color_selected;
+					} else {
+						_bg_color_from = bg_color;
+						_bg_color_to = bg_color_normal;
+					}
 					timeline.start ();
 				} else {
 					bg_color = _active ? bg_color_selected : bg_color_normal;
@@ -90,9 +100,6 @@ namespace Gala
 				border_radius = DeepinUtils.get_css_border_radius (style_class);
 			}
 
-			timeline = new Timeline (200);
-			timeline.new_frame.connect (on_new_frame);
-
 			var canvas = new Canvas ();
 			canvas.draw.connect (on_draw_content);
 
@@ -104,9 +111,11 @@ namespace Gala
 
 		~DeepinWindowSwitcherItemShape ()
 		{
-			timeline.new_frame.disconnect (on_new_frame);
-			if (timeline.is_playing ()) {
-				timeline.stop ();
+			if (timeline != null) {
+				timeline.new_frame.disconnect (on_new_frame);
+				if (timeline.is_playing ()) {
+					timeline.stop ();
+				}
 			}
 		}
 
@@ -126,15 +135,14 @@ namespace Gala
 
 		void on_new_frame (int msecs)
 		{
-			double percent = 1.0f;
-			if (timeline.duration != 0) {
-				percent = (double) msecs / (double) timeline.duration;
-			}
+			double progress = timeline.get_progress ();
+			Gdk.RGBA from_color = _bg_color_from;
+			Gdk.RGBA to_color = _bg_color_to;
 			double red, green, blue, alpha;
-			red = bg_color_normal.red + (bg_color_selected.red - bg_color_normal.red) * percent;
-			green = bg_color_normal.green + (bg_color_selected.green - bg_color_normal.green) * percent;
-			blue = bg_color_normal.blue + (bg_color_selected.blue - bg_color_normal.blue) * percent;
-			alpha = bg_color_normal.alpha + (bg_color_selected.alpha - bg_color_normal.alpha) * percent;
+			red = from_color.red + (to_color.red - from_color.red) * progress;
+			green = from_color.green + (to_color.green - from_color.green) * progress;
+			blue = from_color.blue + (to_color.blue - from_color.blue) * progress;
+			alpha = from_color.alpha + (to_color.alpha - from_color.alpha) * progress;
 			bg_color = {red, green, blue, alpha};
 		}
 	}
