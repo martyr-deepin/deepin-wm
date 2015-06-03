@@ -230,8 +230,10 @@ namespace Gala
 		{
 			if (window.window_type != WindowType.NORMAL
 				|| window.get_workspace () != workspace
-				|| window.on_all_workspaces
-				|| window.get_monitor () != window.get_screen ().get_primary_monitor ())
+				|| window.on_all_workspaces)
+				// FIXME: window.get_monitor may cause window manager panic here,
+				//        could be reproducted in deepin-music's mini mode
+				// || window.get_monitor () != window.get_screen ().get_primary_monitor ())
 				return;
 
 			foreach (var child in window_container.get_children ())
