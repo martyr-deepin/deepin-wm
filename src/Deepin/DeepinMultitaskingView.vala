@@ -22,14 +22,14 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * The central class for the DeepinMultitaskingView which takes
-	 * care of preparing the wm, opening the components and holds
-	 * containers for the DeepinWorkspaceThumbs, the
-	 * DeepinWorkspaceClones and the MonitorClones.
+	 * The central class for the DeepinMultitaskingView which takes care of
+	 * preparing the wm, opening the components and holds containers for
+	 * the icon groups, the WorkspaceClones and the MonitorClones.
 	 */
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
-		const int HIDING_DURATION = 300;
+		public const int ANIMATION_DURATION = 250;
+		public const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 		const int SMOOTH_SCROLL_DELAY = 500;
 
 		public WindowManager wm { get; construct; }
@@ -45,6 +45,7 @@ namespace Gala
 
 		DeepinWorkspaceThumbContainer thumb_container;
 		Actor workspaces;
+		Actor dock_clones;
 
 		public DeepinMultitaskingView (WindowManager wm)
 		{
@@ -64,14 +65,16 @@ namespace Gala
 			workspaces.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 
 			thumb_container = new DeepinWorkspaceThumbContainer (screen);
-			thumb_container.request_reposition.connect (() => reposition_thumb_clones (true));
+			thumb_container.request_reposition.connect (() => reposition_thumb_container (true));
+
+			dock_clones = new Actor ();
 
 			add_child (thumb_container);
 			add_child (workspaces);
+			add_child (dock_clones);
 
-			foreach (var workspace in screen.get_workspaces ()) {
+			foreach (var workspace in screen.get_workspaces ())
 				add_workspace (workspace.index ());
-			}
 
 			screen.workspace_added.connect (add_workspace);
 			screen.workspace_removed.connect (remove_workspace);
@@ -90,9 +93,8 @@ namespace Gala
 				}
 
 				if (Prefs.get_dynamic_workspaces () ||
-					(pref != Preference.DYNAMIC_WORKSPACES && pref != Preference.NUM_WORKSPACES)) {
+					(pref != Preference.DYNAMIC_WORKSPACES && pref != Preference.NUM_WORKSPACES))
 					return;
-				}
 
 				Idle.add (() => {
 					unowned List<Workspace> existing_workspaces = screen.get_workspaces ();
@@ -118,22 +120,20 @@ namespace Gala
 		}
 
 		/**
-		 * Places the primary container for the DeepinWorkspaceClones and the
+		 * Places the primary container for the WorkspaceClones and the
 		 * MonitorClones at the right positions
 		 */
 		void update_monitors ()
 		{
-			foreach (var monitor_clone in window_containers_monitors) {
+			foreach (var monitor_clone in window_containers_monitors)
 				monitor_clone.destroy ();
-			}
 
 			var primary = screen.get_primary_monitor ();
 
 			if (InternalUtils.workspaces_only_on_primary ()) {
 				for (var monitor = 0; monitor < screen.get_n_monitors (); monitor++) {
-					if (monitor == primary) {
+					if (monitor == primary)
 						continue;
-					}
 
 					var monitor_clone = new MonitorClone (screen, monitor);
 					monitor_clone.window_selected.connect (window_selected);
@@ -156,9 +156,8 @@ namespace Gala
 		 */
 		public override void key_focus_out ()
 		{
-			if (opened && !contains (get_stage ().key_focus)) {
+			if (opened && !contains (get_stage ().key_focus))
 				toggle ();
-			}
 		}
 
 		/**
@@ -166,9 +165,8 @@ namespace Gala
 		 */
 		public override bool scroll_event (ScrollEvent scroll_event)
 		{
-			if (scroll_event.direction != ScrollDirection.SMOOTH) {
+			if (scroll_event.direction != ScrollDirection.SMOOTH)
 				return false;
-			}
 
 			double dx, dy;
 			var event = (Event*)(&scroll_event);
@@ -185,37 +183,34 @@ namespace Gala
 				// actual smooth scroll
 				var choice = Math.fabs (dx) > Math.fabs (dy) ? dx : dy;
 
-				if (choice > 0.3) {
+				if (choice > 0.3)
 					direction = MotionDirection.RIGHT;
-				} else if (choice < -0.3) {
+				else if (choice < -0.3)
 					direction = MotionDirection.LEFT;
-				} else {
+				else
 					return false;
-				}
 
 				is_smooth_scrolling = true;
 				Timeout.add (SMOOTH_SCROLL_DELAY, () => {
 					is_smooth_scrolling = false;
 					return false;
 				});
-			} else {
+			} else
 				// smooth scroll delay still active
 				return false;
-			}
 
 			var active_workspace = screen.get_active_workspace ();
 			var new_workspace = active_workspace.get_neighbor (direction);
 
-			if (active_workspace != new_workspace) {
+			if (active_workspace != new_workspace)
 				new_workspace.activate (screen.get_display ().get_current_time ());
-			}
 
 			return false;
 		}
 
 		/**
-		 * Places the DeepinWorkspaceClones, moves the view so that the active one is shown
-		 * and does the same for the DeepinWorkspaceThumbs.
+		 * Places the WorkspaceClones, moves the view so that the active one is shown
+		 * and does the same for the IconGroups.
 		 *
 		 * @param animate Whether to animate the movement or have all elements take their
 		 *                positions immediately.
@@ -228,7 +223,7 @@ namespace Gala
 			foreach (var child in workspaces.get_children ()) {
 				unowned DeepinWorkspaceClone workspace_clone = (DeepinWorkspaceClone) child;
 				var index = workspace_clone.workspace.index ();
-				// TODO
+				// TODO:
 				// var dest_x = index * (workspace_clone.width - 150);
 				var dest_x = index * (workspace_clone.width - 220);
 
@@ -239,17 +234,20 @@ namespace Gala
 					workspace_clone.active = false;
 				}
 
+				workspace_clone.save_easing_state ();
 				workspace_clone.set_easing_duration (animate ? 200 : 0);
 				workspace_clone.x = dest_x;
+				workspace_clone.restore_easing_state ();
 			}
 
-			workspaces.set_easing_duration (animate ? 300 : 0);
+			workspaces.set_easing_duration (animate ?
+				AnimationSettings.get_default ().workspace_switch_duration : 0);
 			workspaces.x = -active_x;
 
-			reposition_thumb_clones (animate);
+			reposition_thumb_container (animate);
 		}
 
-		void reposition_thumb_clones (bool animate)
+		void reposition_thumb_container (bool animate)
 		{
 			var active_index = screen.get_active_workspace ().index ();
 
@@ -263,14 +261,13 @@ namespace Gala
 			var thumb_container_width = thumb_container.calculate_total_width ();
 			if (thumb_container_width > width) {
 				thumb_container.x = (-active_index * (DeepinWorkspaceThumbContainer.SPACING + DeepinWorkspaceThumb.SIZE) + width / 2)
-					.clamp (width - thumb_container_width - 64, 64);
+				.clamp (width - thumb_container_width - 64, 64);
 			} else {
 				thumb_container.x = width / 2 - thumb_container_width / 2;
 			}
 
-			if (animate) {
+			if (animate)
 				thumb_container.restore_easing_state ();
-			}
 		}
 
 		void add_workspace (int num)
@@ -284,9 +281,8 @@ namespace Gala
 
 			update_positions (opened);
 
-			if (opened) {
+			if (opened)
 				workspace.open ();
-			}
 		}
 
 		void remove_workspace (int num)
@@ -304,9 +300,8 @@ namespace Gala
 				}
 			}
 
-			if (workspace == null) {
+			if (workspace == null)
 				return;
-			}
 
 			workspace.window_selected.disconnect (window_selected);
 			workspace.selected.disconnect (activate_workspace);
@@ -332,9 +327,8 @@ namespace Gala
 
 			clone.workspace.activate (screen.get_display ().get_current_time ());
 
-			if (close_view) {
+			if (close_view)
 				toggle ();
-			}
 		}
 
 		/**
@@ -345,10 +339,8 @@ namespace Gala
 		{
 			switch (event.keyval) {
 				case Clutter.Key.Escape:
-					if (opened) {
-						// TODO: reset windowclone active state
+					if (opened)
 						toggle ();
-					}
 					break;
 				case Clutter.Key.Down:
 					select_window (MotionDirection.DOWN);
@@ -404,9 +396,9 @@ namespace Gala
 			var time = screen.get_display ().get_current_time ();
 			var workspace = window.get_workspace ();
 
-			if (workspace != screen.get_active_workspace ()) {
+			if (workspace != screen.get_active_workspace ())
 				workspace.activate (time);
-			} else {
+			else {
 				window.activate (time);
 				toggle ();
 			}
@@ -425,9 +417,8 @@ namespace Gala
 		 */
 		public void open (HashTable<string,Variant>? hints = null)
 		{
-			if (opened) {
+			if (opened)
 				return;
-			}
 
 			toggle ();
 		}
@@ -437,9 +428,8 @@ namespace Gala
 		 */
 		public void close ()
 		{
-			if (!opened) {
+			if (!opened)
 				return;
-			}
 
 			toggle ();
 		}
@@ -451,9 +441,8 @@ namespace Gala
 		 */
 		void toggle ()
 		{
-			if (animating) {
+			if (animating)
 				return;
-			}
 
 			animating = true;
 
@@ -464,9 +453,8 @@ namespace Gala
 				if (opening) {
 					container.visible = true;
 					container.open ();
-				} else {
+				} else
 					container.close ();
-				}
 			}
 
 			if (opening) {
@@ -496,23 +484,51 @@ namespace Gala
 					break;
 				}
 			}
-			if (active_workspace != null) {
+			if (active_workspace != null)
 				workspaces.set_child_above_sibling (active_workspace, null);
+
+			workspaces.remove_all_transitions ();
+			foreach (var child in workspaces.get_children ()) {
+				child.remove_all_transitions ();
 			}
 
 			update_positions (false);
 
 			foreach (var child in workspaces.get_children ()) {
 				unowned DeepinWorkspaceClone workspace = (DeepinWorkspaceClone) child;
-				if (opening) {
+				if (opening)
 					workspace.open ();
-				} else {
+				else
 					workspace.close ();
+			}
+
+			if (opening) {
+				unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
+
+				foreach (var actor in actors) {
+					const int MAX_OFFSET = 100;
+
+					var window = actor.get_meta_window ();
+
+					if (window.window_type != WindowType.DOCK)
+						continue;
+
+					var clone = new SafeWindowClone (window, true);
+					clone.opacity = 0;
+					dock_clones.add_child (clone);
+				}
+			} else {
+				foreach (var child in dock_clones.get_children ()) {
+					var dock = (Clone) child;
+
+					dock.set_easing_duration (ANIMATION_DURATION);
+					dock.set_easing_mode (ANIMATION_MODE);
+					dock.opacity = 255;
 				}
 			}
 
 			if (!opening) {
-				Timeout.add (290, () => {
+				Timeout.add (ANIMATION_DURATION, () => {
 					foreach (var container in window_containers_monitors) {
 						container.visible = false;
 					}
@@ -523,6 +539,8 @@ namespace Gala
 					wm.window_group.show ();
 					wm.top_window_group.show ();
 
+					dock_clones.destroy_all_children ();
+
 					wm.pop_modal (modal_proxy);
 
 					animating = false;
@@ -530,7 +548,7 @@ namespace Gala
 					return false;
 				});
 			} else {
-				Timeout.add (200, () => {
+				Timeout.add (ANIMATION_DURATION, () => {
 					animating = false;
 					return false;
 				});
@@ -545,7 +563,6 @@ namespace Gala
 				return false;
 			}
 
-			// TODO:
 			var action = Prefs.get_keybinding_action (name);
 			switch (action) {
 			case KeyBindingAction.WORKSPACE_1:

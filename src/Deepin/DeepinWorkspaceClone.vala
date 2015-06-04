@@ -281,8 +281,6 @@ namespace Gala
 				window_container.padding_right = (int)(monitor.width - monitor.width * scale) / 2;
 			window_container.padding_bottom = BOTTOM_OFFSET;
 
-			workspace_thumb.redraw (); // TODO
-
 			window_container.open (screen.get_active_workspace () == workspace ? display.get_focus_window () : null);
 		}
 

@@ -91,10 +91,10 @@ namespace Gala
 		construct
 		{
 			if (bg_color_normal == null) {
-				bg_color_normal = DeepinUtils.get_css_background_color (style_class);
+				bg_color_normal = DeepinUtils.get_css_background_gdk_rgba (style_class);
 			}
 			if (bg_color_selected == null) {
-				bg_color_selected = DeepinUtils.get_css_background_color (style_class, Gtk.StateFlags.SELECTED);
+				bg_color_selected = DeepinUtils.get_css_background_gdk_rgba (style_class, Gtk.StateFlags.SELECTED);
 			}
 			if (border_radius == null) {
 				border_radius = DeepinUtils.get_css_border_radius (style_class);

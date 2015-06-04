@@ -74,10 +74,9 @@ namespace Gala
 
 				active_shape.restore_easing_state ();
 
-				// TODO
-				// increase window clone size
-				save_easing_state ();
-				set_easing_duration (200);
+				// TODO increase window clone size
+				// save_easing_state ();
+				// set_easing_duration (200);
 
 				// if (width_orig == 0) {
 				// 	width_orig = width;
@@ -91,10 +90,10 @@ namespace Gala
 				// width = _active ? width_active : width_orig;
 				// height = _active ? height_active : height_orig;
 
-				scale_x = _active ? 1.1 : 1.0;
-				scale_y = _active ? 1.1 : 1.0;
+				// scale_x = _active ? 1.1 : 1.0;
+				// scale_y = _active ? 1.1 : 1.0;
 
-				restore_easing_state ();
+				// restore_easing_state ();
 			}
 		}
 
@@ -164,6 +163,7 @@ namespace Gala
 			window_icon.opacity = 0;
 			window_icon.set_pivot_point (0.5f, 0.5f);
 
+			// TODO:
 			active_shape = new DeepinCssStaticActor ("deepin-window-clone", Gtk.StateFlags.SELECTED);
 			active_shape.opacity = 0;
 

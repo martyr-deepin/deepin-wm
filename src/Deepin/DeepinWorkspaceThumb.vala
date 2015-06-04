@@ -47,15 +47,16 @@ namespace Gala
 		// TODO: remove
 		// static Gtk.StyleContext? style_context = null;
 
+		Actor active_shape;
+		Actor close_button;
+
+		// TODO: use workspace_clone instead
+		Actor window_container;
 #if HAS_MUTTER314
 		BackgroundManager background;
 #else
 		Background background;
 #endif
-
-		Actor active_shape;
-		Actor close_button;
-		Actor window_container;
 
 		uint show_close_button_timeout = 0;
 
@@ -123,13 +124,11 @@ namespace Gala
 			var close_click = new ClickAction ();
 			close_click.clicked.connect (close);
 			close_button.add_action (close_click);
-
-			window_container.actor_removed.connect_after (redraw);
 		}
 
 		~DeepinWorkspaceThumb ()
 		{
-			window_container.actor_removed.disconnect (redraw);
+			background.destroy ();
 		}
 
 		public override bool enter_event (CrossingEvent event)
@@ -160,6 +159,7 @@ namespace Gala
 			}
 		}
 
+		// TODO:
 		/**
 		 * Requests toggling the close button. If show is true, a timeout will be set after which
 		 * the close button is shown, if false, the close button is hidden and the timeout is removed,
@@ -210,6 +210,7 @@ namespace Gala
 			window_container.destroy_all_children ();
 		}
 
+		// TODO: remove argument need_redraw
 		/**
 		 * Creates a Clone for the given window and adds it to the group
 		 *
@@ -234,10 +235,6 @@ namespace Gala
 			new_window.restore_easing_state ();
 
 			window_container.add_child (new_window);
-
-			if (need_redraw) {
-				redraw ();
-			}
 		}
 
 		/**
@@ -273,15 +270,7 @@ namespace Gala
 			}
 		}
 
-		// TODO:
-		/**
-		 * Trigger a redraw
-		 */
-		public void redraw ()
-		{
-			content.invalidate ();
-		}
-
+		// TODO: close workspace action
 		/**
 		 * Close handler. We close the workspace by deleting all the windows on it.
 		 * That way the workspace won't be deleted if windows decide to ignore the
