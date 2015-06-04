@@ -503,12 +503,8 @@ namespace Gala
 					const int MAX_OFFSET = 100;
 
 					var window = actor.get_meta_window ();
-					var monitor = window.get_monitor ();
 
 					if (window.window_type != WindowType.DOCK)
-						continue;
-
-					if (screen.get_monitor_in_fullscreen (monitor))
 						continue;
 
 					var clone = new SafeWindowClone (window, true);
