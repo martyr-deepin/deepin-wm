@@ -21,7 +21,7 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * The actor that support rendering background with animation by css styles.
+	 * Rendering background with animation support to actor through css styles.
 	 */
 	public class DeepinCssActor : Actor
 	{

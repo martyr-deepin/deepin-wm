@@ -48,6 +48,7 @@
 }
 
 .deepin-window-clone:selected {
+    background: rgba(0,0,0,0.0); /*reset background*/
     border: 5px solid rgba(1,189,255,1.0);
     border-radius: 5px;
 }

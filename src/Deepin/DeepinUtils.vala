@@ -20,13 +20,25 @@ namespace Gala
 	public class DeepinUtils
 	{
 		const string deepin_wm_css_file = Config.PKGDATADIR + "/deepin-wm.css";
+		static Gtk.CssProvider default_css_provider;
+
+		public static Gtk.CssProvider get_default_css_provider ()
+		{
+			if (default_css_provider != null) {
+				return default_css_provider;
+			}
+
+			default_css_provider = new Gtk.CssProvider ();
+			try {
+				default_css_provider.load_from_path (deepin_wm_css_file);
+			} catch (Error e) {warning (e.message);}
+
+			return default_css_provider;
+		}
 
 		public static Gtk.StyleContext new_css_style_context (string class_name)
 		{
-			var css_provider = new Gtk.CssProvider ();
-			try {
-				css_provider.load_from_path (deepin_wm_css_file);
-			} catch (Error e) {warning (e.message);}
+			var css_provider = get_default_css_provider ();
 
 			var style_path = new Gtk.WidgetPath ();
 			style_path.append_type (typeof (Gtk.Window));

@@ -21,13 +21,13 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * The actor that rendering background by css styles.
+	 * Rendering background to actor through cssz styles.
 	 */
 	public class DeepinCssStaticActor : Actor
 	{
 		public string style_class { get; construct; }
 		public Gtk.StateFlags state { get; construct; }
-		
+
 		Gtk.StyleContext? style_context;
 
 		public DeepinCssStaticActor (string style_class, Gtk.StateFlags state = Gtk.StateFlags.NORMAL)
@@ -40,7 +40,7 @@ namespace Gala
 			if (style_context == null) {
 				style_context = DeepinUtils.new_css_style_context (style_class);
 			}
-			
+
 			var canvas = new Canvas ();
 			canvas.draw.connect (on_draw_content);
 
