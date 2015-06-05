@@ -29,10 +29,6 @@ namespace Gala
 	{
 		const int WINDOW_ICON_SIZE = 64;
 
-		// TODO:
-		public bool show_shadow { get; construct; }
-		public bool show_icon { get; construct; }
-
 		/**
 		 * The window was selected. The MultitaskingView should consider activating
 		 * the window and closing the view.
@@ -97,6 +93,8 @@ namespace Gala
 			}
 		}
 
+		public bool enable_shadow { get; construct; }
+		public bool enable_icon { get; construct; }
 		public bool overview_mode { get; construct; }
 
 		DragDropAction? drag_action = null;
@@ -119,9 +117,9 @@ namespace Gala
 		// float width_active = 0f;
 		// float height_active = 0f;
 
-		public DeepinWindowClone (Meta.Window window, bool show_shadow = true, bool show_icon = true, bool overview_mode = false)
+		public DeepinWindowClone (Meta.Window window, bool enable_shadow = true, bool enable_icon = true, bool overview_mode = false)
 		{
-			Object (window: window, show_shadow: show_shadow, show_icon: show_icon, overview_mode: overview_mode);
+			Object (window: window, enable_shadow: enable_shadow, enable_icon: enable_icon, overview_mode: overview_mode);
 		}
 
 		construct
@@ -182,13 +180,15 @@ namespace Gala
 			if (shadow_update_timeout != 0)
 				Source.remove (shadow_update_timeout);
 
+			if (enable_shadow) {
 #if HAS_MUTTER312
-			window.size_changed.disconnect (update_shadow_size);
+				window.size_changed.disconnect (update_shadow_size);
 #else
-			var actor = window.get_compositor_private () as WindowActor;
-			if (actor != null)
-				actor.size_changed.disconnect (update_shadow_size);
+				var actor = window.get_compositor_private () as WindowActor;
+				if (actor != null)
+					actor.size_changed.disconnect (update_shadow_size);
 #endif
+			}
 		}
 
 		/**
@@ -226,17 +226,19 @@ namespace Gala
 
 			transition_to_original_state (false);
 
+			if (enable_shadow) {
 #if HAS_MUTTER312
-			var outer_rect = window.get_frame_rect ();
+				var outer_rect = window.get_frame_rect ();
 #else
-			var outer_rect = window.get_outer_rect ();
+				var outer_rect = window.get_outer_rect ();
 #endif
-			add_effect_with_name ("shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5));
+				add_effect_with_name ("shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5));
 #if HAS_MUTTER312
-			window.size_changed.connect (update_shadow_size);
+				window.size_changed.connect (update_shadow_size);
 #else
-			actor.size_changed.connect (update_shadow_size);
+				actor.size_changed.connect (update_shadow_size);
 #endif
+			}
 
 			if (should_fade ())
 				opacity = 0;
@@ -261,7 +263,7 @@ namespace Gala
 		bool should_fade ()
 		{
 			return overview_mode
-				&& window.get_workspace () != window.get_screen ().get_active_workspace ();
+			&& window.get_workspace () != window.get_screen ().get_active_workspace ();
 		}
 
 		/**
@@ -403,7 +405,9 @@ namespace Gala
 			var scale_factor = (float)width / outer_rect.width;
 
 			var shadow_effect = get_effect ("shadow") as ShadowEffect;
-			shadow_effect.scale_factor = scale_factor;
+			if (shadow_effect != null) {
+				shadow_effect.scale_factor = scale_factor;
+			}
 
 			var alloc = ActorBox ();
 			alloc.set_origin ((input_rect.x - outer_rect.x) * scale_factor,

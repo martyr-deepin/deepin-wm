@@ -52,11 +52,7 @@ namespace Gala
 
 		// TODO: use workspace_clone instead
 		Actor window_container;
-#if HAS_MUTTER314
-		BackgroundManager background;
-#else
-		Background background;
-#endif
+		Actor background;
 
 		uint show_close_button_timeout = 0;
 
@@ -78,7 +74,7 @@ namespace Gala
 			add_child (active_shape);
 
 			// background
-			background = new DeepinFramedBackground (workspace.get_screen ());
+			background = new DeepinFramedBackground (workspace.get_screen (), false);
 			// background.reactive = true;// TODO:
 			// background.button_press_event.connect (() => {
 			// 	selected (true);
