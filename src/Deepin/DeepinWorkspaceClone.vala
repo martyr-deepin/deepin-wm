@@ -200,7 +200,7 @@ namespace Gala
 				return;
 
 			foreach (var child in window_container.get_children ())
-				if (((WindowClone) child).window == window)
+				if (((DeepinWindowClone) child).window == window)
 					return;
 
 			window_container.add_window (window);
