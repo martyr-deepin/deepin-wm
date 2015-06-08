@@ -22,10 +22,13 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * Container which controls the layout of a set of WindowClones.
+	 * Container which controls the layout of a set of
+	 * WindowClones. The WindowClones will be placed in rows and
+	 * columns.
 	 */
-	public class DeepinWindowCloneContainer : Actor
+	public class DeepinWindowCloneFlowContainer : Actor
 	{
+		public signal void window_activated (Window window);
 		public signal void window_selected (Window window);
 
 		public int padding_top { get; set; default = 12; }
@@ -43,7 +46,7 @@ namespace Gala
 		 */
 		DeepinWindowClone? current_window;
 
-		public DeepinWindowCloneContainer (bool overview_mode = false)
+		public DeepinWindowCloneFlowContainer (bool overview_mode = false)
 		{
 			Object (overview_mode: overview_mode);
 		}
@@ -76,8 +79,8 @@ namespace Gala
 
 			var new_window = new DeepinWindowClone (window, overview_mode);
 
-			new_window.selected.connect (window_selected_cb);
-			new_window.destroy.connect (window_destroyed);
+			new_window.activated.connect (on_window_activated);
+			new_window.destroy.connect (on_window_destroyed);
 			new_window.request_reposition.connect (reflow);
 
 			var added = false;
@@ -121,21 +124,22 @@ namespace Gala
 			reflow ();
 		}
 
-		void window_selected_cb (DeepinWindowClone tiled)
+		void on_window_activated (DeepinWindowClone clone)
 		{
 			// TODO: restore active state before selecting
-			tiled.active = false;
-			window_selected (tiled.window);
+			clone.active = false;
+			window_activated (clone.window);
 		}
 
-		void window_destroyed (Actor actor)
+		void on_window_destroyed (Actor actor)
 		{
 			var window = actor as DeepinWindowClone;
 			if (window == null)
 				return;
 
-			window.destroy.disconnect (window_destroyed);
-			window.selected.disconnect (window_selected_cb);
+			window.destroy.disconnect (on_window_destroyed);
+			window.activated.disconnect (on_window_activated);
+			window.request_reposition.disconnect (reflow);
 
 			Idle.add (() => {
 				reflow ();
@@ -235,6 +239,7 @@ namespace Gala
 
 			if (current_window == null) {
 				current_window = (DeepinWindowClone) get_child_at_index (0);
+				window_selected (current_window.window);
 				return;
 			}
 
@@ -303,14 +308,17 @@ namespace Gala
 				}
 			}
 
-			if (closest == null)
+			if (closest == null) {
 				return;
+			}
 
-			if (current_window != null)
+			if (current_window != null) {
 				current_window.active = false;
+			}
 
-			closest.active = true;
 			current_window = closest;
+			current_window.active = true;
+			window_selected (current_window.window);
 		}
 
 		/**
@@ -319,11 +327,11 @@ namespace Gala
 		public void activate_selected_window ()
 		{
 			if (current_window != null)
-				current_window.selected ();
+				current_window.activated ();
 		}
 
 		/**
-		 * When opened the WindowClones are animated to a tiled layout
+		 * When opened the WindowClones are animated to a clone layout
 		 */
 		public void open (Window? selected_window = null)
 		{

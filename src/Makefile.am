@@ -50,13 +50,14 @@ gala_VALASOURCES = \
 	Deepin/DeepinMultitaskingView.vala \
 	Deepin/DeepinUtils.vala \
 	Deepin/DeepinWindowClone.vala \
-	Deepin/DeepinWindowCloneContainer.vala \
+	Deepin/DeepinWindowCloneFlowContainer.vala \
+	Deepin/DeepinWindowCloneThumbContainer.vala \
 	Deepin/DeepinWindowSwitcher.vala \
 	Deepin/DeepinWindowSwitcherItem.vala \
 	Deepin/DeepinWindowSwitcherLayout.vala \
-	Deepin/DeepinWorkspaceClone.vala \
-	Deepin/DeepinWorkspaceThumb.vala \
-	Deepin/DeepinWorkspaceThumbContainer.vala \
+	Deepin/DeepinWorkspaceFlowClone.vala \
+	Deepin/DeepinWorkspaceThumbClone.vala \
+	Deepin/DeepinWorkspaceThumbCloneContainer.vala \
 	Widgets/IconGroup.vala \
 	Widgets/IconGroupContainer.vala \
 	Widgets/MonitorClone.vala \

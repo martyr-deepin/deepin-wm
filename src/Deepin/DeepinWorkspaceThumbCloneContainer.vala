@@ -22,11 +22,11 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * This class contains the DeepinWorkspaceThumb at the top
+	 * This class contains the DeepinWorkspaceThumbClone at the top
 	 * and will take care of displaying actors for inserting windows
 	 * between the groups once implemented.
 	 */
-	public class DeepinWorkspaceThumbContainer : Actor
+	public class DeepinWorkspaceThumbCloneContainer : Actor
 	{
 		public static const int SPACING = 48;
 		// TODO:
@@ -37,14 +37,14 @@ namespace Gala
 
 		public Screen screen { get; construct; }
 
-		public DeepinWorkspaceThumbContainer (Screen screen)
+		public DeepinWorkspaceThumbCloneContainer (Screen screen)
 		{
 			Object (screen: screen);
 
 			layout_manager = new BoxLayout ();
 		}
 
-		public void add_thumb (DeepinWorkspaceThumb group)
+		public void add_thumb (DeepinWorkspaceThumbClone group)
 		{
 			var index = group.workspace.index ();
 
@@ -57,7 +57,7 @@ namespace Gala
 			update_inserter_indices ();
 		}
 
-		public void remove_thumb (DeepinWorkspaceThumb group)
+		public void remove_thumb (DeepinWorkspaceThumbClone group)
 		{
 			var thumb = (WorkspaceInsertThumb) group.get_previous_sibling ();
 			thumb.notify["expanded"].disconnect (expanded_changed);

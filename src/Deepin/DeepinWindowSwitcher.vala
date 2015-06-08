@@ -468,11 +468,9 @@ namespace Gala
 			foreach (var actor in window_clones.get_children ()) {
 				unowned SafeWindowClone clone = (SafeWindowClone) actor;
 
-				if (animate) {
-					actor.save_easing_state ();
-					actor.set_easing_duration (250);
-					actor.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-				}
+				actor.save_easing_state ();
+				actor.set_easing_duration (animate ? 250 : 0);
+				actor.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 
 				if (clone.window == current_item.window) {
 					window_clones.set_child_above_sibling (actor, null);
@@ -483,9 +481,7 @@ namespace Gala
 					actor.opacity = window_opacity;
 				}
 
-				if (animate) {
-					actor.restore_easing_state ();
-				}
+				actor.restore_easing_state ();
 			}
 
 			foreach (var actor in item_container.get_children ()) {

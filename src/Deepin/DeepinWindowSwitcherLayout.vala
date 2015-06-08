@@ -118,7 +118,7 @@ namespace Gala
 		 * Place items in one row if their prefer size could be put
 		 * down, or the items will be wrap to 2 lines. If still can
 		 * not be put down, just descrease the item's size. At the
-		 * same time, each row must own at least 4 items, or descrease
+		 * same time, each row must own at least 7 items, or descrease
 		 * the item's size again.
 		 */
 		public override void allocate (Clutter.Container container, Clutter.ActorBox box, Clutter.AllocationFlags flags) {

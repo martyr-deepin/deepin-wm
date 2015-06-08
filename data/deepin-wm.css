@@ -33,17 +33,17 @@
     background: rgba(1,189,255,1.0);
 }
 
-.deepin-workspace-thumb:selected {
+.deepin-workspace-thumb-clone:selected {
     background: rgba(1,189,255,1.0);
     border-radius: 5px;
 }
 
-.deepin-workspace-thumb-title {
+.deepin-workspace-thumb-clone-title {
     background: rgba(255,255,255,0.6);
     border-radius: 4px;
 }
 
-.deepin-workspace-thumb-title:selected {
+.deepin-workspace-thumb-clone-title:selected {
     background: rgba(1,189,255,1.0);
 }
 

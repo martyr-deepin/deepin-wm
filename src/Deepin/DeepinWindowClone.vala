@@ -30,10 +30,11 @@ namespace Gala
 		const int WINDOW_ICON_SIZE = 64;
 
 		/**
-		 * The window was selected. The MultitaskingView should consider activating
-		 * the window and closing the view.
+		 * The window was activated by clicking or pressing enter. The
+		 * MultitaskingView should consider activating the window and
+		 * closing the view.
 		 */
-		public signal void selected ();
+		public signal void activated ();
 
 		/**
 		 * The window was moved or resized and a relayout of the tiling layout may
@@ -93,13 +94,17 @@ namespace Gala
 			}
 		}
 
-		public bool enable_shadow { get; construct; }
-		public bool enable_icon { get; construct; }
-		public bool overview_mode { get; construct; }
+		// for thumbnail mode, shadow, icon and close button will be disabed
+		public bool thumbnail_mode { get; construct; }
+
+		public bool enable_shadow = true;
+		public bool enable_icon = true;
+		public bool enable_close_button = true;
 
 		DragDropAction? drag_action = null;
 		Clone? clone = null;
 
+		// shape size could be override in css
 		int active_shape_size = 5;
 
 		Actor prev_parent = null;
@@ -107,9 +112,9 @@ namespace Gala
 		ulong check_confirm_dialog_cb = 0;
 		uint shadow_update_timeout = 0;
 
-		Actor close_button;
 		Actor active_shape;
-		GtkClutter.Texture window_icon;
+		Actor? close_button = null;
+		GtkClutter.Texture? window_icon = null;
 
 		// TODO: remove
 		// float width_orig = 0f;
@@ -117,57 +122,62 @@ namespace Gala
 		// float width_active = 0f;
 		// float height_active = 0f;
 
-		public DeepinWindowClone (Meta.Window window, bool enable_shadow = true, bool enable_icon = true, bool overview_mode = false)
+		public DeepinWindowClone (Meta.Window window, bool thumbnail_mode = false)
 		{
-			Object (window: window, enable_shadow: enable_shadow, enable_icon: enable_icon, overview_mode: overview_mode);
+			Object (window: window, thumbnail_mode: thumbnail_mode);
 		}
 
 		construct
 		{
+			if (thumbnail_mode) {
+				enable_shadow = false;
+				enable_icon = false;
+				enable_close_button = false;
+			} else {
+				enable_shadow = true;
+				enable_icon = true;
+				enable_close_button = true;
+			}
+
 			reactive = true;
 			active_shape_size = DeepinUtils.get_css_border_radius ("deepin-window-clone", Gtk.StateFlags.SELECTED);
 
 			window.unmanaged.connect (unmanaged);
 			window.notify["on-all-workspaces"].connect (on_all_workspaces_changed);
+#if HAS_MUTTER312
+			window.position_changed.connect (() => request_reposition ());
+#endif
 
-			// TODO:
-			if (overview_mode) {
-				var click_action = new ClickAction ();
-				click_action.clicked.connect (() => {
-					actor_clicked (click_action.get_button ());
+			drag_action = new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
+			drag_action.drag_begin.connect (drag_begin);
+			drag_action.destination_crossed.connect (drag_destination_crossed);
+			drag_action.drag_end.connect (drag_end);
+			drag_action.drag_canceled.connect (drag_canceled);
+			drag_action.actor_clicked.connect (actor_clicked);
+			add_action (drag_action);
+
+			if (enable_close_button) {
+				close_button = Utils.create_close_button ();
+				close_button.opacity = 0;
+				close_button.set_easing_duration (200);
+				close_button.button_press_event.connect (() => {
+					close_window ();
+					return true;
 				});
-
-				add_action (click_action);
-			} else {
-				drag_action = new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
-				drag_action.drag_begin.connect (drag_begin);
-				drag_action.destination_crossed.connect (drag_destination_crossed);
-				drag_action.drag_end.connect (drag_end);
-				drag_action.drag_canceled.connect (drag_canceled);
-				drag_action.actor_clicked.connect (actor_clicked);
-
-				add_action (drag_action);
+				add_child (close_button);
 			}
 
-			close_button = Utils.create_close_button ();
-			close_button.opacity = 0;
-			close_button.set_easing_duration (200);
-			close_button.button_press_event.connect (() => {
-				close_window ();
-				return true;
-			});
+			if (enable_icon) {
+				window_icon = new WindowIcon (window, WINDOW_ICON_SIZE);
+				window_icon.opacity = 0;
+				window_icon.set_pivot_point (0.5f, 0.5f);
+				add_child (window_icon);
+			}
 
-			window_icon = new WindowIcon (window, WINDOW_ICON_SIZE);
-			window_icon.opacity = 0;
-			window_icon.set_pivot_point (0.5f, 0.5f);
-
-			// TODO:
+			// TODO: active shape
 			active_shape = new DeepinCssStaticActor ("deepin-window-clone", Gtk.StateFlags.SELECTED);
 			active_shape.opacity = 0;
-
 			add_child (active_shape);
-			add_child (window_icon);
-			add_child (close_button);
 
 			load_clone ();
 		}
@@ -214,15 +224,19 @@ namespace Gala
 				return;
 			}
 
-			if (overview_mode)
+			if (thumbnail_mode)
 				actor.hide ();
 
 			clone = new Clone (actor.get_texture ());
 			add_child (clone);
 
 			set_child_below_sibling (active_shape, clone);
-			set_child_above_sibling (close_button, clone);
-			set_child_above_sibling (window_icon, clone);
+			if (close_button != null) {
+				set_child_above_sibling (close_button, clone);
+			}
+			if (window_icon != null) {
+				set_child_above_sibling (window_icon, clone);
+			}
 
 			transition_to_original_state (false);
 
@@ -256,14 +270,20 @@ namespace Gala
 			}
 		}
 
+		// TODO: thumbnail
 		/**
-		 * If we are in overview mode, we may display windows from workspaces other than
-		 * the current one. To ease their appearance we have to fade them in.
+		 * If we are in overview mode, we may display windows from
+		 * workspaces other than the current one. To ease their
+		 * appearance we have to fade them in. And if the window is
+		 * identify, it should be fade, too,
 		 */
 		bool should_fade ()
 		{
-			return overview_mode
-			&& window.get_workspace () != window.get_screen ().get_active_workspace ();
+			return (thumbnail_mode && window.get_workspace () != window.get_screen ().get_active_workspace ());
+			// if (thumbnail_mode) {
+			// 	return window.get_workspace () != window.get_screen ().get_active_workspace ());
+			// }
+			// return window.is_hidden ();
 		}
 
 		/**
@@ -282,8 +302,10 @@ namespace Gala
 #else
 				var rect = window.get_outer_rect ();
 #endif
-				var effect = get_effect ("shadow") as ShadowEffect;
-				effect.update_size (rect.width, rect.height);
+				var shadow_effect = get_effect ("shadow") as ShadowEffect;
+				if (shadow_effect != null) {
+					shadow_effect.update_size (rect.width, rect.height);
+				}
 
 				shadow_update_timeout = 0;
 
@@ -318,13 +340,15 @@ namespace Gala
 
 			var parent = get_parent ();
 			if (parent != null) {
-				// in overview_mode the parent has just been added to the stage, so the
+				// TODO:
+				// in thumbnail_mode the parent has just been added to the stage, so the
 				// transforme position is not set yet. However, the set position is correct
 				// for overview anyway, so we can just use that.
-				if (overview_mode)
+				if (thumbnail_mode) {
 					parent.get_position (out offset_x, out offset_y);
-				else
+				} else {
 					parent.get_transformed_position (out offset_x, out offset_y);
+				}
 			}
 
 			set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
@@ -333,7 +357,13 @@ namespace Gala
 			set_position (outer_rect.x - offset_x, outer_rect.y - offset_y);
 			set_size (outer_rect.width, outer_rect.height);
 
-			window_icon.opacity = 0;
+			if (window_icon != null) {
+				window_icon.opacity = 0;
+			}
+
+			if (close_button != null) {
+				close_button.opacity = 0;
+			}
 
 			if (should_fade ())
 				opacity = 0;
@@ -352,11 +382,14 @@ namespace Gala
 			set_size (rect.width, rect.height);
 			set_position (rect.x, rect.y);
 
-			window_icon.opacity = 255;
+			if (window_icon != null) {
+				window_icon.opacity = 255;
+			}
 
-			// for overview mode, windows may be faded out initially. Make sure
+			// TODO: thumbnail
+			// for thumbnail mode, windows may be faded out initially. Make sure
 			// to fade those in.
-			if (overview_mode) {
+			if (thumbnail_mode) {
 				save_easing_state ();
 				set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 				set_easing_duration (300);
@@ -424,14 +457,18 @@ namespace Gala
 
 		public override	bool enter_event (Clutter.CrossingEvent event)
 		{
-			close_button.opacity = 255;
+			if (close_button != null) {
+				close_button.opacity = 255;
+			}
 
 			return false;
 		}
 
 		public override	bool leave_event (Clutter.CrossingEvent event)
 		{
-			close_button.opacity = 0;
+			if (close_button != null) {
+				close_button.opacity = 0;
+			}
 
 			return false;
 		}
@@ -442,25 +479,27 @@ namespace Gala
 		 */
 		public void place_widgets (int dest_width, int dest_height)
 		{
-			Granite.CloseButtonPosition pos;
-			Granite.Widgets.Utils.get_default_close_button_position (out pos);
+			if (close_button != null) {
+				Granite.CloseButtonPosition pos;
+				Granite.Widgets.Utils.get_default_close_button_position (out pos);
 
-			close_button.save_easing_state ();
-			close_button.set_easing_duration (0);
+				close_button.save_easing_state ();
+				close_button.set_easing_duration (0);
 
-			close_button.y = -close_button.height * 0.33f;
+				close_button.y = -close_button.height * 0.33f;
 
-			switch (pos) {
+				switch (pos) {
 				case Granite.CloseButtonPosition.RIGHT:
 					close_button.x = dest_width - close_button.width * 0.5f;
 					break;
 				case Granite.CloseButtonPosition.LEFT:
 					close_button.x = -close_button.width * 0.5f;
 					break;
+				}
+				close_button.restore_easing_state ();
 			}
-			close_button.restore_easing_state ();
 
-			if (!dragging) {
+			if (!dragging && window_icon != null) {
 				window_icon.save_easing_state ();
 				window_icon.set_easing_duration (0);
 
@@ -488,7 +527,7 @@ namespace Gala
 		{
 			if (new_window.get_transient_for () == window) {
 				Idle.add (() => {
-					selected ();
+					activated ();
 					return false;
 				});
 
@@ -524,7 +563,7 @@ namespace Gala
 		void actor_clicked (uint32 button) {
 			switch (button) {
 				case 1:
-					selected ();
+					activated ();
 					break;
 				case 2:
 					close_window ();
@@ -548,9 +587,12 @@ namespace Gala
 			prev_parent.remove_child (this);
 			stage.add_child (this);
 
-			var scale = window_icon.width / clone.width;
+			var scale = WINDOW_ICON_SIZE / clone.width;
 
-			((ShadowEffect) get_effect ("shadow")).shadow_opacity = 0;
+			var shadow_effect = get_effect ("shadow") as ShadowEffect;
+			if (shadow_effect != null) {
+				shadow_effect.shadow_opacity = 0;
+			}
 
 			clone.get_transformed_position (out abs_x, out abs_y);
 			clone.set_pivot_point ((click_x - abs_x) / clone.width, (click_y - abs_y) / clone.height);
@@ -569,13 +611,17 @@ namespace Gala
 			set_easing_duration (0);
 			set_position (abs_x, abs_y);
 
-			window_icon.save_easing_state ();
-			window_icon.set_easing_duration (200);
-			window_icon.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-			window_icon.set_position (click_x - abs_x - window_icon.width / 2, click_y - abs_y - window_icon.height / 2);
-			window_icon.restore_easing_state ();
+			if (window_icon != null) {
+				window_icon.save_easing_state ();
+				window_icon.set_easing_duration (200);
+				window_icon.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+				window_icon.set_position (click_x - abs_x - window_icon.width / 2, click_y - abs_y - window_icon.height / 2);
+				window_icon.restore_easing_state ();
+			}
 
-			close_button.opacity = 0;
+			if (close_button != null) {
+				close_button.opacity = 0;
+			}
 
 			dragging = true;
 
@@ -583,13 +629,13 @@ namespace Gala
 		}
 
 		/**
-		 * When we cross an DeepinWorkspaceThumb, we animate to an even smaller size and slightly
+		 * When we cross an DeepinWorkspaceThumbClone, we animate to an even smaller size and slightly
 		 * less opacity and add ourselves as temporary window to the group. When left,
 		 * we reverse those steps.
 		 */
 		void drag_destination_crossed (Actor destination, bool hovered)
 		{
-			DeepinWorkspaceThumb? workspace_thumb = destination as DeepinWorkspaceThumb;
+			DeepinWorkspaceThumbClone? workspace_thumb = destination as DeepinWorkspaceThumbClone;
 			WorkspaceInsertThumb? insert_thumb = destination as WorkspaceInsertThumb;
 
 			// if we have don't dynamic workspace, we don't allow inserting
@@ -607,14 +653,16 @@ namespace Gala
 			var opacity = hovered ? 0 : 255;
 			var duration = hovered && insert_thumb != null ? WorkspaceInsertThumb.EXPAND_DELAY : 100;
 
-			window_icon.save_easing_state ();
+			if (window_icon != null) {
+				window_icon.save_easing_state ();
 
-			window_icon.set_easing_mode (AnimationMode.LINEAR);
-			window_icon.set_easing_duration (duration);
-			window_icon.set_scale (scale, scale);
-			window_icon.set_opacity (opacity);
+				window_icon.set_easing_mode (AnimationMode.LINEAR);
+				window_icon.set_easing_duration (duration);
+				window_icon.set_scale (scale, scale);
+				window_icon.set_opacity (opacity);
 
-			window_icon.restore_easing_state ();
+				window_icon.restore_easing_state ();
+			}
 
 			if (insert_thumb != null) {
 				insert_thumb.set_window_thumb (window);
@@ -622,7 +670,8 @@ namespace Gala
 
 			if (workspace_thumb != null) {
 				if (hovered)
-					workspace_thumb.add_window (window, false);
+					// TODO: animation
+					workspace_thumb.add_window (window);
 				else
 					workspace_thumb.remove_window (window);
 			}
@@ -638,10 +687,10 @@ namespace Gala
 			Meta.Workspace workspace = null;
 			var primary = window.get_screen ().get_primary_monitor ();
 
-			if (destination is DeepinWorkspaceThumb) {
-				workspace = ((DeepinWorkspaceThumb) destination).workspace;
+			if (destination is DeepinWorkspaceThumbClone) {
+				workspace = ((DeepinWorkspaceThumbClone) destination).workspace;
 			} else if (destination is DeepinFramedBackground) {
-				workspace = ((DeepinWorkspaceClone) destination.get_parent ()).workspace;
+				workspace = ((DeepinWorkspaceFlowClone) destination.get_parent ()).workspace;
 			} else if (destination is WorkspaceInsertThumb) {
 				if (!Prefs.get_dynamic_workspaces ()) {
 					drag_canceled ();
@@ -712,7 +761,10 @@ namespace Gala
 			clone.opacity = 255;
 
 			Clutter.Callback finished = () => {
-				((ShadowEffect) get_effect ("shadow")).shadow_opacity = 255;
+				var shadow_effect = get_effect ("shadow") as ShadowEffect;
+				if (shadow_effect != null) {
+					shadow_effect.shadow_opacity = 255;
+				}
 			};
 
 			var transition = clone.get_transition ("scale-x");
@@ -728,11 +780,14 @@ namespace Gala
 			// pop 0 animation duration from drag_begin()
 			restore_easing_state ();
 
-			window_icon.save_easing_state ();
-			window_icon.set_easing_duration (250);
-			window_icon.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-			window_icon.set_position ((slot.width - WINDOW_ICON_SIZE) / 2, slot.height - WINDOW_ICON_SIZE * 0.75f);
-			window_icon.restore_easing_state ();
+			if (window_icon != null) {
+				window_icon.save_easing_state ();
+				window_icon.set_easing_duration (250);
+				window_icon.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+				// TODO: panic issue
+				window_icon.set_position ((slot.width - WINDOW_ICON_SIZE) / 2, slot.height - WINDOW_ICON_SIZE * 0.75f);
+				window_icon.restore_easing_state ();
+			}
 
 			dragging = false;
 		}

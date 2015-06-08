@@ -21,16 +21,19 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * Workspace thumnail clone with background and normal windows.
-	 * It also includes the drawing code for the active highlight.
+	 * Workspace thumnail clone with background, normal windows and
+	 * workspace names.  It also support dragging and dropping to
+	 * move and close workspaces.
 	 */
-	public class DeepinWorkspaceThumb : Actor
+	public class DeepinWorkspaceThumbClone : Actor
 	{
 		// TODO:
 		// public static const int SIZE = 64;
 		public static const int SIZE = 192;
 
-		// TODO:
+		const int SHAPE_PADDING = 5;
+
+		// TODO: draw plus button
 		static const int PLUS_SIZE = 8;
 		static const int PLUS_WIDTH = 24;
 
@@ -44,19 +47,17 @@ namespace Gala
 
 		public Workspace workspace { get; construct; }
 
-		// TODO: remove
-		// static Gtk.StyleContext? style_context = null;
-
-		Actor active_shape;
+		Actor active_shape_thumb;
+		Actor active_shape_name; // TODO
 		Actor close_button;
 
 		// TODO: use workspace_clone instead
-		Actor window_container;
+		DeepinWindowCloneThumbContainer window_container;
 		Actor background;
 
 		uint show_close_button_timeout = 0;
 
-		public DeepinWorkspaceThumb (Workspace workspace)
+		public DeepinWorkspaceThumbClone (Workspace workspace)
 		{
 			Object (workspace: workspace);
 		}
@@ -69,15 +70,16 @@ namespace Gala
 			reactive = true;
 
 			// active shape
-			active_shape = new DeepinCssStaticActor ("deepin-workspace-thumb", Gtk.StateFlags.SELECTED);
-			active_shape.opacity = 0;
-			add_child (active_shape);
+			active_shape_thumb = new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+			active_shape_thumb.opacity = 0;
+			add_child (active_shape_thumb);
 
 			// background
 			background = new DeepinFramedBackground (workspace.get_screen (), false);
-			// background.reactive = true;// TODO:
+			// TODO: not necessary?
+			// background.reactive = true;
 			// background.button_press_event.connect (() => {
-			// 	selected (true);
+			// 	selected ();
 			// 	return false;
 			// });
 			double scale = ((double) SIZE) / background.width;
@@ -96,13 +98,13 @@ namespace Gala
 			});
 			add_action (click);
 
-			window_container = new Actor ();
+			window_container = new DeepinWindowCloneThumbContainer (workspace);
 			window_container.width = width;
 			window_container.height = height;
 
 			add_child (window_container);
 
-			// TODO:
+			// TODO: show close button
 			close_button = Utils.create_close_button ();
 			close_button.x = -Math.floorf (close_button.width * 0.4f);
 			close_button.y = -Math.floorf (close_button.height * 0.4f);
@@ -122,7 +124,7 @@ namespace Gala
 			close_button.add_action (close_click);
 		}
 
-		~DeepinWorkspaceThumb ()
+		~DeepinWorkspaceThumbClone ()
 		{
 			background.destroy ();
 		}
@@ -135,24 +137,26 @@ namespace Gala
 
 		public override bool leave_event (CrossingEvent event)
 		{
-			if (!contains (event.related))
+			if (!contains (event.related)) {
 				toggle_close_button (false);
+			}
 
 			return false;
 		}
 
 		public void set_active (bool value, bool animate = true)
 		{
-			if (animate) {
-				active_shape.save_easing_state ();
-				active_shape.set_easing_duration (1000); // TODO
-			}
+			active_shape_thumb.save_easing_state ();
+			active_shape_thumb.set_easing_duration (animate ? 500 : 0);
 
-			active_shape.opacity = value ? 255 : 0;
+			active_shape_thumb.opacity = value ? 255 : 0;
 
-			if (animate) {
-				active_shape.restore_easing_state ();
-			}
+			active_shape_thumb.restore_easing_state ();
+		}
+
+		public void select_window (Window window)
+		{
+			window_container.select_window (window);
 		}
 
 		// TODO:
@@ -170,8 +174,9 @@ namespace Gala
 			// or when there are no windows on us. For one, our method for closing
 			// wouldn't work anyway without windows and it's also the last workspace
 			// which we don't want to have closed if everything went correct
-			if (!Prefs.get_dynamic_workspaces () || window_container.get_n_children () < 1)
+			if (!Prefs.get_dynamic_workspaces () || window_container.get_n_children () < 1) {
 				return;
+			}
 
 			if (show_close_button_timeout != 0) {
 				Source.remove (show_close_button_timeout);
@@ -194,10 +199,12 @@ namespace Gala
 				transition.completed.connect (() => {
 					close_button.visible = false;
 				});
-			else
+			else {
 				close_button.visible = false;
+			}
 		}
 
+		// TODO: necessary?
 		/**
 		 * Remove all currently added WindowIconActors
 		 */
@@ -206,64 +213,20 @@ namespace Gala
 			window_container.destroy_all_children ();
 		}
 
-		// TODO: remove argument need_redraw
 		/**
 		 * Creates a Clone for the given window and adds it to the group
-		 *
-		 * @param window      The MetaWindow for which to create the Clone
-		 * @param need_redraw If you add multiple windows at once you may want to consider
-		 *                    settings this to true and when done calling redraw() manually
 		 */
-		public void add_window (Window window, bool need_redraw = true)
+		public void add_window (Window window)
 		{
-			// TODO:
-			// var actor = window.get_compositor_private () as WindowActor;
-			// var new_window = new Clone (actor.get_texture ());
-
-			// hide shadown and icon for window clone
-			var new_window = new DeepinWindowClone (window, false, false);
-			new_window.scale_x = 0.1; // TODO
-			new_window.scale_y = 0.1;
-
-			new_window.save_easing_state ();
-			new_window.set_easing_duration (0);
-			new_window.set_position (32, 32);
-			new_window.restore_easing_state ();
-
-			window_container.add_child (new_window);
+			window_container.add_window (window);
 		}
 
 		/**
-		 * Remove the Clone for a MetaWindow from the group
-		 *
-		 * @param animate Whether to fade the icon out before removing it
+		 * Remove the Clone for a MetaWindow from the container
 		 */
-		public void remove_window (Window window, bool animate = true)
+		public void remove_window (Window window)
 		{
-			foreach (var child in window_container.get_children ()) {
-				unowned DeepinWindowClone w = (DeepinWindowClone) child;
-				if (w.window == window) {
-					if (animate) {
-						w.set_easing_mode (AnimationMode.LINEAR);
-						w.set_easing_duration (200);
-						w.opacity = 0;
-
-						var transition = w.get_transition ("opacity");
-						if (transition != null) {
-							transition.completed.connect (() => {
-								w.destroy ();
-							});
-						} else {
-							w.destroy ();
-						}
-
-					} else
-						w.destroy ();
-
-					// don't break here! If people spam hover events and we animate
-					// removal, we can actually multiple instances of the same window icon
-				}
-			}
+			window_container.remove_window (window);
 		}
 
 		// TODO: close workspace action
@@ -278,20 +241,31 @@ namespace Gala
 			foreach (var window in workspace.list_windows ()) {
 				var type = window.window_type;
 				if (!window.is_on_all_workspaces () && (type == WindowType.NORMAL
-					|| type == WindowType.DIALOG || type == WindowType.MODAL_DIALOG))
+					|| type == WindowType.DIALOG || type == WindowType.MODAL_DIALOG)) {
 					window.@delete (time);
+				}
 			}
 		}
 
-		// TODO:
 		public override void allocate (ActorBox box, AllocationFlags flags)
 		{
 			base.allocate (box, flags);
 
-			var shape_box = ActorBox ();
-			shape_box.set_size (box.get_width (), box.get_height ());
-			shape_box.set_origin (0, 0);
-			active_shape.allocate (shape_box, flags);
+			var thumb_box = ActorBox ();
+			float thumb_width = box.get_width ();
+			float thumb_scale = background.width != 0 ? background.height / background.width : 0.5f;
+			float thumb_height = thumb_width * thumb_scale;
+			thumb_box.set_size (thumb_width, thumb_height);
+			thumb_box.set_origin (0, 0);
+			background.allocate (thumb_box, flags);
+			window_container.allocate (thumb_box, flags);
+
+			var thumb_shape_box = ActorBox ();
+			thumb_shape_box.set_size (thumb_width + SHAPE_PADDING * 2, thumb_height + SHAPE_PADDING * 2);
+			thumb_shape_box.set_origin ((box.get_width () - thumb_shape_box.get_width ()) / 2, -SHAPE_PADDING);
+			active_shape_thumb.allocate (thumb_shape_box, flags);
+
+			// TODO: workspace name
 		}
 	}
 }

@@ -417,11 +417,9 @@ namespace Gala
 
 		public void set_active (bool value, bool animate = true)
 		{
-			if (animate) {
-				active_shape.save_easing_state ();
-				active_shape.set_easing_duration (280);
-				active_shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
-			}
+			active_shape.save_easing_state ();
+			active_shape.set_easing_duration (animate ? 280 : 0);
+			active_shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
 
 			active_shape.active = value;
 
@@ -433,9 +431,7 @@ namespace Gala
 				active_shape.scale_y = 1.0;
 			}
 
-			if (animate) {
-				active_shape.restore_easing_state ();
-			}
+			active_shape.restore_easing_state ();
 		}
 	}
 }

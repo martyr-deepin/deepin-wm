@@ -132,6 +132,7 @@ namespace Gala
 			if (app != null && app.get_desktop_file () != null) {
 				var appinfo = new DesktopAppInfo.from_filename (app.get_desktop_file ());
 				if (appinfo != null) {
+					// TODO: icon issue
 					icon = Plank.Drawing.DrawingService.get_icon_from_gicon (appinfo.get_icon ());
 					icon_key = "%s::%i".printf (icon, size);
 					if (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null) {
@@ -318,7 +319,7 @@ namespace Gala
 					texture.set_from_pixbuf (pixbuf);
 				} catch (Error e) {}
 			} else {
-				// we'll just make this red so there's at least something as an 
+				// we'll just make this red so there's at least something as an
 				// indicator that loading failed. Should never happen and this
 				// works as good as some weird fallback-image-failed-to-load pixbuf
 				texture.background_color = { 255, 0, 0, 255 };

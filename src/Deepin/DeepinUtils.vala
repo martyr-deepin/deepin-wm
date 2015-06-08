@@ -96,5 +96,15 @@ namespace Gala
 			}
 			return false;
 		}
+
+		public static Meta.Rectangle scale_rect (Meta.Rectangle rect, float scale)
+		{
+			return {
+				(int) (rect.x * scale),
+				(int) (rect.y * scale),
+				(int) (rect.width * scale),
+				(int) (rect.width * scale),
+			};
+		}
 	}
 }
