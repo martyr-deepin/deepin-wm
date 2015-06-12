@@ -30,6 +30,7 @@ namespace Gala
 	{
 		public const int ANIMATION_DURATION = 250;
 		public const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
+		public const AnimationMode WORKSPACE_ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 		const int SMOOTH_SCROLL_DELAY = 500;
 
 		public WindowManager wm { get; construct; }
@@ -62,7 +63,7 @@ namespace Gala
 			screen = wm.get_screen ();
 
 			flow_workspaces = new Actor ();
-			flow_workspaces.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+			flow_workspaces.set_easing_mode (WORKSPACE_ANIMATION_MODE);
 
 			thumb_workspaces = new DeepinWorkspaceThumbCloneContainer (screen);
 			thumb_workspaces.request_reposition.connect (() => reposition_thumb_workspaces (true));

@@ -38,12 +38,12 @@
     border-radius: 5px;
 }
 
-.deepin-workspace-thumb-clone-title {
+.deepin-workspace-thumb-clone-name {
     background: rgba(255,255,255,0.6);
     border-radius: 4px;
 }
 
-.deepin-workspace-thumb-clone-title:selected {
+.deepin-workspace-thumb-clone-name:selected {
     background: rgba(1,189,255,1.0);
 }
 
