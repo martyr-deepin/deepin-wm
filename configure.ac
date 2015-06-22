@@ -195,7 +195,7 @@ AC_ARG_ENABLE([debug],
               AS_HELP_STRING([--disable-debug],[compile without debug code]),
               [enable_debug=$enableval], [m4_if(gala_released, [1], [enable_debug=no], [enable_debug=yes])])
 if test "x$enable_debug" = "xyes" ; then
-    VALAFLAGS_CORE="$VALAFLAGS_CORE -g --save-temps"
+    VALAFLAGS_CORE="$VALAFLAGS_CORE -g"
 fi
 
 GALA_CORE_VALAFLAGS="$VALAFLAGS $VALAFLAGS_CORE $GALA_CORE_VALA_PKGS"

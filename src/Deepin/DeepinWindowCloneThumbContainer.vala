@@ -203,9 +203,8 @@ namespace Gala
 #else
 				rect = window.window.window.get_outer_rect ();
 #endif
-				rect = DeepinUtils.scale_rect(rect, scale);
+				rect = DeepinUtils.scale_rect (rect, scale);
 				window.take_slot (rect);
-				window.place_widgets (rect.width, rect.height);
 			}
 
 			// TODO:

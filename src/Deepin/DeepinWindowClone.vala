@@ -104,8 +104,8 @@ namespace Gala
 		DragDropAction? drag_action = null;
 		Clone? clone = null;
 
-		// shape size could be override in css
-		int active_shape_size = 5;
+		// shape border size could be override in css
+		int shape_border_size = 5;
 
 		Actor prev_parent = null;
 		int prev_index = -1;
@@ -140,7 +140,7 @@ namespace Gala
 			}
 
 			reactive = true;
-			active_shape_size = DeepinUtils.get_css_border_radius ("deepin-window-clone", Gtk.StateFlags.SELECTED);
+			shape_border_size = DeepinUtils.get_css_border_radius ("deepin-window-clone", Gtk.StateFlags.SELECTED);
 
 			window.unmanaged.connect (unmanaged);
 			window.notify["on-all-workspaces"].connect (on_all_workspaces_changed);
@@ -159,7 +159,6 @@ namespace Gala
 			if (enable_close_button) {
 				close_button = Utils.create_close_button ();
 				close_button.opacity = 0;
-				close_button.set_easing_duration (200);
 				close_button.button_press_event.connect (() => {
 					close_window ();
 					return true;
@@ -358,11 +357,23 @@ namespace Gala
 			set_size (outer_rect.width, outer_rect.height);
 
 			if (window_icon != null) {
+				window_icon.save_easing_state ();
+
+				window_icon.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+				window_icon.set_easing_duration (animate ? 300 : 0);
 				window_icon.opacity = 0;
+
+				window_icon.restore_easing_state ();
 			}
 
 			if (close_button != null) {
+				close_button.save_easing_state ();
+
+				close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+				close_button.set_easing_duration (animate ? 300 : 0);
 				close_button.opacity = 0;
+
+				close_button.restore_easing_state ();
 			}
 
 			if (should_fade ())
@@ -413,41 +424,56 @@ namespace Gala
 					child.allocate_preferred_size (flags);
 			}
 
-			ActorBox shape_alloc = {
-				-active_shape_size,
-				-active_shape_size,
-				box.get_width () + active_shape_size,
-				box.get_height () + active_shape_size
+			ActorBox alloc_shape = {
+				-shape_border_size,
+				-shape_border_size,
+				box.get_width () + shape_border_size,
+				box.get_height () + shape_border_size
 			};
-			active_shape.allocate (shape_alloc, flags);
+			active_shape.allocate (alloc_shape, flags);
 
-			if (clone == null)
-				return;
-
-			var actor = window.get_compositor_private () as WindowActor;
-#if HAS_MUTTER314
-			var input_rect = window.get_buffer_rect ();
-#else
-			var input_rect = window.get_input_rect ();
-#endif
-#if HAS_MUTTER312
-			var outer_rect = window.get_frame_rect ();
-#else
-			var outer_rect = window.get_outer_rect ();
-#endif
-			var scale_factor = (float)width / outer_rect.width;
-
-			var shadow_effect = get_effect ("shadow") as ShadowEffect;
-			if (shadow_effect != null) {
-				shadow_effect.scale_factor = scale_factor;
+			if (close_button != null) {
+				var  alloc_close = ActorBox ();
+				alloc_close.set_size (close_button.width, close_button.height);
+				alloc_close.set_origin (box.get_width () - alloc_close.get_width () * 0.5f,
+										-close_button.height * 0.33f);
+				close_button.allocate (alloc_close, flags);
 			}
 
-			var alloc = ActorBox ();
-			alloc.set_origin ((input_rect.x - outer_rect.x) * scale_factor,
-			                  (input_rect.y - outer_rect.y) * scale_factor);
-			alloc.set_size (actor.width * scale_factor, actor.height * scale_factor);
+			if (!dragging && window_icon != null) {
+				var  alloc_icon = ActorBox ();
+				alloc_icon.set_size (WINDOW_ICON_SIZE, WINDOW_ICON_SIZE);
+				alloc_icon.set_origin ((box.get_width () - alloc_icon.get_width ()) / 2,
+									   box.get_height () - alloc_icon.get_height () * 0.75f);
+				window_icon.allocate (alloc_icon, flags);
+			}
 
-			clone.allocate (alloc, flags);
+			if (clone != null) {
+				var actor = window.get_compositor_private () as WindowActor;
+#if HAS_MUTTER314
+				var input_rect = window.get_buffer_rect ();
+#else
+				var input_rect = window.get_input_rect ();
+#endif
+#if HAS_MUTTER312
+				var outer_rect = window.get_frame_rect ();
+#else
+				var outer_rect = window.get_outer_rect ();
+#endif
+				var scale_factor = (float)width / outer_rect.width;
+
+				var shadow_effect = get_effect ("shadow") as ShadowEffect;
+				if (shadow_effect != null) {
+					shadow_effect.scale_factor = scale_factor;
+				}
+
+				var alloc_clone = ActorBox ();
+				alloc_clone.set_origin ((input_rect.x - outer_rect.x) * scale_factor,
+								  (input_rect.y - outer_rect.y) * scale_factor);
+				alloc_clone.set_size (actor.width * scale_factor, actor.height * scale_factor);
+
+				clone.allocate (alloc_clone, flags);
+			}
 		}
 
 		public override bool button_press_event (Clutter.ButtonEvent event)
@@ -458,7 +484,13 @@ namespace Gala
 		public override	bool enter_event (Clutter.CrossingEvent event)
 		{
 			if (close_button != null) {
+				close_button.save_easing_state ();
+
+				close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+				close_button.set_easing_duration (200);
 				close_button.opacity = 255;
+
+				close_button.restore_easing_state ();
 			}
 
 			return false;
@@ -467,46 +499,16 @@ namespace Gala
 		public override	bool leave_event (Clutter.CrossingEvent event)
 		{
 			if (close_button != null) {
-				close_button.opacity = 0;
-			}
-
-			return false;
-		}
-
-		/**
-		 * Place the widgets, that is the close button and the WindowIcon of the window,
-		 * at their positions inside the actor for a given width and height.
-		 */
-		public void place_widgets (int dest_width, int dest_height)
-		{
-			if (close_button != null) {
-				Granite.CloseButtonPosition pos;
-				Granite.Widgets.Utils.get_default_close_button_position (out pos);
-
 				close_button.save_easing_state ();
-				close_button.set_easing_duration (0);
 
-				close_button.y = -close_button.height * 0.33f;
+				close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+				close_button.set_easing_duration (200);
+				close_button.opacity = 0;
 
-				switch (pos) {
-				case Granite.CloseButtonPosition.RIGHT:
-					close_button.x = dest_width - close_button.width * 0.5f;
-					break;
-				case Granite.CloseButtonPosition.LEFT:
-					close_button.x = -close_button.width * 0.5f;
-					break;
-				}
 				close_button.restore_easing_state ();
 			}
 
-			if (!dragging && window_icon != null) {
-				window_icon.save_easing_state ();
-				window_icon.set_easing_duration (0);
-
-				window_icon.set_position ((dest_width - WINDOW_ICON_SIZE) / 2, dest_height - WINDOW_ICON_SIZE * 0.75f);
-
-				window_icon.restore_easing_state ();
-			}
+			return false;
 		}
 
 		/**
@@ -613,9 +615,11 @@ namespace Gala
 
 			if (window_icon != null) {
 				window_icon.save_easing_state ();
+
 				window_icon.set_easing_duration (200);
 				window_icon.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
 				window_icon.set_position (click_x - abs_x - window_icon.width / 2, click_y - abs_y - window_icon.height / 2);
+
 				window_icon.restore_easing_state ();
 			}
 

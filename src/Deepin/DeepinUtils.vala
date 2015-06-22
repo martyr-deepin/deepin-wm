@@ -103,7 +103,22 @@ namespace Gala
 				(int) (rect.x * scale),
 				(int) (rect.y * scale),
 				(int) (rect.width * scale),
-				(int) (rect.width * scale),
+				(int) (rect.height * scale),
+			};
+		}
+
+		// Scale rectangle with center point not changed.
+		public static Meta.Rectangle scale_rect_in_center (Meta.Rectangle rect, float scale)
+		{
+			float center_x = rect.x + rect.width / 2;
+			float center_y = rect.y + rect.height / 2;
+			float new_width = rect.width * scale;
+			float new_height = rect.height * scale;
+			return {
+				(int) (center_x - new_width / 2),
+				(int) (center_y - new_height / 2),
+				(int) (new_width),
+				(int) (new_height),
 			};
 		}
 	}

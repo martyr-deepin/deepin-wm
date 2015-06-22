@@ -221,8 +221,10 @@ namespace Gala
 
 			foreach (var tilable in window_positions) {
 				unowned DeepinWindowClone window = (DeepinWindowClone) tilable.id;
+				if (!window.active) {
+					tilable.rect = DeepinUtils.scale_rect_in_center (tilable.rect, 0.9f);
+				}
 				window.take_slot (tilable.rect);
-				window.place_widgets (tilable.rect.width, tilable.rect.height);
 			}
 		}
 
@@ -319,6 +321,8 @@ namespace Gala
 			current_window = closest;
 			current_window.active = true;
 			window_selected (current_window.window);
+
+			reflow ();
 		}
 
 		/**
