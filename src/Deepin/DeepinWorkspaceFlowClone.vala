@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2014 Deepin, Inc.
 //  Copyright (C) 2014 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -65,25 +65,13 @@ namespace Gala
 		public signal void selected (bool close_view);
 
 		public Workspace workspace { get; construct; }
-		public DeepinWorkspaceThumbClone thumb_workspace { get; private set; }
 		public DeepinWindowCloneFlowContainer window_container { get; private set; }
 
-		bool _active = false;
 		/**
-		 * If this DeepinWorkspaceFlowClone is currently the active one. Also sets the active
-		 * state on its DeepinWorkspaceThumbClone.
+		 * Own the related thumbnail workspace clone so that signals
+		 * and events could be dispatched easily.
 		 */
-		public bool active {
-			get {
-				return _active;
-			}
-			set {
-				_active = value;
-
-				// TODO:
-				thumb_workspace.set_active (value);
-			}
-		}
+		public DeepinWorkspaceThumbClone related_thumb_workspace { get; private set; }
 
 #if HAS_MUTTER314
 		BackgroundManager background;
@@ -113,9 +101,8 @@ namespace Gala
 				return false;
 			});
 
-			thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
-			// TODO:
-			thumb_workspace.selected.connect (() => {
+			related_thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
+			related_thumb_workspace.selected.connect (() => {
 				if (workspace != screen.get_active_workspace ()) {
 					selected (false);
 				}
@@ -126,14 +113,14 @@ namespace Gala
 					window_activated (w);
 			});
 			window_container.window_selected.connect ((w) => {
-					thumb_workspace.select_window (w);
+					related_thumb_workspace.select_window (w);
 			});
 			window_container.width = monitor_geometry.width;
 			window_container.height = monitor_geometry.height;
 			screen.restacked.connect (window_container.restack_windows);
 
 			var thumb_drop_action = new DragDropAction (DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
-			thumb_workspace.add_action (thumb_drop_action);
+			related_thumb_workspace.add_action (thumb_drop_action);
 
 			var background_drop_action = new DragDropAction (DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
 			background.add_action (background_drop_action);
@@ -168,7 +155,7 @@ namespace Gala
 					&& !window.on_all_workspaces
 					&& window.get_monitor () == screen.get_primary_monitor ()) {
 					window_container.add_window (window);
-					thumb_workspace.add_window (window);
+					related_thumb_workspace.add_window (window);
 				}
 			}
 
@@ -210,7 +197,7 @@ namespace Gala
 					return;
 
 			window_container.add_window (window);
-			thumb_workspace.add_window (window);
+			related_thumb_workspace.add_window (window);
 		}
 
 		/**
@@ -220,7 +207,7 @@ namespace Gala
 		{
 			window_container.remove_window (window);
 			// TODO: animate
-			thumb_workspace.remove_window (window);
+			related_thumb_workspace.remove_window (window);
 		}
 
 		void window_entered_monitor (Screen screen, int monitor, Window window)

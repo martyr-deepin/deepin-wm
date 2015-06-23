@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2014 Deepin, Inc.
 //  Copyright (C) 2014 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -51,46 +51,25 @@ namespace Gala
 
 		public bool dragging { get; private set; default = false; }
 
-		bool _active = false;
 		/**
-		 * When active fades a highlighted border around the window in. Used for the visually
-		 * indicating the WindowCloneContainer's current_window.
+		 * When selected fades a highlighted border around the window
+		 * in. Used for the visually indicating the
+		 * WindowCloneContainer's current_window.
 		 */
-		public bool active {
+		bool _select = false;
+		public bool select {
 			get {
-				return _active;
+				return _select;
 			}
 			set {
-				_active = value;
+				_select = value;
 
-				// show active shape
-				active_shape.save_easing_state ();
-				active_shape.set_easing_duration (200);
+				shape.save_easing_state ();
 
-				active_shape.opacity = _active ? 255 : 0;
+				shape.set_easing_duration (200);
+				shape.opacity = _select ? 255 : 0;
 
-				active_shape.restore_easing_state ();
-
-				// TODO increase window clone size
-				// save_easing_state ();
-				// set_easing_duration (200);
-
-				// if (width_orig == 0) {
-				// 	width_orig = width;
-				// 	width_active = width_orig * 1.1f;
-				// }
-				// if (height_orig == 0) {
-				// 	height_orig = height;
-				// 	height_active = height_orig * 1.1f;
-				// }
-
-				// width = _active ? width_active : width_orig;
-				// height = _active ? height_active : height_orig;
-
-				// scale_x = _active ? 1.1 : 1.0;
-				// scale_y = _active ? 1.1 : 1.0;
-
-				// restore_easing_state ();
+				shape.restore_easing_state ();
 			}
 		}
 
@@ -112,15 +91,9 @@ namespace Gala
 		ulong check_confirm_dialog_cb = 0;
 		uint shadow_update_timeout = 0;
 
-		Actor active_shape;
+		Actor shape;
 		Actor? close_button = null;
 		GtkClutter.Texture? window_icon = null;
-
-		// TODO: remove
-		// float width_orig = 0f;
-		// float height_orig = 0f;
-		// float width_active = 0f;
-		// float height_active = 0f;
 
 		public DeepinWindowClone (Meta.Window window, bool thumbnail_mode = false)
 		{
@@ -173,10 +146,9 @@ namespace Gala
 				add_child (window_icon);
 			}
 
-			// TODO: active shape
-			active_shape = new DeepinCssStaticActor ("deepin-window-clone", Gtk.StateFlags.SELECTED);
-			active_shape.opacity = 0;
-			add_child (active_shape);
+			shape = new DeepinCssStaticActor ("deepin-window-clone", Gtk.StateFlags.SELECTED);
+			shape.opacity = 0;
+			add_child (shape);
 
 			load_clone ();
 		}
@@ -229,7 +201,7 @@ namespace Gala
 			clone = new Clone (actor.get_texture ());
 			add_child (clone);
 
-			set_child_below_sibling (active_shape, clone);
+			set_child_below_sibling (shape, clone);
 			if (close_button != null) {
 				set_child_above_sibling (close_button, clone);
 			}
@@ -420,32 +392,32 @@ namespace Gala
 			base.allocate (box, flags);
 
 			foreach (var child in get_children ()) {
-				if (child != clone && child != active_shape)
+				if (child != clone && child != shape)
 					child.allocate_preferred_size (flags);
 			}
 
-			ActorBox alloc_shape = {
+			ActorBox shape_box = {
 				-shape_border_size,
 				-shape_border_size,
 				box.get_width () + shape_border_size,
 				box.get_height () + shape_border_size
 			};
-			active_shape.allocate (alloc_shape, flags);
+			shape.allocate (shape_box, flags);
 
 			if (close_button != null) {
-				var  alloc_close = ActorBox ();
-				alloc_close.set_size (close_button.width, close_button.height);
-				alloc_close.set_origin (box.get_width () - alloc_close.get_width () * 0.5f,
+				var  close_box = ActorBox ();
+				close_box.set_size (close_button.width, close_button.height);
+				close_box.set_origin (box.get_width () - close_box.get_width () * 0.5f,
 										-close_button.height * 0.33f);
-				close_button.allocate (alloc_close, flags);
+				close_button.allocate (close_box, flags);
 			}
 
 			if (!dragging && window_icon != null) {
-				var  alloc_icon = ActorBox ();
-				alloc_icon.set_size (WINDOW_ICON_SIZE, WINDOW_ICON_SIZE);
-				alloc_icon.set_origin ((box.get_width () - alloc_icon.get_width ()) / 2,
-									   box.get_height () - alloc_icon.get_height () * 0.75f);
-				window_icon.allocate (alloc_icon, flags);
+				var  icon_box = ActorBox ();
+				icon_box.set_size (WINDOW_ICON_SIZE, WINDOW_ICON_SIZE);
+				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
+									   box.get_height () - icon_box.get_height () * 0.75f);
+				window_icon.allocate (icon_box, flags);
 			}
 
 			if (clone != null) {
@@ -467,12 +439,12 @@ namespace Gala
 					shadow_effect.scale_factor = scale_factor;
 				}
 
-				var alloc_clone = ActorBox ();
-				alloc_clone.set_origin ((input_rect.x - outer_rect.x) * scale_factor,
+				var clone_box = ActorBox ();
+				clone_box.set_origin ((input_rect.x - outer_rect.x) * scale_factor,
 								  (input_rect.y - outer_rect.y) * scale_factor);
-				alloc_clone.set_size (actor.width * scale_factor, actor.height * scale_factor);
+				clone_box.set_size (actor.width * scale_factor, actor.height * scale_factor);
 
-				clone.allocate (alloc_clone, flags);
+				clone.allocate (clone_box, flags);
 			}
 		}
 

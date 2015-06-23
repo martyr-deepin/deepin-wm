@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2014 Deepin, Inc.
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -20,133 +20,6 @@ using Meta;
 
 namespace Gala
 {
-	/**
-	 * Transparent shape to cover the DeepinWindowSwitcherItem.
-	 */
-	public class DeepinWindowSwitcherItemShape : Actor
-	{
-		public string style_class { get; construct; }
-
-		protected AnimationMode progress_mode = AnimationMode.EASE_IN_OUT_QUAD;
-
-		static Gdk.RGBA? bg_color_normal = null;
-		static Gdk.RGBA? bg_color_selected = null;
-		static int? border_radius = null;
-
-		Gdk.RGBA _bg_color;
-		Gdk.RGBA bg_color {
-			get {
-				return _bg_color;
-			}
-			set {
-				_bg_color = value;
-				content.invalidate ();
-			}
-		}
-
-		Gdk.RGBA _bg_color_from;
-		Gdk.RGBA _bg_color_to;
-
-		Timeline? timeline = null;
-
-		bool _active = false;
-		public bool active {
-			get {
-				return _active;
-			}
-			set {
-				if (_active == value) {
-					return;
-				}
-
-				_active = value;
-
-				if (timeline != null && timeline.is_playing ()) {
-					timeline.stop ();
-				}
-				if (get_easing_duration () > 0) {
-					timeline = new Timeline (get_easing_duration ());
-					timeline.progress_mode = get_easing_mode ();
-					timeline.new_frame.connect (on_new_frame);
-
-					if (value) {
-						_bg_color_from = bg_color;
-						_bg_color_to = bg_color_selected;
-					} else {
-						_bg_color_from = bg_color;
-						_bg_color_to = bg_color_normal;
-					}
-					timeline.start ();
-				} else {
-					bg_color = _active ? bg_color_selected : bg_color_normal;
-				}
-			}
-		}
-
-		public DeepinWindowSwitcherItemShape (string style_class)
-		{
-			Object (style_class: style_class);
-		}
-
-		construct
-		{
-			if (bg_color_normal == null) {
-				bg_color_normal = DeepinUtils.get_css_background_gdk_rgba (style_class);
-			}
-			if (bg_color_selected == null) {
-				bg_color_selected = DeepinUtils.get_css_background_gdk_rgba (style_class, Gtk.StateFlags.SELECTED);
-			}
-			if (border_radius == null) {
-				border_radius = DeepinUtils.get_css_border_radius (style_class);
-			}
-
-			var canvas = new Canvas ();
-			canvas.draw.connect (on_draw_content);
-
-			content = canvas;
-			notify["allocation"].connect (() => canvas.set_size ((int) width, (int) height));
-
-			bg_color = bg_color_normal;
-		}
-
-		~DeepinWindowSwitcherItemShape ()
-		{
-			if (timeline != null) {
-				timeline.new_frame.disconnect (on_new_frame);
-				if (timeline.is_playing ()) {
-					timeline.stop ();
-				}
-			}
-		}
-
-		bool on_draw_content (Cairo.Context cr, int width, int height)
-		{
-			// clear the content
-			cr.set_operator (Cairo.Operator.CLEAR);
-			cr.paint ();
-			cr.set_operator (Cairo.Operator.OVER);
-
-			cr.set_source_rgba (bg_color.red, bg_color.green, bg_color.blue, bg_color.alpha);
-			Granite.Drawing.Utilities.cairo_rounded_rectangle (cr, 0, 0, (int) width, (int) height, border_radius);
-			cr.fill ();
-
-			return false;
-		}
-
-		void on_new_frame (int msecs)
-		{
-			double progress = timeline.get_progress ();
-			Gdk.RGBA from_color = _bg_color_from;
-			Gdk.RGBA to_color = _bg_color_to;
-			double red, green, blue, alpha;
-			red = from_color.red + (to_color.red - from_color.red) * progress;
-			green = from_color.green + (to_color.green - from_color.green) * progress;
-			blue = from_color.blue + (to_color.blue - from_color.blue) * progress;
-			alpha = from_color.alpha + (to_color.alpha - from_color.alpha) * progress;
-			bg_color = {red, green, blue, alpha};
-		}
-	}
-
 	/**
 	 * A container for a clone of the texture of a MetaWindow, a WindowIcon
 	 * and a shadow.
@@ -174,7 +47,7 @@ namespace Gala
 		Actor? clone_container = null; // container for clone to add shadow effect
 		Clone? clone = null;
 		GtkClutter.Texture window_icon;
-		DeepinWindowSwitcherItemShape active_shape;
+		DeepinCssActor shape;
 
 		public DeepinWindowSwitcherItem (Meta.Window window)
 		{
@@ -193,11 +66,11 @@ namespace Gala
 			window_icon = new WindowIcon (window, ICON_PREFER_SIZE);
 			window_icon.set_pivot_point (0.5f, 0.5f);
 
-			active_shape = new DeepinWindowSwitcherItemShape ("deepin-window-switcher-item");
-			active_shape.set_pivot_point (0.5f, 0.5f);
+			shape = new DeepinCssActor ("deepin-window-switcher-item");
+			shape.set_pivot_point (0.5f, 0.5f);
 
 			add_child (window_icon);
-			add_child (active_shape);
+			add_child (shape);
 
 			load_clone ();
  		}
@@ -289,7 +162,7 @@ namespace Gala
 
 			add_child (clone_container);
 
-			set_child_below_sibling (active_shape, clone_container);
+			set_child_below_sibling (shape, clone_container);
 			set_child_above_sibling (window_icon, clone_container);
 
 #if HAS_MUTTER312
@@ -363,7 +236,7 @@ namespace Gala
 			var shape_box = ActorBox ();
 			shape_box.set_size (box.get_width (), box.get_height ());
 			shape_box.set_origin (0, 0);
-			active_shape.allocate (shape_box, flags);
+			shape.allocate (shape_box, flags);
 
 			var icon_box = ActorBox ();
 			if (box.get_width () <= ICON_PREFER_SIZE * 2.5f) {
@@ -415,23 +288,23 @@ namespace Gala
 			}
 		}
 
-		public void set_active (bool value, bool animate = true)
+		public void select (bool value, bool animate = true)
 		{
-			active_shape.save_easing_state ();
-			active_shape.set_easing_duration (animate ? 280 : 0);
-			active_shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
+			shape.save_easing_state ();
 
-			active_shape.active = value;
+			shape.set_easing_duration (animate ? 280 : 0);
+			shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
+			shape.select = value;
 
 			if (value) {
-				active_shape.scale_x = 1.033;
-				active_shape.scale_y = 1.033;
+				shape.scale_x = 1.033;
+				shape.scale_y = 1.033;
 			} else {
-				active_shape.scale_x = 1.0;
-				active_shape.scale_y = 1.0;
+				shape.scale_x = 1.0;
+				shape.scale_y = 1.0;
 			}
 
-			active_shape.restore_easing_state ();
+			shape.restore_easing_state ();
 		}
 	}
 }

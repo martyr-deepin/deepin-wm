@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2014 Deepin, Inc.
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -487,9 +487,9 @@ namespace Gala
 			foreach (var actor in item_container.get_children ()) {
 				unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem) actor;
 				if (item == current_item) {
-					item.set_active (true, animate);
+					item.select (true, animate);
 				} else {
-					item.set_active (false, animate);
+					item.select (false, animate);
 				}
 			}
 		}

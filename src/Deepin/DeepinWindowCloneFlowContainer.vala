@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2014 Deepin, Inc.
 //  Copyright (C) 2014 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -103,8 +103,9 @@ namespace Gala
 			}
 
 			// top most or no other children
-			if (!added)
+			if (!added) {
 				add_child (new_window);
+			}
 
 			reflow ();
 		}
@@ -126,16 +127,17 @@ namespace Gala
 
 		void on_window_activated (DeepinWindowClone clone)
 		{
-			// TODO: restore active state before selecting
-			clone.active = false;
+			// TODO: restore state before selecting
+			clone.select = false;
 			window_activated (clone.window);
 		}
 
 		void on_window_destroyed (Actor actor)
 		{
 			var window = actor as DeepinWindowClone;
-			if (window == null)
+			if (window == null) {
 				return;
+			}
 
 			window.destroy.disconnect (on_window_destroyed);
 			window.activated.disconnect (on_window_activated);
@@ -184,8 +186,9 @@ namespace Gala
 		 */
 		public void reflow ()
 		{
-			if (!opened)
+			if (!opened) {
 				return;
+			}
 
 			var windows = new List<InternalUtils.TilableWindow?> ();
 			foreach (var child in get_children ()) {
@@ -197,8 +200,9 @@ namespace Gala
 #endif
 			}
 
-			if (windows.length () < 1)
+			if (windows.length () < 1) {
 				return;
+			}
 
 			// TODO:
 			// make sure the windows are always in the same order so the algorithm
@@ -221,7 +225,7 @@ namespace Gala
 
 			foreach (var tilable in window_positions) {
 				unowned DeepinWindowClone window = (DeepinWindowClone) tilable.id;
-				if (!window.active) {
+				if (!window.select) {
 					tilable.rect = DeepinUtils.scale_rect_in_center (tilable.rect, 0.9f);
 				}
 				window.take_slot (tilable.rect);
@@ -236,8 +240,9 @@ namespace Gala
 		 */
 		public void select_next_window (MotionDirection direction)
 		{
-			if (get_n_children () < 1)
+			if (get_n_children () < 1) {
 				return;
+			}
 
 			if (current_window == null) {
 				current_window = (DeepinWindowClone) get_child_at_index (0);
@@ -249,62 +254,71 @@ namespace Gala
 
 			DeepinWindowClone? closest = null;
 			foreach (var window in get_children ()) {
-				if (window == current_window)
+				if (window == current_window) {
 					continue;
+				}
 
 				var window_rect = ((DeepinWindowClone) window).slot;
 
 				switch (direction) {
 					case MotionDirection.LEFT:
-						if (window_rect.x > current_rect.x)
+						if (window_rect.x > current_rect.x) {
 							continue;
+						}
 
 						// test for vertical intersection
 						if (window_rect.y + window_rect.height > current_rect.y
 							&& window_rect.y < current_rect.y + current_rect.height) {
 
 							if (closest == null
-								|| closest.slot.x < window_rect.x)
+								|| closest.slot.x < window_rect.x) {
 								closest = (DeepinWindowClone) window;
+							}
 						}
 						break;
 					case MotionDirection.RIGHT:
-						if (window_rect.x < current_rect.x)
+						if (window_rect.x < current_rect.x) {
 							continue;
+						}
 
 						// test for vertical intersection
 						if (window_rect.y + window_rect.height > current_rect.y
 							&& window_rect.y < current_rect.y + current_rect.height) {
 
 							if (closest == null
-								|| closest.slot.x > window_rect.x)
+								|| closest.slot.x > window_rect.x) {
 								closest = (DeepinWindowClone) window;
+							}
 						}
 						break;
 					case MotionDirection.UP:
-						if (window_rect.y > current_rect.y)
+						if (window_rect.y > current_rect.y) {
 							continue;
+						}
 
 						// test for horizontal intersection
 						if (window_rect.x + window_rect.width > current_rect.x
 							&& window_rect.x < current_rect.x + current_rect.width) {
 
 							if (closest == null
-								|| closest.slot.y < window_rect.y)
+								|| closest.slot.y < window_rect.y) {
 								closest = (DeepinWindowClone) window;
+							}
 						}
 						break;
 					case MotionDirection.DOWN:
-						if (window_rect.y < current_rect.y)
+						if (window_rect.y < current_rect.y) {
 							continue;
+						}
 
 						// test for horizontal intersection
 						if (window_rect.x + window_rect.width > current_rect.x
 							&& window_rect.x < current_rect.x + current_rect.width) {
 
 							if (closest == null
-								|| closest.slot.y > window_rect.y)
+								|| closest.slot.y > window_rect.y) {
 								closest = (DeepinWindowClone) window;
+							}
 						}
 						break;
 				}
@@ -315,11 +329,11 @@ namespace Gala
 			}
 
 			if (current_window != null) {
-				current_window.active = false;
+				current_window.select = false;
 			}
 
 			current_window = closest;
-			current_window.active = true;
+			current_window.select = true;
 			window_selected (current_window.window);
 
 			reflow ();
@@ -330,8 +344,9 @@ namespace Gala
 		 */
 		public void activate_selected_window ()
 		{
-			if (current_window != null)
+			if (current_window != null) {
 				current_window.activated ();
+			}
 		}
 
 		/**
@@ -339,8 +354,9 @@ namespace Gala
 		 */
 		public void open (Window? selected_window = null)
 		{
-			if (opened)
+			if (opened) {
 				return;
+			}
 
 			opened = true;
 
@@ -353,15 +369,16 @@ namespace Gala
 						break;
 					}
 				}
-				current_window.active = false;
+				current_window.select = false;
 			} else {
 				current_window = null;
 			}
 
 			// make sure our windows are where they belong in case they were moved
 			// while were closed.
-			foreach (var window in get_children ())
+			foreach (var window in get_children ()) {
 				((DeepinWindowClone) window).transition_to_original_state (false);
+			}
 
 			reflow ();
 		}
@@ -372,13 +389,15 @@ namespace Gala
 		 */
 		public void close ()
 		{
-			if (!opened)
+			if (!opened) {
 				return;
+			}
 
 			opened = false;
 
-			foreach (var window in get_children ())
+			foreach (var window in get_children ()) {
 				((DeepinWindowClone) window).transition_to_original_state (true);
+			}
 		}
 	}
 }

@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2014 Deepin, Inc.
 //  Copyright (C) 2014 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -42,11 +42,12 @@ namespace Gala
 
 		bool is_smooth_scrolling = false;
 
+		Actor dock_clones;
+
 		List<MonitorClone> window_containers_monitors;
 
-		DeepinWorkspaceThumbCloneContainer thumb_workspaces;
 		Actor flow_workspaces;
-		Actor dock_clones;
+		DeepinWorkspaceThumbCloneContainer thumb_workspaces;
 
 		public DeepinMultitaskingView (WindowManager wm)
 		{
@@ -74,8 +75,9 @@ namespace Gala
 			add_child (flow_workspaces);
 			add_child (dock_clones);
 
-			foreach (var workspace in screen.get_workspaces ())
+			foreach (var workspace in screen.get_workspaces ()) {
 				add_workspace (workspace.index ());
+			}
 
 			screen.workspace_added.connect (add_workspace);
 			screen.workspace_removed.connect (remove_workspace);
@@ -94,8 +96,9 @@ namespace Gala
 				}
 
 				if (Prefs.get_dynamic_workspaces () ||
-					(pref != Preference.DYNAMIC_WORKSPACES && pref != Preference.NUM_WORKSPACES))
+					(pref != Preference.DYNAMIC_WORKSPACES && pref != Preference.NUM_WORKSPACES)) {
 					return;
+				}
 
 				Idle.add (() => {
 					unowned List<Workspace> existing_workspaces = screen.get_workspaces ();
@@ -103,10 +106,10 @@ namespace Gala
 					foreach (var child in flow_workspaces.get_children ()) {
 						unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
 						if (existing_workspaces.index (workspace_clone.workspace) < 0) {
-							workspace_clone.window_activated.disconnect (on_window_activated);
+							workspace_clone.window_activated.disconnect (activate_window);
 							workspace_clone.selected.disconnect (activate_workspace);
 
-							thumb_workspaces.remove_thumb (workspace_clone.thumb_workspace);
+							thumb_workspaces.remove_thumb (workspace_clone.related_thumb_workspace);
 
 							workspace_clone.destroy ();
 						}
@@ -126,19 +129,21 @@ namespace Gala
 		 */
 		void update_monitors ()
 		{
-			foreach (var monitor_clone in window_containers_monitors)
+			foreach (var monitor_clone in window_containers_monitors) {
 				monitor_clone.destroy ();
+			}
 
 			var primary = screen.get_primary_monitor ();
 
 			if (InternalUtils.workspaces_only_on_primary ()) {
 				for (var monitor = 0; monitor < screen.get_n_monitors (); monitor++) {
-					if (monitor == primary)
+					if (monitor == primary) {
 						continue;
+					}
 
 					var monitor_clone = new MonitorClone (screen, monitor);
-					// TODO:
-					monitor_clone.window_selected.connect (on_window_activated);
+					// TODO: monitors
+					monitor_clone.window_selected.connect (activate_window);
 					monitor_clone.visible = opened;
 
 					window_containers_monitors.append (monitor_clone);
@@ -158,8 +163,9 @@ namespace Gala
 		 */
 		public override void key_focus_out ()
 		{
-			if (opened && !contains (get_stage ().key_focus))
+			if (opened && !contains (get_stage ().key_focus)) {
 				toggle ();
+			}
 		}
 
 		/**
@@ -167,8 +173,9 @@ namespace Gala
 		 */
 		public override bool scroll_event (ScrollEvent scroll_event)
 		{
-			if (scroll_event.direction != ScrollDirection.SMOOTH)
+			if (scroll_event.direction != ScrollDirection.SMOOTH) {
 				return false;
+			}
 
 			double dx, dy;
 			var event = (Event*)(&scroll_event);
@@ -185,27 +192,30 @@ namespace Gala
 				// actual smooth scroll
 				var choice = Math.fabs (dx) > Math.fabs (dy) ? dx : dy;
 
-				if (choice > 0.3)
+				if (choice > 0.3) {
 					direction = MotionDirection.RIGHT;
-				else if (choice < -0.3)
+				} else if (choice < -0.3) {
 					direction = MotionDirection.LEFT;
-				else
+				} else {
 					return false;
+				}
 
 				is_smooth_scrolling = true;
 				Timeout.add (SMOOTH_SCROLL_DELAY, () => {
 					is_smooth_scrolling = false;
 					return false;
 				});
-			} else
+			} else {
 				// smooth scroll delay still active
 				return false;
+			}
 
 			var active_workspace = screen.get_active_workspace ();
 			var new_workspace = active_workspace.get_neighbor (direction);
 
-			if (active_workspace != new_workspace)
+			if (active_workspace != new_workspace) {
 				new_workspace.activate (screen.get_display ().get_current_time ());
+			}
 
 			return false;
 		}
@@ -225,15 +235,15 @@ namespace Gala
 			foreach (var child in flow_workspaces.get_children ()) {
 				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
 				var index = workspace_clone.workspace.index ();
-				// TODO:
+				// TODO: layout
 				// var dest_x = index * (workspace_clone.width - 150);
 				var dest_x = index * (workspace_clone.width - 220);
 
 				if (index == active_index) {
 					active_x = dest_x;
-					workspace_clone.active = true;
+					workspace_clone.related_thumb_workspace.select (true);
 				} else {
-					workspace_clone.active = false;
+					workspace_clone.related_thumb_workspace.select (false);
 				}
 
 				workspace_clone.save_easing_state ();
@@ -249,15 +259,15 @@ namespace Gala
 			reposition_thumb_workspaces (animate);
 		}
 
+		// TODO: layout
 		void reposition_thumb_workspaces (bool animate)
 		{
 			var active_index = screen.get_active_workspace ().index ();
 
-			if (animate) {
-				thumb_workspaces.save_easing_state ();
-				thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-				thumb_workspaces.set_easing_duration (200);
-			}
+			thumb_workspaces.save_easing_state ();
+
+			thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+			thumb_workspaces.set_easing_duration (animate ? 200 : 0);
 
 			// make sure the active workspace's thumbnail clone is always visible
 			var thumb_workspaces_width = thumb_workspaces.calculate_total_width ();
@@ -268,23 +278,23 @@ namespace Gala
 				thumb_workspaces.x = width / 2 - thumb_workspaces_width / 2;
 			}
 
-			if (animate)
-				thumb_workspaces.restore_easing_state ();
+			thumb_workspaces.restore_easing_state ();
 		}
 
 		void add_workspace (int num)
 		{
 			var workspace = new DeepinWorkspaceFlowClone (screen.get_workspace_by_index (num));
-			workspace.window_activated.connect (on_window_activated);
+			workspace.window_activated.connect (activate_window);
 			workspace.selected.connect (activate_workspace);
 
 			flow_workspaces.insert_child_at_index (workspace, num);
-			thumb_workspaces.add_thumb (workspace.thumb_workspace);
+			thumb_workspaces.add_thumb (workspace.related_thumb_workspace);
 
 			update_positions (opened);
 
-			if (opened)
+			if (opened) {
 				workspace.open ();
+			}
 		}
 
 		void remove_workspace (int num)
@@ -302,13 +312,14 @@ namespace Gala
 				}
 			}
 
-			if (workspace == null)
+			if (workspace == null) {
 				return;
+			}
 
-			workspace.window_activated.disconnect (on_window_activated);
+			workspace.window_activated.disconnect (activate_window);
 			workspace.selected.disconnect (activate_workspace);
 
-			thumb_workspaces.remove_thumb (workspace.thumb_workspace);
+			thumb_workspaces.remove_thumb (workspace.related_thumb_workspace);
 
 			workspace.destroy ();
 
@@ -329,8 +340,9 @@ namespace Gala
 
 			clone.workspace.activate (screen.get_display ().get_current_time ());
 
-			if (close_view)
+			if (close_view) {
 				toggle ();
+			}
 		}
 
 		/**
@@ -341,8 +353,9 @@ namespace Gala
 		{
 			switch (event.keyval) {
 				case Clutter.Key.Escape:
-					if (opened)
+					if (opened) {
 						toggle ();
+					}
 					break;
 				case Clutter.Key.Down:
 					select_window (MotionDirection.DOWN);
@@ -393,14 +406,14 @@ namespace Gala
 			assert_not_reached ();
 		}
 
-		void on_window_activated (Meta.Window window)
+		void activate_window (Meta.Window window)
 		{
 			var time = screen.get_display ().get_current_time ();
 			var workspace = window.get_workspace ();
 
-			if (workspace != screen.get_active_workspace ())
+			if (workspace != screen.get_active_workspace ()) {
 				workspace.activate (time);
-			else {
+			} else {
 				window.activate (time);
 				toggle ();
 			}
@@ -419,8 +432,9 @@ namespace Gala
 		 */
 		public void open (HashTable<string,Variant>? hints = null)
 		{
-			if (opened)
+			if (opened) {
 				return;
+			}
 
 			toggle ();
 		}
@@ -430,8 +444,9 @@ namespace Gala
 		 */
 		public void close ()
 		{
-			if (!opened)
+			if (!opened) {
 				return;
+			}
 
 			toggle ();
 		}
@@ -443,8 +458,9 @@ namespace Gala
 		 */
 		void toggle ()
 		{
-			if (animating)
+			if (animating) {
 				return;
+			}
 
 			animating = true;
 
@@ -455,8 +471,9 @@ namespace Gala
 				if (opening) {
 					container.visible = true;
 					container.open ();
-				} else
+				} else {
 					container.close ();
+				}
 			}
 
 			if (opening) {
@@ -469,7 +486,7 @@ namespace Gala
 				show ();
 				grab_key_focus ();
 
-				// TODO:
+				// TODO: layout
 				// thumb_workspaces.y = height - DeepinWorkspaceFlowClone.BOTTOM_OFFSET + 20;
 				thumb_workspaces.y = 10;
 			} else {
@@ -486,8 +503,9 @@ namespace Gala
 					break;
 				}
 			}
-			if (active_workspace != null)
+			if (active_workspace != null) {
 				flow_workspaces.set_child_above_sibling (active_workspace, null);
+			}
 
 			flow_workspaces.remove_all_transitions ();
 			foreach (var child in flow_workspaces.get_children ()) {
@@ -498,10 +516,11 @@ namespace Gala
 
 			foreach (var child in flow_workspaces.get_children ()) {
 				unowned DeepinWorkspaceFlowClone workspace = (DeepinWorkspaceFlowClone) child;
-				if (opening)
+				if (opening) {
 					workspace.open ();
-				else
+				} else {
 					workspace.close ();
+				}
 			}
 
 			if (opening) {
@@ -512,8 +531,9 @@ namespace Gala
 
 					var window = actor.get_meta_window ();
 
-					if (window.window_type != WindowType.DOCK)
+					if (window.window_type != WindowType.DOCK) {
 						continue;
+					}
 
 					var clone = new SafeWindowClone (window, true);
 					clone.opacity = 0;

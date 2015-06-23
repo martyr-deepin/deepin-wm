@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2014 Deepin, Inc.
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -48,8 +48,8 @@ namespace Gala
 		public Workspace workspace { get; construct; }
 
 		// TODO:
-		Actor active_shape_thumb;
-		DeepinCssActor active_shape_name;
+		Actor shape_thumb;
+		DeepinCssActor shape_name;
 		Actor close_button;
 
 		// TODO: use workspace_clone instead
@@ -71,14 +71,14 @@ namespace Gala
 			reactive = true;
 
 			// active shape
-			active_shape_thumb = new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			active_shape_thumb.opacity = 0;
-			active_shape_thumb.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
-			add_child (active_shape_thumb);
+			shape_thumb = new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+			shape_thumb.opacity = 0;
+			shape_thumb.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
+			add_child (shape_thumb);
 
-			active_shape_name = new DeepinCssActor ("deepin-workspace-thumb-clone-name");
-			active_shape_name.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
-			add_child (active_shape_name);
+			shape_name = new DeepinCssActor ("deepin-workspace-thumb-clone-name");
+			shape_name.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
+			add_child (shape_name);
 
 			// background
 			background = new DeepinFramedBackground (workspace.get_screen (), false);
@@ -87,8 +87,8 @@ namespace Gala
 			background.scale_y = scale;
 			add_child (background);
 
-			// TODO:
 			var click = new ClickAction ();
+			// TODO: merge selected() to set_select()
 			click.clicked.connect (() => selected ());
 			// when the actor is pressed, the ClickAction grabs all events, so we won't be
 			// notified when the cursor leaves the actor, which makes our close button stay
@@ -144,19 +144,23 @@ namespace Gala
 			return false;
 		}
 
-		public void set_active (bool value, bool animate = true)
+		public void select (bool value, bool animate = true)
 		{
-			active_shape_thumb.save_easing_state ();
-			active_shape_thumb.set_easing_duration (animate ?
-				AnimationSettings.get_default ().workspace_switch_duration : 0);
-			active_shape_thumb.opacity = value ? 255 : 0;
-			active_shape_thumb.restore_easing_state ();
+			shape_thumb.save_easing_state ();
 
-			active_shape_name.save_easing_state ();
-			active_shape_name.set_easing_duration (animate ?
+			shape_thumb.set_easing_duration (animate ?
 				AnimationSettings.get_default ().workspace_switch_duration : 0);
-			active_shape_name.active = value;
-			active_shape_name.restore_easing_state ();
+			shape_thumb.opacity = value ? 255 : 0;
+
+			shape_thumb.restore_easing_state ();
+
+			shape_name.save_easing_state ();
+
+			shape_name.set_easing_duration (animate ?
+				AnimationSettings.get_default ().workspace_switch_duration : 0);
+			shape_name.select = value;
+
+			shape_name.restore_easing_state ();
 		}
 
 		public void select_window (Window window)
@@ -268,13 +272,13 @@ namespace Gala
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (thumb_width + SHAPE_PADDING * 2, thumb_height + SHAPE_PADDING * 2);
 			thumb_shape_box.set_origin ((box.get_width () - thumb_shape_box.get_width ()) / 2, -SHAPE_PADDING);
-			active_shape_thumb.allocate (thumb_shape_box, flags);
+			shape_thumb.allocate (thumb_shape_box, flags);
 
 			// TODO: workspace names
 			var name_shape_box = ActorBox ();
 			name_shape_box.set_size (60, 25);
 			name_shape_box.set_origin ((box.get_width () - name_shape_box.get_width ()) / 2, box.get_height () - 50);
-			active_shape_name.allocate (name_shape_box, flags);
+			shape_name.allocate (name_shape_box, flags);
 		}
 	}
 }

@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2014 Deepin, Inc.
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -49,17 +49,17 @@ namespace Gala
 
 		Timeline? timeline = null;
 
-		bool _active = false;
-		public bool active {
+		bool _select = false;
+		public bool select {
 			get {
-				return _active;
+				return _select;
 			}
 			set {
-				if (_active == value) {
+				if (_select == value) {
 					return;
 				}
 
-				_active = value;
+				_select = value;
 
 				if (timeline != null && timeline.is_playing ()) {
 					timeline.stop ();
@@ -78,7 +78,7 @@ namespace Gala
 					}
 					timeline.start ();
 				} else {
-					bg_color = _active ? bg_color_selected : bg_color_normal;
+					bg_color = _select ? bg_color_selected : bg_color_normal;
 				}
 			}
 		}
