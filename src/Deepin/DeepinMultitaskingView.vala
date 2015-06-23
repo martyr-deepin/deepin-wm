@@ -357,17 +357,22 @@ namespace Gala
 						toggle ();
 					}
 					break;
+				case Clutter.Key.Tab:
+				case Clutter.Key.ISO_Left_Tab:
+					bool backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
+					select_window_by_order (backward);
+					break;
 				case Clutter.Key.Down:
-					select_window (MotionDirection.DOWN);
+					select_window_by_direction (MotionDirection.DOWN);
 					break;
 				case Clutter.Key.Up:
-					select_window (MotionDirection.UP);
+					select_window_by_direction (MotionDirection.UP);
 					break;
 				case Clutter.Key.Left:
-					select_window (MotionDirection.LEFT);
+					select_window_by_direction (MotionDirection.LEFT);
 					break;
 				case Clutter.Key.Right:
-					select_window (MotionDirection.RIGHT);
+					select_window_by_direction (MotionDirection.RIGHT);
 					break;
 				case Clutter.Key.Return:
 				case Clutter.Key.KP_Enter:
@@ -379,14 +384,25 @@ namespace Gala
 		}
 
 		/**
-		 * Inform the current WindowCloneContainer that we want to move the focus in
-		 * a specific direction.
+		 * Inform the current WindowCloneContainer that we want to
+		 * move the window focus in.
+		 *
+		 * @param backward The window order in which to looking for.
+		 */
+		void select_window_by_order (bool backward)
+		{
+			get_active_workspace_clone ().window_container.select_window_by_order (backward);
+		}
+
+		/**
+		 * Inform the current WindowCloneContainer that we want to
+		 * move the focus in a specific direction.
 		 *
 		 * @param direction The direction in which to move the focus to
 		 */
-		void select_window (MotionDirection direction)
+		void select_window_by_direction (MotionDirection direction)
 		{
-			get_active_workspace_clone ().window_container.select_next_window (direction);
+			get_active_workspace_clone ().window_container.select_window_by_direction (direction);
 		}
 
 		/**

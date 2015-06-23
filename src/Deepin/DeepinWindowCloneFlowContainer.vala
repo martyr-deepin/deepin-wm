@@ -204,7 +204,7 @@ namespace Gala
 				return;
 			}
 
-			// TODO:
+			// TODO: sort windows
 			// make sure the windows are always in the same order so the algorithm
 			// doesn't give us different slots based on stacking order, which can lead
 			// to windows flying around weirdly
@@ -233,20 +233,82 @@ namespace Gala
 		}
 
 		/**
-		 * Look for the next window in a direction and make this window the
-		 * new current_window. Used for keyboard navigation.
-		 *
-		 * @param direction The MetaMotionDirection in which to search for windows for.
+		 * Change current selected window and call reflow to adjust
+		 * windows size.
 		 */
-		public void select_next_window (MotionDirection direction)
+		void change_current_window (DeepinWindowClone? window, bool need_reflow = true)
+		{
+			if (window == null) {
+				if (current_window != null) {
+					current_window.select = false;
+					current_window = null;
+				}
+			} else {
+				if (current_window != window) {
+					if (current_window != null) {
+						current_window.select = false;
+					}
+					current_window = window;
+				}
+				current_window.select = true;
+				window_selected (current_window.window);
+			}
+
+			if (need_reflow) {
+				reflow ();
+			}
+		}
+
+		/**
+		 * Select the next window.
+		 *
+		 * @param backward The window order in which to looking for.
+		 */
+		public void select_window_by_order (bool backward)
 		{
 			if (get_n_children () < 1) {
 				return;
 			}
 
 			if (current_window == null) {
-				current_window = (DeepinWindowClone) get_child_at_index (0);
-				window_selected (current_window.window);
+				change_current_window ((DeepinWindowClone) get_child_at_index (0));
+				return;
+			}
+
+			DeepinWindowClone next_window;
+			if (backward) {
+				next_window = (DeepinWindowClone) current_window.get_next_sibling ();
+				if (next_window == null) {
+					next_window = (DeepinWindowClone) get_first_child ();
+				}
+			} else {
+				next_window = (DeepinWindowClone) current_window.get_previous_sibling ();
+				if (next_window == null) {
+					next_window = (DeepinWindowClone) get_last_child ();
+				}
+			}
+
+			if (current_window != null) {
+				current_window.select = false;
+			}
+
+			change_current_window (next_window);
+		}
+
+		/**
+		 * Look for the next window in a direction and make this window the
+		 * new current_window. Used for keyboard navigation.
+		 *
+		 * @param direction The MetaMotionDirection in which to search for windows for.
+		 */
+		public void select_window_by_direction (MotionDirection direction)
+		{
+			if (get_n_children () < 1) {
+				return;
+			}
+
+			if (current_window == null) {
+				change_current_window ((DeepinWindowClone) get_child_at_index (0));
 				return;
 			}
 
@@ -328,15 +390,7 @@ namespace Gala
 				return;
 			}
 
-			if (current_window != null) {
-				current_window.select = false;
-			}
-
-			current_window = closest;
-			current_window.select = true;
-			window_selected (current_window.window);
-
-			reflow ();
+			change_current_window (closest);
 		}
 
 		/**
@@ -360,22 +414,19 @@ namespace Gala
 
 			opened = true;
 
-			// hide the highlight when opened
+			// reset the current window
+			DeepinWindowClone? selected_window_clone = null;
 			if (selected_window != null) {
 				foreach (var child in get_children ()) {
-					unowned DeepinWindowClone tiled_window = (DeepinWindowClone) child;
-					if (tiled_window.window == selected_window) {
-						current_window = tiled_window;
+					unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
+					if (window_clone.window == selected_window) {
+						selected_window_clone = window_clone;
 						break;
 					}
 				}
-				current_window.select = false;
-			} else {
-				current_window = null;
 			}
+			change_current_window (selected_window_clone, false);
 
-			// make sure our windows are where they belong in case they were moved
-			// while were closed.
 			foreach (var window in get_children ()) {
 				((DeepinWindowClone) window).transition_to_original_state (false);
 			}
