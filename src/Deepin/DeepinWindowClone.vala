@@ -158,16 +158,18 @@ namespace Gala
 			window.unmanaged.disconnect (unmanaged);
 			window.notify["on-all-workspaces"].disconnect (on_all_workspaces_changed);
 
-			if (shadow_update_timeout != 0)
+			if (shadow_update_timeout != 0) {
 				Source.remove (shadow_update_timeout);
+			}
 
 			if (enable_shadow) {
 #if HAS_MUTTER312
 				window.size_changed.disconnect (update_shadow_size);
 #else
 				var actor = window.get_compositor_private () as WindowActor;
-				if (actor != null)
+				if (actor != null) {
 					actor.size_changed.disconnect (update_shadow_size);
+				}
 #endif
 			}
 		}
@@ -187,16 +189,18 @@ namespace Gala
 			var actor = window.get_compositor_private () as WindowActor;
 			if (actor == null) {
 				Idle.add (() => {
-					if (window.get_compositor_private () != null)
+					if (window.get_compositor_private () != null) {
 						load_clone (true);
+					}
 					return false;
 				});
 
 				return;
 			}
 
-			if (thumbnail_mode)
+			if (thumbnail_mode) {
 				actor.hide ();
+			}
 
 			clone = new Clone (actor.get_texture ());
 			add_child (clone);
@@ -225,8 +229,9 @@ namespace Gala
 #endif
 			}
 
-			if (should_fade ())
+			if (should_fade ()) {
 				opacity = 0;
+			}
 
 			// if we were waiting the view was most probably already opened when our window
 			// finally got available. So we fade-in and make sure we took the took place.
@@ -264,8 +269,9 @@ namespace Gala
 		 */
 		void update_shadow_size ()
 		{
-			if (shadow_update_timeout != 0)
+			if (shadow_update_timeout != 0) {
 				Source.remove (shadow_update_timeout);
+			}
 
 			shadow_update_timeout = Timeout.add (500, () => {
 #if HAS_MUTTER312
@@ -290,8 +296,9 @@ namespace Gala
 		void on_all_workspaces_changed ()
 		{
 			// we don't display windows that are on all workspaces
-			if (window.on_all_workspaces)
+			if (window.on_all_workspaces) {
 				unmanaged ();
+			}
 		}
 
 		/**
@@ -348,8 +355,9 @@ namespace Gala
 				close_button.restore_easing_state ();
 			}
 
-			if (should_fade ())
+			if (should_fade ()) {
 				opacity = 0;
+			}
 		}
 
 		/**
@@ -392,8 +400,9 @@ namespace Gala
 			base.allocate (box, flags);
 
 			foreach (var child in get_children ()) {
-				if (child != clone && child != shape)
+				if (child != clone && child != shape) {
 					child.allocate_preferred_size (flags);
+				}
 			}
 
 			ActorBox shape_box = {
@@ -515,11 +524,13 @@ namespace Gala
 		 */
 		void unmanaged ()
 		{
-			if (drag_action != null && drag_action.dragging)
+			if (drag_action != null && drag_action.dragging) {
 				drag_action.cancel ();
+			}
 
-			if (clone != null)
+			if (clone != null) {
 				clone.destroy ();
+			}
 
 			if (check_confirm_dialog_cb != 0) {
 				SignalHandler.disconnect (window.get_screen (), check_confirm_dialog_cb);
@@ -616,14 +627,16 @@ namespace Gala
 
 			// if we have don't dynamic workspace, we don't allow inserting
 			if (workspace_thumb == null && insert_thumb == null
-				|| (insert_thumb != null && !Prefs.get_dynamic_workspaces ()))
+				|| (insert_thumb != null && !Prefs.get_dynamic_workspaces ())) {
 				return;
+			}
 
 			// for an workspace thumbnail, we only do animations if there is an actual movement possible
 			if (workspace_thumb != null
 				&& workspace_thumb.workspace == window.get_workspace ()
-				&& window.get_monitor () == window.get_screen ().get_primary_monitor ())
+				&& window.get_monitor () == window.get_screen ().get_primary_monitor ()) {
 				return;
+			}
 
 			var scale = hovered ? 0.4 : 1.0;
 			var opacity = hovered ? 0 : 255;
@@ -645,11 +658,12 @@ namespace Gala
 			}
 
 			if (workspace_thumb != null) {
-				if (hovered)
+				if (hovered) {
 					// TODO: animation
 					workspace_thumb.add_window (window);
-				else
+				} else {
 					workspace_thumb.remove_window (window);
+				}
 			}
 		}
 
@@ -686,10 +700,11 @@ namespace Gala
 
 				// if we don't actually change workspaces, the window-added/removed signals won't
 				// be emitted so we can just keep our window here
-				if (!will_move)
+				if (!will_move) {
 					drag_canceled ();
-				else
+				} else {
 					unmanaged ();
+				}
 
 				return;
 			} else if (destination is MonitorClone) {
@@ -697,8 +712,9 @@ namespace Gala
 				if (window.get_monitor () != monitor) {
 					window.move_to_monitor (monitor);
 					unmanaged ();
-				} else
+				} else {
 					drag_canceled ();
+				}
 
 				return;
 			}
@@ -715,11 +731,12 @@ namespace Gala
 				did_move = true;
 			}
 
-			if (did_move)
+			if (did_move) {
 				unmanaged ();
-			else
+			} else {
 				// if we're dropped at the place where we came from interpret as cancel
 				drag_canceled ();
+			}
 		}
 
 		/**
@@ -744,10 +761,11 @@ namespace Gala
 			};
 
 			var transition = clone.get_transition ("scale-x");
-			if (transition != null)
+			if (transition != null) {
 				transition.completed.connect (() => finished (this));
-			else
+			} else {
 				finished (this);
+			}
 
 			clone.restore_easing_state ();
 

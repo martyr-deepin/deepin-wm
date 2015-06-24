@@ -47,8 +47,8 @@ namespace Gala
 
 		public Workspace workspace { get; construct; }
 
-		Actor shape_thumb;
-		DeepinCssActor shape_name;
+		Actor shape_thumb; // selected shape for workspace thumbnail clone
+		DeepinCssActor shape_name; // selected shape for workspace name field
 		Actor close_button;
 
 		Actor workspace_clone;
@@ -209,11 +209,11 @@ namespace Gala
 
 			close_button.opacity = 0;
 			var transition = get_transition ("opacity");
-			if (transition != null)
+			if (transition != null) {
 				transition.completed.connect (() => {
 					close_button.visible = false;
 				});
-			else {
+			} else {
 				close_button.visible = false;
 			}
 		}

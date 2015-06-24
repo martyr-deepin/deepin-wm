@@ -189,12 +189,15 @@ namespace Gala
 			if (window.window_type != WindowType.NORMAL
 				|| window.get_workspace () != workspace
 				|| window.on_all_workspaces
-				|| window.get_monitor () != window.get_screen ().get_primary_monitor ())
+				|| window.get_monitor () != window.get_screen ().get_primary_monitor ()) {
 				return;
+			}
 
-			foreach (var child in window_container.get_children ())
-				if (((DeepinWindowClone) child).window == window)
+			foreach (var child in window_container.get_children ()) {
+				if (((DeepinWindowClone) child).window == window) {
 					return;
+				}
+			}
 
 			window_container.add_window (window);
 			related_thumb_workspace.add_window (window);
@@ -217,8 +220,9 @@ namespace Gala
 
 		void window_left_monitor (Screen screen, int monitor, Window window)
 		{
-			if (monitor == screen.get_primary_monitor ())
+			if (monitor == screen.get_primary_monitor ()) {
 				remove_window (window);
+			}
 		}
 
 		/**
@@ -243,8 +247,9 @@ namespace Gala
 		 */
 		public void open ()
 		{
-			if (opened)
+			if (opened) {
 				return;
+			}
 
 			opened = true;
 
@@ -284,8 +289,9 @@ namespace Gala
 		 */
 		public void close ()
 		{
-			if (!opened)
+			if (!opened) {
 				return;
+			}
 
 			opened = false;
 
