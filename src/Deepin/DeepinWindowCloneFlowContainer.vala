@@ -46,6 +46,12 @@ namespace Gala
 		 */
 		DeepinWindowClone? current_window;
 
+		/**
+		 * Own all window postions to find next or preview window in
+		 * position.
+		 */
+		List<InternalUtils.TilableWindow?> window_positions;
+
 		public DeepinWindowCloneFlowContainer (bool overview_mode = false)
 		{
 			Object (overview_mode: overview_mode);
@@ -221,7 +227,8 @@ namespace Gala
 				(int)height - padding_top - padding_bottom
 			};
 
-			var window_positions = InternalUtils.calculate_grid_placement (area, windows);
+			// reset window_positions
+			window_positions = InternalUtils.calculate_grid_placement (area, windows);
 
 			foreach (var tilable in window_positions) {
 				unowned DeepinWindowClone window = (DeepinWindowClone) tilable.id;
@@ -269,28 +276,46 @@ namespace Gala
 			if (get_n_children () < 1) {
 				return;
 			}
-
-			if (current_window == null) {
-				change_current_window ((DeepinWindowClone) get_child_at_index (0));
+			if (window_positions.length () < 1) {
 				return;
 			}
 
-			DeepinWindowClone next_window;
-			if (backward) {
-				next_window = (DeepinWindowClone) current_window.get_next_sibling ();
-				if (next_window == null) {
-					next_window = (DeepinWindowClone) get_first_child ();
+			// get current window index
+			int index = -1;
+			int tmp_index = 0;
+			foreach (var tilable in window_positions) {
+				unowned DeepinWindowClone window = (DeepinWindowClone) tilable.id;
+				if (window == current_window) {
+					index = tmp_index;
+					break;
 				}
-			} else {
-				next_window = (DeepinWindowClone) current_window.get_previous_sibling ();
-				if (next_window == null) {
-					next_window = (DeepinWindowClone) get_last_child ();
-				}
+				tmp_index++;
 			}
 
-			if (current_window != null) {
-				current_window.select = false;
+			// search for next window
+			DeepinWindowClone next_window = null;
+			int next_index = -1;
+			if (index < 0) {
+				if (backward) {
+					next_index = (int) window_positions.length () - 1;
+				} else {
+					next_index = 0;
+				}
+			} else {
+				next_index = index;
+				if (backward) {
+					next_index--;
+					if (next_index < 0) {
+						next_index = (int) window_positions.length () - 1;
+					}
+				} else {
+					next_index++;
+					if (next_index >= (int) window_positions.length ()) {
+						next_index = 0;
+					}
+				}
 			}
+			next_window = (DeepinWindowClone) window_positions.nth_data (next_index).id;
 
 			change_current_window (next_window);
 		}
