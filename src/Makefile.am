@@ -48,6 +48,7 @@ gala_VALASOURCES = \
 	Deepin/DeepinCssStaticActor.vala \
 	Deepin/DeepinFramedBackground.vala \
 	Deepin/DeepinMultitaskingView.vala \
+	Deepin/DeepinRoundRectEffect.vala \
 	Deepin/DeepinUtils.vala \
 	Deepin/DeepinWindowClone.vala \
 	Deepin/DeepinWindowCloneFlowContainer.vala \

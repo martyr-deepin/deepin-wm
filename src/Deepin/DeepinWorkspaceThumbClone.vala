@@ -47,12 +47,11 @@ namespace Gala
 
 		public Workspace workspace { get; construct; }
 
-		// TODO:
 		Actor shape_thumb;
 		DeepinCssActor shape_name;
 		Actor close_button;
 
-		// TODO: use workspace_clone instead
+		Actor workspace_clone;
 		DeepinWindowCloneThumbContainer window_container;
 		Actor background;
 
@@ -80,12 +79,18 @@ namespace Gala
 			shape_name.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
 			add_child (shape_name);
 
+			// workspace thumbnail clone
+			workspace_clone = new Actor ();
+			workspace_clone.add_effect (new DeepinRoundRectEffect (5));
+			add_child (workspace_clone);
+
 			// background
 			background = new DeepinFramedBackground (workspace.get_screen (), false);
 			double scale = ((double) SIZE) / background.width;
 			background.scale_x = scale;
 			background.scale_y = scale;
-			add_child (background);
+			background.add_constraint (new BindConstraint (workspace_clone, BindCoordinate.ALL, 0));
+			workspace_clone.add_child (background);
 
 			var click = new ClickAction ();
 			// TODO: merge selected() to set_select()
@@ -101,8 +106,8 @@ namespace Gala
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
 			window_container.width = width;
 			window_container.height = height;
-
-			add_child (window_container);
+			window_container.add_constraint (new BindConstraint (workspace_clone, BindCoordinate.ALL, 0));
+			workspace_clone.add_child (window_container);
 
 			// TODO: show close button
 			close_button = Utils.create_close_button ();
@@ -266,8 +271,7 @@ namespace Gala
 			float thumb_height = thumb_width * thumb_scale;
 			thumb_box.set_size (thumb_width, thumb_height);
 			thumb_box.set_origin (0, 0);
-			background.allocate (thumb_box, flags);
-			window_container.allocate (thumb_box, flags);
+			workspace_clone.allocate (thumb_box, flags);
 
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (thumb_width + SHAPE_PADDING * 2, thumb_height + SHAPE_PADDING * 2);
