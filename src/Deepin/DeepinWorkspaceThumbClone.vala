@@ -81,7 +81,8 @@ namespace Gala
 
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
-			workspace_clone.add_effect (new DeepinRoundRectEffect (5));
+			int radius = DeepinUtils.get_css_border_radius ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 			add_child (workspace_clone);
 
 			// background
