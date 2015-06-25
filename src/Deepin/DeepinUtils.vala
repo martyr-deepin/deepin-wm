@@ -97,29 +97,40 @@ namespace Gala
 			return false;
 		}
 
-		public static Meta.Rectangle scale_rect (Meta.Rectangle rect, float scale)
+		/**
+		 * Shrink a MetaRectangle on all sides for the given size.
+		 * Negative amounts will scale it instead.
+		 */
+		public static void shrink_rectangle (ref Meta.Rectangle rect, int size)
 		{
-			return {
-				(int) (rect.x * scale),
-				(int) (rect.y * scale),
-				(int) (rect.width * scale),
-				(int) (rect.height * scale),
-			};
+			rect.x += size;
+			rect.y += size;
+			rect.width -= size * 2;
+			rect.height -= size * 2;
 		}
 
-		// Scale rectangle with center point not changed.
-		public static Meta.Rectangle scale_rect_in_center (Meta.Rectangle rect, float scale)
+		/**
+		 * Scale a MetaRectangle on size and position.
+		 */
+		public static void scale_rectangle (ref Meta.Rectangle rect, float scale)
 		{
-			float center_x = rect.x + rect.width / 2;
-			float center_y = rect.y + rect.height / 2;
-			float new_width = rect.width * scale;
-			float new_height = rect.height * scale;
-			return {
-				(int) (center_x - new_width / 2),
-				(int) (center_y - new_height / 2),
-				(int) (new_width),
-				(int) (new_height),
-			};
+			rect.x = (int) (rect.x * scale);
+			rect.y = (int) (rect.y * scale);
+			rect.width = (int) (rect.width * scale);
+			rect.height = (int) (rect.height * scale);
+		}
+
+		/**
+		 * Scale a MetaRectangle on allsides and keep center point not changed.
+		 */
+		public static void scale_rectangle_in_center (ref Meta.Rectangle rect, float scale)
+		{
+			int distance_x = (int) ((scale - 1) / 2 * rect.width);
+			int distance_y = (int) ((scale - 1) / 2 * rect.height);
+			rect.x -= distance_x;
+			rect.y -= distance_y;
+			rect.width += distance_x * 2;
+			rect.height += distance_y * 2;
 		}
 	}
 }

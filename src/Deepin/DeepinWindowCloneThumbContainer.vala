@@ -188,7 +188,7 @@ namespace Gala
 		{
 			// the scale between workspace's thumbnail size and real size
 			float scale = 1.0f;
-			unowned Screen screen = workspace.get_screen ();
+			var screen = workspace.get_screen ();
 			var monitor_geometry = screen.get_monitor_geometry (screen.get_primary_monitor ());
 			if (monitor_geometry.width != 0) {
 				scale = width / (float) monitor_geometry.width;
@@ -203,7 +203,7 @@ namespace Gala
 #else
 				rect = window.window.window.get_outer_rect ();
 #endif
-				rect = DeepinUtils.scale_rect (rect, scale);
+				DeepinUtils.scale_rectangle (ref rect, scale);
 				window.take_slot (rect);
 			}
 

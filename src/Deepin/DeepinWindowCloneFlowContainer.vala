@@ -36,8 +36,6 @@ namespace Gala
 		public int padding_right { get; set; default = 12; }
 		public int padding_bottom { get; set; default = 12; }
 
-		public bool overview_mode { get; construct; }
-
 		bool opened;
 
 		/**
@@ -47,14 +45,14 @@ namespace Gala
 		DeepinWindowClone? current_window;
 
 		/**
-		 * Own all window postions to find next or preview window in
+		 * Own all window positions to find next or preview window in
 		 * position.
 		 */
 		List<InternalUtils.TilableWindow?> window_positions;
 
-		public DeepinWindowCloneFlowContainer (bool overview_mode = false)
+		public DeepinWindowCloneFlowContainer ()
 		{
-			Object (overview_mode: overview_mode);
+			Object ();
 		}
 
 		construct
@@ -75,15 +73,15 @@ namespace Gala
 
 			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
 			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone tw = (DeepinWindowClone) child;
-				windows.prepend (tw.window);
+				unowned DeepinWindowClone clone = (DeepinWindowClone) child;
+				windows.prepend (clone.window);
 			}
 			windows.prepend (window);
 			windows.reverse ();
 
 			var windows_ordered = display.sort_windows_by_stacking (windows);
 
-			var new_window = new DeepinWindowClone (window, overview_mode);
+			var new_window = new DeepinWindowClone (window);
 
 			new_window.activated.connect (on_window_activated);
 			new_window.destroy.connect (on_window_destroyed);
@@ -100,9 +98,9 @@ namespace Gala
 			}
 
 			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone tw = (DeepinWindowClone) child;
-				if (target == tw.window) {
-					insert_child_above (new_window, tw);
+				unowned DeepinWindowClone clone = (DeepinWindowClone) child;
+				if (target == clone.window) {
+					insert_child_above (new_window, clone);
 					added = true;
 					break;
 				}
@@ -155,19 +153,21 @@ namespace Gala
 			});
 		}
 
+		// TODO: check window order
 		/**
 		 * Sort the windows z-order by their actual stacking to make intersections
 		 * during animations correct.
 		 */
 		public void restack_windows (Screen screen)
 		{
+			// stdout.printf ("restack windows...\n");	// TODO
 			unowned Meta.Display display = screen.get_display ();
 			var children = get_children ();
 
 			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
 			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone tw = (DeepinWindowClone) child;
-				windows.prepend (tw.window);
+				unowned DeepinWindowClone clone = (DeepinWindowClone) child;
+				windows.prepend (clone.window);
 			}
 
 			var windows_ordered = display.sort_windows_by_stacking (windows);
@@ -233,7 +233,7 @@ namespace Gala
 			foreach (var tilable in window_positions) {
 				unowned DeepinWindowClone window = (DeepinWindowClone) tilable.id;
 				if (!window.select) {
-					tilable.rect = DeepinUtils.scale_rect_in_center (tilable.rect, 0.9f);
+					DeepinUtils.scale_rectangle_in_center (ref tilable.rect, 0.9f);
 				}
 				window.take_slot (tilable.rect);
 			}
@@ -440,17 +440,17 @@ namespace Gala
 			opened = true;
 
 			// reset the current window
-			DeepinWindowClone? selected_window_clone = null;
+			DeepinWindowClone? selected_clone = null;
 			if (selected_window != null) {
 				foreach (var child in get_children ()) {
-					unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
-					if (window_clone.window == selected_window) {
-						selected_window_clone = window_clone;
+					unowned DeepinWindowClone clone = (DeepinWindowClone) child;
+					if (clone.window == selected_window) {
+						selected_clone = clone;
 						break;
 					}
 				}
 			}
-			change_current_window (selected_window_clone, false);
+			change_current_window (selected_clone, false);
 
 			foreach (var window in get_children ()) {
 				((DeepinWindowClone) window).transition_to_original_state (false);

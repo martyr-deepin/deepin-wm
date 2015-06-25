@@ -91,7 +91,7 @@ namespace Gala
 		{
 			opened = false;
 
-			unowned Screen screen = workspace.get_screen ();
+			var screen = workspace.get_screen ();
 			var monitor_geometry = screen.get_monitor_geometry (screen.get_primary_monitor ());
 
 			background = new DeepinFramedBackground (workspace.get_screen ());
@@ -165,7 +165,7 @@ namespace Gala
 
 		~DeepinWorkspaceFlowClone ()
 		{
-			unowned Screen screen = workspace.get_screen ();
+			var screen = workspace.get_screen ();
 
 			screen.restacked.disconnect (window_container.restack_windows);
 
@@ -226,20 +226,6 @@ namespace Gala
 		}
 
 		/**
-		 * Utility function to shrink a MetaRectangle on all sides for the given amount.
-		 * Negative amounts will scale it instead.
-		 *
-		 * @param amount The amount in px to shrink.
-		 */
-		static inline void shrink_rectangle (ref Meta.Rectangle rect, int amount)
-		{
-			rect.x += amount;
-			rect.y += amount;
-			rect.width -= amount * 2;
-			rect.height -= amount * 2;
-		}
-
-		/**
 		 * Animates the background to its scale, causes a redraw on the DeepinWorkspaceThumbClone and
 		 * makes sure the DeepinWindowCloneFlowContainer animates its windows to their tiled layout.
 		 * Also sets the current_window of the DeepinWindowCloneFlowContainer to the active window
@@ -273,7 +259,7 @@ namespace Gala
 				(int)Math.floorf (monitor.width * scale),
 				(int)Math.floorf (monitor.height * scale)
 			};
-			shrink_rectangle (ref area, 32);
+			DeepinUtils.shrink_rectangle (ref area, 32);
 
 			window_container.padding_top = TOP_OFFSET;
 			window_container.padding_left =

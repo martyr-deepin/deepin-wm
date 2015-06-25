@@ -305,9 +305,9 @@ namespace Gala
 			unowned List<Meta.Workspace> existing_workspaces = screen.get_workspaces ();
 
 			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone clone = (DeepinWorkspaceFlowClone) child;
-				if (existing_workspaces.index (clone.workspace) < 0) {
-					workspace = clone;
+				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
+				if (existing_workspaces.index (workspace_clone.workspace) < 0) {
+					workspace = workspace_clone;
 					break;
 				}
 			}
@@ -513,9 +513,9 @@ namespace Gala
 			DeepinWorkspaceFlowClone? active_workspace = null;
 			var active = screen.get_active_workspace ();
 			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace = (DeepinWorkspaceFlowClone) child;
-				if (workspace.workspace == active) {
-					active_workspace = workspace;
+				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
+				if (workspace_clone.workspace == active) {
+					active_workspace = workspace_clone;
 					break;
 				}
 			}
@@ -531,11 +531,11 @@ namespace Gala
 			update_positions (false);
 
 			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace = (DeepinWorkspaceFlowClone) child;
+				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
 				if (opening) {
-					workspace.open ();
+					workspace_clone.open ();
 				} else {
-					workspace.close ();
+					workspace_clone.close ();
 				}
 			}
 
