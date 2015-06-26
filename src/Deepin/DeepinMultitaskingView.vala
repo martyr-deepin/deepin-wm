@@ -33,6 +33,25 @@ namespace Gala
 		public const AnimationMode WORKSPACE_ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 		const int SMOOTH_SCROLL_DELAY = 500;
 
+		/**
+		 * The percent value between workspace clones' horizontal
+		 * offset and monitor's height.
+		 */
+		public const float HORIZONTAL_OFFSET_PERCENT = 0.03f;
+
+		/**
+		 * The percent value between flow workspace's top offset and
+		 * monitor's height.
+		 */
+		public const float FLOW_CLONE_TOP_OFFSET_PERCENT = 0.24f;
+
+		// TODO: layout, use container for flow workspaces
+		/**
+		 * The percent value between distance of flow workspaces and
+		 * its width.
+		 */
+		public const float FLOW_CLONE_DISTANCE_PERCENT = 0.10f;
+
 		public WindowManager wm { get; construct; }
 
 		Meta.Screen screen;
@@ -67,7 +86,6 @@ namespace Gala
 			flow_workspaces.set_easing_mode (WORKSPACE_ANIMATION_MODE);
 
 			thumb_workspaces = new DeepinWorkspaceThumbCloneContainer (screen);
-			thumb_workspaces.request_reposition.connect (() => reposition_thumb_workspaces (true));
 
 			dock_clones = new Actor ();
 
@@ -109,7 +127,7 @@ namespace Gala
 							workspace_clone.window_activated.disconnect (activate_window);
 							workspace_clone.selected.disconnect (activate_workspace);
 
-							thumb_workspaces.remove_thumb (workspace_clone.related_thumb_workspace);
+							thumb_workspaces.remove_workspace (workspace_clone.related_thumb_workspace);
 
 							workspace_clone.destroy ();
 						}
@@ -222,22 +240,22 @@ namespace Gala
 
 		/**
 		 * Places the WorkspaceClones, moves the view so that the active one is shown
-		 * and does the same for the IconGroups.
+		 * and does the same for the ThumbWorkspaces.
 		 *
 		 * @param animate Whether to animate the movement or have all elements take their
 		 *                positions immediately.
 		 */
+		// TODO: rename
 		void update_positions (bool animate)
 		{
 			var active_index = screen.get_active_workspace ().index ();
 			var active_x = 0.0f;
 
+			// TODO: layout, use container for flow workspaces
 			foreach (var child in flow_workspaces.get_children ()) {
 				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
 				var index = workspace_clone.workspace.index ();
-				// TODO: layout
-				// var dest_x = index * (workspace_clone.width - 150);
-				var dest_x = index * (workspace_clone.width - 220);
+				var dest_x = index * (int) (workspace_clone.width * (1 - FLOW_CLONE_DISTANCE_PERCENT * 2));
 
 				if (index == active_index) {
 					active_x = dest_x;
@@ -247,8 +265,10 @@ namespace Gala
 				}
 
 				workspace_clone.save_easing_state ();
+
 				workspace_clone.set_easing_duration (animate ? 200 : 0);
 				workspace_clone.x = dest_x;
+
 				workspace_clone.restore_easing_state ();
 			}
 
@@ -256,29 +276,8 @@ namespace Gala
 				AnimationSettings.get_default ().workspace_switch_duration : 0);
 			flow_workspaces.x = -active_x;
 
-			reposition_thumb_workspaces (animate);
-		}
-
-		// TODO: layout
-		void reposition_thumb_workspaces (bool animate)
-		{
-			var active_index = screen.get_active_workspace ().index ();
-
-			thumb_workspaces.save_easing_state ();
-
-			thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-			thumb_workspaces.set_easing_duration (animate ? 200 : 0);
-
-			// make sure the active workspace's thumbnail clone is always visible
-			var thumb_workspaces_width = thumb_workspaces.calculate_total_width ();
-			if (thumb_workspaces_width > width) {
-				thumb_workspaces.x = (-active_index * (DeepinWorkspaceThumbCloneContainer.SPACING + DeepinWorkspaceThumbClone.SIZE) + width / 2)
-				.clamp (width - thumb_workspaces_width - 64, 64);
-			} else {
-				thumb_workspaces.x = width / 2 - thumb_workspaces_width / 2;
-			}
-
-			thumb_workspaces.restore_easing_state ();
+			thumb_workspaces.update_layout ();
+			thumb_workspaces.x = width / 2 - thumb_workspaces.width / 2;
 		}
 
 		void add_workspace (int num)
@@ -288,7 +287,7 @@ namespace Gala
 			workspace.selected.connect (activate_workspace);
 
 			flow_workspaces.insert_child_at_index (workspace, num);
-			thumb_workspaces.add_thumb (workspace.related_thumb_workspace);
+			thumb_workspaces.add_workspace (workspace.related_thumb_workspace);
 
 			update_positions (opened);
 
@@ -319,7 +318,7 @@ namespace Gala
 			workspace.window_activated.disconnect (activate_window);
 			workspace.selected.disconnect (activate_workspace);
 
-			thumb_workspaces.remove_thumb (workspace.related_thumb_workspace);
+			thumb_workspaces.remove_workspace (workspace.related_thumb_workspace);
 
 			workspace.destroy ();
 
@@ -501,10 +500,6 @@ namespace Gala
 				wm.top_window_group.hide ();
 				show ();
 				grab_key_focus ();
-
-				// TODO: layout
-				// thumb_workspaces.y = height - DeepinWorkspaceFlowClone.BOTTOM_OFFSET + 20;
-				thumb_workspaces.y = 10;
 			} else {
 				DragDropAction.cancel_all_by_id ("deepin-multitaskingview-window");
 			}

@@ -33,18 +33,6 @@ namespace Gala
 	public class DeepinWorkspaceFlowClone : Actor
 	{
 		/**
-		 * The offset of the scaled background to the bottom of the monitor bounds
-		 */
-		// TODO:
-		public const int BOTTOM_OFFSET = 20;
-
-		/**
-		 * The offset of the scaled background to the top of the monitor bounds
-		 */
-		// TODO:
-		const int TOP_OFFSET = 200;
-
-		/**
 		 * The amount of time a window has to be over the DeepinWorkspaceFlowClone while in drag
 		 * before we activate the workspace.
 		 */
@@ -241,30 +229,27 @@ namespace Gala
 
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
-
 			var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
-			var scale = (float)(monitor.height - TOP_OFFSET - BOTTOM_OFFSET) / monitor.height;
-			var pivotY = TOP_OFFSET / (monitor.height - monitor.height * scale);
-			background.set_pivot_point (0.5f, pivotY);
+
+			int top_offset = (int) (monitor.height * DeepinMultitaskingView.FLOW_CLONE_TOP_OFFSET_PERCENT);
+			int bottom_offset = (int) (monitor.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			float scale = (float)(monitor.height - top_offset - bottom_offset) / monitor.height;
+			float pivot_y = top_offset / (monitor.height - monitor.height * scale);
+
+			background.set_pivot_point (0.5f, pivot_y);
 
 			background.save_easing_state ();
-			background.set_easing_duration (250);
-			background.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+
+			background.set_easing_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+			background.set_easing_mode (DeepinMultitaskingView.ANIMATION_MODE);
 			background.set_scale (scale, scale);
+
 			background.restore_easing_state ();
 
-			Meta.Rectangle area = {
-				(int)Math.floorf (monitor.x + monitor.width - monitor.width * scale) / 2,
-				(int)Math.floorf (monitor.y + TOP_OFFSET),
-				(int)Math.floorf (monitor.width * scale),
-				(int)Math.floorf (monitor.height * scale)
-			};
-			DeepinUtils.shrink_rectangle (ref area, 32);
-
-			window_container.padding_top = TOP_OFFSET;
+			window_container.padding_top = top_offset;
 			window_container.padding_left =
 				window_container.padding_right = (int)(monitor.width - monitor.width * scale) / 2;
-			window_container.padding_bottom = BOTTOM_OFFSET;
+			window_container.padding_bottom = bottom_offset;
 
 			window_container.open (screen.get_active_workspace () == workspace ? display.get_focus_window () : null);
 		}

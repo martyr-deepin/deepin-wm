@@ -28,15 +28,28 @@ namespace Gala
 	public class DeepinWorkspaceThumbClone : Actor
 	{
 		// TODO:
-		// public static const int SIZE = 64;
-		public static const int SIZE = 192;
+		// public const int SIZE = 64;
+		public const int SIZE = 192;
 
 		const int SHAPE_PADDING = 5;
 
-		// TODO: draw plus button
-		static const int PLUS_SIZE = 8;
-		static const int PLUS_WIDTH = 24;
+		/**
+		 * Width and heigth for workspace name field.
+		 */
+		const int NAME_WIDTH = 80;
+		const int NAME_HEIGHT = 24;
 
+		 /**
+		  * Distance between thumbnail workspace clone and workspace
+		  * name field.
+		  */
+		const int NAME_DISTANCE = 20;
+
+		// TODO: draw plus button
+		const int PLUS_SIZE = 8;
+		const int PLUS_WIDTH = 24;
+
+		// TODO: close button
 		const int SHOW_CLOSE_BUTTON_DELAY = 200;
 
 		/**
@@ -64,7 +77,7 @@ namespace Gala
 
 		construct
 		{
-			// TODO: size
+			// TODO: layout
 			width = SIZE;
 			height = SIZE;
 			reactive = true;
@@ -174,7 +187,7 @@ namespace Gala
 			window_container.select_window (window);
 		}
 
-		// TODO:
+		// TODO: necessary?
 		/**
 		 * Requests toggling the close button. If show is true, a timeout will be set after which
 		 * the close button is shown, if false, the close button is hidden and the timeout is removed,
@@ -279,10 +292,10 @@ namespace Gala
 			thumb_shape_box.set_origin ((box.get_width () - thumb_shape_box.get_width ()) / 2, -SHAPE_PADDING);
 			shape_thumb.allocate (thumb_shape_box, flags);
 
-			// TODO: workspace names
+			// TODO: workspace name
 			var name_shape_box = ActorBox ();
-			name_shape_box.set_size (60, 25);
-			name_shape_box.set_origin ((box.get_width () - name_shape_box.get_width ()) / 2, box.get_height () - 50);
+			name_shape_box.set_size (NAME_WIDTH, NAME_HEIGHT);
+			name_shape_box.set_origin ((box.get_width () - name_shape_box.get_width ()) / 2, thumb_box.y2 + NAME_DISTANCE);
 			shape_name.allocate (name_shape_box, flags);
 		}
 	}

@@ -28,12 +28,17 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceThumbCloneContainer : Actor
 	{
-		public static const int SPACING = 48;
-		// TODO:
-		// public static const int THUMB_WIDTH = 64;
-		public static const int THUMB_WIDTH = 192;
+		/**
+		 * The percent value between thumbnail workspace clone's width
+		 * and monitor's width.
+		 */
+		public const float WORKSPACE_WIDTH_PERCENT = 0.12f;
 
-		public signal void request_reposition ();
+		/**
+		 * The percent value between distance of thumbnail workspace
+		 * clones and monitor's width.
+		 */
+		const float SPACING_PERCENT = 0.02f;
 
 		public Screen screen { get; construct; }
 
@@ -44,68 +49,31 @@ namespace Gala
 			layout_manager = new BoxLayout ();
 		}
 
-		public void add_thumb (DeepinWorkspaceThumbClone group)
+		public void add_workspace (DeepinWorkspaceThumbClone workspace_clone)
 		{
-			var index = group.workspace.index ();
+			var index = workspace_clone.workspace.index ();
+			insert_child_at_index (workspace_clone, index);
 
-			insert_child_at_index (group, index * 2);
-
-			var thumb = new WorkspaceInsertThumb (index);
-			thumb.notify["expanded"].connect_after (expanded_changed);
-			insert_child_at_index (thumb, index * 2);
-
-			update_inserter_indices ();
+			update_layout ();
 		}
 
-		public void remove_thumb (DeepinWorkspaceThumbClone group)
+		public void remove_workspace (DeepinWorkspaceThumbClone workspace_clone)
 		{
-			var thumb = (WorkspaceInsertThumb) group.get_previous_sibling ();
-			thumb.notify["expanded"].disconnect (expanded_changed);
-			remove_child (thumb);
-
-			remove_child (group);
-
-			update_inserter_indices ();
+			remove_child (workspace_clone);
 		}
 
-		void expanded_changed (ParamSpec param)
+		public void update_layout ()
 		{
-			request_reposition ();
-		}
+			var display = screen.get_display ();
+			var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
 
-		/**
-		 * Calculates the width that will be occupied taking currently running animations
-		 * end states into account
-		 */
-		public float calculate_total_width ()
-		{
-			var width = 0.0f;
-			foreach (var child in get_children ()) {
-				if (child is WorkspaceInsertThumb) {
-					if (((WorkspaceInsertThumb) child).expanded) {
-						width += THUMB_WIDTH + SPACING * 2;
-					} else {
-						width += SPACING;
-					}
-				} else {
-					width += THUMB_WIDTH;
-				}
-			}
+			y = (int) (monitor.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
 
-			width += SPACING;
-
-			return width;
-		}
-
-		void update_inserter_indices ()
-		{
-			var current_index = 0;
+			var layout = layout_manager as BoxLayout;
+			layout.spacing = (int) (monitor.width * SPACING_PERCENT);
 
 			foreach (var child in get_children ()) {
-				unowned WorkspaceInsertThumb thumb = child as WorkspaceInsertThumb;
-				if (thumb != null) {
-					thumb.workspace_index = current_index++;
-				}
+				child.width = (int) (monitor.width * WORKSPACE_WIDTH_PERCENT);
 			}
 		}
 	}

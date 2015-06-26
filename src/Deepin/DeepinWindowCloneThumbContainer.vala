@@ -71,7 +71,7 @@ namespace Gala
 			var windows_ordered = display.sort_windows_by_stacking (windows);
 
 			// TODO: thumbnail mode
-			// hide shadow and icon for window clone
+			// enable thumbnail mode for window clone to hide shadow and icon
 			var new_window = new DeepinWindowClone (window, true);
 
 			new_window.destroy.connect (on_window_destroyed);
@@ -194,7 +194,8 @@ namespace Gala
 				scale = width / (float) monitor_geometry.width;
 			}
 
-			var windows = new List<InternalUtils.TilableWindow?> ();
+			// TODO: remove
+			// var windows = new List<InternalUtils.TilableWindow?> ();
 			foreach (var child in get_children ()) {
 				unowned DeepinWindowClone window = (DeepinWindowClone) child;
 				Meta.Rectangle rect;
@@ -207,7 +208,7 @@ namespace Gala
 				window.take_slot (rect);
 			}
 
-			// TODO:
+			// TODO: windows order
 			// make sure the windows are always in the same order so the algorithm
 			// doesn't give us different slots based on stacking order, which can lead
 			// to windows flying around weirdly
