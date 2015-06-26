@@ -31,13 +31,14 @@ namespace Gala
 #endif
 	{
 		public bool enable_shadow { get; construct; }
+		public bool enable_border { get; construct; }
 
-		public DeepinFramedBackground (Screen screen, bool enable_shadow = true)
+		public DeepinFramedBackground (Screen screen, bool enable_shadow = true, bool enable_border = true)
 		{
 #if HAS_MUTTER314
-			Object (screen: screen, enable_shadow: enable_shadow, monitor_index: screen.get_primary_monitor (), control_position: false);
+			Object (screen: screen,  enable_shadow: enable_shadow, enable_border: enable_border, monitor_index: screen.get_primary_monitor (), control_position: false);
 #else
-			Object (screen: screen, enable_shadow: enable_shadow, monitor: screen.get_primary_monitor (),
+			Object (screen: screen,  enable_shadow: enable_shadow, enable_border: enable_border, monitor: screen.get_primary_monitor (),
 					settings: BackgroundSettings.get_default ().schema);
 #endif
 		}
@@ -56,8 +57,8 @@ namespace Gala
 		{
 			base.paint ();
 
-			// draw outer rectangle only when shadow effect enabled
-			if (enable_shadow) {
+			// draw outer rectangle
+			if (enable_border) {
 				Cogl.set_source_color4ub (0, 0, 0, 100);
 				Cogl.Path.rectangle (0, 0, width, height);
 				Cogl.Path.stroke ();

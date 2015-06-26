@@ -27,12 +27,6 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceThumbClone : Actor
 	{
-		// TODO:
-		// public const int SIZE = 64;
-		public const int SIZE = 192;
-
-		const int SHAPE_PADDING = 5;
-
 		/**
 		 * Width and heigth for workspace name field.
 		 */
@@ -44,6 +38,8 @@ namespace Gala
 		  * name field.
 		  */
 		const int NAME_DISTANCE = 20;
+
+		const int SHAPE_PADDING = 5;
 
 		// TODO: draw plus button
 		const int PLUS_SIZE = 8;
@@ -77,9 +73,6 @@ namespace Gala
 
 		construct
 		{
-			// TODO: layout
-			width = SIZE;
-			height = SIZE;
 			reactive = true;
 
 			// active shape
@@ -95,32 +88,15 @@ namespace Gala
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
 			int radius = DeepinUtils.get_css_border_radius ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
+			// workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 			add_child (workspace_clone);
 
 			// background
-			background = new DeepinFramedBackground (workspace.get_screen (), false);
-			double scale = ((double) SIZE) / background.width;
-			background.scale_x = scale;
-			background.scale_y = scale;
-			background.add_constraint (new BindConstraint (workspace_clone, BindCoordinate.ALL, 0));
+			background = new DeepinFramedBackground (workspace.get_screen (), false, false);
 			workspace_clone.add_child (background);
 
-			var click = new ClickAction ();
-			// TODO: merge selected() to set_select()
-			click.clicked.connect (() => selected ());
-			// when the actor is pressed, the ClickAction grabs all events, so we won't be
-			// notified when the cursor leaves the actor, which makes our close button stay
-			// forever. To fix this we hide the button for as long as the actor is pressed.
-			click.notify["pressed"].connect (() => {
-				toggle_close_button (!click.pressed && get_has_pointer ());
-			});
-			add_action (click);
-
+			// window container
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
-			window_container.width = width;
-			window_container.height = height;
-			window_container.add_constraint (new BindConstraint (workspace_clone, BindCoordinate.ALL, 0));
 			workspace_clone.add_child (window_container);
 
 			// TODO: show close button
@@ -137,6 +113,17 @@ namespace Gala
 			close_button.button_press_event.connect (() => { return true; });
 
 			add_child (close_button);
+
+			var click = new ClickAction ();
+			// TODO: merge selected() to set_select()
+			click.clicked.connect (() => selected ());
+			// when the actor is pressed, the ClickAction grabs all events, so we won't be
+			// notified when the cursor leaves the actor, which makes our close button stay
+			// forever. To fix this we hide the button for as long as the actor is pressed.
+			click.notify["pressed"].connect (() => {
+				toggle_close_button (!click.pressed && get_has_pointer ());
+			});
+			add_action (click);
 
 			var close_click = new ClickAction ();
 			close_click.clicked.connect (close);
@@ -286,6 +273,17 @@ namespace Gala
 			thumb_box.set_size (thumb_width, thumb_height);
 			thumb_box.set_origin (0, 0);
 			workspace_clone.allocate (thumb_box, flags);
+
+ 			// adjust background and window conatiner's size
+			var screen = workspace.get_screen ();
+			var display = screen.get_display ();
+			var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
+			// workspace_clone.width = SIZE;
+			double scale = ((double) workspace_clone.width) / monitor.width;
+			foreach (var child in workspace_clone.get_children ()) {
+				child.scale_x = scale;
+				child.scale_y = scale;
+			}
 
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (thumb_width + SHAPE_PADDING * 2, thumb_height + SHAPE_PADDING * 2);
