@@ -188,10 +188,9 @@ namespace Gala
 		{
 			// the scale between workspace's thumbnail size and real size
 			float scale = 1.0f;
-			var screen = workspace.get_screen ();
-			var monitor_geometry = screen.get_monitor_geometry (screen.get_primary_monitor ());
-			if (monitor_geometry.width != 0) {
-				scale = width / (float) monitor_geometry.width;
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+			if (monitor_geom.width != 0) {
+				scale = width / (float) monitor_geom.width;
 			}
 
 			// TODO: remove

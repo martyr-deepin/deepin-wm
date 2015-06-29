@@ -80,7 +80,7 @@ namespace Gala
 			opened = false;
 
 			var screen = workspace.get_screen ();
-			var monitor_geometry = screen.get_monitor_geometry (screen.get_primary_monitor ());
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
 			background = new DeepinFramedBackground (workspace.get_screen ());
 			background.reactive = true;
@@ -103,8 +103,8 @@ namespace Gala
 			window_container.window_selected.connect ((w) => {
 					related_thumb_workspace.select_window (w);
 			});
-			window_container.width = monitor_geometry.width;
-			window_container.height = monitor_geometry.height;
+			window_container.width = monitor_geom.width;
+			window_container.height = monitor_geom.height;
 			screen.restacked.connect (window_container.restack_windows);
 
 			var thumb_drop_action = new DragDropAction (DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
@@ -229,12 +229,12 @@ namespace Gala
 
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
-			var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 
-			int top_offset = (int) (monitor.height * DeepinMultitaskingView.FLOW_CLONE_TOP_OFFSET_PERCENT);
-			int bottom_offset = (int) (monitor.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
-			float scale = (float)(monitor.height - top_offset - bottom_offset) / monitor.height;
-			float pivot_y = top_offset / (monitor.height - monitor.height * scale);
+			int top_offset = (int) (monitor_geom.height * DeepinMultitaskingView.FLOW_CLONE_TOP_OFFSET_PERCENT);
+			int bottom_offset = (int) (monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			float scale = (float)(monitor_geom.height - top_offset - bottom_offset) / monitor_geom.height;
+			float pivot_y = top_offset / (monitor_geom.height - monitor_geom.height * scale);
 
 			background.set_pivot_point (0.5f, pivot_y);
 
@@ -248,7 +248,7 @@ namespace Gala
 
 			window_container.padding_top = top_offset;
 			window_container.padding_left =
-				window_container.padding_right = (int)(monitor.width - monitor.width * scale) / 2;
+				window_container.padding_right = (int)(monitor_geom.width - monitor_geom.width * scale) / 2;
 			window_container.padding_bottom = bottom_offset;
 
 			window_container.open (screen.get_active_workspace () == workspace ? display.get_focus_window () : null);

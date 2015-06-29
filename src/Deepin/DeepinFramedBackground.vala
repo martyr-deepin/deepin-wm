@@ -45,10 +45,8 @@ namespace Gala
 
 		construct
 		{
-			var primary = screen.get_primary_monitor ();
-			var monitor_geom = screen.get_monitor_geometry (primary);
-
 			if (enable_shadow) {
+				var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 				add_effect (new ShadowEffect (monitor_geom.width, monitor_geom.height, 40, 5));
 			}
 		}

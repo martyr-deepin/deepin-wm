@@ -88,6 +88,7 @@ namespace Gala
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
 			int radius = DeepinUtils.get_css_border_radius ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+			// TODO: effect
 			// workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 			add_child (workspace_clone);
 
@@ -266,6 +267,7 @@ namespace Gala
 		{
 			base.allocate (box, flags);
 
+			// alocate workspace clone
 			var thumb_box = ActorBox ();
 			float thumb_width = box.get_width ();
 			float thumb_scale = background.width != 0 ? background.height / background.width : 0.5f;
@@ -274,12 +276,13 @@ namespace Gala
 			thumb_box.set_origin (0, 0);
 			workspace_clone.allocate (thumb_box, flags);
 
+			// TODO: shadow
+			// adjust workspace clone shadow's size
+			// workspace_clone.add_effect_with_name ("shadow", new ShadowEffect (monitor_geom.width, monitor_geom.height, 40, 5));
+
  			// adjust background and window conatiner's size
-			var screen = workspace.get_screen ();
-			var display = screen.get_display ();
-			var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
-			// workspace_clone.width = SIZE;
-			double scale = ((double) workspace_clone.width) / monitor.width;
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+			double scale = ((double) workspace_clone.width) / monitor_geom.width;
 			foreach (var child in workspace_clone.get_children ()) {
 				child.scale_x = scale;
 				child.scale_y = scale;

@@ -97,6 +97,11 @@ namespace Gala
 			return false;
 		}
 
+		public static Meta.Rectangle get_primary_monitor_geometry (Meta.Screen screen)
+		{
+			return screen.get_monitor_geometry (screen.get_primary_monitor ());
+		}
+
 		/**
 		 * Shrink a MetaRectangle on all sides for the given size.
 		 * Negative amounts will scale it instead.

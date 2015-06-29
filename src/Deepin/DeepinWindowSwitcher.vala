@@ -131,18 +131,13 @@ namespace Gala
 
 		void place_popup ()
 		{
-			var geometry = get_screen_geometry ();
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
 
 			var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
-			switcher_layout.max_width = geometry.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;;
+			switcher_layout.max_width = monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;;
 
-			popup.x = Math.ceilf (geometry.x + (geometry.width - popup.width) / 2.0f);
-			popup.y = Math.ceilf (geometry.y + (geometry.height - popup.height) / 2.0f);
-		}
-		Meta.Rectangle get_screen_geometry ()
-		{
-			var screen = wm.get_screen ();
-			return screen.get_monitor_geometry (screen.get_primary_monitor ());
+			popup.x = Math.ceilf (monitor_geom.x + (monitor_geom.width - popup.width) / 2.0f);
+			popup.y = Math.ceilf (monitor_geom.y + (monitor_geom.height - popup.height) / 2.0f);
 		}
 
 		void show_popup ()
