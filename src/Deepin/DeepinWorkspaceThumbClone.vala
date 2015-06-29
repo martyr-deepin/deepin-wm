@@ -27,16 +27,12 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceThumbClone : Actor
 	{
-		/**
-		 * Width and heigth for workspace name field.
-		 */
+		// width and heigth for workspace name field
 		const int NAME_WIDTH = 80;
 		const int NAME_HEIGHT = 24;
 
-		 /**
-		  * Distance between thumbnail workspace clone and workspace
-		  * name field.
-		  */
+		// distance between thumbnail workspace clone and workspace
+		// name field
 		const int NAME_DISTANCE = 20;
 
 		const int SHAPE_PADDING = 5;
@@ -56,14 +52,20 @@ namespace Gala
 
 		public Workspace workspace { get; construct; }
 
-		Actor shape_thumb; // selected shape for workspace thumbnail clone
-		DeepinCssActor shape_name; // selected shape for workspace name field
+		// selected shape for workspace thumbnail clone
+		Actor shape_thumb;
+
+		// selected shape for workspace name field
+		DeepinCssActor shape_name;
+
 		Actor close_button;
 
+		Actor workspace_shadow;
 		Actor workspace_clone;
 		DeepinWindowCloneThumbContainer window_container;
 		Actor background;
 
+		// TODO: close button
 		uint show_close_button_timeout = 0;
 
 		public DeepinWorkspaceThumbClone (Workspace workspace)
@@ -75,7 +77,14 @@ namespace Gala
 		{
 			reactive = true;
 
-			// active shape
+			// workspace shadow effect
+			workspace_shadow = new Actor ();
+			workspace_shadow.add_effect_with_name ("shadow", new ShadowEffect (get_workspace_prefer_width (), get_workspace_prefer_heigth (), 10, 1));
+			add_child (workspace_shadow);
+
+			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
+
+			// selected shape for thumbnail workspace
 			shape_thumb = new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
 			shape_thumb.opacity = 0;
 			shape_thumb.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
@@ -88,8 +97,7 @@ namespace Gala
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
 			int radius = DeepinUtils.get_css_border_radius ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			// TODO: effect
-			// workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
+			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 			add_child (workspace_clone);
 
 			// background
@@ -100,7 +108,7 @@ namespace Gala
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
 			workspace_clone.add_child (window_container);
 
-			// TODO: show close button
+			// TODO: close button
 			close_button = Utils.create_close_button ();
 			close_button.x = -Math.floorf (close_button.width * 0.4f);
 			close_button.y = -Math.floorf (close_button.height * 0.4f);
@@ -133,6 +141,7 @@ namespace Gala
 
 		~DeepinWorkspaceThumbClone ()
 		{
+			workspace.get_screen ().monitors_changed.disconnect (update_workspace_shadow);
 			background.destroy ();
 		}
 
@@ -173,6 +182,26 @@ namespace Gala
 		public void select_window (Window window)
 		{
 			window_container.select_window (window);
+		}
+
+		void update_workspace_shadow ()
+		{
+			var shadow_effect = workspace_clone.get_effect ("shadow") as ShadowEffect;
+			if (shadow_effect != null) {
+				shadow_effect.update_size (get_workspace_prefer_width (), get_workspace_prefer_heigth ());
+			}
+		}
+
+		int get_workspace_prefer_width ()
+		{
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+			return (int) (monitor_geom.width * DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
+		}
+
+		int get_workspace_prefer_heigth ()
+		{
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+			return (int) (monitor_geom.height * DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
 		// TODO: necessary?
@@ -275,12 +304,9 @@ namespace Gala
 			thumb_box.set_size (thumb_width, thumb_height);
 			thumb_box.set_origin (0, 0);
 			workspace_clone.allocate (thumb_box, flags);
+			workspace_shadow.allocate (thumb_box, flags);
 
-			// TODO: shadow
-			// adjust workspace clone shadow's size
-			// workspace_clone.add_effect_with_name ("shadow", new ShadowEffect (monitor_geom.width, monitor_geom.height, 40, 5));
-
- 			// adjust background and window conatiner's size
+ 			// scale background and window conatiner
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 			double scale = ((double) workspace_clone.width) / monitor_geom.width;
 			foreach (var child in workspace_clone.get_children ()) {
