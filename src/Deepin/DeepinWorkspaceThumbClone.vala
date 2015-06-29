@@ -41,7 +41,6 @@ namespace Gala
 		const int PLUS_SIZE = 8;
 		const int PLUS_WIDTH = 24;
 
-		// TODO: close button
 		const int SHOW_CLOSE_BUTTON_DELAY = 200;
 
 		/**
@@ -79,7 +78,7 @@ namespace Gala
 
 			// workspace shadow effect
 			workspace_shadow = new Actor ();
-			workspace_shadow.add_effect_with_name ("shadow", new ShadowEffect (get_workspace_prefer_width (), get_workspace_prefer_heigth (), 10, 1));
+			workspace_shadow.add_effect_with_name ("shadow", new ShadowEffect (get_thumb_workspace_prefer_width (), get_thumb_workspace_prefer_heigth (), 10, 1));
 			add_child (workspace_shadow);
 
 			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
@@ -100,43 +99,38 @@ namespace Gala
 			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 			add_child (workspace_clone);
 
-			// background
 			background = new DeepinFramedBackground (workspace.get_screen (), false, false);
 			workspace_clone.add_child (background);
 
-			// window container
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
 			workspace_clone.add_child (window_container);
 
-			// TODO: close button
+			// close button
 			close_button = Utils.create_close_button ();
-			close_button.x = -Math.floorf (close_button.width * 0.4f);
-			close_button.y = -Math.floorf (close_button.height * 0.4f);
 			close_button.opacity = 0;
 			close_button.reactive = true;
 			close_button.visible = false;
 			close_button.set_easing_duration (200);
 
+			add_child (close_button);
+
 			// block propagation of button presses on the close button, otherwise
 			// the click action on the icon group will act weirdly
 			close_button.button_press_event.connect (() => { return true; });
 
-			add_child (close_button);
+			var close_click = new ClickAction ();
+			close_click.clicked.connect (close);
+			close_button.add_action (close_click);
 
 			var click = new ClickAction ();
-			// TODO: merge selected() to set_select()
 			click.clicked.connect (() => selected ());
-			// when the actor is pressed, the ClickAction grabs all events, so we won't be
+			// When the actor is pressed, the ClickAction grabs all events, so we won't be
 			// notified when the cursor leaves the actor, which makes our close button stay
 			// forever. To fix this we hide the button for as long as the actor is pressed.
 			click.notify["pressed"].connect (() => {
 				toggle_close_button (!click.pressed && get_has_pointer ());
 			});
 			add_action (click);
-
-			var close_click = new ClickAction ();
-			close_click.clicked.connect (close);
-			close_button.add_action (close_click);
 		}
 
 		~DeepinWorkspaceThumbClone ()
@@ -147,6 +141,7 @@ namespace Gala
 
 		public override bool enter_event (CrossingEvent event)
 		{
+			// TODO: close button
 			toggle_close_button (true);
 			return false;
 		}
@@ -188,38 +183,36 @@ namespace Gala
 		{
 			var shadow_effect = workspace_clone.get_effect ("shadow") as ShadowEffect;
 			if (shadow_effect != null) {
-				shadow_effect.update_size (get_workspace_prefer_width (), get_workspace_prefer_heigth ());
+				shadow_effect.update_size (get_thumb_workspace_prefer_width (), get_thumb_workspace_prefer_heigth ());
 			}
 		}
 
-		int get_workspace_prefer_width ()
+		int get_thumb_workspace_prefer_width ()
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 			return (int) (monitor_geom.width * DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
-		int get_workspace_prefer_heigth ()
+		int get_thumb_workspace_prefer_heigth ()
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 			return (int) (monitor_geom.height * DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
-		// TODO: necessary?
 		/**
-		 * Requests toggling the close button. If show is true, a timeout will be set after which
-		 * the close button is shown, if false, the close button is hidden and the timeout is removed,
-		 * if it exists. The close button may not be shown even though requested if the workspace has
-		 * no windows or workspaces aren't set to be dynamic.
+		 * Requests toggling the close button. If show is true, a timeout will
+		 * be set after which the close button is shown, if false, the close
+		 * button is hidden and the timeout is removed, if it exists. The close
+		 * button may not be shown even though requested if the workspaces are
+		 * set to be dynamic.
 		 *
 		 * @param show Whether to show the close button
 		 */
 		void toggle_close_button (bool show)
 		{
-			// don't display the close button when we don't have dynamic workspaces
-			// or when there are no windows on us. For one, our method for closing
-			// wouldn't work anyway without windows and it's also the last workspace
-			// which we don't want to have closed if everything went correct
-			if (!Prefs.get_dynamic_workspaces () || window_container.get_n_children () < 1) {
+			// don't display the close button when we have dynamic workspaces or
+			// when there is only one workspace
+			if (Prefs.get_dynamic_workspaces () || workspace.get_screen ().get_n_workspaces () == 1) {
 				return;
 			}
 
@@ -282,6 +275,11 @@ namespace Gala
 		 */
 		void close ()
 		{
+			if (workspace.get_screen ().get_n_workspaces () == 1) {
+				warning ("there is only one workspace, close action will be ignored");
+				return;
+			}
+
 			var time = workspace.get_screen ().get_display ().get_current_time ();
 			foreach (var window in workspace.list_windows ()) {
 				var type = window.window_type;
@@ -296,28 +294,37 @@ namespace Gala
 		{
 			base.allocate (box, flags);
 
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+			float scale = box.get_width () != 0 ? box.get_width () / monitor_geom.width : 0.5f;
+
+			// calculate monitor width height ratio
+			float monitor_whr = (float) monitor_geom.height / monitor_geom.width;
+
 			// alocate workspace clone
 			var thumb_box = ActorBox ();
 			float thumb_width = box.get_width ();
-			float thumb_scale = background.width != 0 ? background.height / background.width : 0.5f;
-			float thumb_height = thumb_width * thumb_scale;
+			float thumb_height = thumb_width * monitor_whr;
 			thumb_box.set_size (thumb_width, thumb_height);
 			thumb_box.set_origin (0, 0);
 			workspace_clone.allocate (thumb_box, flags);
 			workspace_shadow.allocate (thumb_box, flags);
 
  			// scale background and window conatiner
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			double scale = ((double) workspace_clone.width) / monitor_geom.width;
-			foreach (var child in workspace_clone.get_children ()) {
-				child.scale_x = scale;
-				child.scale_y = scale;
-			}
+			background.scale_x = scale;
+			background.scale_y = scale;
+			window_container.scale_x = scale;
+			window_container.scale_y = scale;
 
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (thumb_width + SHAPE_PADDING * 2, thumb_height + SHAPE_PADDING * 2);
 			thumb_shape_box.set_origin ((box.get_width () - thumb_shape_box.get_width ()) / 2, -SHAPE_PADDING);
 			shape_thumb.allocate (thumb_shape_box, flags);
+
+			var close_box = ActorBox ();
+			close_box.set_size (close_button.width, close_button.height);
+			close_box.set_origin (box.get_width () - close_box.get_width () * 0.5f,
+								  -close_button.height * 0.33f);
+			close_button.allocate (close_box, flags);
 
 			// TODO: workspace name
 			var name_shape_box = ActorBox ();

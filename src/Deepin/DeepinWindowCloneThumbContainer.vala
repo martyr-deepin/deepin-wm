@@ -62,8 +62,8 @@ namespace Gala
 
 			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
 			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone tw = (DeepinWindowClone) child;
-				windows.prepend (tw.window);
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
+				windows.prepend (window_clone.window);
 			}
 			windows.prepend (window);
 			windows.reverse ();
@@ -88,9 +88,9 @@ namespace Gala
 			}
 
 			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone tw = (DeepinWindowClone) child;
-				if (target == tw.window) {
-					insert_child_above (new_window, tw);
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
+				if (target == window_clone.window) {
+					insert_child_above (new_window, window_clone);
 					added = true;
 					break;
 				}
@@ -160,8 +160,8 @@ namespace Gala
 
 			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
 			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone tw = (DeepinWindowClone) child;
-				windows.prepend (tw.window);
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
+				windows.prepend (window_clone.window);
 			}
 
 			var windows_ordered = display.sort_windows_by_stacking (windows);
@@ -184,27 +184,20 @@ namespace Gala
 		 * Recalculate the positions of the windows and animate them
 		 * to the resulting spots.
 		 */
+		// TODO: refactor code, rename to update_layout ()
 		public void reflow ()
 		{
-			// the scale between workspace's thumbnail size and real size
-			float scale = 1.0f;
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			if (monitor_geom.width != 0) {
-				scale = width / (float) monitor_geom.width;
-			}
-
 			// TODO: remove
 			// var windows = new List<InternalUtils.TilableWindow?> ();
 			foreach (var child in get_children ()) {
-				unowned DeepinWindowClone window = (DeepinWindowClone) child;
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
 				Meta.Rectangle rect;
 #if HAS_MUTTER312
-				rect = window.window.get_frame_rect ();
+				rect = window_clone.window.get_frame_rect ();
 #else
-				rect = window.window.window.get_outer_rect ();
+				rect = window_clone.window.get_outer_rect ();
 #endif
-				DeepinUtils.scale_rectangle (ref rect, scale);
-				window.take_slot (rect);
+				window_clone.take_slot (rect);
 			}
 
 			// TODO: windows order
