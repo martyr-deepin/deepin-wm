@@ -51,6 +51,11 @@ namespace Gala
 
 		public void add_workspace (DeepinWorkspaceThumbClone workspace_clone)
 		{
+			// Enable expand space in x and y axis so that all children will be
+			// aligned even through in different size.
+			workspace_clone.x_expand = true;
+			workspace_clone.y_expand = true;
+
 			var index = workspace_clone.workspace.index ();
 			insert_child_at_index (workspace_clone, index);
 
@@ -65,15 +70,15 @@ namespace Gala
 		public void update_layout ()
 		{
 			var display = screen.get_display ();
-			var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
+			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
 
-			y = (int) (monitor.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			y = (int) (monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
 
 			var layout = layout_manager as BoxLayout;
-			layout.spacing = (int) (monitor.width * SPACING_PERCENT);
+			layout.spacing = (int) (monitor_geom.width * SPACING_PERCENT);
 
 			foreach (var child in get_children ()) {
-				child.width = (int) (monitor.width * WORKSPACE_WIDTH_PERCENT);
+				child.width = monitor_geom.width * WORKSPACE_WIDTH_PERCENT;
 			}
 		}
 	}
