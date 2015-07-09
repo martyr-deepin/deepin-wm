@@ -139,6 +139,19 @@ namespace Gala
 					return false;
 				});
 			});
+
+			/**
+			 * We generally assume that when the key-focus-out signal is emitted
+			 * a different component was opened, so we close in that case. And
+			 * we should listen property changed for "key-forcus" in stage
+			 * instead of overriding key_focus_out, or could not get the right
+			 * key focus actor.
+			 */
+			get_stage ().notify["key-focus"].connect (() => {
+				if (opened && !contains (get_stage ().key_focus)) {
+					toggle ();
+				}
+			});
 		}
 
 		/**
@@ -173,24 +186,6 @@ namespace Gala
 
 			set_position (primary_geometry.x, primary_geometry.y);
 			set_size (primary_geometry.width, primary_geometry.height);
-		}
-
-		/**
-		 * We generally assume that when the key-focus-out signal is emitted
-		 * a different component was opened, so we close in that case.
-		 */
-		public override void key_focus_out ()
-		{
-			// TODO: workspace name
-			// if (get_stage ().key_focus == null) {
-			// 	stdout.printf ("focus is null\n");
-			// } else if (get_stage ().key_focus is Actor) {
-			// 	stdout.printf ("focus name is %s\n", get_stage ().key_focus.name);
-			// }
-
-			// if (opened && !contains (get_stage ().key_focus)) {
-			// 	toggle ();
-			// }
 		}
 
 		/**
@@ -350,16 +345,6 @@ namespace Gala
 			if (close_view) {
 				toggle ();
 			}
-		}
-
-		/**
-		 * // TODO: workspace name field
-		 */
-		public virtual bool button_press_event (Clutter.ButtonEvent event)
-		{
-			stdout.printf ("multitask button_press_event\n");
-			grab_key_focus ();
-			return false;
 		}
 
 		/**

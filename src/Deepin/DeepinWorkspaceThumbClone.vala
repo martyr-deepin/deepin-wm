@@ -143,10 +143,7 @@ namespace Gala
 			workspace_name_text.selection_color = DeepinUtils.get_css_background_color ("deepin-text-selection");
 			workspace_name_text.selected_text_color = DeepinUtils.get_css_color ("deepin-text-selection");
 
-			workspace_name_text.button_press_event.connect (() => {
-					stdout.printf ("workspace name text press\n"); // TODO: test
-					return on_name_button_press_event ();
-				});
+			workspace_name_text.button_press_event.connect (on_name_button_press_event);
 			workspace_name_text.activate.connect (() => {
 				get_stage ().set_key_focus (fallback_key_focus);
 				workspace_name_text.editable = false;
