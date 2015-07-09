@@ -22,6 +22,54 @@ namespace Gala
 		const string deepin_wm_css_file = Config.PKGDATADIR + "/deepin-wm.css";
 		static Gtk.CssProvider default_css_provider;
 
+		const string KEY_WORKSPACE_NAMES = "workspace-names";
+		const string SCHEMA_GENERAL = "com.deepin.wrap.gnome.desktop.wm.preferences";
+		static GLib.Settings general_gsettings;
+
+		/* WM functions */
+
+		public static bool is_window_in_tab_list (Meta.Window window)
+		{
+			var workspace = window.get_screen ().get_active_workspace ();
+			var display = window.get_screen ().get_display ();
+#if HAS_MUTTER314
+			var windows = display.get_tab_list (Meta.TabList.NORMAL, workspace);
+#else
+			var windows = display.get_tab_list (Meta.TabList.NORMAL, screen, workspace);
+#endif
+			foreach (var w in windows) {
+				if (w == window) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		/**
+		 * Overide Meta.Prefs.get_workspace_name () to ignore the default
+		 * workspace name in format "Workspace %d".
+		 */
+		public static string get_workspace_name (int i)
+		{
+			var names = get_workspace_names ();
+			if (names.length < i) {
+				return "";
+			}
+			return names[i];
+		}
+
+		public static string[] get_workspace_names ()
+		{
+			return get_general_gsettings ().get_strv (KEY_WORKSPACE_NAMES);
+		}
+
+		public static Meta.Rectangle get_primary_monitor_geometry (Meta.Screen screen)
+		{
+			return screen.get_monitor_geometry (screen.get_primary_monitor ());
+		}
+
+		/* CSS functions */
+
 		public static Gtk.CssProvider get_default_css_provider ()
 		{
 			if (default_css_provider != null) {
@@ -51,25 +99,25 @@ namespace Gala
 			return style_context;
 		}
 
-		public static Clutter.Color convert_gdk_rgba_to_clutter_color (Gdk.RGBA rgba)
-		{
-			return {
-				(uint8) (rgba.red * 255),
-				(uint8) (rgba.green * 255),
-				(uint8) (rgba.blue * 255),
-				(uint8) (rgba.alpha * 255)
-			};
-		}
-
 		public static Clutter.Color get_css_background_color (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
-			return convert_gdk_rgba_to_clutter_color (get_css_background_gdk_rgba (class_name, flags));
+			return gdkrgba2color (get_css_background_color_gdk_rgba (class_name, flags));
 		}
-
-		public static Gdk.RGBA get_css_background_gdk_rgba (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		public static Gdk.RGBA get_css_background_color_gdk_rgba (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			var style_context = new_css_style_context (class_name);
 			var value = style_context.get_property (Gtk.STYLE_PROPERTY_BACKGROUND_COLOR, flags);
+			return (Gdk.RGBA) value;
+		}
+
+		public static Clutter.Color get_css_color (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		{
+			return gdkrgba2color (get_css_color_gdk_rgba (class_name, flags));
+		}
+		public static Gdk.RGBA get_css_color_gdk_rgba (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		{
+			var style_context = new_css_style_context (class_name);
+			var value = style_context.get_property (Gtk.STYLE_PROPERTY_COLOR, flags);
 			return (Gdk.RGBA) value;
 		}
 
@@ -80,26 +128,38 @@ namespace Gala
 			return (int) value;
 		}
 
-		public static bool is_window_in_tab_list (Meta.Window window)
+		public static Pango.FontDescription get_css_font (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
-			var workspace = window.get_screen ().get_active_workspace ();
-			var display = window.get_screen ().get_display ();
-#if HAS_MUTTER314
-			var windows = display.get_tab_list (Meta.TabList.NORMAL, workspace);
-#else
-			var windows = display.get_tab_list (Meta.TabList.NORMAL, screen, workspace);
-#endif
-			foreach (var w in windows) {
-				if (w == window) {
-					return true;
-				}
-			}
-			return false;
+			var style_context = new_css_style_context (class_name);
+			var value = style_context.get_property (Gtk.STYLE_PROPERTY_FONT, flags);
+			return (Pango.FontDescription) value;
+		}
+		public static int get_css_font_size (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		{
+			var fontdsc = get_css_font (class_name, flags);
+			return (int) ((float) fontdsc.get_size () / Pango.SCALE);
 		}
 
-		public static Meta.Rectangle get_primary_monitor_geometry (Meta.Screen screen)
+		/* Other */
+		public static GLib.Settings get_general_gsettings ()
 		{
-			return screen.get_monitor_geometry (screen.get_primary_monitor ());
+			if (general_gsettings == null) {
+				general_gsettings = new GLib.Settings (SCHEMA_GENERAL);
+			}
+			return general_gsettings;
+		}
+
+		/**
+		 * Convert Gdk.RGBA to Clutter.Color.
+		 */
+		public static Clutter.Color gdkrgba2color (Gdk.RGBA rgba)
+		{
+			return {
+				(uint8) (rgba.red * 255),
+				(uint8) (rgba.green * 255),
+				(uint8) (rgba.blue * 255),
+				(uint8) (rgba.alpha * 255)
+			};
 		}
 
 		/**

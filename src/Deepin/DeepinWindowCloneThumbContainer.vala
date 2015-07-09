@@ -27,6 +27,8 @@ namespace Gala
 	 */
 	public class DeepinWindowCloneThumbContainer : Actor
 	{
+		public signal void window_activated (Window window);
+
 		public Workspace workspace { get; construct; }
 
 		public int padding_top { get; set; default = 12; }
@@ -74,6 +76,7 @@ namespace Gala
 			// enable thumbnail mode for window clone to hide shadow and icon
 			var new_window = new DeepinWindowClone (window, true);
 
+			new_window.activated.connect (on_window_activated);
 			new_window.destroy.connect (on_window_destroyed);
 			new_window.request_reposition.connect (reflow);
 
@@ -119,6 +122,13 @@ namespace Gala
 			reflow ();
 		}
 
+		void on_window_activated (DeepinWindowClone clone)
+		{
+			// TODO: restore state before selecting
+			clone.select = false;
+			window_activated (clone.window);
+		}
+
 		void on_window_destroyed (Actor actor)
 		{
 			var window = actor as DeepinWindowClone;
@@ -127,6 +137,7 @@ namespace Gala
 			}
 
 			window.destroy.disconnect (on_window_destroyed);
+			window.activated.disconnect (on_window_activated);
 			window.request_reposition.disconnect (reflow);
 
 			Idle.add (() => {

@@ -181,9 +181,16 @@ namespace Gala
 		 */
 		public override void key_focus_out ()
 		{
-			if (opened && !contains (get_stage ().key_focus)) {
-				toggle ();
-			}
+			// TODO: workspace name
+			// if (get_stage ().key_focus == null) {
+			// 	stdout.printf ("focus is null\n");
+			// } else if (get_stage ().key_focus is Actor) {
+			// 	stdout.printf ("focus name is %s\n", get_stage ().key_focus.name);
+			// }
+
+			// if (opened && !contains (get_stage ().key_focus)) {
+			// 	toggle ();
+			// }
 		}
 
 		/**
@@ -287,6 +294,7 @@ namespace Gala
 			workspace.selected.connect (activate_workspace);
 
 			flow_workspaces.insert_child_at_index (workspace, num);
+			workspace.related_thumb_workspace.fallback_key_focus = this;
 			thumb_workspaces.add_workspace (workspace.related_thumb_workspace);
 
 			update_positions (opened);
@@ -342,6 +350,16 @@ namespace Gala
 			if (close_view) {
 				toggle ();
 			}
+		}
+
+		/**
+		 * // TODO: workspace name field
+		 */
+		public virtual bool button_press_event (Clutter.ButtonEvent event)
+		{
+			stdout.printf ("multitask button_press_event\n");
+			grab_key_focus ();
+			return false;
 		}
 
 		/**
