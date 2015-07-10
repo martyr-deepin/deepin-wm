@@ -30,8 +30,6 @@ namespace Gala
 
 		public WindowManager wm { get; construct; }
 
-		static Gtk.StyleContext? style_context = null;
-
 		DeepinWindowSwitcherItem? current_item = null;
 
 		Actor popup;
@@ -53,23 +51,12 @@ namespace Gala
 
 		construct
 		{
-			if (style_context == null) {
-				style_context = DeepinUtils.new_css_style_context("deepin-window-switcher");
-			}
-
-			popup = new Actor ();
+			popup = new DeepinCssStaticActor ("deepin-window-switcher");
 			popup.opacity = 0;
 
 			var layout = new BoxLayout ();
 			layout.orientation = Orientation.HORIZONTAL;
 			popup.layout_manager = layout;
-
-			var popup_canvas = new Canvas ();
-			popup_canvas.draw.connect (on_draw_popup_background);
-
-			popup.content = popup_canvas;
-			popup.notify["allocation"].connect (() =>
-				popup_canvas.set_size ((int) popup.width, (int) popup.height));
 
 			item_container = new Actor ();
 			item_container.margin_bottom = POPUP_PADDING;
@@ -108,25 +95,6 @@ namespace Gala
 		void on_monitor_changed ()
 		{
 			place_popup ();
-		}
-
-		bool on_draw_popup_background (Cairo.Context cr, int width, int height)
-		{
-			// fix size
-			if (width <= 0 || height <= 0) {
-				width = 1;
-				height = 1;
-			}
-
-			// clear content
-			cr.set_operator (Cairo.Operator.CLEAR);
-			cr.paint ();
-			cr.set_operator (Cairo.Operator.OVER);
-
-			style_context.render_background (cr, 0, 0, width, height);
-			style_context.render_frame (cr, 0, 0, width, height);
-
-			return false;
 		}
 
 		void place_popup ()
