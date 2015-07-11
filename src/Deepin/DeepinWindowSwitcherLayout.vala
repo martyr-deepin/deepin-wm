@@ -121,7 +121,8 @@ namespace Gala
 		 * same time, each row must own at least 7 items, or descrease
 		 * the item's size again.
 		 */
-		public override void allocate (Clutter.Container container, Clutter.ActorBox box, Clutter.AllocationFlags flags) {
+		public override void allocate (Clutter.Container container, Clutter.ActorBox box, Clutter.AllocationFlags flags)
+		{
 			float box_width, box_height, item_width, item_height;
 			int max_items_each_row;
 			do_get_preferred_size (container, out box_width, out box_height, out item_width, out item_height, out max_items_each_row);

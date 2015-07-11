@@ -33,6 +33,14 @@
     background: rgba(1,189,255,1.0);
 }
 
+.deepin-workspace-name {
+    background: rgba(0,0,0,0.6);
+    color: rgba(255,255,255,0.6);
+    border-radius: 4px;
+    font-weight: normal;
+    font-size: 18px;
+}
+
 .deepin-workspace-thumb-clone:selected {
     background: rgba(1,189,255,1.0);
     border-radius: 5px;
@@ -48,7 +56,7 @@
     color: rgba(0,0,0,1.0);
     border-radius: 4px;
     font-weight: normal;
-    font-size: 11;
+    font-size: 11px;
 }
 
 .deepin-workspace-thumb-clone-name:selected {

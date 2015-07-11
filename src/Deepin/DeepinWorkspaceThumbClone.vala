@@ -241,7 +241,7 @@ namespace Gala
 
 		public void update_workspace_name ()
 		{
-			workspace_name_num.text = "%d".printf (workspace.index ());
+			workspace_name_num.text = "%d".printf (workspace.index () + 1);
 			workspace_name_text.text = DeepinUtils.get_workspace_name (workspace.index ());
 		}
 
