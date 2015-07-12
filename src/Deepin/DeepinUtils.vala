@@ -28,6 +28,59 @@ namespace Gala
 
 		/* WM functions */
 
+		struct DebugRule {
+			public string keyword;
+			public Meta.DebugTopic topic;
+		}
+
+		public static void init_debug_topics ()
+		{
+			string debug_env = GLib.Environment.get_variable ("MUTTER_DEBUG");
+			if (debug_env != null) {
+				const DebugRule[] rules = {
+					{ "VERBOSE", Meta.DebugTopic.VERBOSE },
+					{ "FOCUS", Meta.DebugTopic.FOCUS },
+					{ "WORKAREA", Meta.DebugTopic.WORKAREA },
+					{ "STACK", Meta.DebugTopic.STACK },
+					{ "THEMES", Meta.DebugTopic.THEMES },
+					{ "SM", Meta.DebugTopic.SM },
+					{ "EVENTS", Meta.DebugTopic.EVENTS },
+					{ "STATE", Meta.DebugTopic.WINDOW_STATE },
+					{ "OPS", Meta.DebugTopic.WINDOW_OPS },
+					{ "GEOMETRY", Meta.DebugTopic.GEOMETRY },
+					{ "PLACEMENT", Meta.DebugTopic.PLACEMENT },
+					{ "PING", Meta.DebugTopic.PING },
+					{ "XINERAMA", Meta.DebugTopic.XINERAMA },
+					{ "KEYBINDINGS", Meta.DebugTopic.KEYBINDINGS },
+					{ "SYNC", Meta.DebugTopic.SYNC },
+					{ "ERRORS", Meta.DebugTopic.ERRORS },
+					{ "STARTUP", Meta.DebugTopic.STARTUP },
+					{ "PREFS", Meta.DebugTopic.PREFS },
+					{ "GROUPS", Meta.DebugTopic.GROUPS },
+					{ "RESIZING", Meta.DebugTopic.RESIZING },
+					{ "SHAPES", Meta.DebugTopic.SHAPES },
+					{ "COMPOSITOR", Meta.DebugTopic.COMPOSITOR },
+#if HAS_MUTTER310
+					{ "RESISTANCE", Meta.DebugTopic.EDGE_RESISTANCE },
+					{ "DBUS", Meta.DebugTopic.DBUS }
+#else
+					{ "RESISTANCE", Meta.DebugTopic.EDGE_RESISTANCE }
+#endif
+				};
+
+				bool matched = false;
+				foreach (var rule in rules) {
+					if (rule.keyword.match_string (debug_env, true)) {
+						matched =true;
+						Meta.Util.add_verbose_topic (rule.topic);
+					}
+				}
+				if (!matched) {
+					Meta.Util.add_verbose_topic (Meta.DebugTopic.VERBOSE);
+				}
+			}
+		}
+
 		public static bool is_window_in_tab_list (Meta.Window window)
 		{
 			var workspace = window.get_screen ().get_active_workspace ();

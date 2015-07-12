@@ -43,6 +43,8 @@ namespace Gala
 		Meta.set_wm_name ("Mutter(DeepinGala)");
 		Meta.Prefs.set_force_fullscreen (false);
 
+		DeepinUtils.init_debug_topics ();
+
 		/**
 		 * Prevent Meta.init () from causing gtk to load gail and at-bridge
 		 * Taken from Gnome-Shell main.c
