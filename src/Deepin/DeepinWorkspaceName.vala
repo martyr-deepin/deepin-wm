@@ -28,18 +28,14 @@ namespace Gala
 		const int ANIMATION_DURATION = 200;
 		const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_CUBIC;
 
-		const int POPUP_TIMEOUT = 100;
-		const int POPUP_PADDING = 20;
+		const int POPUP_TIMEOUT = 200;
+		const int POPUP_PADDING = 14;
 		const int POPUP_MAX_WIDTH = 300;
-
-		const int LAYOUT_SPACING = 12;
 
 		public Screen screen { get; construct; }
 
 		Actor popup;
-		Actor container;
-		Text worksapce_num;
-		Text worksapce_name;
+		Text workspace_name;
 
 		uint popup_timeout_id = 0;
 
@@ -55,29 +51,22 @@ namespace Gala
 			popup.set_easing_duration (ANIMATION_DURATION);
 			popup.set_easing_mode (ANIMATION_MODE);
 			popup.layout_manager = new BoxLayout ();
-
-			container = new Actor ();
-			container.margin_bottom = POPUP_PADDING;
-			container.margin_left = POPUP_PADDING;
-			container.margin_right = POPUP_PADDING;
-			container.margin_top = POPUP_PADDING;
-			container.layout_manager = new BoxLayout ();
-			popup.add_child (container);
+			popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
 
 			var font = DeepinUtils.get_css_font ("deepin-workspace-name");
 
-			worksapce_num = new Text ();
-			worksapce_num.set_font_description (font);
-			worksapce_num.color = DeepinUtils.get_css_color ("deepin-workspace-name");
-			container.add_child (worksapce_num);
+			workspace_name = new Text ();
+			workspace_name.margin_bottom = POPUP_PADDING;
+			workspace_name.margin_left = POPUP_PADDING;
+			workspace_name.margin_right = POPUP_PADDING;
+			workspace_name.margin_top = POPUP_PADDING;
+			workspace_name.activatable = true;
+			workspace_name.ellipsize = Pango.EllipsizeMode.END;
+			workspace_name.single_line_mode = true;
+			workspace_name.set_font_description (font);
+			workspace_name.color = DeepinUtils.get_css_color ("deepin-workspace-name");
 
-			worksapce_name = new Text ();
-			worksapce_name.activatable = true;
-			worksapce_name.ellipsize = Pango.EllipsizeMode.END;
-			worksapce_name.single_line_mode = true;
-			worksapce_name.set_font_description (font);
-			worksapce_name.color = DeepinUtils.get_css_color ("deepin-workspace-name");
-			container.add_child (worksapce_name);
+			popup.add_child (workspace_name);
 
 			add_child (popup);
 
@@ -95,10 +84,14 @@ namespace Gala
 
 		public void show_popup ()
 		{
+			update_workspace_name ();
+
 			// reset timer and trasition
 			if (popup_timeout_id != 0) {
 				Source.remove (popup_timeout_id);
+				popup_timeout_id = 0;
 			}
+
 			var transition = popup.get_transition ("opacity");
 			if (transition != null) {
 				popup.remove_transition ("opacity");
@@ -110,14 +103,13 @@ namespace Gala
 			// start timer after popup shown
 			transition = popup.get_transition ("opacity");
 			if (transition != null) {
-				transition.completed.connect (setup_timer);
+				transition.completed.connect (start_timer);
 			} else {
-				setup_timer ();
+				start_timer ();
 			}
 		}
 
-		void setup_timer ()
-		{
+		void start_timer () {
 			popup_timeout_id = Timeout.add (POPUP_TIMEOUT, () => {
 				hide_popup ();
 				popup_timeout_id = 0;
@@ -141,30 +133,13 @@ namespace Gala
 		void update_workspace_name ()
 		{
 			int active_index = screen.get_active_workspace_index ();
-			worksapce_num.text = "%d".printf (active_index + 1);
-			worksapce_name.text = DeepinUtils.get_workspace_name (active_index);
 
-			var layout = container.layout_manager as BoxLayout;
-			if (worksapce_name.text.length == 0) {
-				layout.spacing = 0;
+			var name = DeepinUtils.get_workspace_name (active_index);
+			if (name.length > 0) {
+				workspace_name.text = "%d  %s".printf (active_index + 1, name);
 			} else {
-				layout.spacing = LAYOUT_SPACING;
+				workspace_name.text = "%d".printf (active_index + 1);
 			}
-		}
-
-		public override void allocate (ActorBox box, AllocationFlags flags)
-		{
-			base.allocate (box, flags);
-
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
-
-			update_workspace_name ();
-
-			var popup_box = new ActorBox ();
-			popup_box.set_size (Math.fminf (container.width, POPUP_MAX_WIDTH), container.height);
-			popup_box.set_origin ((monitor_geom.width - popup_box.get_width ()) / 2,
-								  (monitor_geom.height - popup_box.get_height ()) / 2);
-			popup.allocate (popup_box, flags);
 		}
 	}
 }
