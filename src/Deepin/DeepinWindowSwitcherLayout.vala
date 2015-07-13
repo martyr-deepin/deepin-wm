@@ -25,10 +25,10 @@ namespace Gala
 	 */
 	public class DeepinWindowSwitcherLayout : LayoutManager
 	{
-		public const int COLUMN_SPACING = 20;
-		public const int ROW_SPACING = 20;
-		public const int MIN_ITEMS_EACH_ROW = 7;
-		public const int MAX_ROWS = 2;
+		const int COLUMN_SPACING = 20;
+		const int ROW_SPACING = 20;
+		const int MIN_ITEMS_EACH_ROW = 7;
+		const int MAX_ROWS = 2;
 
 		float _max_width = 1024.0f;
 		public float max_width {

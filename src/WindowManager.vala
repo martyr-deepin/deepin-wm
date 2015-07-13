@@ -228,6 +228,7 @@ namespace Gala
 
 			if (plugin_manager.window_switcher_provider == null) {
 				winswitcher = new DeepinWindowSwitcher (this);
+				winswitcher.add_constraint (new Clutter.BindConstraint (stage, Clutter.BindCoordinate.ALL, 0));
 				ui_group.add_child (winswitcher);
 
 				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);

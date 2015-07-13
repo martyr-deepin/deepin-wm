@@ -57,6 +57,7 @@ namespace Gala
 			var layout = new BoxLayout ();
 			layout.orientation = Orientation.HORIZONTAL;
 			popup.layout_manager = layout;
+			popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
 
 			item_container = new Actor ();
 			item_container.margin_bottom = POPUP_PADDING;
@@ -64,6 +65,7 @@ namespace Gala
 			item_container.margin_right = POPUP_PADDING;
 			item_container.margin_top = POPUP_PADDING;
 			item_container.layout_manager = new DeepinWindowSwitcherLayout ();
+			update_layout ();
 
 			item_container.actor_removed.connect (on_item_removed);
 			popup.add_child (item_container);
@@ -74,7 +76,7 @@ namespace Gala
 			add_child (window_clones);
 			add_child (popup);
 
-			wm.get_screen ().monitors_changed.connect (on_monitor_changed);
+			wm.get_screen ().monitors_changed.connect (update_layout);
 
 			visible = false;
 		}
@@ -85,27 +87,14 @@ namespace Gala
 				Source.remove (popup_delay_timeout_id);
 			}
 
-			wm.get_screen ().monitors_changed.disconnect (on_monitor_changed);
+			wm.get_screen ().monitors_changed.disconnect (update_layout);
 		}
 
-		/**
-		 * set the values which don't get set every time and need to
-		 * be updated when the monitor changes
-		 */
-		void on_monitor_changed ()
-		{
-			place_popup ();
-		}
-
-		void place_popup ()
+		void update_layout ()
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
-
 			var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
 			switcher_layout.max_width = monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;;
-
-			popup.x = Math.ceilf (monitor_geom.x + (monitor_geom.width - popup.width) / 2.0f);
-			popup.y = Math.ceilf (monitor_geom.y + (monitor_geom.height - popup.height) / 2.0f);
 		}
 
 		void show_popup ()
@@ -157,8 +146,6 @@ namespace Gala
 
 				dim_items ();
 			}
-
-			place_popup ();
 		}
 
 		public override bool key_release_event (Clutter.KeyEvent event)
@@ -224,8 +211,6 @@ namespace Gala
 
 			current_item = next_item (workspace, backward);
 
-			place_popup ();
-
 			visible = true;
 			closing = false;
 			modal_proxy = wm.push_modal ();
@@ -257,6 +242,13 @@ namespace Gala
 			}
 			popup_delay_timeout_id = Timeout.add (POPUP_DELAY_TIMEOUT, () => {
 				if (visible && !closing) {
+					// add desktop item if need after popup shown
+					if (DeepinUtils.is_show_desktop_in_tab_list ()) {
+						if (visible && window_type == TabList.NORMAL) {
+							add_desktop_item ();
+						}
+					}
+
 					show_clones ();
 					hide_windows (workspace);
 					dim_items ();
@@ -292,7 +284,8 @@ namespace Gala
 				unowned SafeWindowClone clone = (SafeWindowClone) actor;
 
 				// current clone stays on top
-				if (clone.window == current_item.window) {
+				if (current_item is DeepinWindowSwitcherWindowItem &&
+					clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
 					continue;
 				}
 
@@ -312,7 +305,11 @@ namespace Gala
 			}
 
 			if (current_item != null) {
-				current_item.window.activate (time);
+				if (current_item is DeepinWindowSwitcherWindowItem) {
+					(current_item as DeepinWindowSwitcherWindowItem).window.activate (time);
+				} else {
+					DeepinUtils.show_desktop (wm.get_screen ().get_active_workspace ());
+				}
 				current_item = null;
 			}
 
@@ -394,13 +391,22 @@ namespace Gala
 
 			window_clones.add_child (safe_clone);
 
-			var item = new DeepinWindowSwitcherItem (window);
+			var item = new DeepinWindowSwitcherWindowItem (window);
 			item.reactive = true;
 			item.button_release_event.connect (on_clicked_item);
 
 			item_container.add_child (item);
 
 			return item;
+		}
+
+		void add_desktop_item ()
+		{
+			var item = new DeepinWindowSwitcherDesktopItem (wm.get_screen ());
+			item.reactive = true;
+			item.button_release_event.connect (on_clicked_item);
+
+			item_container.add_child (item);
 		}
 
 		DeepinWindowSwitcherItem next_item (Workspace workspace, bool backward)
@@ -436,7 +442,8 @@ namespace Gala
 				actor.set_easing_duration (animate ? 250 : 0);
 				actor.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 
-				if (clone.window == current_item.window) {
+				if (current_item is DeepinWindowSwitcherWindowItem &&
+					clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
 					window_clones.set_child_above_sibling (actor, null);
 					actor.z_position = 0;
 					actor.opacity = 255;

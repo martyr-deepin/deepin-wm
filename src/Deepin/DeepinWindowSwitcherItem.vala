@@ -21,17 +21,23 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * A container for a clone of the texture of a MetaWindow, a WindowIcon
-	 * and a shadow.
+	 * Base class for alt-tab list items.
 	 */
 	public class DeepinWindowSwitcherItem : Actor
 	{
+		/**
+		 * Prefer size for current item.
+		 */
 		public const int PREFER_WIDTH = 300;
 		public const int PREFER_HEIGHT = 200;
-		const int ICON_PREFER_SIZE = 48;
-		const int SHAPE_PADDING = 10;
-		const int CLONE_PREFER_RECT_WIDTH = PREFER_WIDTH - SHAPE_PADDING * 2;
-		const int CLONE_PREFER_RECT_HEIGHT = PREFER_HEIGHT - SHAPE_PADDING * 2;
+
+		/**
+		 * Prefer size for the inner item's rectangle.
+		 */
+		public const int RECT_PREFER_WIDTH = PREFER_WIDTH - SHAPE_PADDING * 2;
+		public const int RECT_PREFER_HEIGHT = PREFER_HEIGHT - SHAPE_PADDING * 2;
+
+		protected const int SHAPE_PADDING = 10;
 
 		/**
 		 * The window was resized and a relayout of the tiling layout may
@@ -39,19 +45,11 @@ namespace Gala
 		 */
 		public signal void request_reposition ();
 
-		public Meta.Window window { get; construct; }
+		protected DeepinCssActor shape;
 
-		uint shadow_update_timeout_id = 0;
-		bool enable_shadow = false;
-
-		Actor? clone_container = null; // container for clone to add shadow effect
-		Clone? clone = null;
-		GtkClutter.Texture window_icon;
-		DeepinCssActor shape;
-
-		public DeepinWindowSwitcherItem (Meta.Window window)
+		public DeepinWindowSwitcherItem ()
 		{
-			Object (window: window);
+			Object ();
 		}
 
 		construct
@@ -59,6 +57,130 @@ namespace Gala
 			x_align = ActorAlign.FILL;
 			y_align = ActorAlign.FILL;
 
+			shape = new DeepinCssActor ("deepin-window-switcher-item");
+			shape.set_pivot_point (0.5f, 0.5f);
+
+			add_child (shape);
+ 		}
+
+		public void select (bool value, bool animate = true)
+		{
+			shape.save_easing_state ();
+
+			shape.set_easing_duration (animate ? 280 : 0);
+			shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
+			shape.select = value;
+
+			if (value) {
+				shape.scale_x = 1.033;
+				shape.scale_y = 1.033;
+			} else {
+				shape.scale_x = 1.0;
+				shape.scale_y = 1.0;
+			}
+
+			shape.restore_easing_state ();
+		}
+
+		public override void allocate (ActorBox box, AllocationFlags flags)
+		{
+			base.allocate (box, flags);
+
+			var shape_box = ActorBox ();
+			shape_box.set_size (box.get_width (), box.get_height ());
+			shape_box.set_origin (0, 0);
+			shape.allocate (shape_box, flags);
+		}
+	}
+
+	/**
+	 * Desktop item in alt-tab list, which owns the background. This item always
+	 * be put in last and will show desktop if activated.
+	 */
+	public class DeepinWindowSwitcherDesktopItem : DeepinWindowSwitcherItem
+	{
+		public Screen screen { get; construct; }
+
+		Actor background;
+
+		public DeepinWindowSwitcherDesktopItem (Screen screen)
+		{
+			Object (screen: screen);
+		}
+
+		construct
+		{
+			background = new DeepinFramedBackground (screen, false, false);
+			add_child (background);
+		}
+
+		/**
+		 * Calculate the preferred size for background.
+		 */
+		void get_background_preferred_size (out float width, out float height)
+		{
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+
+			float scale_x = RECT_PREFER_WIDTH / (float) monitor_geom.width;
+			float scale_y = RECT_PREFER_HEIGHT / (float) monitor_geom.height;
+			float scale = Math.fminf (scale_x, scale_y);
+
+			width = (float) monitor_geom.width * scale;
+			height = (float) monitor_geom.height * scale;
+		}
+
+		public override void allocate (ActorBox box, AllocationFlags flags)
+		{
+			base.allocate (box, flags);
+
+			float scale = box.get_width () / PREFER_WIDTH;
+
+			var bg_box = ActorBox ();
+			float bg_width, bg_height;
+			float bg_prefer_width, bg_prefer_height;
+			get_background_preferred_size (out bg_prefer_width, out bg_prefer_height);
+			bg_width = bg_prefer_width * scale;
+			bg_height = bg_prefer_height * scale;
+			bg_box.set_size (bg_width, bg_height);
+			bg_box.set_origin ((box.get_width () - bg_box.get_width ()) / 2,
+							   (box.get_height () - bg_box.get_height ()) / 2);
+
+			// scale background to fix the allocated size
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+			float bg_scale = (bg_width > 0) ? bg_width / (float) monitor_geom.width : 0.5f;
+			if (bg_scale != 1.0f) {
+				background.scale_x = bg_scale;
+				background.scale_y = bg_scale;
+			}
+
+			background.allocate (bg_box, flags);
+		}
+	}
+
+	/**
+	 * Window item in alt-tab list, which is a container for a clone of the
+	 * texture of MetaWindow, a WindowIcon and a shadow.
+	 */
+	public class DeepinWindowSwitcherWindowItem : DeepinWindowSwitcherItem
+	{
+		const int ICON_PREFER_SIZE = 48;
+
+		public Window window { get; construct; }
+
+		uint shadow_update_timeout_id = 0;
+		bool enable_shadow = false;
+
+		Actor? clone_container = null; // container for clone to add shadow effect
+		Clone? clone = null;
+		GtkClutter.Texture window_icon;
+
+		public DeepinWindowSwitcherWindowItem (Window window)
+		{
+			Object (window: window);
+		}
+
+		construct
+		{
 			window.unmanaged.connect (on_unmanaged);
 			window.workspace_changed.connect (on_workspace_changed);
 			window.notify["on-all-workspaces"].connect (on_all_workspaces_changed);
@@ -66,16 +188,12 @@ namespace Gala
 			window_icon = new WindowIcon (window, ICON_PREFER_SIZE);
 			window_icon.set_pivot_point (0.5f, 0.5f);
 
-			shape = new DeepinCssActor ("deepin-window-switcher-item");
-			shape.set_pivot_point (0.5f, 0.5f);
-
 			add_child (window_icon);
-			add_child (shape);
 
 			load_clone ();
  		}
 
-		~DeepinWindowSwitcherItem ()
+		~DeepinWindowSwitcherWindowItem ()
 		{
 			window.unmanaged.disconnect (on_unmanaged);
 			window.workspace_changed.disconnect (on_workspace_changed);
@@ -116,12 +234,10 @@ namespace Gala
 		{
 			check_is_window_in_active_workspace ();
 		}
-
 		void on_all_workspaces_changed ()
 		{
 			check_is_window_in_active_workspace ();
 		}
-
 		void check_is_window_in_active_workspace ()
 		{
 			// we don't display windows that are moved to other workspace
@@ -162,7 +278,6 @@ namespace Gala
 
 			add_child (clone_container);
 
-			set_child_below_sibling (shape, clone_container);
 			set_child_above_sibling (window_icon, clone_container);
 
 #if HAS_MUTTER312
@@ -181,15 +296,16 @@ namespace Gala
 #endif
 			return outer_rect;
 		}
+
 		/**
-		 * Calculate the preferred size of clone.
+		 * Calculate the preferred size for window clone.
 		 */
 		void get_clone_preferred_size (out float width, out float height)
 		{
 			var outer_rect = get_window_outer_rect ();
-			var scale_x = CLONE_PREFER_RECT_WIDTH / (float) outer_rect.width;
-			var scale_y = CLONE_PREFER_RECT_HEIGHT / (float) outer_rect.height;
-			var scale = Math.fminf (scale_x, scale_y);
+			float scale_x = RECT_PREFER_WIDTH / (float) outer_rect.width;
+			float scale_y = RECT_PREFER_HEIGHT / (float) outer_rect.height;
+			float scale = Math.fminf (scale_x, scale_y);
 
 			width = outer_rect.width * scale;
 			height = outer_rect.height * scale;
@@ -231,12 +347,7 @@ namespace Gala
 		{
 			base.allocate (box, flags);
 
-			var scale = box.get_width () / PREFER_WIDTH;
-
-			var shape_box = ActorBox ();
-			shape_box.set_size (box.get_width (), box.get_height ());
-			shape_box.set_origin (0, 0);
-			shape.allocate (shape_box, flags);
+			float scale = box.get_width () / PREFER_WIDTH;
 
 			var icon_box = ActorBox ();
 			if (box.get_width () <= ICON_PREFER_SIZE * 2.5f) {
@@ -279,32 +390,14 @@ namespace Gala
 			clone_width = clone_prefer_width * scale;
 			clone_height = clone_prefer_height * scale;
 			clone_box.set_size (clone_width, clone_height);
-			clone_box.set_origin ((box.get_width () - clone_box.get_width ()) / 2, (box.get_height () - clone_box.get_height ()) / 2);
+			clone_box.set_origin ((box.get_width () - clone_box.get_width ()) / 2,
+								  (box.get_height () - clone_box.get_height ()) / 2);
 
 			clone_container.allocate (clone_box, flags);
 
 			if (enable_shadow) {
 				update_shadow_async (0, (int) clone_width, (int) clone_height);
 			}
-		}
-
-		public void select (bool value, bool animate = true)
-		{
-			shape.save_easing_state ();
-
-			shape.set_easing_duration (animate ? 280 : 0);
-			shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
-			shape.select = value;
-
-			if (value) {
-				shape.scale_x = 1.033;
-				shape.scale_y = 1.033;
-			} else {
-				shape.scale_x = 1.0;
-				shape.scale_y = 1.0;
-			}
-
-			shape.restore_easing_state ();
 		}
 	}
 }

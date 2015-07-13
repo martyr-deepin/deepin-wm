@@ -81,6 +81,33 @@ namespace Gala
 			}
 		}
 
+		// TODO: use gsettings instead
+		public static bool is_show_desktop_in_tab_list ()
+		{
+			return true;
+		}
+
+		/**
+		 * Show desktop by minimizing all windows.
+		 */
+		public static void show_desktop (Meta.Workspace workspace)
+		{
+			// TODO: this is a temporary solution, use interface in mutter
+			// instead
+
+			var screen = workspace.get_screen ();
+			var display = screen.get_display ();
+
+#if HAS_MUTTER314
+			var windows = display.get_tab_list (Meta.TabList.NORMAL, workspace);
+#else
+			var windows = display.get_tab_list (Meta.TabList.NORMAL, screen, workspace);
+#endif
+			foreach (var w in windows) {
+				w.minimize ();
+			}
+		}
+
 		public static bool is_window_in_tab_list (Meta.Window window)
 		{
 			var workspace = window.get_screen ().get_active_workspace ();
