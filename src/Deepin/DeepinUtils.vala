@@ -22,8 +22,8 @@ namespace Gala
 		const string deepin_wm_css_file = Config.PKGDATADIR + "/deepin-wm.css";
 		static Gtk.CssProvider default_css_provider;
 
-		const string KEY_WORKSPACE_NAMES = "workspace-names";
 		const string SCHEMA_GENERAL = "com.deepin.wrap.gnome.desktop.wm.preferences";
+		const string KEY_WORKSPACE_NAMES = "workspace-names";
 		static GLib.Settings general_gsettings;
 
 		/* WM functions */
@@ -77,6 +77,22 @@ namespace Gala
 				}
 				if (!matched) {
 					Meta.Util.add_verbose_topic (Meta.DebugTopic.VERBOSE);
+				}
+			}
+		}
+
+		public static void fix_workspace_max_num (Meta.Screen screen, int max_num)
+		{
+			// fix workspace maximize number
+			int workspace_num = screen.get_n_workspaces ();
+			int fixed_workspace_num = workspace_num <= max_num ? workspace_num : max_num;
+
+			// remove spare workspaces
+			if (fixed_workspace_num < workspace_num) {
+				for (int i = workspace_num; i > fixed_workspace_num; i--) {
+					var workspace = screen.get_workspace_by_index (i - 1);
+					uint32 timestamp = screen.get_display ().get_current_time ();
+					screen.remove_workspace (workspace, timestamp);
 				}
 			}
 		}

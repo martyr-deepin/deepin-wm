@@ -21,6 +21,8 @@ namespace Gala
 {
 	public class WindowManagerGala : Meta.Plugin, WindowManager
 	{
+		public const int MAX_WORKSPACE_NUM = 7;
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -86,6 +88,7 @@ namespace Gala
 
 		public override void start ()
 		{
+			DeepinUtils.fix_workspace_max_num (get_screen (), MAX_WORKSPACE_NUM);
 			Util.later_add (LaterType.BEFORE_REDRAW, show_stage);
 		}
 
