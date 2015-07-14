@@ -16,56 +16,61 @@
  */
 
 .deepin-window-manager {
-    background: rgba(105,105,105,1.0);
+    background: rgba(105, 105, 105, 1.0);
 }
 
 .deepin-window-switcher {
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     border-radius: 4px;
 }
 
 .deepin-window-switcher-item {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 4px;
 }
 
 .deepin-window-switcher-item:selected {
-    background: rgba(1,189,255,1.0);
+    background: rgba(1, 189, 255, 1.0);
 }
 
 .deepin-workspace-name {
-    background: rgba(0,0,0,0.6);
-    color: rgba(255,255,255,0.6);
+    background: rgba(0, 0, 0, 0.6);
+    color: rgba(255, 255, 255, 0.6);
     border-radius: 4px;
     font-weight: normal;
     font-size: 18px;
 }
 
 .deepin-workspace-thumb-clone:selected {
-    background: rgba(1,189,255,1.0);
+    background: rgba(1, 189, 255, 1.0);
     border-radius: 5px;
 }
 
 .deepin-text-selection {
-    background: rgba(0,0,120,1.0);
-    color: rgba(255,255,255,1.0);
+    background: rgba(0, 0, 120, 1.0);
+    color: rgba(255, 255, 255, 1.0);
 }
 
 .deepin-workspace-thumb-clone-name {
-    background: rgba(255,255,255,0.6);
-    color: rgba(0,0,0,1.0);
+    background: rgba(255, 255, 255, 0.6);
+    color: rgba(0, 0, 0, 1.0);
     border-radius: 4px;
     font-weight: normal;
     font-size: 11px;
 }
 
+.deepin-workspace-add-button {
+    background: rgba(73, 73, 73, 1.0);
+    border-radius: 4px;
+}
+
 .deepin-workspace-thumb-clone-name:selected {
-    background: rgba(1,189,255,1.0);
-    color: rgba(255,255,255,1.0);
+    background: rgba(1, 189, 255, 1.0);
+    color: rgba(255, 255, 255, 1.0);
 }
 
 .deepin-window-clone:selected {
-    background: rgba(0,0,0,0.0); /*reset background*/
-    border: 5px solid rgba(1,189,255,1.0);
+    background: rgba(0, 0, 0, 0.0); /*reset background*/
+    border: 5px solid rgba(1, 189, 255, 1.0);
     border-radius: 5px;
 }

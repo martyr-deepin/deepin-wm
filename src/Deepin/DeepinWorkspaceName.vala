@@ -21,7 +21,7 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * Show the name after switching workspace.
+	 * Show workspace name after workspace switched.
 	 */
 	public class DeepinWorkspaceName : Clutter.Actor
 	{

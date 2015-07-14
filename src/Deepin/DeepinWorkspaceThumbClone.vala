@@ -40,10 +40,6 @@ namespace Gala
 
 		const int SHAPE_PADDING = 5;
 
-		// TODO: draw plus button
-		const int PLUS_SIZE = 8;
-		const int PLUS_WIDTH = 24;
-
 		const int SHOW_CLOSE_BUTTON_DELAY = 200;
 
 		/**
@@ -157,11 +153,9 @@ namespace Gala
 					workspace_name_text.text = "";
 				}
 			});
-			workspace_name_text.key_focus_out.connect (() => {
-				Prefs.change_workspace_name (workspace.index (), workspace_name_text.text);
-			});
+			workspace_name_text.key_focus_out.connect (set_workspace_name);
 
-			update_workspace_name ();
+			get_workspace_name ();
 
 			workspace_name.add_child (workspace_name_num);
 			workspace_name.add_child (workspace_name_text);
@@ -179,7 +173,7 @@ namespace Gala
 			close_button.button_press_event.connect (() => { return true; });
 
 			var close_click = new ClickAction ();
-			close_click.clicked.connect (close);
+			close_click.clicked.connect (remove_workspace);
 			close_button.add_action (close_click);
 
 			var click = new ClickAction ();
@@ -203,7 +197,6 @@ namespace Gala
 
 		public override bool enter_event (CrossingEvent event)
 		{
-			// TODO: close button
 			toggle_close_button (true);
 			return false;
 		}
@@ -239,7 +232,12 @@ namespace Gala
 			workspace_name_text.editable = true;
 		}
 
-		public void update_workspace_name ()
+		public void set_workspace_name ()
+		{
+			Prefs.change_workspace_name (workspace.index (), workspace_name_text.text);
+		}
+
+		public void get_workspace_name ()
 		{
 			workspace_name_num.text = "%d".printf (workspace.index () + 1);
 			workspace_name_text.text = DeepinUtils.get_workspace_name (workspace.index ());
@@ -318,7 +316,7 @@ namespace Gala
 		{
 			// don't display the close button when we have dynamic workspaces or
 			// when there is only one workspace
-			if (Prefs.get_dynamic_workspaces () || workspace.get_screen ().get_n_workspaces () == 1) {
+			if (Prefs.get_dynamic_workspaces () || Prefs.get_num_workspaces () == 1) {
 				return;
 			}
 
@@ -373,27 +371,38 @@ namespace Gala
 			window_container.remove_window (window);
 		}
 
-		// TODO: close workspace action
-		/**
-		 * Close handler. We close the workspace by deleting all the windows on it.
-		 * That way the workspace won't be deleted if windows decide to ignore the
-		 * delete signal
+		/*
+		 * Remove current workspace and moving all the windows to preview
+		 * workspace.
 		 */
-		void close ()
+		void remove_workspace ()
 		{
-			if (workspace.get_screen ().get_n_workspaces () == 1) {
-				warning ("there is only one workspace, close action will be ignored");
+			var screen = workspace.get_screen ();
+			if (Prefs.get_num_workspaces () <= 1) {
+				// there is only one workspace, ignored
 				return;
 			}
 
-			var time = workspace.get_screen ().get_display ().get_current_time ();
-			foreach (var window in workspace.list_windows ()) {
-				var type = window.window_type;
-				if (!window.is_on_all_workspaces () && (type == WindowType.NORMAL
-					|| type == WindowType.DIALOG || type == WindowType.MODAL_DIALOG)) {
-					window.@delete (time);
-				}
+			// do not store old workspace name in gsettings
+			DeepinUtils.reset_all_workspace_names ();
+
+			// TODO: animation
+			opacity = 0;
+			var transition = workspace_clone.get_transition ("opacity");
+			if (transition != null) {
+				// stdout.printf ("transition is not null\n");// TODO:
+				transition.completed.connect (do_close_workspace);
+			} else {
+				// stdout.printf ("transition is null\n");// TODO:
+				do_close_workspace ();
 			}
+
+		}
+		void do_close_workspace ()
+		{
+			var screen = workspace.get_screen ();
+			uint32 timestamp = screen.get_display ().get_current_time ();
+			screen.remove_workspace (workspace, timestamp);
 		}
 
 		public override void allocate (ActorBox box, AllocationFlags flags)
@@ -401,7 +410,7 @@ namespace Gala
 			base.allocate (box, flags);
 
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			float scale = box.get_width () != 0 ? box.get_width () / monitor_geom.width : 0.5f;
+			float scale = box.get_width () != 0 ? box.get_width () / (float) monitor_geom.width : 0.5f;
 
 			// calculate monitor width height ratio
 			float monitor_whr = (float) monitor_geom.height / monitor_geom.width;

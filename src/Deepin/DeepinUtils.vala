@@ -81,10 +81,15 @@ namespace Gala
 			}
 		}
 
+		public static Meta.Rectangle get_primary_monitor_geometry (Meta.Screen screen)
+		{
+			return screen.get_monitor_geometry (screen.get_primary_monitor ());
+		}
+
 		public static void fix_workspace_max_num (Meta.Screen screen, int max_num)
 		{
 			// fix workspace maximize number
-			int workspace_num = screen.get_n_workspaces ();
+			int workspace_num = Meta.Prefs.get_num_workspaces ();
 			int fixed_workspace_num = workspace_num <= max_num ? workspace_num : max_num;
 
 			// remove spare workspaces
@@ -95,6 +100,31 @@ namespace Gala
 					screen.remove_workspace (workspace, timestamp);
 				}
 			}
+		}
+
+		public static void reset_all_workspace_names ()
+		{
+			for (var i = 0; i < Meta.Prefs.get_num_workspaces (); i++) {
+				Meta.Prefs.change_workspace_name (i, "");
+			}
+		}
+
+		/**
+		 * Overide Meta.Prefs.get_workspace_name () to ignore the default
+		 * workspace name in format "Workspace %d".
+		 */
+		public static string get_workspace_name (int i)
+		{
+			var names = get_workspace_names ();
+			if (names.length < i) {
+				return "";
+			}
+			return names[i];
+		}
+
+		public static string[] get_workspace_names ()
+		{
+			return get_general_gsettings ().get_strv (KEY_WORKSPACE_NAMES);
 		}
 
 		// TODO: use gsettings instead
@@ -139,29 +169,6 @@ namespace Gala
 				}
 			}
 			return false;
-		}
-
-		/**
-		 * Overide Meta.Prefs.get_workspace_name () to ignore the default
-		 * workspace name in format "Workspace %d".
-		 */
-		public static string get_workspace_name (int i)
-		{
-			var names = get_workspace_names ();
-			if (names.length < i) {
-				return "";
-			}
-			return names[i];
-		}
-
-		public static string[] get_workspace_names ()
-		{
-			return get_general_gsettings ().get_strv (KEY_WORKSPACE_NAMES);
-		}
-
-		public static Meta.Rectangle get_primary_monitor_geometry (Meta.Screen screen)
-		{
-			return screen.get_monitor_geometry (screen.get_primary_monitor ());
 		}
 
 		/* CSS functions */
@@ -236,7 +243,7 @@ namespace Gala
 			return (int) ((float) fontdsc.get_size () / Pango.SCALE);
 		}
 
-		/* Other */
+		/* Others */
 		public static GLib.Settings get_general_gsettings ()
 		{
 			if (general_gsettings == null) {

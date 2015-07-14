@@ -195,7 +195,7 @@ namespace Gala
 		 * Recalculate the positions of the windows and animate them
 		 * to the resulting spots.
 		 */
-		// TODO: refactor code, rename to update_layout ()
+		// TODO: refactor code, rename to relayout ()
 		public void reflow ()
 		{
 			// TODO: remove

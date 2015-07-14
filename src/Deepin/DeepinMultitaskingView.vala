@@ -86,6 +86,7 @@ namespace Gala
 			flow_workspaces.set_easing_mode (WORKSPACE_ANIMATION_MODE);
 
 			thumb_workspaces = new DeepinWorkspaceThumbCloneContainer (screen);
+			thumb_workspaces.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
 
 			dock_clones = new Actor ();
 
@@ -278,8 +279,7 @@ namespace Gala
 				AnimationSettings.get_default ().workspace_switch_duration : 0);
 			flow_workspaces.x = -active_x;
 
-			thumb_workspaces.update_layout ();
-			thumb_workspaces.x = width / 2 - thumb_workspaces.width / 2;
+			thumb_workspaces.relayout ();
 		}
 
 		void add_workspace (int num)

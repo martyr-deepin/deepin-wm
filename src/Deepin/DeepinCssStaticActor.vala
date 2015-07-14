@@ -21,14 +21,14 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * Rendering background to actor through cssz styles.
+	 * Rendering background to actor through css styles.
 	 */
 	public class DeepinCssStaticActor : Actor
 	{
 		public string style_class { get; construct; }
 		public Gtk.StateFlags state { get; construct; }
 
-		Gtk.StyleContext? style_context;
+		protected Gtk.StyleContext? style_context;
 
 		public DeepinCssStaticActor (string style_class, Gtk.StateFlags state = Gtk.StateFlags.NORMAL)
 		{
