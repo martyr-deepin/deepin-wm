@@ -377,32 +377,21 @@ namespace Gala
 		 */
 		void remove_workspace ()
 		{
-			var screen = workspace.get_screen ();
 			if (Prefs.get_num_workspaces () <= 1) {
 				// there is only one workspace, ignored
 				return;
 			}
-
-			// do not store old workspace name in gsettings
-			DeepinUtils.reset_all_workspace_names ();
 
 			// TODO: animation
 			opacity = 0;
 			var transition = workspace_clone.get_transition ("opacity");
 			if (transition != null) {
 				// stdout.printf ("transition is not null\n");// TODO:
-				transition.completed.connect (do_close_workspace);
+				transition.completed.connect (() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
 			} else {
 				// stdout.printf ("transition is null\n");// TODO:
-				do_close_workspace ();
+				DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
 			}
-
-		}
-		void do_close_workspace ()
-		{
-			var screen = workspace.get_screen ();
-			uint32 timestamp = screen.get_display ().get_current_time ();
-			screen.remove_workspace (workspace, timestamp);
 		}
 
 		public override void allocate (ActorBox box, AllocationFlags flags)

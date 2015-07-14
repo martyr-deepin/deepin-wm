@@ -57,8 +57,7 @@ namespace Gala
 			add_button.set_easing_duration (ANIMATION_DURATION);
 			add_button.set_easing_mode (ANIMATION_MODE);
 			add_button.button_press_event.connect (() => {
-				uint32 timestamp = screen.get_display ().get_current_time ();
-				screen.append_new_workspace (true, timestamp);
+				DeepinUtils.append_new_workspace (screen);
 				return false;
 			});
 		}

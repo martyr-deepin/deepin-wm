@@ -122,9 +122,46 @@ namespace Gala
 			return names[i];
 		}
 
+		/**
+		 * Get all workspace names in gsettings.
+		 */
 		public static string[] get_workspace_names ()
 		{
 			return get_general_gsettings ().get_strv (KEY_WORKSPACE_NAMES);
+		}
+
+		/**
+		 * Append a new workspace.
+		 */
+		public static void append_new_workspace (Meta.Screen screen, bool activate = true)
+		{
+			if (Meta.Prefs.get_num_workspaces () >= WindowManagerGala.MAX_WORKSPACE_NUM) {
+				return;
+			}
+			uint32 timestamp = screen.get_display ().get_current_time ();
+			screen.append_new_workspace (activate, timestamp);
+		}
+
+		/**
+		 * Remove a workspace, if workspace is null, use the active workspace in
+		 * screen.
+		 */
+		public static void remove_workspace (Meta.Screen screen, Meta.Workspace? workspace = null)
+		{
+			if (Meta.Prefs.get_num_workspaces () <= 1) {
+				// there is only one workspace, ignored
+				return;
+			}
+
+			// do not store old workspace name in gsettings
+			DeepinUtils.reset_all_workspace_names ();
+
+			if (workspace == null) {
+				workspace = screen.get_active_workspace ();
+			}
+
+			uint32 timestamp = screen.get_display ().get_current_time ();
+			screen.remove_workspace (workspace, timestamp);
 		}
 
 		// TODO: use gsettings instead

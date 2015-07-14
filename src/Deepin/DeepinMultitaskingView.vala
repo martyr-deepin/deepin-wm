@@ -364,17 +364,20 @@ namespace Gala
 					bool backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
 					select_window_by_order (backward);
 					break;
-				case Clutter.Key.Down:
-					select_window_by_direction (MotionDirection.DOWN);
-					break;
-				case Clutter.Key.Up:
-					select_window_by_direction (MotionDirection.UP);
-					break;
 				case Clutter.Key.Left:
-					select_window_by_direction (MotionDirection.LEFT);
+					wm.switch_to_next_workspace (MotionDirection.LEFT);
 					break;
 				case Clutter.Key.Right:
-					select_window_by_direction (MotionDirection.RIGHT);
+					wm.switch_to_next_workspace (MotionDirection.RIGHT);
+					break;
+				case Clutter.Key.plus:
+				case Clutter.Key.equal:
+				case Clutter.Key.KP_Add:
+					DeepinUtils.append_new_workspace (screen);
+					break;
+				case Clutter.Key.minus:
+				case Clutter.Key.KP_Subtract:
+					DeepinUtils.remove_workspace (screen);
 					break;
 				case Clutter.Key.Return:
 				case Clutter.Key.KP_Enter:
