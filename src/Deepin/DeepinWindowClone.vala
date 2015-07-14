@@ -610,6 +610,10 @@ namespace Gala
 				close_button.opacity = 0;
 			}
 
+			if (_select) {
+				shape.opacity = 0;
+			}
+
 			dragging = true;
 
 			return this;
@@ -757,6 +761,9 @@ namespace Gala
 				var shadow_effect = get_effect ("shadow") as ShadowEffect;
 				if (shadow_effect != null) {
 					shadow_effect.shadow_opacity = 255;
+				}
+				if (_select) {
+					shape.opacity = 255;
 				}
 			};
 
