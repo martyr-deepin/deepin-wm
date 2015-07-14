@@ -21,9 +21,8 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * Container which controls the layout of a set of
-	 * WindowClones. The WindowClones will be placed in their real
-	 * position.
+	 * Container which controls the layout of a set of WindowClones. The
+	 * WindowClones will be placed in their real position.
 	 */
 	public class DeepinWindowCloneThumbContainer : Actor
 	{
@@ -198,8 +197,13 @@ namespace Gala
 		// TODO: refactor code, rename to relayout ()
 		public void reflow ()
 		{
-			// TODO: remove
-			// var windows = new List<InternalUtils.TilableWindow?> ();
+			float thumb_width, thumb_height;
+			DeepinWorkspaceThumbCloneContainer.get_thumb_size (workspace.get_screen (),
+															   out thumb_width, out thumb_height);
+
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+			float scale = thumb_width != 0 ? thumb_width / (float) monitor_geom.width : 0.5f;
+
 			foreach (var child in get_children ()) {
 				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
 				Meta.Rectangle rect;
@@ -208,6 +212,7 @@ namespace Gala
 #else
 				rect = window_clone.window.get_outer_rect ();
 #endif
+				DeepinUtils.scale_rectangle (ref rect, scale);
 				window_clone.take_slot (rect);
 			}
 

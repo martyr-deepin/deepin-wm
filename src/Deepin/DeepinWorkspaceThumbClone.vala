@@ -422,12 +422,11 @@ namespace Gala
 			thumb_box.set_origin (0, 0);
 			workspace_clone.allocate (thumb_box, flags);
 			workspace_shadow.allocate (thumb_box, flags);
+			window_container.allocate (thumb_box, flags);
 
- 			// scale background and window conatiner
+ 			// scale background
 			background.scale_x = scale;
 			background.scale_y = scale;
-			window_container.scale_x = scale;
-			window_container.scale_y = scale;
 
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (thumb_width + SHAPE_PADDING * 2,

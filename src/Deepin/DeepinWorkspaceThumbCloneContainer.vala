@@ -97,8 +97,8 @@ namespace Gala
 		{
 			setup_pluse_button ();
 
-			var display = screen.get_display ();
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
+
 			y = (int) (monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
 
 			var i = 0;
@@ -118,26 +118,37 @@ namespace Gala
 			}
 		}
 
-		void place_child (Actor child, int index)
+		public static void get_thumb_size (Screen screen, out float width, out float height)
 		{
-			var display = screen.get_display ();
-			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
 			// calculate monitor width height ratio
 			float monitor_whr = (float) monitor_geom.height / monitor_geom.width;
 
+			width = monitor_geom.width * WORKSPACE_WIDTH_PERCENT;;
+			height = width * monitor_whr;
+		}
+
+		void place_child (Actor child, int index)
+		{
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+
 			float child_x = 0;
 			float child_y = 0;
-			float child_width = monitor_geom.width * WORKSPACE_WIDTH_PERCENT;;
-			float child_height = child_width * monitor_whr;
 			float child_spacing = monitor_geom.width * SPACING_PERCENT;
 
+			float child_width, child_height = 0;
+			get_thumb_size (screen, out child_width, out child_height);
 			child_x = (child_width + child_spacing) * index;
 
 			child.x = child_x;
 			child.y = child_y;
 			child.width = child_width;
-			child.height = child_height;
+
+			// For DeepinWorkspaceThumbClone, its height will be allocate by iteself
+			if (child is DeepinWorkspaceAddButton) {
+				child.height = child_height;
+			}
 		}
 
 		/*

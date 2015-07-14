@@ -319,10 +319,10 @@ namespace Gala
 		 */
 		public static void scale_rectangle (ref Meta.Rectangle rect, float scale)
 		{
-			rect.x = (int) (rect.x * scale);
-			rect.y = (int) (rect.y * scale);
-			rect.width = (int) (rect.width * scale);
-			rect.height = (int) (rect.height * scale);
+			rect.x = (int) Math.round (rect.x * scale);
+			rect.y = (int) Math.round (rect.y * scale);
+			rect.width = (int) Math.round (rect.width * scale);
+			rect.height = (int) Math.round (rect.height * scale);
 		}
 
 		/**
