@@ -312,7 +312,7 @@ namespace Gala
 			var pixbuf = get_close_button_pixbuf ();
 
 			texture.reactive = true;
-			texture.set_size (36, 36);
+			texture.set_size (48, 48);
 
 			if (pixbuf != null) {
 				try {
