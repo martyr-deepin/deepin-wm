@@ -116,6 +116,7 @@ namespace Gala
 			}
 
 			stage = Compositor.get_stage_for_screen (screen) as Clutter.Stage;
+			stage.name = "Stage";// TODO: test
 
 			var color = BackgroundSettings.get_default ().primary_color;
 			stage.background_color = Clutter.Color.from_string (color);

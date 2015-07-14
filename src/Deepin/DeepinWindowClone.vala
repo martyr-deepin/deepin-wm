@@ -28,6 +28,7 @@ namespace Gala
 	public class DeepinWindowClone : Actor
 	{
 		const int WINDOW_ICON_SIZE = 64;
+		const int DRAGING_SIZE = 200;
 
 		/**
 		 * The window was activated by clicking or pressing enter. The
@@ -565,45 +566,41 @@ namespace Gala
 		{
 			float abs_x, abs_y;
 
+			// get abs_x and abs_y before reparent
+			get_transformed_position (out abs_x, out abs_y);
+
 			prev_parent = get_parent ();
 			prev_index = prev_parent.get_children ().index (this);
 
+			// reparent
 			var stage = get_stage ();
 			prev_parent.remove_child (this);
 			stage.add_child (this);
 
-			var scale = WINDOW_ICON_SIZE / clone.width;
+			var scale = DRAGING_SIZE / clone.width;
 
 			var shadow_effect = get_effect ("shadow") as ShadowEffect;
 			if (shadow_effect != null) {
 				shadow_effect.shadow_opacity = 0;
 			}
 
-			clone.get_transformed_position (out abs_x, out abs_y);
+			// clone.get_transformed_position (out abs_x, out abs_y);
 			clone.set_pivot_point ((click_x - abs_x) / clone.width, (click_y - abs_y) / clone.height);
 			clone.save_easing_state ();
 			clone.set_easing_duration (200);
 			clone.set_easing_mode (AnimationMode.EASE_IN_CUBIC);
 			clone.set_scale (scale, scale);
-			clone.opacity = 0;
+			clone.set_position (click_x - abs_x - clone.width / 2, click_y - abs_y - clone.height / 2);
 			clone.restore_easing_state ();
 
 			request_reposition ();
-
-			get_transformed_position (out abs_x, out abs_y);
 
 			save_easing_state ();
 			set_easing_duration (0);
 			set_position (abs_x, abs_y);
 
 			if (window_icon != null) {
-				window_icon.save_easing_state ();
-
-				window_icon.set_easing_duration (200);
-				window_icon.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-				window_icon.set_position (click_x - abs_x - window_icon.width / 2, click_y - abs_y - window_icon.height / 2);
-
-				window_icon.restore_easing_state ();
+				window_icon.opacity = 0;
 			}
 
 			if (close_button != null) {
@@ -637,8 +634,7 @@ namespace Gala
 
 			// for an workspace thumbnail, we only do animations if there is an actual movement possible
 			if (workspace_thumb != null
-				&& workspace_thumb.workspace == window.get_workspace ()
-				&& window.get_monitor () == window.get_screen ().get_primary_monitor ()) {
+				&& workspace_thumb.workspace == window.get_workspace ()) {
 				return;
 			}
 
@@ -646,16 +642,14 @@ namespace Gala
 			var opacity = hovered ? 0 : 255;
 			var duration = hovered && insert_thumb != null ? WorkspaceInsertThumb.EXPAND_DELAY : 100;
 
-			if (window_icon != null) {
-				window_icon.save_easing_state ();
+			clone.save_easing_state ();
 
-				window_icon.set_easing_mode (AnimationMode.LINEAR);
-				window_icon.set_easing_duration (duration);
-				window_icon.set_scale (scale, scale);
-				window_icon.set_opacity (opacity);
+			clone.set_easing_mode (AnimationMode.LINEAR);
+			clone.set_easing_duration (duration);
+			// clone.set_scale (scale, scale);
+			clone.set_opacity (opacity);
 
-				window_icon.restore_easing_state ();
-			}
+			clone.restore_easing_state ();
 
 			if (insert_thumb != null) {
 				insert_thumb.set_window_thumb (window);
