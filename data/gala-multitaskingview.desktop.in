@@ -6,4 +6,4 @@ GenericName=Multitasking View
 Icon=deepin-multitasking-view
 Terminal=false
 Categories=Gnome;Gtk
-Exec=dbus-send --session --dest=com.deepin.gala --print-reply /com/deepin/gala com.deepin.gala.PerformAction int32:1
+Exec=dbus-send --session --dest=com.deepin.wm --print-reply /com/deepin/wm com.deepin.wm.PerformAction int32:1

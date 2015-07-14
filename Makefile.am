@@ -12,7 +12,7 @@ SUBDIRS = \
 
 EXTRA_DIST = \
 	.version \
-	build-aux/bzr-version-gen \
+	build-aux/git-version-gen \
 	$(NULL)
 
 BUILT_SOURCES = \

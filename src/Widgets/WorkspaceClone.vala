@@ -23,14 +23,22 @@ namespace Gala
 	/**
 	 * Utility class which adds a border and a shadow to a Background
 	 */
+#if HAS_MUTTER314
+	class FramedBackground : BackgroundManager
+#else
 	class FramedBackground : Background
+#endif
 	{
 		public FramedBackground (Screen screen)
 		{
+#if HAS_MUTTER314
+			Object (screen: screen, monitor_index: screen.get_primary_monitor (), control_position: false);
+#else
 			Object (screen: screen, monitor: screen.get_primary_monitor (), 
-				settings: BackgroundSettings.get_default ().schema);
+					settings: BackgroundSettings.get_default ().schema);
+#endif
 		}
-		
+
 		construct
 		{
 			var primary = screen.get_primary_monitor ();
@@ -111,7 +119,11 @@ namespace Gala
 			}
 		}
 
+#if HAS_MUTTER314
+		BackgroundManager background;
+#else
 		Background background;
+#endif
 		bool opened;
 
 		uint hover_activate_timeout = 0;
@@ -218,8 +230,10 @@ namespace Gala
 		{
 			if (window.window_type != WindowType.NORMAL
 				|| window.get_workspace () != workspace
-				|| window.on_all_workspaces
-				|| window.get_monitor () != window.get_screen ().get_primary_monitor ())
+				|| window.on_all_workspaces)
+				// FIXME: window.get_monitor may cause window manager panic here,
+				//        could be reproducted in deepin-music's mini mode
+				// || window.get_monitor () != window.get_screen ().get_primary_monitor ())
 				return;
 
 			foreach (var child in window_container.get_children ())
@@ -286,8 +300,8 @@ namespace Gala
 			background.set_pivot_point (0.5f, pivotY);
 
 			background.save_easing_state ();
-			background.set_easing_duration (250);
-			background.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+			background.set_easing_duration (MultitaskingView.ANIMATION_DURATION);
+			background.set_easing_mode (MultitaskingView.ANIMATION_MODE);
 			background.set_scale (scale, scale);
 			background.restore_easing_state ();
 
@@ -321,8 +335,8 @@ namespace Gala
 			opened = false;
 
 			background.save_easing_state ();
-			background.set_easing_duration (300);
-			background.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+			background.set_easing_duration (MultitaskingView.ANIMATION_DURATION);
+			background.set_easing_mode (MultitaskingView.ANIMATION_MODE);
 			background.set_scale (1, 1);
 			background.restore_easing_state ();
 

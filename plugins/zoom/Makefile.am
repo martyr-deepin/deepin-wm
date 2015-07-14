@@ -11,7 +11,7 @@ libgala_zoom_ladir = $(pkglibdir)/plugins
 libgala_zoom_la_LDFLAGS = \
 	$(PLUGIN_LDFLAGS) \
 	$(GALA_CORE_LDFLAGS) \
-	$(top_builddir)/lib/libgala.la \
+	$(top_builddir)/lib/libdeepin-wm.la \
 	$(NULL)
 
 libgala_zoom_la_CFLAGS = \
@@ -41,7 +41,7 @@ nodist_libgala_zoom_la_SOURCES = \
 	$(libgala_zoom_la_VALASOURCES:.vala=.c) \
 	$(NULL)
 
-libgala_zoom_la_vala.stamp: $(libgala_zoom_la_VALASOURCES)
+libgala_zoom_la_vala.stamp: $(libgala_zoom_la_VALASOURCES) $(top_builddir)/lib/gala.vapi Makefile
 	$(AM_V_VALA)$(VALAC) \
 		$(libgala_zoom_la_VALAFLAGS) \
 		-C \

@@ -3,10 +3,7 @@ SUBDIRS = \
 	$(NULL)
 
 stylesdir = $(pkgdatadir)
-styles_DATA = gala.css texture.png close.png
-
-xsessionsdir = $(datadir)/xsessions
-xsessions_DATA = deepin-test.desktop
+styles_DATA = deepin-wm.css gala.css texture.png close.png
 
 applicationsdir = $(datadir)/applications
 applications_DATA = gala.desktop gala-multitaskingview.desktop
@@ -15,10 +12,7 @@ applications_DATA = gala.desktop gala-multitaskingview.desktop
 
 gsettings_SCHEMAS = org.pantheon.desktop.gala.gschema.xml
 
-%.gschema.xml.in: %.gschema.xml.in.in Makefile
-	$(AM_V_GEN) sed -e 's|@GETTEXT_PACKAGE[@]|$(GETTEXT_PACKAGE)|g' $< > $@ || rm $@
-
-@INTLTOOL_XML_RULE@
+@INTLTOOL_XML_NOMERGE_RULE@
 
 @GSETTINGS_RULES@
 
@@ -29,6 +23,7 @@ all-local: gschemas.compiled
 
 EXTRA_DIST = \
 	deepin-test.desktop \
+	deepin-wm.css \
 	gala.css \
 	gala.desktop \
 	gala-multitaskingview.desktop.in \
@@ -39,14 +34,13 @@ EXTRA_DIST = \
 
 CLEANFILES = \
 	gala-multitaskingview.desktop \
-	$(gsettings_SCHEMAS) \
 	gschemas.compiled \
-	data/org.pantheon.desktop.gala.gschema.xml \
-	data/org.pantheon.desktop.gala.gschema.xml.in \
+	org.pantheon.desktop.gala.gschema.xml \
+	org.pantheon.desktop.gala.gschema.xml.in \
 	$(NULL)
 
 # rename data file with prefix 'deepin'
 install-data-hook:
 	mv $(DESTDIR)$(applicationsdir)/gala.desktop $(DESTDIR)$(applicationsdir)/deepin-wm.desktop
 	mv $(DESTDIR)$(applicationsdir)/gala-multitaskingview.desktop $(DESTDIR)$(applicationsdir)/deepin-wm-multitaskingview.desktop
-	mv $(DESTDIR)$(gsettingsschemadir)/org.pantheon.desktop.gala.gschema.xml $(DESTDIR)$(gsettingsschemadir)/com.deepin.dde.wm.gala.gschema.xml
+	mv $(DESTDIR)$(gsettingsschemadir)/org.pantheon.desktop.gala.gschema.xml $(DESTDIR)$(gsettingsschemadir)/com.deepin.wrap.pantheon.desktop.gala.gschema.xml

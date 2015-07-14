@@ -32,6 +32,10 @@ namespace Gala
 			icon_pixbuf_cache = new HashTable<string, Gdk.Pixbuf> (str_hash, str_equal);
 		}
 
+		Utils ()
+		{
+		}
+
 		/**
 		 * Clean icon caches
 		 */
@@ -75,79 +79,6 @@ namespace Gala
 				});
 				return false;
 			});
-		}
-
-		/**
-		 * Creates a new GtkClutterTexture with an icon for the window at the given size.
-		 * This is recommended way to grab an icon for a window as this method will make
-		 * sure the icon is updated if it becomes available at a later point.
-		 */
-		public class WindowIcon : GtkClutter.Texture
-		{
-			static Bamf.Matcher matcher;
-
-			static construct
-			{
-				matcher = Bamf.Matcher.get_default ();
-			}
-
-			public Meta.Window window { get; construct; }
-			public int icon_size { get; construct; }
-
-			bool loaded = false;
-			uint32 xid;
-
-			public WindowIcon (Meta.Window window, int icon_size)
-			{
-				Object (window: window, icon_size: icon_size);
-			}
-
-			construct
-			{
-				width = icon_size;
-				height = icon_size;
-				xid = (uint32) window.get_xwindow ();
-
-				// new windows often reach mutter earlier than bamf, that's why
-				// we have to wait until the next window opens and hope that it's
-				// ours so we can get a proper icon instead of the default fallback.
-				var app = matcher.get_application_for_xid (xid);
-				if (app == null)
-					matcher.view_opened.connect (retry_load);
-				else
-					loaded = true;
-
-				update_texture (true);
-			}
-
-			~WindowIcon ()
-			{
-				if (!loaded)
-					matcher.view_opened.disconnect (retry_load);
-			}
-
-			void retry_load (Bamf.View view)
-			{
-				var app = matcher.get_application_for_xid (xid);
-
-				// retry only once
-				loaded = true;
-				matcher.view_opened.disconnect (retry_load);
-
-				if (app == null)
-					return;
-
-				update_texture (false);
-			}
-
-			void update_texture (bool initial)
-			{
-				var pixbuf = get_icon_for_xid (xid, icon_size, !initial);
-
-				try {
-					set_from_pixbuf (pixbuf);
-				} catch (Error e) {}
-			}
 		}
 
 		/**
@@ -199,18 +130,14 @@ namespace Gala
 			string? icon_key = null;
 
 			if (app != null && app.get_desktop_file () != null) {
-				try {
-					var appinfo = new DesktopAppInfo.from_filename (app.get_desktop_file ());
-					if (appinfo != null) {
-						icon = Plank.Drawing.DrawingService.get_icon_from_gicon (appinfo.get_icon ());
-						icon_key = "%s::%i".printf (icon, size);
-						if (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null) {
-							image = Plank.Drawing.DrawingService.load_icon (icon, size, size);
-							not_cached = true;
-						}
+				var appinfo = new DesktopAppInfo.from_filename (app.get_desktop_file ());
+				if (appinfo != null) {
+					icon = Plank.Drawing.DrawingService.get_icon_from_gicon (appinfo.get_icon ());
+					icon_key = "%s::%i".printf (icon, size);
+					if (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null) {
+						image = Plank.Drawing.DrawingService.load_icon (icon, size, size);
+						not_cached = true;
 					}
-				} catch (Error e) {
-					warning (e.message);
 				}
 			}
 
@@ -298,6 +225,48 @@ namespace Gala
 		}
 
 		/**
+		 * Creates an actor showing the current contents of the given WindowActor.
+		 *
+		 * @param actor 	 The actor from which to create a shnapshot
+		 * @param inner_rect The inner (actually visible) rectangle of the window
+		 * @param outer_rect The outer (input region) rectangle of the window
+		 *
+		 * @return           A copy of the actor at that time or %NULL
+		 */
+		public static Clutter.Actor? get_window_actor_snapshot (Meta.WindowActor actor, Meta.Rectangle inner_rect, Meta.Rectangle outer_rect)
+		{
+			var texture = actor.get_texture () as Meta.ShapedTexture;
+
+			if (texture == null)
+				return null;
+
+			var surface = texture.get_image ({
+				inner_rect.x - outer_rect.x,
+				inner_rect.y - outer_rect.y,
+				inner_rect.width,
+				inner_rect.height
+			});
+
+			if (surface == null)
+				return null;
+
+			var canvas = new Clutter.Canvas ();
+			var handler = canvas.draw.connect ((cr) => {
+				cr.set_source_surface (surface, 0, 0);
+				cr.paint ();
+				return false;
+			});
+			canvas.set_size (inner_rect.width, inner_rect.height);
+			SignalHandler.disconnect (canvas, handler);
+
+			var container = new Clutter.Actor ();
+			container.set_size (inner_rect.width, inner_rect.height);
+			container.content = canvas;
+
+			return container;
+		}
+
+		/**
 		 * Ring the system bell, will most likely emit a <beep> error sound or, if the
 		 * audible bell is disabled, flash the screen
 		 *
@@ -356,56 +325,6 @@ namespace Gala
 			}
 
 			return texture;
-		}
-
-		/**
-		 * Provides access to a PlankDrawingDockTheme and PlankDockPrefereces
-		 */
-		public class DockThemeManager : Object
-		{
-			Plank.DockPreferences? dock_settings = null;
-			Plank.Drawing.DockTheme? dock_theme = null;
-
-			public signal void dock_theme_changed (Plank.Drawing.DockTheme? old_theme,
-				Plank.Drawing.DockTheme new_theme);
-
-			DockThemeManager ()
-			{
-				var file = Environment.get_user_config_dir () + "/plank/dock1/settings";
-
-				dock_settings = new Plank.DockPreferences.with_filename (file);
-				dock_settings.notify["Theme"].connect (load_dock_theme);
-			}
-
-			public Plank.Drawing.DockTheme get_dock_theme ()
-			{
-				if (dock_theme == null)
-					load_dock_theme ();
-
-				return dock_theme;
-			}
-
-			public Plank.DockPreferences get_dock_settings ()
-			{
-				return dock_settings;
-			}
-
-			void load_dock_theme ()
-			{
-				var new_theme = new Plank.Drawing.DockTheme (dock_settings.Theme);
-				new_theme.load ("dock");
-				dock_theme_changed (dock_theme, new_theme);
-				dock_theme = new_theme;
-			}
-
-			static DockThemeManager? instance = null;
-			public static DockThemeManager get_default ()
-			{
-				if (instance == null)
-					instance = new DockThemeManager ();
-
-				return instance;
-			}
 		}
 	}
 }

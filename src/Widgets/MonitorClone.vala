@@ -35,7 +35,11 @@ namespace Gala
 		public int monitor { get; construct; }
 
 		WindowCloneContainer window_container;
+#if HAS_MUTTER314
+		BackgroundManager background;
+#else
 		Background background;
+#endif
 
 		public MonitorClone (Screen screen, int monitor)
 		{
@@ -46,8 +50,12 @@ namespace Gala
 		{
 			reactive = true;
 
+#if HAS_MUTTER314
+			background = new BackgroundManager (screen, monitor, false);
+#else
 			background = new Background (screen, monitor, BackgroundSettings.get_default ().schema);
-			background.set_easing_duration (300);
+#endif
+			background.set_easing_duration (MultitaskingView.ANIMATION_DURATION);
 
 			window_container = new WindowCloneContainer ();
 			window_container.window_selected.connect ((w) => { window_selected (w); });

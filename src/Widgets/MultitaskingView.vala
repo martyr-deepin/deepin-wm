@@ -27,7 +27,8 @@ namespace Gala
 	 */
 	public class MultitaskingView : Actor, ActivatableComponent
 	{
-		const int HIDING_DURATION = 300;
+		public const int ANIMATION_DURATION = 250;
+		public const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 		const int SMOOTH_SCROLL_DELAY = 500;
 
 		public WindowManager wm { get; construct; }
@@ -43,6 +44,7 @@ namespace Gala
 
 		IconGroupContainer icon_groups;
 		Actor workspaces;
+		Actor dock_clones;
 
 		public MultitaskingView (WindowManager wm)
 		{
@@ -64,8 +66,11 @@ namespace Gala
 			icon_groups = new IconGroupContainer (screen);
 			icon_groups.request_reposition.connect (() => reposition_icon_groups (true));
 
+			dock_clones = new Actor ();
+
 			add_child (icon_groups);
 			add_child (workspaces);
+			add_child (dock_clones);
 
 			foreach (var workspace in screen.get_workspaces ())
 				add_workspace (workspace.index ());
@@ -226,11 +231,14 @@ namespace Gala
 					workspace_clone.active = false;
 				}
 
+				workspace_clone.save_easing_state ();
 				workspace_clone.set_easing_duration (animate ? 200 : 0);
 				workspace_clone.x = dest_x;
+				workspace_clone.restore_easing_state ();
 			}
 
-			workspaces.set_easing_duration (animate ? 300 : 0);
+			workspaces.set_easing_duration (animate ?
+				AnimationSettings.get_default ().workspace_switch_duration : 0);
 			workspaces.x = -active_x;
 
 			reposition_icon_groups (animate);
@@ -473,6 +481,11 @@ namespace Gala
 			if (active_workspace != null)
 				workspaces.set_child_above_sibling (active_workspace, null);
 
+			workspaces.remove_all_transitions ();
+			foreach (var child in workspaces.get_children ()) {
+				child.remove_all_transitions ();
+			}
+
 			update_positions (false);
 
 			foreach (var child in workspaces.get_children ()) {
@@ -483,8 +496,33 @@ namespace Gala
 					workspace.close ();
 			}
 
+			if (opening) {
+				unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
+
+				foreach (var actor in actors) {
+					const int MAX_OFFSET = 100;
+
+					var window = actor.get_meta_window ();
+
+					if (window.window_type != WindowType.DOCK)
+						continue;
+
+					var clone = new SafeWindowClone (window, true);
+					clone.opacity = 0;
+					dock_clones.add_child (clone);
+				}
+			} else {
+				foreach (var child in dock_clones.get_children ()) {
+					var dock = (Clone) child;
+
+					dock.set_easing_duration (ANIMATION_DURATION);
+					dock.set_easing_mode (ANIMATION_MODE);
+					dock.opacity = 255;
+				}
+			}
+
 			if (!opening) {
-				Timeout.add (290, () => {
+				Timeout.add (ANIMATION_DURATION, () => {
 					foreach (var container in window_containers_monitors) {
 						container.visible = false;
 					}
@@ -495,6 +533,8 @@ namespace Gala
 					wm.window_group.show ();
 					wm.top_window_group.show ();
 
+					dock_clones.destroy_all_children ();
+
 					wm.pop_modal (modal_proxy);
 
 					animating = false;
@@ -502,7 +542,7 @@ namespace Gala
 					return false;
 				});
 			} else {
-				Timeout.add (200, () => {
+				Timeout.add (ANIMATION_DURATION, () => {
 					animating = false;
 					return false;
 				});

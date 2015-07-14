@@ -1,9 +1,0 @@
-usr/bin
-usr/lib/*/deepin-wm/lib*.so
-usr/lib/*/deepin-wm/plugins/lib*.so
-usr/share/xsessions
-usr/share/applications
-usr/share/deepin-wm
-usr/share/glib-2.0
-usr/share/icons
-usr/share/locale
