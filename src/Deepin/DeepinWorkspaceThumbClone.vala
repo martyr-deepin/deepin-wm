@@ -143,6 +143,7 @@ namespace Gala
 			workspace_name_text.activate.connect (() => {
 				get_stage ().set_key_focus (fallback_key_focus);
 				workspace_name_text.editable = false;
+				// TODO: relayout
 				workspace_name.queue_relayout ();
 			});
 			workspace_name_text.key_focus_in.connect (() => {
@@ -153,7 +154,12 @@ namespace Gala
 					workspace_name_text.text = "";
 				}
 			});
-			workspace_name_text.key_focus_out.connect (set_workspace_name);
+			workspace_name_text.key_focus_out.connect (() => {
+				set_workspace_name ();
+				workspace_name.queue_relayout ();
+
+				stdout.printf ("name queue relayout..%d\n", workspace.index () + 1);// TODO:
+			});
 
 			get_workspace_name ();
 
@@ -381,6 +387,10 @@ namespace Gala
 				// there is only one workspace, ignored
 				return;
 			}
+
+			// Ensure workspace name field lost focus to avoid invalid operation
+			// even though the workspace already no exists.
+			get_stage ().set_key_focus (fallback_key_focus);
 
 			// TODO: animation
 			opacity = 0;

@@ -66,12 +66,14 @@ namespace Gala
 		{
 			// TODO: animation
 			// workspace_clone.opacity = 0;
-			workspace_clone.set_easing_duration (ANIMATION_DURATION);
+			// workspace_clone.set_easing_duration (ANIMATION_DURATION);
 			workspace_clone.set_easing_mode (ANIMATION_MODE);
 			// workspace_clone.opacity = 255;
 
 			var index = workspace_clone.workspace.index ();
 			insert_child_at_index (workspace_clone, index);
+
+			workspace_clone.grab_key_focus_for_name ();
 
 			relayout ();
 		}
@@ -109,12 +111,18 @@ namespace Gala
 			float child_spacing = monitor_geom.width * SPACING_PERCENT;
 			var i = 0;
 			foreach (var child in get_children ()) {
+				child.save_easing_state ();
+
+				child.set_easing_duration (ANIMATION_DURATION);
+
 				child.x = child_x;
 				child.y = 0;
 				child.width = child_width;
 				child.height = child_height;
 				child_x += child_width + child_spacing;
 				i++;
+
+				child.restore_easing_state ();
 
 				if (child is DeepinWorkspaceThumbClone) {
 					(child as DeepinWorkspaceThumbClone).get_workspace_name ();
