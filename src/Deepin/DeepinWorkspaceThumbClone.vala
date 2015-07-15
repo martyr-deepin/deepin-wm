@@ -38,8 +38,6 @@ namespace Gala
 		// layout spacing for workspace name field
 		const int WORKSPACE_NAME_SPACING = 5;
 
-		const int SHOW_CLOSE_BUTTON_DELAY = 200;
-
 		const int THUMB_SHAPE_PADDING = 2;
 		const int NAME_SHAPE_PADDING = 8;
 
@@ -174,30 +172,22 @@ namespace Gala
 
 			// close button
 			close_button = Utils.create_close_button ();
-			close_button.opacity = 0;
 			close_button.reactive = true;
-			close_button.visible = false;
-			close_button.set_easing_duration (200);
+			close_button.opacity = 0;
 
 			// block propagation of button presses on the close button, otherwise
 			// the click action on the WorkspaceTHumbClone will act weirdly
-			close_button.button_press_event.connect (() => { return true; });
+			// close_button.button_press_event.connect (() => { return true; });
+			close_button.button_press_event.connect (() => {
+				remove_workspace ();
+				return true;
+			});
 
-			var close_click = new ClickAction ();
-			close_click.clicked.connect (remove_workspace);
-			close_button.add_action (close_click);
+			add_child (close_button);
 
 			var click = new ClickAction ();
 			click.clicked.connect (() => selected ());
-			// When the actor is pressed, the ClickAction grabs all events, so we won't be
-			// notified when the cursor leaves the actor, which makes our close button stay
-			// forever. To fix this we hide the button for as long as the actor is pressed.
-			click.notify["pressed"].connect (() => {
-				toggle_close_button (!click.pressed && get_has_pointer ());
-			});
 			add_action (click);
-
-			add_child (close_button);
 		}
 
 		~DeepinWorkspaceThumbClone ()
@@ -208,15 +198,32 @@ namespace Gala
 
 		public override bool enter_event (CrossingEvent event)
 		{
-			toggle_close_button (true);
+			// don't display the close button when we have dynamic workspaces or
+			// when there is only one workspace
+			if (Prefs.get_dynamic_workspaces () || Prefs.get_num_workspaces () == 1) {
+				return false;
+			}
+
+			close_button.save_easing_state ();
+
+			close_button.set_easing_duration (300);
+			close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+			close_button.opacity = 255;
+
+			close_button.restore_easing_state ();
+
 			return false;
 		}
 
 		public override bool leave_event (CrossingEvent event)
 		{
-			if (!contains (event.related)) {
-				toggle_close_button (false);
-			}
+			close_button.save_easing_state ();
+
+			close_button.set_easing_duration (300);
+			close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+			close_button.opacity = 0;
+
+			close_button.restore_easing_state ();
 
 			return false;
 		}
@@ -298,7 +305,8 @@ namespace Gala
 		{
 			var shadow_effect = workspace_clone.get_effect ("shadow") as ShadowEffect;
 			if (shadow_effect != null) {
-				shadow_effect.update_size (get_thumb_workspace_prefer_width (), get_thumb_workspace_prefer_heigth ());
+				shadow_effect.update_size (get_thumb_workspace_prefer_width (),
+										   get_thumb_workspace_prefer_heigth ());
 			}
 		}
 
@@ -311,50 +319,8 @@ namespace Gala
 		int get_thumb_workspace_prefer_heigth ()
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			return (int) (monitor_geom.height * DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
-		}
-
-		/**
-		 * Requests toggling the close button. If show is true, a timeout will
-		 * be set after which the close button is shown, if false, the close
-		 * button is hidden and the timeout is removed, if it exists. The close
-		 * button may not be shown even though requested if the workspaces are
-		 * set to be dynamic.
-		 *
-		 * @param show Whether to show the close button
-		 */
-		void toggle_close_button (bool show)
-		{
-			// don't display the close button when we have dynamic workspaces or
-			// when there is only one workspace
-			if (Prefs.get_dynamic_workspaces () || Prefs.get_num_workspaces () == 1) {
-				return;
-			}
-
-			if (show_close_button_timeout_id != 0) {
-				Source.remove (show_close_button_timeout_id);
-				show_close_button_timeout_id = 0;
-			}
-
-			if (show) {
-				show_close_button_timeout_id = Timeout.add (SHOW_CLOSE_BUTTON_DELAY, () => {
-					close_button.visible = true;
-					close_button.opacity = 255;
-					show_close_button_timeout_id = 0;
-					return false;
-				});
-				return;
-			}
-
-			close_button.opacity = 0;
-			var transition = get_transition ("opacity");
-			if (transition != null) {
-				transition.completed.connect (() => {
-					close_button.visible = false;
-				});
-			} else {
-				close_button.visible = false;
-			}
+			return (int) (monitor_geom.height *
+						  DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
 		// TODO: necessary?
@@ -389,12 +355,12 @@ namespace Gala
 		void remove_workspace ()
 		{
 			if (Prefs.get_num_workspaces () <= 1) {
-				// there is only one workspace, ignored
+				// there is only one workspace, just ignore
 				return;
 			}
 
-			// Ensure workspace name field lost focus to avoid invalid operation
-			// even though the workspace already no exists.
+			// Ensure workspace name field lost focus to avoid invalid
+			// operations even though the workspace already not exists.
 			get_stage ().set_key_focus (fallback_key_focus);
 
 			// TODO: animation
@@ -402,7 +368,8 @@ namespace Gala
 			var transition = workspace_clone.get_transition ("opacity");
 			if (transition != null) {
 				// stdout.printf ("transition is not null\n");// TODO:
-				transition.completed.connect (() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
+				transition.completed.connect (() => DeepinUtils.remove_workspace (
+												  workspace.get_screen (), workspace));
 			} else {
 				// stdout.printf ("transition is null\n");// TODO:
 				DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
@@ -414,7 +381,8 @@ namespace Gala
 			base.allocate (box, flags);
 
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			float scale = box.get_width () != 0 ? box.get_width () / (float) monitor_geom.width : 0.5f;
+			float scale = box.get_width () != 0 ?
+				box.get_width () / (float) monitor_geom.width : 0.5f;
 
 			// calculate monitor width height ratio
 			float monitor_whr = (float) monitor_geom.height / monitor_geom.width;
@@ -454,7 +422,8 @@ namespace Gala
 			name_shape.allocate (name_shape_box, flags);
 
 			var name_box = ActorBox ();
-			name_box.set_size (Math.fminf (workspace_name.width, WORKSPACE_NAME_WIDTH), workspace_name.height);
+			name_box.set_size (Math.fminf (workspace_name.width, WORKSPACE_NAME_WIDTH),
+							   workspace_name.height);
 			name_box.set_origin ((box.get_width () - name_box.get_width ()) / 2,
 								 name_shape_box.y1 + (name_shape_box.get_height () -
 													  name_box.get_height ()) / 2);
