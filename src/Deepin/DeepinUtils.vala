@@ -164,6 +164,17 @@ namespace Gala
 			screen.remove_workspace (workspace, timestamp);
 		}
 
+		public static void switch_to_workspace (Meta.Screen screen, int index)
+		{
+			var workspace = screen.get_workspace_by_index (index);
+			if (workspace == null) {
+				return;
+			}
+
+			uint32 timestamp = screen.get_display ().get_current_time ();
+			workspace.activate (timestamp);
+		}
+
 		// TODO: use gsettings instead
 		public static bool is_show_desktop_in_tab_list ()
 		{
@@ -250,6 +261,13 @@ namespace Gala
 			return (Gdk.RGBA) value;
 		}
 
+		public static int get_css_border_radius (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		{
+			var style_context = new_css_style_context (class_name);
+			var value = style_context.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS, flags);
+			return (int) value;
+		}
+
 		public static Clutter.Color get_css_color (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			return gdkrgba2color (get_css_color_gdk_rgba (class_name, flags));
@@ -259,13 +277,6 @@ namespace Gala
 			var style_context = new_css_style_context (class_name);
 			var value = style_context.get_property (Gtk.STYLE_PROPERTY_COLOR, flags);
 			return (Gdk.RGBA) value;
-		}
-
-		public static int get_css_border_radius (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
-		{
-			var style_context = new_css_style_context (class_name);
-			var value = style_context.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS, flags);
-			return (int) value;
 		}
 
 		public static Pango.FontDescription get_css_font (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)

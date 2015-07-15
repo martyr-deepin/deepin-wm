@@ -359,6 +359,36 @@ namespace Gala
 						toggle ();
 					}
 					break;
+				case Clutter.Key.@0:
+					DeepinUtils.switch_to_workspace (screen, 9);
+					break;
+				case Clutter.Key.@1:
+					DeepinUtils.switch_to_workspace (screen, 0);
+					break;
+				case Clutter.Key.@2:
+					DeepinUtils.switch_to_workspace (screen, 1);
+					break;
+				case Clutter.Key.@3:
+					DeepinUtils.switch_to_workspace (screen, 2);
+					break;
+				case Clutter.Key.@4:
+					DeepinUtils.switch_to_workspace (screen, 3);
+					break;
+				case Clutter.Key.@5:
+					DeepinUtils.switch_to_workspace (screen, 4);
+					break;
+				case Clutter.Key.@6:
+					DeepinUtils.switch_to_workspace (screen, 5);
+					break;
+				case Clutter.Key.@7:
+					DeepinUtils.switch_to_workspace (screen, 6);
+					break;
+				case Clutter.Key.@8:
+					DeepinUtils.switch_to_workspace (screen, 7);
+					break;
+				case Clutter.Key.@9:
+					DeepinUtils.switch_to_workspace (screen, 8);
+					break;
 				case Clutter.Key.Tab:
 				case Clutter.Key.ISO_Left_Tab:
 					bool backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
@@ -381,6 +411,7 @@ namespace Gala
 					break;
 				case Clutter.Key.Return:
 				case Clutter.Key.KP_Enter:
+					// TODO: how about there is no selected window?
 					get_active_workspace_clone ().window_container.activate_selected_window ();
 					break;
 			}
