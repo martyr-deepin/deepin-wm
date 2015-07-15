@@ -27,20 +27,21 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceThumbClone : Actor
 	{
-		const int WORKSPACE_NAME_WIDTH = 80;
-		const int WORKSPACE_NAME_HEIGHT = 18;
+		const int WORKSPACE_NAME_WIDTH = 70;
+		const int WORKSPACE_NAME_HEIGHT = 8; // will pluse NAME_SHAPE_PADDING * 2 when using
 		const int WORKSPACE_NAME_MAX_LENGTH = 32;
 
 		// distance between thumbnail workspace clone and workspace
 		// name field
-		const int WORKSPACE_NAME_DISTANCE = 20;
+		const int WORKSPACE_NAME_DISTANCE = 16;
 
 		// layout spacing for workspace name field
 		const int WORKSPACE_NAME_SPACING = 5;
 
-		const int SHAPE_PADDING = 5;
-
 		const int SHOW_CLOSE_BUTTON_DELAY = 200;
+
+		const int THUMB_SHAPE_PADDING = 2;
+		const int NAME_SHAPE_PADDING = 8;
 
 		/**
 		 * The group has been clicked. The MultitaskingView should consider activating
@@ -66,6 +67,8 @@ namespace Gala
 		Actor workspace_name;
 		Text workspace_name_num;
 		Text workspace_name_text;
+		int workspace_name_width;
+		int workspace_name_height;
 
 		Actor close_button;
 
@@ -83,7 +86,9 @@ namespace Gala
 			// workspace shadow effect
 			workspace_shadow = new Actor ();
 			workspace_shadow.add_effect_with_name ("shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
-																			   get_thumb_workspace_prefer_heigth (), 10, 1));
+																			   get_thumb_workspace_prefer_heigth (),
+																			   10, 1));
+			workspace_shadow.opacity = 76;
 			add_child (workspace_shadow);
 
 			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
@@ -429,10 +434,10 @@ namespace Gala
 			background.scale_y = scale;
 
 			var thumb_shape_box = ActorBox ();
-			thumb_shape_box.set_size (thumb_width + SHAPE_PADDING * 2,
-									  thumb_height + SHAPE_PADDING * 2);
+			thumb_shape_box.set_size (thumb_width + THUMB_SHAPE_PADDING * 2,
+									  thumb_height + THUMB_SHAPE_PADDING * 2);
 			thumb_shape_box.set_origin ((box.get_width () - thumb_shape_box.get_width ()) / 2,
-										-SHAPE_PADDING);
+										-THUMB_SHAPE_PADDING);
 			thumb_shape.allocate (thumb_shape_box, flags);
 
 			var close_box = ActorBox ();
@@ -442,8 +447,8 @@ namespace Gala
 			close_button.allocate (close_box, flags);
 
 			var name_shape_box = ActorBox ();
-			name_shape_box.set_size (WORKSPACE_NAME_WIDTH + SHAPE_PADDING * 2,
-									 WORKSPACE_NAME_HEIGHT + SHAPE_PADDING * 2);
+			name_shape_box.set_size (WORKSPACE_NAME_WIDTH + NAME_SHAPE_PADDING * 2,
+									 WORKSPACE_NAME_HEIGHT + NAME_SHAPE_PADDING * 2);
 			name_shape_box.set_origin ((box.get_width () - name_shape_box.get_width ()) / 2,
 									   thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
 			name_shape.allocate (name_shape_box, flags);
