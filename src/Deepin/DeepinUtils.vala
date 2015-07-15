@@ -113,13 +113,13 @@ namespace Gala
 		 * Overide Meta.Prefs.get_workspace_name () to ignore the default
 		 * workspace name in format "Workspace %d".
 		 */
-		public static string get_workspace_name (int i)
+		public static string get_workspace_name (int index)
 		{
 			var names = get_workspace_names ();
-			if (names.length < i) {
+			if (names.length < index + 1) {
 				return "";
 			}
-			return names[i];
+			return names[index];
 		}
 
 		/**
