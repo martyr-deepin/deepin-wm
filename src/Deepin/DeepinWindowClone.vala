@@ -417,8 +417,8 @@ namespace Gala
 			if (close_button != null) {
 				var  close_box = ActorBox ();
 				close_box.set_size (close_button.width, close_button.height);
-				close_box.set_origin (box.get_width () - close_box.get_width () * 0.5f,
-										-close_button.height * 0.5f);
+				close_box.set_origin (box.get_width () - close_box.get_width () * 0.60f,
+									  -close_button.height * 0.40f);
 				close_button.allocate (close_box, flags);
 			}
 
@@ -426,7 +426,7 @@ namespace Gala
 				var  icon_box = ActorBox ();
 				icon_box.set_size (WINDOW_ICON_SIZE, WINDOW_ICON_SIZE);
 				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
-									   box.get_height () - icon_box.get_height () * 0.75f);
+									 box.get_height () - icon_box.get_height () * 0.75f);
 				window_icon.allocate (icon_box, flags);
 			}
 
