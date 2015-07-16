@@ -228,6 +228,7 @@ namespace Gala
 				|| (workspace_view = (plugin_manager.get_plugin (plugin_manager.workspace_view_provider) as ActivatableComponent)) == null) {
 				workspace_view = new DeepinMultitaskingView (this);
 				ui_group.add_child ((Clutter.Actor) workspace_view);
+				(workspace_view as DeepinMultitaskingView).connect_key_focus_out_signal ();
 			}
 
 			if (plugin_manager.window_switcher_provider == null) {

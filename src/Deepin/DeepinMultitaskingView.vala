@@ -140,7 +140,10 @@ namespace Gala
 					return false;
 				});
 			});
+		}
 
+		public void connect_key_focus_out_signal ()
+		{
 			/**
 			 * We generally assume that when the key-focus-out signal is emitted
 			 * a different component was opened, so we close in that case. And
