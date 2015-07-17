@@ -21,26 +21,36 @@ using Meta;
 
 namespace Gala
 {
-	/**
-	 * Utility class which adds a border and a shadow to a Background
-	 */
+/**
+ * Utility class which adds a border and a shadow to a Background
+ */
 #if HAS_MUTTER314
 	class DeepinFramedBackground : BackgroundManager
 #else
 	class DeepinFramedBackground : Background
 #endif
 	{
-		public bool enable_shadow { get; construct; }
-		public bool enable_border { get; construct; }
+		public bool enable_shadow
+		{
+			get;
+			construct;
+		}
+		public bool enable_border
+		{
+			get;
+			construct;
+		}
 
-		public DeepinFramedBackground (Screen screen, bool enable_shadow = true, bool enable_border = true)
+		public DeepinFramedBackground (
+			Screen screen, bool enable_shadow = true, bool enable_border = true)
 		{
 #if HAS_MUTTER314
-			Object (screen: screen,  enable_shadow: enable_shadow, enable_border: enable_border,
-					monitor_index: screen.get_primary_monitor (), control_position: false);
+			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
+				monitor_index: screen.get_primary_monitor (), control_position: false);
 #else
-			Object (screen: screen,  enable_shadow: enable_shadow, enable_border: enable_border,
-					monitor: screen.get_primary_monitor (), settings: BackgroundSettings.get_default ().schema);
+			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
+				monitor: screen.get_primary_monitor (),
+				settings: BackgroundSettings.get_default ().schema);
 #endif
 		}
 

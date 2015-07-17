@@ -622,6 +622,9 @@ namespace Gala
 			var current = display.get_focus_window ();
 
 			switch (type) {
+				case ActionType.NONE:
+					// ignore none action
+					break;
 				case ActionType.SHOW_WORKSPACE_VIEW:
 					if (workspace_view == null)
 						break;

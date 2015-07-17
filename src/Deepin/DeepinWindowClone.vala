@@ -22,8 +22,8 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * A container for a clone of the texture of a MetaWindow, a WindowIcon,
-	 * a close button and a shadow. Used together with the WindowCloneContainer.
+	 * A container for a clone of the texture of a MetaWindow, a WindowIcon, a close button and a
+	 * shadow. Used together with the WindowCloneContainer.
 	 */
 	public class DeepinWindowClone : Actor
 	{
@@ -31,9 +31,8 @@ namespace Gala
 		const int DRAGING_SIZE = 200;
 
 		/**
-		 * The window was activated by clicking or pressing enter. The
-		 * MultitaskingView should consider activating the window and
-		 * closing the view.
+		 * The window was activated by clicking or pressing enter. The MultitaskingView should
+		 * consider activating the window and closing the view.
 		 */
 		public signal void activated ();
 
@@ -43,14 +42,31 @@ namespace Gala
 		 */
 		public signal void request_reposition ();
 
-		public Meta.Window window { get; construct; }
+		public Meta.Window window
+		{
+			get;
+			construct;
+		}
 
 		/**
-		 * The currently assigned slot of the window in the tiling layout. May be null.
+		 * The currently assigned slot of the window in the tiling layout. May be
+		 * null.
 		 */
-		public Meta.Rectangle? slot { get; private set; default = null; }
+		public Meta.Rectangle? slot
+		{
+			get;
+			private set;
+		default =
+			null;
+		}
 
-		public bool dragging { get; private set; default = false; }
+		public bool dragging
+		{
+			get;
+			private set;
+		default =
+			false;
+		}
 
 		/**
 		 * When selected fades a highlighted border around the window
@@ -58,11 +74,14 @@ namespace Gala
 		 * WindowCloneContainer's current_window.
 		 */
 		bool _select = false;
-		public bool select {
-			get {
+		public bool select
+		{
+			get
+			{
 				return _select;
 			}
-			set {
+			set
+			{
 				_select = value;
 
 				shape.save_easing_state ();
@@ -75,7 +94,11 @@ namespace Gala
 		}
 
 		// for thumbnail mode, shadow, icon and close button will be disabed
-		public bool thumbnail_mode { get; construct; }
+		public bool thumbnail_mode
+		{
+			get;
+			construct;
+		}
 
 		public bool enable_shadow = true;
 		public bool enable_icon = true;
@@ -114,7 +137,8 @@ namespace Gala
 			}
 
 			reactive = true;
-			shape_border_size = DeepinUtils.get_css_border_radius ("deepin-window-clone", Gtk.StateFlags.SELECTED);
+			shape_border_size =
+				DeepinUtils.get_css_border_radius ("deepin-window-clone", Gtk.StateFlags.SELECTED);
 
 			window.unmanaged.connect (unmanaged);
 			window.notify["on-all-workspaces"].connect (on_all_workspaces_changed);
@@ -122,7 +146,8 @@ namespace Gala
 			window.position_changed.connect (() => request_reposition ());
 #endif
 
-			drag_action = new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
+			drag_action =
+				new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
 			drag_action.drag_begin.connect (drag_begin);
 			drag_action.destination_crossed.connect (drag_destination_crossed);
 			drag_action.drag_end.connect (drag_end);
@@ -176,14 +201,13 @@ namespace Gala
 		}
 
 		/**
-		 * Waits for the texture of a new WindowActor to be available
-		 * and makes a close of it. If it was already was assigned a slot
-		 * at this point it will animate to it. Otherwise it will just place
-		 * itself at the location of the original window. Also adds the shadow
-		 * effect and makes sure the shadow is updated on size changes.
+		 * Waits for the texture of a new WindowActor to be available and makes a close of it. If it
+		 * was already was assigned a slot at this point it will animate to it. Otherwise it will
+		 * just place itself at the location of the original window. Also adds the shadow effect and
+		 * makes sure the shadow is updated on size changes.
 		 *
-		 * @param was_waiting Internal argument used to indicate that we had to
-		 *                    wait before the window's texture became available.
+		 * @param was_waiting Internal argument used to indicate that we had to wait before the
+		 *                    window's texture became available.
 		 */
 		void load_clone (bool was_waiting = false)
 		{
@@ -222,7 +246,8 @@ namespace Gala
 #else
 				var outer_rect = window.get_outer_rect ();
 #endif
-				add_effect_with_name ("shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5));
+				add_effect_with_name (
+					"shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5));
 #if HAS_MUTTER312
 				window.size_changed.connect (update_shadow_size);
 #else
@@ -234,9 +259,12 @@ namespace Gala
 				opacity = 0;
 			}
 
-			// if we were waiting the view was most probably already opened when our window
-			// finally got available. So we fade-in and make sure we took the took place.
-			// If the slot is not available however, the view was probably closed while this
+			// if we were waiting the view was most probably already opened when our
+			// window
+			// finally got available. So we fade-in and make sure we took the took
+			// place.
+			// If the slot is not available however, the view was probably closed while
+			// this
 			// window was opened, so we stay at our old place.
 			if (was_waiting && slot != null) {
 				opacity = 0;
@@ -256,9 +284,11 @@ namespace Gala
 		 */
 		bool should_fade ()
 		{
-			return (thumbnail_mode && window.get_workspace () != window.get_screen ().get_active_workspace ());
+			return (thumbnail_mode &&
+				window.get_workspace () != window.get_screen ().get_active_workspace ());
 			// if (thumbnail_mode) {
-			// 	return window.get_workspace () != window.get_screen ().get_active_workspace ());
+			// 	return window.get_workspace () != window.get_screen
+			// ().get_active_workspace ());
 			// }
 			// return window.is_hidden ();
 		}
@@ -320,8 +350,10 @@ namespace Gala
 			var parent = get_parent ();
 			if (parent != null) {
 				// TODO:
-				// in thumbnail_mode the parent has just been added to the stage, so the
-				// transforme position is not set yet. However, the set position is correct
+				// in thumbnail_mode the parent has just been added to the stage, so
+				// the
+				// transforme position is not set yet. However, the set position is
+				// correct
 				// for overview anyway, so we can just use that.
 				if (thumbnail_mode) {
 					parent.get_position (out offset_x, out offset_y);
@@ -400,33 +432,30 @@ namespace Gala
 		{
 			base.allocate (box, flags);
 
-			foreach (var child in get_children ()) {
+			foreach (var child in get_children ())
+			{
 				if (child != clone && child != shape) {
 					child.allocate_preferred_size (flags);
 				}
 			}
 
-			ActorBox shape_box = {
-				-shape_border_size,
-				-shape_border_size,
-				box.get_width () + shape_border_size,
-				box.get_height () + shape_border_size
-			};
+			ActorBox shape_box = { -shape_border_size, -shape_border_size,
+				box.get_width () + shape_border_size, box.get_height () + shape_border_size };
 			shape.allocate (shape_box, flags);
 
 			if (close_button != null) {
-				var  close_box = ActorBox ();
+				var close_box = ActorBox ();
 				close_box.set_size (close_button.width, close_button.height);
 				close_box.set_origin (box.get_width () - close_box.get_width () * 0.60f,
-									  -close_button.height * 0.40f);
+					-close_button.height * 0.40f);
 				close_button.allocate (close_box, flags);
 			}
 
 			if (!dragging && window_icon != null) {
-				var  icon_box = ActorBox ();
+				var icon_box = ActorBox ();
 				icon_box.set_size (WINDOW_ICON_SIZE, WINDOW_ICON_SIZE);
 				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
-									 box.get_height () - icon_box.get_height () * 0.75f);
+					box.get_height () - icon_box.get_height () * 0.75f);
 				window_icon.allocate (icon_box, flags);
 			}
 
@@ -451,7 +480,7 @@ namespace Gala
 
 				var clone_box = ActorBox ();
 				clone_box.set_origin ((input_rect.x - outer_rect.x) * scale_factor,
-								  (input_rect.y - outer_rect.y) * scale_factor);
+					(input_rect.y - outer_rect.y) * scale_factor);
 				clone_box.set_size (actor.width * scale_factor, actor.height * scale_factor);
 
 				clone.allocate (clone_box, flags);
@@ -463,7 +492,7 @@ namespace Gala
 			return true;
 		}
 
-		public override	bool enter_event (Clutter.CrossingEvent event)
+		public override bool enter_event (Clutter.CrossingEvent event)
 		{
 			if (close_button != null) {
 				close_button.save_easing_state ();
@@ -478,7 +507,7 @@ namespace Gala
 			return false;
 		}
 
-		public override	bool leave_event (Clutter.CrossingEvent event)
+		public override bool leave_event (Clutter.CrossingEvent event)
 		{
 			if (close_button != null) {
 				close_button.save_easing_state ();
@@ -496,7 +525,8 @@ namespace Gala
 		/**
 		 * Send the window the delete signal and listen for new windows to be added
 		 * to the window's workspace, in which case we check if the new window is a
-		 * dialog of the window we were going to delete. If that's the case, we request
+		 * dialog of the window we were going to delete. If that's the case, we
+		 * request
 		 * to select our window.
 		 */
 		void close_window ()
@@ -504,7 +534,7 @@ namespace Gala
 			var screen = window.get_screen ();
 			check_confirm_dialog_cb = screen.window_entered_monitor.connect (check_confirm_dialog);
 
-			window.@delete (screen.get_display ().get_current_time ());
+			window.@ delete (screen.get_display ().get_current_time ());
 		}
 
 		void check_confirm_dialog (int monitor, Meta.Window new_window)
@@ -521,7 +551,8 @@ namespace Gala
 		}
 
 		/**
-		 * The window unmanaged by the compositor, so we need to destroy ourselves too.
+		 * The window unmanaged by the compositor, so we need to destroy ourselves
+		 * too.
 		 */
 		void unmanaged ()
 		{
@@ -546,19 +577,21 @@ namespace Gala
 			destroy ();
 		}
 
-		void actor_clicked (uint32 button) {
+		void actor_clicked (uint32 button)
+		{
 			switch (button) {
-				case 1:
-					activated ();
-					break;
-				case 2:
-					close_window ();
-					break;
+			case 1:
+				activated ();
+				break;
+			case 2:
+				close_window ();
+				break;
 			}
 		}
 
 		/**
-		 * A drag action has been initiated on us, we reparent ourselves to the stage so
+		 * A drag action has been initiated on us, we reparent ourselves to the stage
+		 * so
 		 * we can move freely, scale ourselves to a smaller scale and request that the
 		 * position we just freed is immediately filled by the WindowCloneContainer.
 		 */
@@ -585,12 +618,14 @@ namespace Gala
 			}
 
 			// clone.get_transformed_position (out abs_x, out abs_y);
-			clone.set_pivot_point ((click_x - abs_x) / clone.width, (click_y - abs_y) / clone.height);
+			clone.set_pivot_point (
+				(click_x - abs_x) / clone.width, (click_y - abs_y) / clone.height);
 			clone.save_easing_state ();
 			clone.set_easing_duration (200);
 			clone.set_easing_mode (AnimationMode.EASE_IN_CUBIC);
 			clone.set_scale (scale, scale);
-			clone.set_position (click_x - abs_x - clone.width / 2, click_y - abs_y - clone.height / 2);
+			clone.set_position (
+				click_x - abs_x - clone.width / 2, click_y - abs_y - clone.height / 2);
 			clone.restore_easing_state ();
 
 			request_reposition ();
@@ -617,30 +652,34 @@ namespace Gala
 		}
 
 		/**
-		 * When we cross an DeepinWorkspaceThumbClone, we animate to an even smaller size and slightly
+		 * When we cross an DeepinWorkspaceThumbClone, we animate to an even smaller
+		 * size and
+		 * slightly
 		 * less opacity and add ourselves as temporary window to the group. When left,
 		 * we reverse those steps.
 		 */
 		void drag_destination_crossed (Actor destination, bool hovered)
 		{
-			DeepinWorkspaceThumbClone? workspace_thumb = destination as DeepinWorkspaceThumbClone;
-			WorkspaceInsertThumb? insert_thumb = destination as WorkspaceInsertThumb;
+			DeepinWorkspaceThumbClone ? workspace_thumb = destination as DeepinWorkspaceThumbClone;
+			WorkspaceInsertThumb ? insert_thumb = destination as WorkspaceInsertThumb;
 
 			// if we have don't dynamic workspace, we don't allow inserting
-			if (workspace_thumb == null && insert_thumb == null
-				|| (insert_thumb != null && !Prefs.get_dynamic_workspaces ())) {
+			if (workspace_thumb == null && insert_thumb == null ||
+				(insert_thumb != null && !Prefs.get_dynamic_workspaces ())) {
 				return;
 			}
 
-			// for an workspace thumbnail, we only do animations if there is an actual movement possible
-			if (workspace_thumb != null
-				&& workspace_thumb.workspace == window.get_workspace ()) {
+			// for an workspace thumbnail, we only do animations if there is an actual
+			// movement
+			// possible
+			if (workspace_thumb != null && workspace_thumb.workspace == window.get_workspace ()) {
 				return;
 			}
 
 			var scale = hovered ? 0.4 : 1.0;
 			var opacity = hovered ? 0 : 255;
-			var duration = hovered && insert_thumb != null ? WorkspaceInsertThumb.EXPAND_DELAY : 100;
+			var duration =
+				hovered && insert_thumb != null ? WorkspaceInsertThumb.EXPAND_DELAY : 100;
 
 			clone.save_easing_state ();
 
@@ -666,8 +705,10 @@ namespace Gala
 		}
 
 		/**
-		 * Depending on the destination we have different ways to find the correct destination.
-		 * After we found one we destroy ourselves so the dragged clone immediately disappears,
+		 * Depending on the destination we have different ways to find the correct
+		 * destination.
+		 * After we found one we destroy ourselves so the dragged clone immediately
+		 * disappears,
 		 * otherwise we cancel the drag and animate back to our old place.
 		 */
 		void drag_end (Actor destination)
@@ -676,16 +717,16 @@ namespace Gala
 			var primary = window.get_screen ().get_primary_monitor ();
 
 			if (destination is DeepinWorkspaceThumbClone) {
-				workspace = ((DeepinWorkspaceThumbClone) destination).workspace;
+				workspace = ((DeepinWorkspaceThumbClone)destination).workspace;
 			} else if (destination is DeepinFramedBackground) {
-				workspace = ((DeepinWorkspaceFlowClone) destination.get_parent ()).workspace;
+				workspace = ((DeepinWorkspaceFlowClone)destination.get_parent ()).workspace;
 			} else if (destination is WorkspaceInsertThumb) {
 				if (!Prefs.get_dynamic_workspaces ()) {
 					drag_canceled ();
 					return;
 				}
 
-				unowned WorkspaceInsertThumb inserter = (WorkspaceInsertThumb) destination;
+				unowned WorkspaceInsertThumb inserter = (WorkspaceInsertThumb)destination;
 
 				var will_move = window.get_workspace ().index () != inserter.workspace_index;
 
@@ -696,7 +737,8 @@ namespace Gala
 
 				InternalUtils.insert_workspace_with_window (inserter.workspace_index, window);
 
-				// if we don't actually change workspaces, the window-added/removed signals won't
+				// if we don't actually change workspaces, the window-added/removed
+				// signals won't
 				// be emitted so we can just keep our window here
 				if (!will_move) {
 					drag_canceled ();
@@ -706,7 +748,7 @@ namespace Gala
 
 				return;
 			} else if (destination is MonitorClone) {
-				var monitor = ((MonitorClone) destination).monitor;
+				var monitor = ((MonitorClone)destination).monitor;
 				if (window.get_monitor () != monitor) {
 					window.move_to_monitor (monitor);
 					unmanaged ();
@@ -732,7 +774,8 @@ namespace Gala
 			if (did_move) {
 				unmanaged ();
 			} else {
-				// if we're dropped at the place where we came from interpret as cancel
+				// if we're dropped at the place where we came from interpret as
+				// cancel
 				drag_canceled ();
 			}
 		}
@@ -751,7 +794,8 @@ namespace Gala
 			clone.set_scale (1, 1);
 			clone.opacity = 255;
 
-			Clutter.Callback finished = () => {
+			Clutter.Callback finished = () =>
+			{
 				var shadow_effect = get_effect ("shadow") as ShadowEffect;
 				if (shadow_effect != null) {
 					shadow_effect.shadow_opacity = 255;
@@ -780,7 +824,8 @@ namespace Gala
 				window_icon.set_easing_duration (250);
 				window_icon.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 				// TODO: panic issue
-				window_icon.set_position ((slot.width - WINDOW_ICON_SIZE) / 2, slot.height - WINDOW_ICON_SIZE * 0.75f);
+				window_icon.set_position (
+					(slot.width - WINDOW_ICON_SIZE) / 2, slot.height - WINDOW_ICON_SIZE * 0.75f);
 				window_icon.restore_easing_state ();
 			}
 

@@ -32,7 +32,11 @@ namespace Gala
 		const int POPUP_PADDING = 14;
 		const int POPUP_MAX_WIDTH = 300;
 
-		public Screen screen { get; construct; }
+		public Screen screen
+		{
+			get;
+			construct;
+		}
 
 		Actor popup;
 		Text workspace_name;
@@ -109,7 +113,8 @@ namespace Gala
 			}
 		}
 
-		void start_timer () {
+		void start_timer ()
+		{
 			popup_timeout_id = Timeout.add (POPUP_TIMEOUT, () => {
 				hide_popup ();
 				popup_timeout_id = 0;

@@ -25,7 +25,11 @@ namespace Gala
 	 */
 	public class DeepinCssActor : Actor
 	{
-		public string style_class { get; construct; }
+		public string style_class
+		{
+			get;
+			construct;
+		}
 
 		protected AnimationMode progress_mode = AnimationMode.EASE_IN_OUT_QUAD;
 
@@ -34,11 +38,14 @@ namespace Gala
 		int? border_radius = null;
 
 		Gdk.RGBA _bg_color;
-		Gdk.RGBA bg_color {
-			get {
+		Gdk.RGBA bg_color
+		{
+			get
+			{
 				return _bg_color;
 			}
-			set {
+			set
+			{
 				_bg_color = value;
 				content.invalidate ();
 			}
@@ -50,11 +57,14 @@ namespace Gala
 		Timeline? timeline = null;
 
 		bool _select = false;
-		public bool select {
-			get {
+		public bool select
+		{
+			get
+			{
 				return _select;
 			}
-			set {
+			set
+			{
 				if (_select == value) {
 					return;
 				}
@@ -91,14 +101,15 @@ namespace Gala
 		construct
 		{
 			bg_color_normal = DeepinUtils.get_css_background_color_gdk_rgba (style_class);
-			bg_color_selected = DeepinUtils.get_css_background_color_gdk_rgba (style_class, Gtk.StateFlags.SELECTED);
+			bg_color_selected = DeepinUtils.get_css_background_color_gdk_rgba (
+				style_class, Gtk.StateFlags.SELECTED);
 			border_radius = DeepinUtils.get_css_border_radius (style_class);
 
 			var canvas = new Canvas ();
 			canvas.draw.connect (on_draw_content);
 
 			content = canvas;
-			notify["allocation"].connect (() => canvas.set_size ((int) width, (int) height));
+			notify["allocation"].connect (() => canvas.set_size ((int)width, (int)height));
 
 			bg_color = bg_color_normal;
 		}
@@ -121,7 +132,8 @@ namespace Gala
 			cr.set_operator (Cairo.Operator.OVER);
 
 			cr.set_source_rgba (bg_color.red, bg_color.green, bg_color.blue, bg_color.alpha);
-			Granite.Drawing.Utilities.cairo_rounded_rectangle (cr, 0, 0, (int) width, (int) height, border_radius);
+			Granite.Drawing.Utilities.cairo_rounded_rectangle (
+				cr, 0, 0, (int)width, (int)height, border_radius);
 			cr.fill ();
 
 			return false;
@@ -137,7 +149,7 @@ namespace Gala
 			green = from_color.green + (to_color.green - from_color.green) * progress;
 			blue = from_color.blue + (to_color.blue - from_color.blue) * progress;
 			alpha = from_color.alpha + (to_color.alpha - from_color.alpha) * progress;
-			bg_color = {red, green, blue, alpha};
+			bg_color = { red, green, blue, alpha };
 		}
 	}
 }

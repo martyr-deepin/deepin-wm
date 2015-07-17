@@ -31,10 +31,34 @@ namespace Gala
 		public signal void window_activated (Window window);
 		public signal void window_selected (Window window);
 
-		public int padding_top { get; set; default = 12; }
-		public int padding_left { get; set; default = 12; }
-		public int padding_right { get; set; default = 12; }
-		public int padding_bottom { get; set; default = 12; }
+		public int padding_top
+		{
+			get;
+			set;
+		default =
+			12;
+		}
+		public int padding_left
+		{
+			get;
+			set;
+		default =
+			12;
+		}
+		public int padding_right
+		{
+			get;
+			set;
+		default =
+			12;
+		}
+		public int padding_bottom
+		{
+			get;
+			set;
+		default =
+			12;
+		}
 
 		bool opened;
 
@@ -48,7 +72,7 @@ namespace Gala
 		 * Own all window positions to find next or preview window in
 		 * position.
 		 */
-		List<InternalUtils.TilableWindow?> window_positions;
+		List<InternalUtils.TilableWindow?>window_positions;
 
 		public DeepinWindowCloneFlowContainer ()
 		{
@@ -71,9 +95,10 @@ namespace Gala
 			unowned Meta.Display display = window.get_display ();
 			var children = get_children ();
 
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone clone = (DeepinWindowClone) child;
+			GLib.SList<unowned Meta.Window>windows = new GLib.SList<unowned Meta.Window>();
+			foreach (unowned Actor child in children)
+			{
+				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
 				windows.prepend (clone.window);
 			}
 			windows.prepend (window);
@@ -88,8 +113,9 @@ namespace Gala
 			new_window.request_reposition.connect (reflow);
 
 			var added = false;
-			unowned Meta.Window? target = null;
-			foreach (unowned Meta.Window w in windows_ordered) {
+			unowned Meta.Window ? target = null;
+			foreach (unowned Meta.Window w in windows_ordered)
+			{
 				if (w != window) {
 					target = w;
 					continue;
@@ -97,8 +123,9 @@ namespace Gala
 				break;
 			}
 
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone clone = (DeepinWindowClone) child;
+			foreach (unowned Actor child in children)
+			{
+				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
 				if (target == clone.window) {
 					insert_child_above (new_window, clone);
 					added = true;
@@ -119,8 +146,9 @@ namespace Gala
 		 */
 		public void remove_window (Window window)
 		{
-			foreach (var child in get_children ()) {
-				if (((DeepinWindowClone) child).window == window) {
+			foreach (var child in get_children ())
+			{
+				if (((DeepinWindowClone)child).window == window) {
 					remove_child (child);
 					break;
 				}
@@ -164,19 +192,22 @@ namespace Gala
 			unowned Meta.Display display = screen.get_display ();
 			var children = get_children ();
 
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone clone = (DeepinWindowClone) child;
+			GLib.SList<unowned Meta.Window>windows = new GLib.SList<unowned Meta.Window>();
+			foreach (unowned Actor child in children)
+			{
+				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
 				windows.prepend (clone.window);
 			}
 
 			var windows_ordered = display.sort_windows_by_stacking (windows);
 			windows_ordered.reverse ();
 
-			foreach (unowned Meta.Window window in windows_ordered) {
+			foreach (unowned Meta.Window window in windows_ordered)
+			{
 				var i = 0;
-				foreach (unowned Actor child in children) {
-					if (((DeepinWindowClone) child).window == window) {
+				foreach (unowned Actor child in children)
+				{
+					if (((DeepinWindowClone)child).window == window) {
 						set_child_at_index (child, i);
 						children.remove (child);
 						i++;
@@ -196,9 +227,10 @@ namespace Gala
 				return;
 			}
 
-			var windows = new List<InternalUtils.TilableWindow?> ();
-			foreach (var child in get_children ()) {
-				unowned DeepinWindowClone window = (DeepinWindowClone) child;
+			var windows = new List < InternalUtils.TilableWindow ? > ();
+			foreach (var child in get_children ())
+			{
+				unowned DeepinWindowClone window = (DeepinWindowClone)child;
 #if HAS_MUTTER312
 				windows.prepend ({ window.window.get_frame_rect (), window });
 #else
@@ -215,23 +247,21 @@ namespace Gala
 			// doesn't give us different slots based on stacking order, which can lead
 			// to windows flying around weirdly
 			windows.sort ((a, b) => {
-				var seq_a = ((DeepinWindowClone) a.id).window.get_stable_sequence ();
-				var seq_b = ((DeepinWindowClone) b.id).window.get_stable_sequence ();
-				return (int) (seq_b - seq_a);
+				var seq_a = ((DeepinWindowClone)a.id).window.get_stable_sequence ();
+				var seq_b = ((DeepinWindowClone)b.id).window.get_stable_sequence ();
+				return (int)(seq_b - seq_a);
 			});
 
-			Meta.Rectangle area = {
-				padding_left,
-				padding_top,
+			Meta.Rectangle area = { padding_left, padding_top,
 				(int)width - padding_left - padding_right,
-				(int)height - padding_top - padding_bottom
-			};
+				(int)height - padding_top - padding_bottom };
 
 			// reset window_positions
 			window_positions = InternalUtils.calculate_grid_placement (area, windows);
 
-			foreach (var tilable in window_positions) {
-				unowned DeepinWindowClone window = (DeepinWindowClone) tilable.id;
+			foreach (var tilable in window_positions)
+			{
+				unowned DeepinWindowClone window = (DeepinWindowClone)tilable.id;
 				if (!window.select) {
 					DeepinUtils.scale_rectangle_in_center (ref tilable.rect, 0.9f);
 				}
@@ -283,8 +313,9 @@ namespace Gala
 			// get current window index
 			int index = -1;
 			int tmp_index = 0;
-			foreach (var tilable in window_positions) {
-				unowned DeepinWindowClone window = (DeepinWindowClone) tilable.id;
+			foreach (var tilable in window_positions)
+			{
+				unowned DeepinWindowClone window = (DeepinWindowClone)tilable.id;
 				if (window == current_window) {
 					index = tmp_index;
 					break;
@@ -297,7 +328,7 @@ namespace Gala
 			int next_index = -1;
 			if (index < 0) {
 				if (backward) {
-					next_index = (int) window_positions.length () - 1;
+					next_index = (int)window_positions.length () - 1;
 				} else {
 					next_index = 0;
 				}
@@ -306,16 +337,16 @@ namespace Gala
 				if (backward) {
 					next_index--;
 					if (next_index < 0) {
-						next_index = (int) window_positions.length () - 1;
+						next_index = (int)window_positions.length () - 1;
 					}
 				} else {
 					next_index++;
-					if (next_index >= (int) window_positions.length ()) {
+					if (next_index >= (int)window_positions.length ()) {
 						next_index = 0;
 					}
 				}
 			}
-			next_window = (DeepinWindowClone) window_positions.nth_data (next_index).id;
+			next_window = (DeepinWindowClone)window_positions.nth_data (next_index).id;
 
 			change_current_window (next_window);
 		}
@@ -324,7 +355,8 @@ namespace Gala
 		 * Look for the next window in a direction and make this window the
 		 * new current_window. Used for keyboard navigation.
 		 *
-		 * @param direction The MetaMotionDirection in which to search for windows for.
+		 * @param direction The MetaMotionDirection in which to search for windows
+		 * for.
 		 */
 		public void select_window_by_direction (MotionDirection direction)
 		{
@@ -333,81 +365,74 @@ namespace Gala
 			}
 
 			if (current_window == null) {
-				change_current_window ((DeepinWindowClone) get_child_at_index (0));
+				change_current_window ((DeepinWindowClone)get_child_at_index (0));
 				return;
 			}
 
 			var current_rect = current_window.slot;
 
-			DeepinWindowClone? closest = null;
-			foreach (var window in get_children ()) {
+			DeepinWindowClone ? closest = null;
+			foreach (var window in get_children ())
+			{
 				if (window == current_window) {
 					continue;
 				}
 
-				var window_rect = ((DeepinWindowClone) window).slot;
+				var window_rect = ((DeepinWindowClone)window).slot;
 
 				switch (direction) {
-					case MotionDirection.LEFT:
-						if (window_rect.x > current_rect.x) {
-							continue;
-						}
+				case MotionDirection.LEFT:
+					if (window_rect.x > current_rect.x) {
+						continue;
+					}
 
-						// test for vertical intersection
-						if (window_rect.y + window_rect.height > current_rect.y
-							&& window_rect.y < current_rect.y + current_rect.height) {
-
-							if (closest == null
-								|| closest.slot.x < window_rect.x) {
-								closest = (DeepinWindowClone) window;
-							}
+					// test for vertical intersection
+					if (window_rect.y + window_rect.height > current_rect.y &&
+						window_rect.y < current_rect.y + current_rect.height) {
+						if (closest == null || closest.slot.x < window_rect.x) {
+							closest = (DeepinWindowClone)window;
 						}
-						break;
-					case MotionDirection.RIGHT:
-						if (window_rect.x < current_rect.x) {
-							continue;
-						}
+					}
+					break;
+				case MotionDirection.RIGHT:
+					if (window_rect.x < current_rect.x) {
+						continue;
+					}
 
-						// test for vertical intersection
-						if (window_rect.y + window_rect.height > current_rect.y
-							&& window_rect.y < current_rect.y + current_rect.height) {
-
-							if (closest == null
-								|| closest.slot.x > window_rect.x) {
-								closest = (DeepinWindowClone) window;
-							}
+					// test for vertical intersection
+					if (window_rect.y + window_rect.height > current_rect.y &&
+						window_rect.y < current_rect.y + current_rect.height) {
+						if (closest == null || closest.slot.x > window_rect.x) {
+							closest = (DeepinWindowClone)window;
 						}
-						break;
-					case MotionDirection.UP:
-						if (window_rect.y > current_rect.y) {
-							continue;
-						}
+					}
+					break;
+				case MotionDirection.UP:
+					if (window_rect.y > current_rect.y) {
+						continue;
+					}
 
-						// test for horizontal intersection
-						if (window_rect.x + window_rect.width > current_rect.x
-							&& window_rect.x < current_rect.x + current_rect.width) {
-
-							if (closest == null
-								|| closest.slot.y < window_rect.y) {
-								closest = (DeepinWindowClone) window;
-							}
+					// test for horizontal intersection
+					if (window_rect.x + window_rect.width > current_rect.x &&
+						window_rect.x < current_rect.x + current_rect.width) {
+						if (closest == null || closest.slot.y < window_rect.y) {
+							closest = (DeepinWindowClone)window;
 						}
-						break;
-					case MotionDirection.DOWN:
-						if (window_rect.y < current_rect.y) {
-							continue;
-						}
+					}
+					break;
+				case MotionDirection.DOWN:
+					if (window_rect.y < current_rect.y) {
+						continue;
+					}
 
-						// test for horizontal intersection
-						if (window_rect.x + window_rect.width > current_rect.x
-							&& window_rect.x < current_rect.x + current_rect.width) {
-
-							if (closest == null
-								|| closest.slot.y > window_rect.y) {
-								closest = (DeepinWindowClone) window;
-							}
+					// test for horizontal intersection
+					if (window_rect.x + window_rect.width > current_rect.x &&
+						window_rect.x < current_rect.x + current_rect.width) {
+						if (closest == null || closest.slot.y > window_rect.y) {
+							closest = (DeepinWindowClone)window;
 						}
-						break;
+					}
+					break;
 				}
 			}
 
@@ -440,10 +465,11 @@ namespace Gala
 			opened = true;
 
 			// reset the current window
-			DeepinWindowClone? selected_clone = null;
+			DeepinWindowClone ? selected_clone = null;
 			if (selected_window != null) {
-				foreach (var child in get_children ()) {
-					unowned DeepinWindowClone clone = (DeepinWindowClone) child;
+				foreach (var child in get_children ())
+				{
+					unowned DeepinWindowClone clone = (DeepinWindowClone)child;
 					if (clone.window == selected_window) {
 						selected_clone = clone;
 						break;
@@ -452,8 +478,9 @@ namespace Gala
 			}
 			change_current_window (selected_clone, false);
 
-			foreach (var window in get_children ()) {
-				((DeepinWindowClone) window).transition_to_original_state (false);
+			foreach (var window in get_children ())
+			{
+				((DeepinWindowClone)window).transition_to_original_state (false);
 			}
 
 			reflow ();
@@ -471,8 +498,9 @@ namespace Gala
 
 			opened = false;
 
-			foreach (var window in get_children ()) {
-				((DeepinWindowClone) window).transition_to_original_state (true);
+			foreach (var window in get_children ())
+			{
+				((DeepinWindowClone)window).transition_to_original_state (true);
 			}
 		}
 	}

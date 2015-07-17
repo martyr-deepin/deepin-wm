@@ -23,19 +23,25 @@ namespace Gala
 	public class DeepinWindowSwitcher : Clutter.Actor
 	{
 		// TODO: adjust doc, remove POPUP_ prefix
-		const int POPUP_DELAY_TIMEOUT = 150; // milliseconds, keep popup window hidden when clicked alt-tab quickly
-		const int MIN_DELTA = 100; // milliseconds, repeat key pressing minimum delta time after popup shown
+		const int POPUP_DELAY_TIMEOUT = 150;  // milliseconds, keep popup window hidden
+		// when clicked alt-tab quickly
+		const int MIN_DELTA = 100;  // milliseconds, repeat key pressing minimum delta
+		// time after popup shown
 		const int POPUP_SCREEN_PADDING = 20;
 		const int POPUP_PADDING = 36;
 
-		public WindowManager wm { get; construct; }
+		public WindowManager wm
+		{
+			get;
+			construct;
+		}
 
 		DeepinWindowSwitcherItem? current_item = null;
 
 		Actor popup;
 		Actor item_container;
 		Actor window_clones;
-		List<Actor> clone_sort_order;
+		List<Actor>clone_sort_order;
 
 		uint popup_delay_timeout_id = 0;
 
@@ -94,7 +100,9 @@ namespace Gala
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
 			var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
-			switcher_layout.max_width = monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;;
+			switcher_layout.max_width =
+				monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;
+			;
 		}
 
 		void show_popup ()
@@ -107,8 +115,9 @@ namespace Gala
 			popup.opacity = 0;
 		}
 
-		bool on_clicked_item (Clutter.ButtonEvent event) {
-			unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem) event.source;
+		bool on_clicked_item (Clutter.ButtonEvent event)
+		{
+			unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem)event.source;
 
 			if (current_item != item) {
 				current_item = item;
@@ -139,9 +148,9 @@ namespace Gala
 			}
 
 			if (actor == current_item) {
-				current_item = (DeepinWindowSwitcherItem) current_item.get_next_sibling ();
+				current_item = (DeepinWindowSwitcherItem)current_item.get_next_sibling ();
 				if (current_item == null) {
-					current_item = (DeepinWindowSwitcherItem) item_container.get_first_child ();
+					current_item = (DeepinWindowSwitcherItem)item_container.get_first_child ();
 				}
 
 				dim_items ();
@@ -162,8 +171,8 @@ namespace Gala
 			close (wm.get_screen ().get_display ().get_current_time ());
 		}
 
-		[CCode (instance_pos = -1)]
-		public void handle_switch_windows (Display display, Screen screen, Window? window,
+		[CCode (instance_pos = -1)] public void handle_switch_windows (Display display,
+			Screen screen, Window? window,
 #if HAS_MUTTER314
 			Clutter.KeyEvent event, KeyBinding binding)
 #else
@@ -175,7 +184,8 @@ namespace Gala
 				return;
 			}
 
-			// if we were still closing while the next invocation comes in, we need to cleanup
+			// if we were still closing while the next invocation comes in, we need to
+			// cleanup
 			// things right away
 			if (visible && closing) {
 				close_cleanup ();
@@ -187,7 +197,8 @@ namespace Gala
 			var binding_name = binding.get_name ();
 			var backward = binding_name.has_suffix ("-backward");
 
-			// FIXME for unknown reasons, switch-applications-backward won't be emitted, so we
+			// FIXME for unknown reasons, switch-applications-backward won't be emitted,
+			// so we
 			//       test manually if shift is held down
 			if (binding_name == "switch-applications") {
 				backward = (get_current_modifiers () & ModifierType.SHIFT_MASK) != 0;
@@ -214,7 +225,8 @@ namespace Gala
 			visible = true;
 			closing = false;
 			modal_proxy = wm.push_modal ();
-			modal_proxy.keybinding_filter = (binding) => {
+			modal_proxy.keybinding_filter = (binding) =>
+			{
 				// if it's not built-in, we can block it right away
 				if (!binding.is_builtin ()) {
 					return true;
@@ -223,9 +235,9 @@ namespace Gala
 				// otherwise we determine by name if it's meant for us
 				var name = binding.get_name ();
 
-				return !(name == "switch-applications" || name == "switch-applications-backward"
-						 || name == "switch-windows" || name == "switch-windows-backward"
-						 || name == "switch-group" || name == "switch-group-backward");
+				return !(name == "switch-applications" || name == "switch-applications-backward" ||
+					name == "switch-windows" || name == "switch-windows-backward" ||
+					name == "switch-group" || name == "switch-group-backward");
 			};
 
 			dim_items ();
@@ -280,8 +292,9 @@ namespace Gala
 			closing = true;
 			last_switch_time = 0;
 
-			foreach (var actor in clone_sort_order) {
-				unowned SafeWindowClone clone = (SafeWindowClone) actor;
+			foreach (var actor in clone_sort_order)
+			{
+				unowned SafeWindowClone clone = (SafeWindowClone)actor;
 
 				// current clone stays on top
 				if (current_item is DeepinWindowSwitcherWindowItem &&
@@ -361,7 +374,8 @@ namespace Gala
 				return false;
 			}
 
-			foreach (var window in windows) {
+			foreach (var window in windows)
+			{
 				var item = add_item (window);
 				if (window == current) {
 					current_item = item;
@@ -371,7 +385,7 @@ namespace Gala
 			clone_sort_order = window_clones.get_children ().copy ();
 
 			if (current_item == null) {
-				current_item = (DeepinWindowSwitcherItem) item_container.get_child_at_index (0);
+				current_item = (DeepinWindowSwitcherItem)item_container.get_child_at_index (0);
 			}
 
 			return true;
@@ -387,7 +401,7 @@ namespace Gala
 			var safe_clone = new SafeWindowClone (window, true);
 			safe_clone.x = actor.x;
 			safe_clone.y = actor.y;
-			safe_clone.opacity = 0; // keepin hidden before popup window shown
+			safe_clone.opacity = 0;  // keepin hidden before popup window shown
 
 			window_clones.add_child (safe_clone);
 
@@ -424,19 +438,20 @@ namespace Gala
 				}
 			}
 
-			return (DeepinWindowSwitcherItem) actor;
+			return (DeepinWindowSwitcherItem)actor;
 		}
-
 
 		void dim_items ()
 		{
 			// show animation only when popup window shown
 			bool animate = (popup.visible && popup.opacity != 0) ? true : false;
 
-			var window_opacity = (int) Math.floor (AppearanceSettings.get_default ().alt_tab_window_opacity * 255);
+			var window_opacity =
+				(int)Math.floor (AppearanceSettings.get_default ().alt_tab_window_opacity * 255);
 
-			foreach (var actor in window_clones.get_children ()) {
-				unowned SafeWindowClone clone = (SafeWindowClone) actor;
+			foreach (var actor in window_clones.get_children ())
+			{
+				unowned SafeWindowClone clone = (SafeWindowClone)actor;
 
 				actor.save_easing_state ();
 				actor.set_easing_duration (animate ? 250 : 0);
@@ -455,8 +470,9 @@ namespace Gala
 				actor.restore_easing_state ();
 			}
 
-			foreach (var actor in item_container.get_children ()) {
-				unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem) actor;
+			foreach (var actor in item_container.get_children ())
+			{
+				unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem)actor;
 				if (item == current_item) {
 					item.select (true, animate);
 				} else {
@@ -467,7 +483,8 @@ namespace Gala
 
 		void show_clones ()
 		{
-			foreach (var actor in window_clones.get_children ()) {
+			foreach (var actor in window_clones.get_children ())
+			{
 				actor.opacity = 255;
 			}
 		}
@@ -475,13 +492,13 @@ namespace Gala
 		void hide_windows (Workspace workspace)
 		{
 			var screen = workspace.get_screen ();
-			foreach (var actor in Compositor.get_window_actors (screen)) {
+			foreach (var actor in Compositor.get_window_actors (screen))
+			{
 				var window = actor.get_meta_window ();
 				var type = window.window_type;
 
-				if (type != WindowType.DOCK
-					&& type != WindowType.DESKTOP
-					&& type != WindowType.NOTIFICATION) {
+				if (type != WindowType.DOCK && type != WindowType.DESKTOP &&
+					type != WindowType.NOTIFICATION) {
 					actor.hide ();
 				}
 			}
@@ -494,18 +511,19 @@ namespace Gala
 
 			// need to go through all the windows because of hidden dialogs
 			unowned List<WindowActor>? window_actors = Compositor.get_window_actors (screen);
-			foreach (var actor in window_actors) {
+			foreach (var actor in window_actors)
+			{
 				unowned Window window = actor.get_meta_window ();
 
-				if (window.get_workspace () == workspace
-					&& window.showing_on_its_workspace ()) {
+				if (window.get_workspace () == workspace && window.showing_on_its_workspace ()) {
 					actor.show ();
 				}
 			}
 		}
 
 		/**
-		 * copied from gnome-shell, finds the primary modifier in the mask and saves it
+		 * copied from gnome-shell, finds the primary modifier in the mask and saves
+		 * it
 		 * to our modifier_mask field
 		 *
 		 * @param mask The modifier mask to extract the primary one from
@@ -527,8 +545,8 @@ namespace Gala
 		{
 			Gdk.ModifierType modifiers;
 			double[] axes = {};
-			Gdk.Display.get_default ().get_device_manager ().get_client_pointer ()
-				.get_state (Gdk.get_default_root_window (), axes, out modifiers);
+			Gdk.Display.get_default ().get_device_manager ().get_client_pointer ().get_state (
+				Gdk.get_default_root_window (), axes, out modifiers);
 
 			return modifiers;
 		}

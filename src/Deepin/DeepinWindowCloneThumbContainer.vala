@@ -28,12 +28,40 @@ namespace Gala
 	{
 		public signal void window_activated (Window window);
 
-		public Workspace workspace { get; construct; }
+		public Workspace workspace
+		{
+			get;
+			construct;
+		}
 
-		public int padding_top { get; set; default = 12; }
-		public int padding_left { get; set; default = 12; }
-		public int padding_right { get; set; default = 12; }
-		public int padding_bottom { get; set; default = 12; }
+		public int padding_top
+		{
+			get;
+			set;
+		default =
+			12;
+		}
+		public int padding_left
+		{
+			get;
+			set;
+		default =
+			12;
+		}
+		public int padding_right
+		{
+			get;
+			set;
+		default =
+			12;
+		}
+		public int padding_bottom
+		{
+			get;
+			set;
+		default =
+			12;
+		}
 
 		/**
 		 * The window that is currently selected via keyboard shortcuts. It is not
@@ -61,9 +89,10 @@ namespace Gala
 			unowned Meta.Display display = window.get_display ();
 			var children = get_children ();
 
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
+			GLib.SList<unowned Meta.Window>windows = new GLib.SList<unowned Meta.Window>();
+			foreach (unowned Actor child in children)
+			{
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
 				windows.prepend (window_clone.window);
 			}
 			windows.prepend (window);
@@ -80,8 +109,9 @@ namespace Gala
 			new_window.request_reposition.connect (reflow);
 
 			var added = false;
-			unowned Meta.Window? target = null;
-			foreach (unowned Meta.Window w in windows_ordered) {
+			unowned Meta.Window ? target = null;
+			foreach (unowned Meta.Window w in windows_ordered)
+			{
 				if (w != window) {
 					target = w;
 					continue;
@@ -89,8 +119,9 @@ namespace Gala
 				break;
 			}
 
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
+			foreach (unowned Actor child in children)
+			{
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
 				if (target == window_clone.window) {
 					insert_child_above (new_window, window_clone);
 					added = true;
@@ -111,8 +142,9 @@ namespace Gala
 		 */
 		public void remove_window (Window window)
 		{
-			foreach (var child in get_children ()) {
-				if (((DeepinWindowClone) child).window == window) {
+			foreach (var child in get_children ())
+			{
+				if (((DeepinWindowClone)child).window == window) {
 					remove_child (child);
 					break;
 				}
@@ -150,8 +182,9 @@ namespace Gala
 		 */
 		public void select_window (Window window)
 		{
-			foreach (var child in get_children ()) {
-				if (((DeepinWindowClone) child).window == window) {
+			foreach (var child in get_children ())
+			{
+				if (((DeepinWindowClone)child).window == window) {
 					set_child_at_index (child, -1);
 					break;
 				}
@@ -168,19 +201,22 @@ namespace Gala
 			unowned Meta.Display display = screen.get_display ();
 			var children = get_children ();
 
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
+			GLib.SList<unowned Meta.Window>windows = new GLib.SList<unowned Meta.Window>();
+			foreach (unowned Actor child in children)
+			{
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
 				windows.prepend (window_clone.window);
 			}
 
 			var windows_ordered = display.sort_windows_by_stacking (windows);
 			windows_ordered.reverse ();
 
-			foreach (unowned Meta.Window window in windows_ordered) {
+			foreach (unowned Meta.Window window in windows_ordered)
+			{
 				var i = 0;
-				foreach (unowned Actor child in children) {
-					if (((DeepinWindowClone) child).window == window) {
+				foreach (unowned Actor child in children)
+				{
+					if (((DeepinWindowClone)child).window == window) {
 						set_child_at_index (child, i);
 						children.remove (child);
 						i++;
@@ -198,14 +234,15 @@ namespace Gala
 		public void reflow ()
 		{
 			float thumb_width, thumb_height;
-			DeepinWorkspaceThumbCloneContainer.get_thumb_size (workspace.get_screen (),
-															   out thumb_width, out thumb_height);
+			DeepinWorkspaceThumbCloneContainer.get_thumb_size (
+				workspace.get_screen (), out thumb_width, out thumb_height);
 
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			float scale = thumb_width != 0 ? thumb_width / (float) monitor_geom.width : 0.5f;
+			float scale = thumb_width != 0 ? thumb_width / (float)monitor_geom.width : 0.5f;
 
-			foreach (var child in get_children ()) {
-				unowned DeepinWindowClone window_clone = (DeepinWindowClone) child;
+			foreach (var child in get_children ())
+			{
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
 				Meta.Rectangle rect;
 #if HAS_MUTTER312
 				rect = window_clone.window.get_frame_rect ();

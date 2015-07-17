@@ -69,9 +69,10 @@ namespace Gala
 				};
 
 				bool matched = false;
-				foreach (var rule in rules) {
+				foreach (var rule in rules)
+				{
 					if (rule.keyword.match_string (debug_env, true)) {
-						matched =true;
+						matched = true;
 						Meta.Util.add_verbose_topic (rule.topic);
 					}
 				}
@@ -197,7 +198,8 @@ namespace Gala
 #else
 			var windows = display.get_tab_list (Meta.TabList.NORMAL, screen, workspace);
 #endif
-			foreach (var w in windows) {
+			foreach (var w in windows)
+			{
 				w.minimize ();
 			}
 		}
@@ -211,7 +213,8 @@ namespace Gala
 #else
 			var windows = display.get_tab_list (Meta.TabList.NORMAL, screen, workspace);
 #endif
-			foreach (var w in windows) {
+			foreach (var w in windows)
+			{
 				if (w == window) {
 					return true;
 				}
@@ -230,7 +233,9 @@ namespace Gala
 			default_css_provider = new Gtk.CssProvider ();
 			try {
 				default_css_provider.load_from_path (deepin_wm_css_file);
-			} catch (Error e) {warning (e.message);}
+			} catch (Error e) {
+				warning (e.message);
+			}
 
 			return default_css_provider;
 		}
@@ -240,7 +245,7 @@ namespace Gala
 			var css_provider = get_default_css_provider ();
 
 			var style_path = new Gtk.WidgetPath ();
-			style_path.append_type (typeof (Gtk.Window));
+			style_path.append_type (typeof(Gtk.Window));
 
 			var style_context = new Gtk.StyleContext ();
 			style_context.add_provider (css_provider, Gtk.STYLE_PROVIDER_PRIORITY_USER);
@@ -250,45 +255,52 @@ namespace Gala
 			return style_context;
 		}
 
-		public static Clutter.Color get_css_background_color (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		public static Clutter.Color get_css_background_color (
+			string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			return gdkrgba2color (get_css_background_color_gdk_rgba (class_name, flags));
 		}
-		public static Gdk.RGBA get_css_background_color_gdk_rgba (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		public static Gdk.RGBA get_css_background_color_gdk_rgba (
+			string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			var style_context = new_css_style_context (class_name);
 			var value = style_context.get_property (Gtk.STYLE_PROPERTY_BACKGROUND_COLOR, flags);
-			return (Gdk.RGBA) value;
+			return (Gdk.RGBA)value;
 		}
 
-		public static int get_css_border_radius (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		public static int get_css_border_radius (
+			string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			var style_context = new_css_style_context (class_name);
 			var value = style_context.get_property (Gtk.STYLE_PROPERTY_BORDER_RADIUS, flags);
-			return (int) value;
+			return (int)value;
 		}
 
-		public static Clutter.Color get_css_color (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		public static Clutter.Color get_css_color (
+			string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			return gdkrgba2color (get_css_color_gdk_rgba (class_name, flags));
 		}
-		public static Gdk.RGBA get_css_color_gdk_rgba (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		public static Gdk.RGBA get_css_color_gdk_rgba (
+			string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			var style_context = new_css_style_context (class_name);
 			var value = style_context.get_property (Gtk.STYLE_PROPERTY_COLOR, flags);
-			return (Gdk.RGBA) value;
+			return (Gdk.RGBA)value;
 		}
 
-		public static Pango.FontDescription get_css_font (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		public static Pango.FontDescription get_css_font (
+			string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			var style_context = new_css_style_context (class_name);
 			var value = style_context.get_property (Gtk.STYLE_PROPERTY_FONT, flags);
-			return (Pango.FontDescription) value;
+			return (Pango.FontDescription)value;
 		}
-		public static int get_css_font_size (string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
+		public static int get_css_font_size (
+			string class_name, Gtk.StateFlags flags = Gtk.StateFlags.NORMAL)
 		{
 			var fontdsc = get_css_font (class_name, flags);
-			return (int) ((float) fontdsc.get_size () / Pango.SCALE);
+			return (int)((float)fontdsc.get_size () / Pango.SCALE);
 		}
 
 		/* Others */
@@ -305,12 +317,8 @@ namespace Gala
 		 */
 		public static Clutter.Color gdkrgba2color (Gdk.RGBA rgba)
 		{
-			return {
-				(uint8) (rgba.red * 255),
-				(uint8) (rgba.green * 255),
-				(uint8) (rgba.blue * 255),
-				(uint8) (rgba.alpha * 255)
-			};
+			return { (uint8) (rgba.red * 255), (uint8) (rgba.green * 255),
+				(uint8) (rgba.blue * 255), (uint8) (rgba.alpha * 255) };
 		}
 
 		/**
@@ -330,10 +338,10 @@ namespace Gala
 		 */
 		public static void scale_rectangle (ref Meta.Rectangle rect, float scale)
 		{
-			rect.x = (int) Math.round (rect.x * scale);
-			rect.y = (int) Math.round (rect.y * scale);
-			rect.width = (int) Math.round (rect.width * scale);
-			rect.height = (int) Math.round (rect.height * scale);
+			rect.x = (int)Math.round (rect.x * scale);
+			rect.y = (int)Math.round (rect.y * scale);
+			rect.width = (int)Math.round (rect.width * scale);
+			rect.height = (int)Math.round (rect.height * scale);
 		}
 
 		/**
@@ -341,8 +349,8 @@ namespace Gala
 		 */
 		public static void scale_rectangle_in_center (ref Meta.Rectangle rect, float scale)
 		{
-			int distance_x = (int) ((scale - 1) / 2 * rect.width);
-			int distance_y = (int) ((scale - 1) / 2 * rect.height);
+			int distance_x = (int)((scale - 1) / 2 * rect.width);
+			int distance_y = (int)((scale - 1) / 2 * rect.height);
 			rect.x -= distance_x;
 			rect.y -= distance_y;
 			rect.width += distance_x * 2;

@@ -25,12 +25,21 @@ namespace Gala
 	 */
 	public class DeepinCssStaticActor : Actor
 	{
-		public string style_class { get; construct; }
-		public Gtk.StateFlags state { get; construct; }
+		public string style_class
+		{
+			get;
+			construct;
+		}
+		public Gtk.StateFlags state
+		{
+			get;
+			construct;
+		}
 
 		protected Gtk.StyleContext? style_context;
 
-		public DeepinCssStaticActor (string style_class, Gtk.StateFlags state = Gtk.StateFlags.NORMAL)
+		public DeepinCssStaticActor (
+			string style_class, Gtk.StateFlags state = Gtk.StateFlags.NORMAL)
 		{
 			Object (style_class: style_class, state: state);
 		}
@@ -45,10 +54,12 @@ namespace Gala
 			canvas.draw.connect (on_draw_content);
 
 			content = canvas;
-			notify["allocation"].connect (() => canvas.set_size ((int) width, (int) height));
+			notify["allocation"].connect (() => canvas.set_size ((int)width, (int)height));
 		}
 
-		~DeepinCssStaticActor () {}
+		~DeepinCssStaticActor ()
+		{
+		}
 
 		bool on_draw_content (Cairo.Context cr, int width, int height)
 		{

@@ -52,7 +52,11 @@ namespace Gala
 		 */
 		public const float FLOW_CLONE_DISTANCE_PERCENT = 0.10f;
 
-		public WindowManager wm { get; construct; }
+		public WindowManager wm
+		{
+			get;
+			construct;
+		}
 
 		Meta.Screen screen;
 		ModalProxy modal_proxy;
@@ -63,7 +67,7 @@ namespace Gala
 
 		Actor dock_clones;
 
-		List<MonitorClone> window_containers_monitors;
+		List<MonitorClone>window_containers_monitors;
 
 		Actor flow_workspaces;
 		DeepinWorkspaceThumbCloneContainer thumb_workspaces;
@@ -94,17 +98,17 @@ namespace Gala
 			add_child (flow_workspaces);
 			add_child (dock_clones);
 
-			foreach (var workspace in screen.get_workspaces ()) {
+			foreach (var workspace in screen.get_workspaces ())
+			{
 				add_workspace (workspace.index ());
 			}
 
 			screen.workspace_added.connect (add_workspace);
 			screen.workspace_removed.connect (remove_workspace);
-			screen.workspace_switched.connect_after ((from, to, direction) => {
-				update_positions (opened);
-			});
+			screen.workspace_switched.connect_after (
+				(from, to, direction) => { update_positions (opened); });
 
-			window_containers_monitors = new List<MonitorClone> ();
+			window_containers_monitors = new List<MonitorClone>();
 			update_monitors ();
 			screen.monitors_changed.connect (update_monitors);
 
@@ -120,15 +124,18 @@ namespace Gala
 				}
 
 				Idle.add (() => {
-					unowned List<Workspace> existing_workspaces = screen.get_workspaces ();
+					unowned List<Workspace>existing_workspaces = screen.get_workspaces ();
 
-					foreach (var child in flow_workspaces.get_children ()) {
-						unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
+					foreach (var child in flow_workspaces.get_children ())
+					{
+						unowned DeepinWorkspaceFlowClone workspace_clone =
+							(DeepinWorkspaceFlowClone)child;
 						if (existing_workspaces.index (workspace_clone.workspace) < 0) {
 							workspace_clone.window_activated.disconnect (activate_window);
 							workspace_clone.selected.disconnect (activate_workspace);
 
-							thumb_workspaces.remove_workspace (workspace_clone.related_thumb_workspace);
+							thumb_workspaces.remove_workspace (
+								workspace_clone.related_thumb_workspace);
 
 							workspace_clone.destroy ();
 						}
@@ -164,7 +171,8 @@ namespace Gala
 		 */
 		void update_monitors ()
 		{
-			foreach (var monitor_clone in window_containers_monitors) {
+			foreach (var monitor_clone in window_containers_monitors)
+			{
 				monitor_clone.destroy ();
 			}
 
@@ -207,7 +215,8 @@ namespace Gala
 
 			var direction = MotionDirection.LEFT;
 
-			// concept from maya to detect mouse wheel and proper smooth scroll and prevent
+			// concept from maya to detect mouse wheel and proper smooth scroll and
+			// prevent
 			// too much repetition on the events
 			if (Math.fabs (dy) == 1.0) {
 				// mouse wheel scroll
@@ -248,7 +257,8 @@ namespace Gala
 		 * Places the WorkspaceClones, moves the view so that the active one is shown
 		 * and does the same for the ThumbWorkspaces.
 		 *
-		 * @param animate Whether to animate the movement or have all elements take their
+		 * @param animate Whether to animate the movement or have all elements take
+		 * their
 		 *                positions immediately.
 		 */
 		// TODO: rename
@@ -258,10 +268,12 @@ namespace Gala
 			var active_x = 0.0f;
 
 			// TODO: layout, use container for flow workspaces
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
+			foreach (var child in flow_workspaces.get_children ())
+			{
+				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
 				var index = workspace_clone.workspace.index ();
-				var dest_x = index * (int) (workspace_clone.width * (1 - FLOW_CLONE_DISTANCE_PERCENT * 2));
+				var dest_x =
+					index * (int)(workspace_clone.width * (1 - FLOW_CLONE_DISTANCE_PERCENT * 2));
 
 				if (index == active_index) {
 					active_x = dest_x;
@@ -278,8 +290,8 @@ namespace Gala
 				workspace_clone.restore_easing_state ();
 			}
 
-			flow_workspaces.set_easing_duration (animate ?
-				AnimationSettings.get_default ().workspace_switch_duration : 0);
+			flow_workspaces.set_easing_duration (
+				animate ? AnimationSettings.get_default ().workspace_switch_duration : 0);
 			flow_workspaces.x = -active_x;
 
 			thumb_workspaces.relayout ();
@@ -304,13 +316,14 @@ namespace Gala
 
 		void remove_workspace (int num)
 		{
-			DeepinWorkspaceFlowClone? workspace = null;
+			DeepinWorkspaceFlowClone ? workspace = null;
 
 			// FIXME is there a better way to get the removed workspace?
-			unowned List<Meta.Workspace> existing_workspaces = screen.get_workspaces ();
+			unowned List<Meta.Workspace>existing_workspaces = screen.get_workspaces ();
 
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
+			foreach (var child in flow_workspaces.get_children ())
+			{
+				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
 				if (existing_workspaces.index (workspace_clone.workspace) < 0) {
 					workspace = workspace_clone;
 					break;
@@ -334,9 +347,11 @@ namespace Gala
 		/**
 		 * Activates the workspace of a DeepinWorkspaceFlowClone
 		 *
-		 * @param close_view Whether to close the view as well. Will only be considered
+		 * @param close_view Whether to close the view as well. Will only be
+		 * considered
 		 *                   if the workspace is also the currently active workspace.
-		 *                   Otherwise it will only be made active, but the view won't be
+		 *                   Otherwise it will only be made active, but the view won't
+		 * be
 		 *                   closed.
 		 */
 		void activate_workspace (DeepinWorkspaceFlowClone clone, bool close_view)
@@ -351,72 +366,73 @@ namespace Gala
 		}
 
 		/**
-		 * Collect key events, mainly for redirecting them to the WindowCloneContainers to
+		 * Collect key events, mainly for redirecting them to the
+		 * WindowCloneContainers to
 		 * select the active window.
 		 */
 		public override bool key_press_event (Clutter.KeyEvent event)
 		{
 			switch (event.keyval) {
-				case Clutter.Key.Escape:
-					if (opened) {
-						toggle ();
-					}
-					break;
-				case Clutter.Key.@0:
-					DeepinUtils.switch_to_workspace (screen, 9);
-					break;
-				case Clutter.Key.@1:
-					DeepinUtils.switch_to_workspace (screen, 0);
-					break;
-				case Clutter.Key.@2:
-					DeepinUtils.switch_to_workspace (screen, 1);
-					break;
-				case Clutter.Key.@3:
-					DeepinUtils.switch_to_workspace (screen, 2);
-					break;
-				case Clutter.Key.@4:
-					DeepinUtils.switch_to_workspace (screen, 3);
-					break;
-				case Clutter.Key.@5:
-					DeepinUtils.switch_to_workspace (screen, 4);
-					break;
-				case Clutter.Key.@6:
-					DeepinUtils.switch_to_workspace (screen, 5);
-					break;
-				case Clutter.Key.@7:
-					DeepinUtils.switch_to_workspace (screen, 6);
-					break;
-				case Clutter.Key.@8:
-					DeepinUtils.switch_to_workspace (screen, 7);
-					break;
-				case Clutter.Key.@9:
-					DeepinUtils.switch_to_workspace (screen, 8);
-					break;
-				case Clutter.Key.Tab:
-				case Clutter.Key.ISO_Left_Tab:
-					bool backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
-					select_window_by_order (backward);
-					break;
-				case Clutter.Key.Left:
-					wm.switch_to_next_workspace (MotionDirection.LEFT);
-					break;
-				case Clutter.Key.Right:
-					wm.switch_to_next_workspace (MotionDirection.RIGHT);
-					break;
-				case Clutter.Key.plus:
-				case Clutter.Key.equal:
-				case Clutter.Key.KP_Add:
-					DeepinUtils.append_new_workspace (screen);
-					break;
-				case Clutter.Key.minus:
-				case Clutter.Key.KP_Subtract:
-					DeepinUtils.remove_workspace (screen);
-					break;
-				case Clutter.Key.Return:
-				case Clutter.Key.KP_Enter:
-					// TODO: how about there is no selected window?
-					get_active_workspace_clone ().window_container.activate_selected_window ();
-					break;
+			case Clutter.Key.Escape:
+				if (opened) {
+					toggle ();
+				}
+				break;
+			case Clutter.Key.@0:
+				DeepinUtils.switch_to_workspace (screen, 9);
+				break;
+			case Clutter.Key.@1:
+				DeepinUtils.switch_to_workspace (screen, 0);
+				break;
+			case Clutter.Key.@2:
+				DeepinUtils.switch_to_workspace (screen, 1);
+				break;
+			case Clutter.Key.@3:
+				DeepinUtils.switch_to_workspace (screen, 2);
+				break;
+			case Clutter.Key.@4:
+				DeepinUtils.switch_to_workspace (screen, 3);
+				break;
+			case Clutter.Key.@5:
+				DeepinUtils.switch_to_workspace (screen, 4);
+				break;
+			case Clutter.Key.@6:
+				DeepinUtils.switch_to_workspace (screen, 5);
+				break;
+			case Clutter.Key.@7:
+				DeepinUtils.switch_to_workspace (screen, 6);
+				break;
+			case Clutter.Key.@8:
+				DeepinUtils.switch_to_workspace (screen, 7);
+				break;
+			case Clutter.Key.@9:
+				DeepinUtils.switch_to_workspace (screen, 8);
+				break;
+			case Clutter.Key.Tab:
+			case Clutter.Key.ISO_Left_Tab:
+				bool backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
+				select_window_by_order (backward);
+				break;
+			case Clutter.Key.Left:
+				wm.switch_to_next_workspace (MotionDirection.LEFT);
+				break;
+			case Clutter.Key.Right:
+				wm.switch_to_next_workspace (MotionDirection.RIGHT);
+				break;
+			case Clutter.Key.plus:
+			case Clutter.Key.equal:
+			case Clutter.Key.KP_Add:
+				DeepinUtils.append_new_workspace (screen);
+				break;
+			case Clutter.Key.minus:
+			case Clutter.Key.KP_Subtract:
+				DeepinUtils.remove_workspace (screen);
+				break;
+			case Clutter.Key.Return:
+			case Clutter.Key.KP_Enter:
+				// TODO: how about there is no selected window?
+				get_active_workspace_clone ().window_container.activate_selected_window ();
+				break;
 			}
 
 			return false;
@@ -451,8 +467,9 @@ namespace Gala
 		 */
 		DeepinWorkspaceFlowClone get_active_workspace_clone ()
 		{
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
+			foreach (var child in flow_workspaces.get_children ())
+			{
+				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
 				if (workspace_clone.workspace == screen.get_active_workspace ()) {
 					return workspace_clone;
 				}
@@ -485,7 +502,7 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public void open (HashTable<string,Variant>? hints = null)
+		public void open (HashTable<string, Variant>? hints = null)
 		{
 			if (opened) {
 				return;
@@ -507,8 +524,10 @@ namespace Gala
 		}
 
 		/**
-		 * Toggles the view open or closed. Takes care of all the wm related tasks, like
-		 * starting the modal mode and hiding the WindowGroup. Finally tells all components
+		 * Toggles the view open or closed. Takes care of all the wm related tasks,
+		 * like
+		 * starting the modal mode and hiding the WindowGroup. Finally tells all
+		 * components
 		 * to animate to their positions.
 		 */
 		void toggle ()
@@ -522,7 +541,8 @@ namespace Gala
 			opened = !opened;
 			var opening = opened;
 
-			foreach (var container in window_containers_monitors) {
+			foreach (var container in window_containers_monitors)
+			{
 				if (opening) {
 					container.visible = true;
 					container.open ();
@@ -544,11 +564,13 @@ namespace Gala
 				DragDropAction.cancel_all_by_id ("deepin-multitaskingview-window");
 			}
 
-			// find active workspace clone and raise it, so there are no overlaps while transitioning
-			DeepinWorkspaceFlowClone? active_workspace = null;
+			// find active workspace clone and raise it, so there are no overlaps while
+			// transitioning
+			DeepinWorkspaceFlowClone ? active_workspace = null;
 			var active = screen.get_active_workspace ();
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
+			foreach (var child in flow_workspaces.get_children ())
+			{
+				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
 				if (workspace_clone.workspace == active) {
 					active_workspace = workspace_clone;
 					break;
@@ -559,14 +581,16 @@ namespace Gala
 			}
 
 			flow_workspaces.remove_all_transitions ();
-			foreach (var child in flow_workspaces.get_children ()) {
+			foreach (var child in flow_workspaces.get_children ())
+			{
 				child.remove_all_transitions ();
 			}
 
 			update_positions (false);
 
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone) child;
+			foreach (var child in flow_workspaces.get_children ())
+			{
+				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
 				if (opening) {
 					workspace_clone.open ();
 				} else {
@@ -575,9 +599,10 @@ namespace Gala
 			}
 
 			if (opening) {
-				unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
+				unowned List<WindowActor>actors = Compositor.get_window_actors (screen);
 
-				foreach (var actor in actors) {
+				foreach (var actor in actors)
+				{
 					const int MAX_OFFSET = 100;
 
 					var window = actor.get_meta_window ();
@@ -591,8 +616,9 @@ namespace Gala
 					dock_clones.add_child (clone);
 				}
 			} else {
-				foreach (var child in dock_clones.get_children ()) {
-					var dock = (Clone) child;
+				foreach (var child in dock_clones.get_children ())
+				{
+					var dock = (Clone)child;
 
 					dock.set_easing_duration (ANIMATION_DURATION);
 					dock.set_easing_mode (ANIMATION_MODE);
@@ -602,7 +628,8 @@ namespace Gala
 
 			if (!opening) {
 				Timeout.add (ANIMATION_DURATION, () => {
-					foreach (var container in window_containers_monitors) {
+					foreach (var container in window_containers_monitors)
+					{
 						container.visible = false;
 					}
 

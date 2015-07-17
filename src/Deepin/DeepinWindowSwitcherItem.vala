@@ -61,7 +61,7 @@ namespace Gala
 			shape.set_pivot_point (0.5f, 0.5f);
 
 			add_child (shape);
- 		}
+		}
 
 		public void select (bool value, bool animate = true)
 		{
@@ -99,7 +99,11 @@ namespace Gala
 	 */
 	public class DeepinWindowSwitcherDesktopItem : DeepinWindowSwitcherItem
 	{
-		public Screen screen { get; construct; }
+		public Screen screen
+		{
+			get;
+			construct;
+		}
 
 		Actor background;
 
@@ -121,12 +125,12 @@ namespace Gala
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-			float scale_x = RECT_PREFER_WIDTH / (float) monitor_geom.width;
-			float scale_y = RECT_PREFER_HEIGHT / (float) monitor_geom.height;
+			float scale_x = RECT_PREFER_WIDTH / (float)monitor_geom.width;
+			float scale_y = RECT_PREFER_HEIGHT / (float)monitor_geom.height;
 			float scale = Math.fminf (scale_x, scale_y);
 
-			width = (float) monitor_geom.width * scale;
-			height = (float) monitor_geom.height * scale;
+			width = (float)monitor_geom.width * scale;
+			height = (float)monitor_geom.height * scale;
 		}
 
 		public override void allocate (ActorBox box, AllocationFlags flags)
@@ -143,11 +147,11 @@ namespace Gala
 			bg_height = bg_prefer_height * scale;
 			bg_box.set_size (bg_width, bg_height);
 			bg_box.set_origin ((box.get_width () - bg_box.get_width ()) / 2,
-							   (box.get_height () - bg_box.get_height ()) / 2);
+				(box.get_height () - bg_box.get_height ()) / 2);
 
 			// scale background to fix the allocated size
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
-			float bg_scale = (bg_width > 0) ? bg_width / (float) monitor_geom.width : 0.5f;
+			float bg_scale = (bg_width > 0) ? bg_width / (float)monitor_geom.width : 0.5f;
 			if (bg_scale != 1.0f) {
 				background.scale_x = bg_scale;
 				background.scale_y = bg_scale;
@@ -165,12 +169,16 @@ namespace Gala
 	{
 		const int ICON_PREFER_SIZE = 48;
 
-		public Window window { get; construct; }
+		public Window window
+		{
+			get;
+			construct;
+		}
 
 		uint shadow_update_timeout_id = 0;
 		bool enable_shadow = false;
 
-		Actor? clone_container = null; // container for clone to add shadow effect
+		Actor? clone_container = null;  // container for clone to add shadow effect
 		Clone? clone = null;
 		GtkClutter.Texture window_icon;
 
@@ -191,7 +199,7 @@ namespace Gala
 			add_child (window_icon);
 
 			load_clone ();
- 		}
+		}
 
 		~DeepinWindowSwitcherWindowItem ()
 		{
@@ -214,7 +222,8 @@ namespace Gala
 		}
 
 		/**
-		 * The window unmanaged by the compositor, so we need to destroy ourselves too.
+		 * The window unmanaged by the compositor, so we need to destroy ourselves
+		 * too.
 		 */
 		void on_unmanaged ()
 		{
@@ -246,7 +255,8 @@ namespace Gala
 			}
 		}
 
-		void on_window_size_changed () {
+		void on_window_size_changed ()
+		{
 			request_reposition ();
 		}
 
@@ -303,15 +313,16 @@ namespace Gala
 		void get_clone_preferred_size (out float width, out float height)
 		{
 			var outer_rect = get_window_outer_rect ();
-			float scale_x = RECT_PREFER_WIDTH / (float) outer_rect.width;
-			float scale_y = RECT_PREFER_HEIGHT / (float) outer_rect.height;
+			float scale_x = RECT_PREFER_WIDTH / (float)outer_rect.width;
+			float scale_y = RECT_PREFER_HEIGHT / (float)outer_rect.height;
 			float scale = Math.fminf (scale_x, scale_y);
 
 			width = outer_rect.width * scale;
 			height = outer_rect.height * scale;
 		}
 
-		void update_shadow_async (uint interval, int width, int height) {
+		void update_shadow_async (uint interval, int width, int height)
+		{
 			if (shadow_update_timeout_id != 0) {
 				Source.remove (shadow_update_timeout_id);
 				shadow_update_timeout_id = 0;
@@ -322,9 +333,9 @@ namespace Gala
 				shadow_update_timeout_id = 0;
 				return false;
 			});
-
 		}
-		void do_update_shadow (int width, int height) {
+		void do_update_shadow (int width, int height)
+		{
 			if (clone_container == null) {
 				return;
 			}
@@ -360,10 +371,12 @@ namespace Gala
 					}
 					icon_box.set_size (icon_size, icon_size);
 				}
-				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2, (box.get_height () - icon_box.get_height ()) / 2);
+				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
+					(box.get_height () - icon_box.get_height ()) / 2);
 			} else {
 				icon_box.set_size (ICON_PREFER_SIZE, ICON_PREFER_SIZE);
-				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2, box.get_height () - icon_box.get_height () - icon_box.get_height () * 0.25f);
+				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
+					box.get_height () - icon_box.get_height () - icon_box.get_height () * 0.25f);
 			}
 			window_icon.allocate (icon_box, flags);
 
@@ -381,7 +394,7 @@ namespace Gala
 				return;
 			}
 
-			clone_container.visible = true; // reset clone visible
+			clone_container.visible = true;  // reset clone visible
 
 			var clone_box = ActorBox ();
 			float clone_width, clone_height;
@@ -391,12 +404,12 @@ namespace Gala
 			clone_height = clone_prefer_height * scale;
 			clone_box.set_size (clone_width, clone_height);
 			clone_box.set_origin ((box.get_width () - clone_box.get_width ()) / 2,
-								  (box.get_height () - clone_box.get_height ()) / 2);
+				(box.get_height () - clone_box.get_height ()) / 2);
 
 			clone_container.allocate (clone_box, flags);
 
 			if (enable_shadow) {
-				update_shadow_async (0, (int) clone_width, (int) clone_height);
+				update_shadow_async (0, (int)clone_width, (int)clone_height);
 			}
 		}
 	}

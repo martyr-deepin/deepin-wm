@@ -33,13 +33,15 @@ namespace Gala
 	public class DeepinWorkspaceFlowClone : Actor
 	{
 		/**
-		 * The amount of time a window has to be over the DeepinWorkspaceFlowClone while in drag
+		 * The amount of time a window has to be over the DeepinWorkspaceFlowClone
+		 * while in drag
 		 * before we activate the workspace.
 		 */
 		const int HOVER_ACTIVATE_DELAY = 400;
 
 		/**
-		 * A window has been selected, the DeepinMultitaskingView should consider activating
+		 * A window has been selected, the DeepinMultitaskingView should consider
+		 * activating
 		 * and closing the view.
 		 */
 		public signal void window_activated (Window window);
@@ -47,19 +49,32 @@ namespace Gala
 		/**
 		 * The background has been selected. Switch to that workspace.
 		 *
-		 * @param close_view If the DeepinMultitaskingView should also consider closing itself
+		 * @param close_view If the DeepinMultitaskingView should also consider
+		 * closing itself
 		 *                   after switching.
 		 */
 		public signal void selected (bool close_view);
 
-		public Workspace workspace { get; construct; }
-		public DeepinWindowCloneFlowContainer window_container { get; private set; }
+		public Workspace workspace
+		{
+			get;
+			construct;
+		}
+		public DeepinWindowCloneFlowContainer window_container
+		{
+			get;
+			private set;
+		}
 
 		/**
 		 * Own the related thumbnail workspace clone so that signals
 		 * and events could be dispatched easily.
 		 */
-		public DeepinWorkspaceThumbClone related_thumb_workspace { get; private set; }
+		public DeepinWorkspaceThumbClone related_thumb_workspace
+		{
+			get;
+			private set;
+		}
 
 #if HAS_MUTTER314
 		BackgroundManager background;
@@ -97,20 +112,19 @@ namespace Gala
 			});
 
 			window_container = new DeepinWindowCloneFlowContainer ();
-			window_container.window_activated.connect ((w) => {
-					window_activated (w);
-			});
-			window_container.window_selected.connect ((w) => {
-					related_thumb_workspace.select_window (w);
-			});
+			window_container.window_activated.connect ((w) => { window_activated (w); });
+			window_container.window_selected.connect (
+				(w) => { related_thumb_workspace.select_window (w); });
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
 			screen.restacked.connect (window_container.restack_windows);
 
-			var thumb_drop_action = new DragDropAction (DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
+			var thumb_drop_action = new DragDropAction (
+				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
 			related_thumb_workspace.add_action (thumb_drop_action);
 
-			var background_drop_action = new DragDropAction (DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
+			var background_drop_action = new DragDropAction (
+				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
 			background.add_action (background_drop_action);
 			background_drop_action.crossed.connect ((hovered) => {
 				if (!hovered && hover_activate_timeout != 0) {
@@ -138,10 +152,10 @@ namespace Gala
 
 			// add existing windows
 			var windows = workspace.list_windows ();
-			foreach (var window in windows) {
-				if (window.window_type == WindowType.NORMAL
-					&& !window.on_all_workspaces
-					&& window.get_monitor () == screen.get_primary_monitor ()) {
+			foreach (var window in windows)
+			{
+				if (window.window_type == WindowType.NORMAL && !window.on_all_workspaces &&
+					window.get_monitor () == screen.get_primary_monitor ()) {
 					window_container.add_window (window);
 					related_thumb_workspace.add_window (window);
 				}
@@ -169,20 +183,22 @@ namespace Gala
 		}
 
 		/**
-		 * Add a window to the DeepinWindowCloneFlowContainer and the DeepinWorkspaceThumbClone if it really
+		 * Add a window to the DeepinWindowCloneFlowContainer and the
+		 * DeepinWorkspaceThumbClone if
+		 * it really
 		 * belongs to this workspace and this monitor.
 		 */
 		void add_window (Window window)
 		{
-			if (window.window_type != WindowType.NORMAL
-				|| window.get_workspace () != workspace
-				|| window.on_all_workspaces
-				|| window.get_monitor () != window.get_screen ().get_primary_monitor ()) {
+			if (window.window_type != WindowType.NORMAL || window.get_workspace () != workspace ||
+				window.on_all_workspaces ||
+				window.get_monitor () != window.get_screen ().get_primary_monitor ()) {
 				return;
 			}
 
-			foreach (var child in window_container.get_children ()) {
-				if (((DeepinWindowClone) child).window == window) {
+			foreach (var child in window_container.get_children ())
+			{
+				if (((DeepinWindowClone)child).window == window) {
 					return;
 				}
 			}
@@ -192,7 +208,8 @@ namespace Gala
 		}
 
 		/**
-		 * Remove a window from the DeepinWindowCloneFlowContainer and the DeepinWorkspaceThumbClone
+		 * Remove a window from the DeepinWindowCloneFlowContainer and the
+		 * DeepinWorkspaceThumbClone
 		 */
 		void remove_window (Window window)
 		{
@@ -214,9 +231,13 @@ namespace Gala
 		}
 
 		/**
-		 * Animates the background to its scale, causes a redraw on the DeepinWorkspaceThumbClone and
-		 * makes sure the DeepinWindowCloneFlowContainer animates its windows to their tiled layout.
-		 * Also sets the current_window of the DeepinWindowCloneFlowContainer to the active window
+		 * Animates the background to its scale, causes a redraw on the
+		 * DeepinWorkspaceThumbClone
+		 * and
+		 * makes sure the DeepinWindowCloneFlowContainer animates its windows to their
+		 * tiled layout.
+		 * Also sets the current_window of the DeepinWindowCloneFlowContainer to the
+		 * active window
 		 * if it belongs to this workspace.
 		 */
 		public void open ()
@@ -231,9 +252,12 @@ namespace Gala
 			var display = screen.get_display ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 
-			int top_offset = (int) (monitor_geom.height * DeepinMultitaskingView.FLOW_CLONE_TOP_OFFSET_PERCENT);
-			int bottom_offset = (int) (monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
-			float scale = (float)(monitor_geom.height - top_offset - bottom_offset) / monitor_geom.height;
+			int top_offset =
+				(int)(monitor_geom.height * DeepinMultitaskingView.FLOW_CLONE_TOP_OFFSET_PERCENT);
+			int bottom_offset =
+				(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			float scale =
+				(float)(monitor_geom.height - top_offset - bottom_offset) / monitor_geom.height;
 			float pivot_y = top_offset / (monitor_geom.height - monitor_geom.height * scale);
 
 			background.set_pivot_point (0.5f, pivot_y);
@@ -247,11 +271,12 @@ namespace Gala
 			background.restore_easing_state ();
 
 			window_container.padding_top = top_offset;
-			window_container.padding_left =
-				window_container.padding_right = (int)(monitor_geom.width - monitor_geom.width * scale) / 2;
+			window_container.padding_left = window_container.padding_right =
+				(int)(monitor_geom.width - monitor_geom.width * scale) / 2;
 			window_container.padding_bottom = bottom_offset;
 
-			window_container.open (screen.get_active_workspace () == workspace ? display.get_focus_window () : null);
+			window_container.open (
+				screen.get_active_workspace () == workspace ? display.get_focus_window () : null);
 		}
 
 		/**

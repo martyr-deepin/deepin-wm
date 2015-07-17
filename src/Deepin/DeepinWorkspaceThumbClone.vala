@@ -28,7 +28,7 @@ namespace Gala
 	public class DeepinWorkspaceThumbClone : Actor
 	{
 		const int WORKSPACE_NAME_WIDTH = 70;
-		const int WORKSPACE_NAME_HEIGHT = 8; // will pluse NAME_SHAPE_PADDING * 2 when using
+		const int WORKSPACE_NAME_HEIGHT = 8;  // will pluse NAME_SHAPE_PADDING * 2 when using
 		const int WORKSPACE_NAME_MAX_LENGTH = 32;
 
 		// distance between thumbnail workspace clone and workspace
@@ -47,7 +47,11 @@ namespace Gala
 		 */
 		public signal void selected ();
 
-		public Workspace workspace { get; construct; }
+		public Workspace workspace
+		{
+			get;
+			construct;
+		}
 
 		public Actor? fallback_key_focus = null;
 
@@ -83,28 +87,33 @@ namespace Gala
 
 			// workspace shadow effect
 			workspace_shadow = new Actor ();
-			workspace_shadow.add_effect_with_name ("shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
-																			   get_thumb_workspace_prefer_heigth (),
-																			   10, 1));
+			workspace_shadow.add_effect_with_name (
+				"shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
+							  get_thumb_workspace_prefer_heigth (), 10, 1));
 			workspace_shadow.opacity = 76;
 			add_child (workspace_shadow);
 
 			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
 
 			// selected shape for workspace thumbnail clone
-			thumb_shape = new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+			thumb_shape =
+				new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
 			thumb_shape.opacity = 0;
 			thumb_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
 			add_child (thumb_shape);
 
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
-			int radius = DeepinUtils.get_css_border_radius ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+			int radius = DeepinUtils.get_css_border_radius (
+				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
 			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 			add_child (workspace_clone);
 
 			background = new DeepinFramedBackground (workspace.get_screen (), false, false);
-			background.button_press_event.connect (() => {selected (); return true;});
+			background.button_press_event.connect (() => {
+				selected ();
+				return true;
+			});
 			workspace_clone.add_child (background);
 
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
@@ -139,8 +148,10 @@ namespace Gala
 			workspace_name_text.single_line_mode = true;
 			workspace_name_text.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
 			workspace_name_text.set_font_description (name_font);
-			workspace_name_text.selection_color = DeepinUtils.get_css_background_color ("deepin-text-selection");
-			workspace_name_text.selected_text_color = DeepinUtils.get_css_color ("deepin-text-selection");
+			workspace_name_text.selection_color =
+				DeepinUtils.get_css_background_color ("deepin-text-selection");
+			workspace_name_text.selected_text_color =
+				DeepinUtils.get_css_color ("deepin-text-selection");
 
 			workspace_name_text.button_press_event.connect (on_name_button_press_event);
 			workspace_name_text.activate.connect (() => {
@@ -161,7 +172,7 @@ namespace Gala
 				set_workspace_name ();
 				workspace_name.queue_relayout ();
 
-				stdout.printf ("name queue relayout..%d\n", workspace.index () + 1);// TODO:
+				stdout.printf ("name queue relayout..%d\n", workspace.index () + 1);  // TODO:
 			});
 
 			get_workspace_name ();
@@ -288,7 +299,7 @@ namespace Gala
 			workspace_name_num.set_easing_duration (duration);
 			workspace_name_text.set_easing_duration (duration);
 			var text_color = DeepinUtils.get_css_color ("deepin-workspace-thumb-clone-name",
-														value ? Gtk.StateFlags.SELECTED : Gtk.StateFlags.NORMAL);
+				value ? Gtk.StateFlags.SELECTED : Gtk.StateFlags.NORMAL);
 			workspace_name_num.color = text_color;
 			workspace_name_text.color = text_color;
 
@@ -305,22 +316,23 @@ namespace Gala
 		{
 			var shadow_effect = workspace_clone.get_effect ("shadow") as ShadowEffect;
 			if (shadow_effect != null) {
-				shadow_effect.update_size (get_thumb_workspace_prefer_width (),
-										   get_thumb_workspace_prefer_heigth ());
+				shadow_effect.update_size (
+					get_thumb_workspace_prefer_width (), get_thumb_workspace_prefer_heigth ());
 			}
 		}
 
 		int get_thumb_workspace_prefer_width ()
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			return (int) (monitor_geom.width * DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
+			return (int)(monitor_geom.width *
+				DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
 		int get_thumb_workspace_prefer_heigth ()
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			return (int) (monitor_geom.height *
-						  DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
+			return (int)(monitor_geom.height *
+				DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
 		// TODO: necessary?
@@ -368,8 +380,8 @@ namespace Gala
 			var transition = workspace_clone.get_transition ("opacity");
 			if (transition != null) {
 				// stdout.printf ("transition is not null\n");// TODO:
-				transition.completed.connect (() => DeepinUtils.remove_workspace (
-												  workspace.get_screen (), workspace));
+				transition.completed.connect (
+					() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
 			} else {
 				// stdout.printf ("transition is null\n");// TODO:
 				DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
@@ -381,11 +393,11 @@ namespace Gala
 			base.allocate (box, flags);
 
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			float scale = box.get_width () != 0 ?
-				box.get_width () / (float) monitor_geom.width : 0.5f;
+			float scale =
+				box.get_width () != 0 ? box.get_width () / (float)monitor_geom.width : 0.5f;
 
 			// calculate monitor width height ratio
-			float monitor_whr = (float) monitor_geom.height / monitor_geom.width;
+			float monitor_whr = (float)monitor_geom.height / monitor_geom.width;
 
 			// alocate workspace clone
 			var thumb_box = ActorBox ();
@@ -397,36 +409,35 @@ namespace Gala
 			workspace_shadow.allocate (thumb_box, flags);
 			window_container.allocate (thumb_box, flags);
 
- 			// scale background
+			// scale background
 			background.scale_x = scale;
 			background.scale_y = scale;
 
 			var thumb_shape_box = ActorBox ();
-			thumb_shape_box.set_size (thumb_width + THUMB_SHAPE_PADDING * 2,
-									  thumb_height + THUMB_SHAPE_PADDING * 2);
-			thumb_shape_box.set_origin ((box.get_width () - thumb_shape_box.get_width ()) / 2,
-										-THUMB_SHAPE_PADDING);
+			thumb_shape_box.set_size (
+				thumb_width + THUMB_SHAPE_PADDING * 2, thumb_height + THUMB_SHAPE_PADDING * 2);
+			thumb_shape_box.set_origin (
+				(box.get_width () - thumb_shape_box.get_width ()) / 2, -THUMB_SHAPE_PADDING);
 			thumb_shape.allocate (thumb_shape_box, flags);
 
 			var close_box = ActorBox ();
 			close_box.set_size (close_button.width, close_button.height);
-			close_box.set_origin (box.get_width () - close_box.get_width () * 0.60f,
-								  -close_button.height * 0.40f);
+			close_box.set_origin (
+				box.get_width () - close_box.get_width () * 0.60f, -close_button.height * 0.40f);
 			close_button.allocate (close_box, flags);
 
 			var name_shape_box = ActorBox ();
 			name_shape_box.set_size (WORKSPACE_NAME_WIDTH + NAME_SHAPE_PADDING * 2,
-									 WORKSPACE_NAME_HEIGHT + NAME_SHAPE_PADDING * 2);
+				WORKSPACE_NAME_HEIGHT + NAME_SHAPE_PADDING * 2);
 			name_shape_box.set_origin ((box.get_width () - name_shape_box.get_width ()) / 2,
-									   thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
+				thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
 			name_shape.allocate (name_shape_box, flags);
 
 			var name_box = ActorBox ();
-			name_box.set_size (Math.fminf (workspace_name.width, WORKSPACE_NAME_WIDTH),
-							   workspace_name.height);
+			name_box.set_size (
+				Math.fminf (workspace_name.width, WORKSPACE_NAME_WIDTH), workspace_name.height);
 			name_box.set_origin ((box.get_width () - name_box.get_width ()) / 2,
-								 name_shape_box.y1 + (name_shape_box.get_height () -
-													  name_box.get_height ()) / 2);
+				name_shape_box.y1 + (name_shape_box.get_height () - name_box.get_height ()) / 2);
 			workspace_name.allocate (name_box, flags);
 
 			// update layout for workspace name field.

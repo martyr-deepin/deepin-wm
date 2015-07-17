@@ -44,7 +44,11 @@ namespace Gala
 		const int ANIMATION_DURATION = 500;
 		const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 
-		public Screen screen { get; construct; }
+		public Screen screen
+		{
+			get;
+			construct;
+		}
 
 		Actor add_button;
 
@@ -84,7 +88,8 @@ namespace Gala
 
 			// Prevent other workspaces' original name to be reset, so here set
 			// them to gsettings again.
-			foreach (var child in get_children ()) {
+			foreach (var child in get_children ())
+			{
 				if (child is DeepinWorkspaceThumbClone) {
 					(child as DeepinWorkspaceThumbClone).set_workspace_name ();
 				}
@@ -99,10 +104,11 @@ namespace Gala
 
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
 
-			y = (int) (monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			y = (int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
 
 			var i = 0;
-			foreach (var child in get_children ()) {
+			foreach (var child in get_children ())
+			{
 				child.save_easing_state ();
 
 				child.set_easing_duration (ANIMATION_DURATION);
@@ -123,9 +129,10 @@ namespace Gala
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
 			// calculate monitor width height ratio
-			float monitor_whr = (float) monitor_geom.height / monitor_geom.width;
+			float monitor_whr = (float)monitor_geom.height / monitor_geom.width;
 
-			width = monitor_geom.width * WORKSPACE_WIDTH_PERCENT;;
+			width = monitor_geom.width * WORKSPACE_WIDTH_PERCENT;
+			;
 			height = width * monitor_whr;
 		}
 
