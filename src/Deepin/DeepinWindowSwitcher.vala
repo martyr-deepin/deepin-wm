@@ -23,25 +23,25 @@ namespace Gala
 	public class DeepinWindowSwitcher : Clutter.Actor
 	{
 		// TODO: adjust doc, remove POPUP_ prefix
-		const int POPUP_DELAY_TIMEOUT = 150;  // milliseconds, keep popup window hidden
-		// when clicked alt-tab quickly
-		const int MIN_DELTA = 100;  // milliseconds, repeat key pressing minimum delta
+		// milliseconds, keep popup window hidden when clicked alt-tab quickly
+		const int POPUP_DELAY_TIMEOUT = 150;
+
+		// milliseconds, repeat key pressing minimum delta
+		const int MIN_DELTA = 100;
+
 		// time after popup shown
 		const int POPUP_SCREEN_PADDING = 20;
+
 		const int POPUP_PADDING = 36;
 
-		public WindowManager wm
-		{
-			get;
-			construct;
-		}
+		public WindowManager wm { get; construct; }
 
 		DeepinWindowSwitcherItem? current_item = null;
 
 		Actor popup;
 		Actor item_container;
 		Actor window_clones;
-		List<Actor>clone_sort_order;
+		List<Actor> clone_sort_order;
 
 		uint popup_delay_timeout_id = 0;
 
@@ -102,7 +102,6 @@ namespace Gala
 			var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
 			switcher_layout.max_width =
 				monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;
-			;
 		}
 
 		void show_popup ()
@@ -171,8 +170,8 @@ namespace Gala
 			close (wm.get_screen ().get_display ().get_current_time ());
 		}
 
-		[CCode (instance_pos = -1)] public void handle_switch_windows (Display display,
-			Screen screen, Window? window,
+		[CCode (instance_pos = -1)] public void handle_switch_windows (
+			Display display, Screen screen, Window? window,
 #if HAS_MUTTER314
 			Clutter.KeyEvent event, KeyBinding binding)
 #else
@@ -184,8 +183,7 @@ namespace Gala
 				return;
 			}
 
-			// if we were still closing while the next invocation comes in, we need to
-			// cleanup
+			// if we were still closing while the next invocation comes in, we need to cleanup
 			// things right away
 			if (visible && closing) {
 				close_cleanup ();
@@ -197,9 +195,8 @@ namespace Gala
 			var binding_name = binding.get_name ();
 			var backward = binding_name.has_suffix ("-backward");
 
-			// FIXME for unknown reasons, switch-applications-backward won't be emitted,
-			// so we
-			//       test manually if shift is held down
+			// FIXME: for unknown reasons, switch-applications-backward won't be emitted, so we test
+			//        manually if shift is held down
 			if (binding_name == "switch-applications") {
 				backward = (get_current_modifiers () & ModifierType.SHIFT_MASK) != 0;
 			}
@@ -236,8 +233,8 @@ namespace Gala
 				var name = binding.get_name ();
 
 				return !(name == "switch-applications" || name == "switch-applications-backward" ||
-					name == "switch-windows" || name == "switch-windows-backward" ||
-					name == "switch-group" || name == "switch-group-backward");
+						 name == "switch-windows" || name == "switch-windows-backward" ||
+						 name == "switch-group" || name == "switch-group-backward");
 			};
 
 			dim_items ();
@@ -247,8 +244,8 @@ namespace Gala
 				close (wm.get_screen ().get_display ().get_current_time ());
 			}
 
-			// We delay showing the popup so that fast Alt+Tab users aren't
-			// disturbed by the popup briefly flashing.
+			// We delay showing the popup so that fast Alt+Tab users aren't disturbed by the popup
+			// briefly flashing.
 			if (popup_delay_timeout_id != 0) {
 				Source.remove (popup_delay_timeout_id);
 			}
@@ -292,8 +289,7 @@ namespace Gala
 			closing = true;
 			last_switch_time = 0;
 
-			foreach (var actor in clone_sort_order)
-			{
+			foreach (var actor in clone_sort_order) {
 				unowned SafeWindowClone clone = (SafeWindowClone)actor;
 
 				// current clone stays on top
@@ -343,8 +339,8 @@ namespace Gala
 		/**
 		 * Adds the suitable windows on the given workspace to the switcher
 		 *
-		 * @return whether the switcher should actually be started or if there are
-		 *         not enough windows
+		 * @return whether the switcher should actually be started or if there are not enough
+		 *         windows
 		 */
 		bool collect_windows (Workspace workspace, TabList type)
 		{
@@ -374,8 +370,7 @@ namespace Gala
 				return false;
 			}
 
-			foreach (var window in windows)
-			{
+			foreach (var window in windows) {
 				var item = add_item (window);
 				if (window == current) {
 					current_item = item;
@@ -449,8 +444,7 @@ namespace Gala
 			var window_opacity =
 				(int)Math.floor (AppearanceSettings.get_default ().alt_tab_window_opacity * 255);
 
-			foreach (var actor in window_clones.get_children ())
-			{
+			foreach (var actor in window_clones.get_children ()) {
 				unowned SafeWindowClone clone = (SafeWindowClone)actor;
 
 				actor.save_easing_state ();
@@ -470,8 +464,7 @@ namespace Gala
 				actor.restore_easing_state ();
 			}
 
-			foreach (var actor in item_container.get_children ())
-			{
+			foreach (var actor in item_container.get_children ()) {
 				unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem)actor;
 				if (item == current_item) {
 					item.select (true, animate);
@@ -483,8 +476,7 @@ namespace Gala
 
 		void show_clones ()
 		{
-			foreach (var actor in window_clones.get_children ())
-			{
+			foreach (var actor in window_clones.get_children ()) {
 				actor.opacity = 255;
 			}
 		}
@@ -492,8 +484,7 @@ namespace Gala
 		void hide_windows (Workspace workspace)
 		{
 			var screen = workspace.get_screen ();
-			foreach (var actor in Compositor.get_window_actors (screen))
-			{
+			foreach (var actor in Compositor.get_window_actors (screen)) {
 				var window = actor.get_meta_window ();
 				var type = window.window_type;
 
@@ -511,8 +502,7 @@ namespace Gala
 
 			// need to go through all the windows because of hidden dialogs
 			unowned List<WindowActor>? window_actors = Compositor.get_window_actors (screen);
-			foreach (var actor in window_actors)
-			{
+			foreach (var actor in window_actors) {
 				unowned Window window = actor.get_meta_window ();
 
 				if (window.get_workspace () == workspace && window.showing_on_its_workspace ()) {
@@ -522,9 +512,8 @@ namespace Gala
 		}
 
 		/**
-		 * copied from gnome-shell, finds the primary modifier in the mask and saves
-		 * it
-		 * to our modifier_mask field
+		 * copied from gnome-shell, finds the primary modifier in the mask and saves it to our
+		 * modifier_mask field
 		 *
 		 * @param mask The modifier mask to extract the primary one from
 		 */

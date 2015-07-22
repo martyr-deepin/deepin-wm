@@ -1,7 +1,8 @@
 ---
-Language:        Cpp
+Language:        Vala
+# BasedOnStyle:  Google
 AccessModifierOffset: 0
-AlignAfterOpenBracket: true
+AlignAfterOpenBracket: false
 AlignConsecutiveAssignments: false
 AlignEscapedNewlinesLeft: true
 AlignOperands:   false
@@ -9,33 +10,34 @@ AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
-AlwaysBreakAfterDefinitionReturnType: false
+AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: true
 BinPackArguments: true
 BinPackParameters: true
 BreakBeforeBinaryOperators: None
-BreakBeforeBraces: Attach
-BreakBeforeTernaryOperators: true
-BreakConstructorInitializersBeforeComma: false
+BreakBeforeBraces: Linux
+BreakBeforeTernaryOperators: false
+BreakConstructorInitializersBeforeComma: true
 ColumnLimit:     100
 CommentPragmas:  '^ IWYU pragma:'
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: false
-DerivePointerAlignment: true
-DisableFormat:   false
+DerivePointerAlignment: false
+DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
-ForEachMacros:   [ foreach, Q_FOREACH, BOOST_FOREACH ]
-IndentCaseLabels: true
-IndentFunctionDeclarationAfterType: false
+ForEachMacros:   [ Q_FOREACH, BOOST_FOREACH ]
+IndentCaseLabels: false
 IndentWidth:     4
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: false
+MacroBlockBegin: ''
+MacroBlockEnd:   ''
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: All
 ObjCBlockIndentWidth: 2
@@ -55,7 +57,7 @@ SpaceInEmptyParentheses: false
 SpacesBeforeTrailingComments: 2
 SpacesInAngles:  false
 SpacesInCStyleCastParentheses: false
-SpacesInContainerLiterals: true
+SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard:        Auto

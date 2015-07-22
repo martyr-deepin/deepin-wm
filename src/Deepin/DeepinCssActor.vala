@@ -25,11 +25,7 @@ namespace Gala
 	 */
 	public class DeepinCssActor : Actor
 	{
-		public string style_class
-		{
-			get;
-			construct;
-		}
+		public string style_class { get; construct; }
 
 		protected AnimationMode progress_mode = AnimationMode.EASE_IN_OUT_QUAD;
 
@@ -38,14 +34,9 @@ namespace Gala
 		int? border_radius = null;
 
 		Gdk.RGBA _bg_color;
-		Gdk.RGBA bg_color
-		{
-			get
-			{
-				return _bg_color;
-			}
-			set
-			{
+		Gdk.RGBA bg_color {
+			get { return _bg_color; }
+			set {
 				_bg_color = value;
 				content.invalidate ();
 			}
@@ -57,14 +48,9 @@ namespace Gala
 		Timeline? timeline = null;
 
 		bool _select = false;
-		public bool select
-		{
-			get
-			{
-				return _select;
-			}
-			set
-			{
+		public bool select {
+			get { return _select; }
+			set {
 				if (_select == value) {
 					return;
 				}

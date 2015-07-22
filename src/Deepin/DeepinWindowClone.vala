@@ -37,51 +37,28 @@ namespace Gala
 		public signal void activated ();
 
 		/**
-		 * The window was moved or resized and a relayout of the tiling layout may
-		 * be sensible right now.
+		 * The window was moved or resized and a relayout of the tiling layout may be sensible right
+		 * now.
 		 */
 		public signal void request_reposition ();
 
-		public Meta.Window window
-		{
-			get;
-			construct;
-		}
+		public Meta.Window window { get; construct; }
 
 		/**
-		 * The currently assigned slot of the window in the tiling layout. May be
-		 * null.
+		 * The currently assigned slot of the window in the tiling layout. May be null.
 		 */
-		public Meta.Rectangle? slot
-		{
-			get;
-			private set;
-		default =
-			null;
-		}
+		public Meta.Rectangle? slot { get; private set; default = null; }
 
-		public bool dragging
-		{
-			get;
-			private set;
-		default =
-			false;
-		}
+		public bool dragging { get; private set; default = false; }
 
 		/**
-		 * When selected fades a highlighted border around the window
-		 * in. Used for the visually indicating the
-		 * WindowCloneContainer's current_window.
+		 * When selected fades a highlighted border around the window in. Used for the visually
+		 * indicating the WindowCloneContainer's current_window.
 		 */
 		bool _select = false;
-		public bool select
-		{
-			get
-			{
-				return _select;
-			}
-			set
-			{
+		public bool select {
+			get { return _select; }
+			set {
 				_select = value;
 
 				shape.save_easing_state ();
@@ -94,11 +71,7 @@ namespace Gala
 		}
 
 		// for thumbnail mode, shadow, icon and close button will be disabed
-		public bool thumbnail_mode
-		{
-			get;
-			construct;
-		}
+		public bool thumbnail_mode { get; construct; }
 
 		public bool enable_shadow = true;
 		public bool enable_icon = true;
@@ -259,13 +232,10 @@ namespace Gala
 				opacity = 0;
 			}
 
-			// if we were waiting the view was most probably already opened when our
-			// window
-			// finally got available. So we fade-in and make sure we took the took
-			// place.
-			// If the slot is not available however, the view was probably closed while
-			// this
-			// window was opened, so we stay at our old place.
+			// If we were waiting the view was most probably already opened when our window finally
+			// got available. So we fade-in and make sure we took the took place.  If the slot is
+			// not available however, the view was probably closed while this window was opened, so
+			// we stay at our old place.
 			if (was_waiting && slot != null) {
 				opacity = 0;
 				take_slot (slot);
@@ -277,15 +247,15 @@ namespace Gala
 
 		// TODO: thumbnail
 		/**
-		 * If we are in overview mode, we may display windows from
-		 * workspaces other than the current one. To ease their
-		 * appearance we have to fade them in. And if the window is
-		 * identify, it should be fade, too,
+		 * If we are in overview mode, we may display windows from workspaces other than the current
+		 * one. To ease their appearance we have to fade them in. And if the window is identify, it
+		 * should be fade, too,
 		 */
 		bool should_fade ()
 		{
 			return (thumbnail_mode &&
-				window.get_workspace () != window.get_screen ().get_active_workspace ());
+					window.get_workspace () != window.get_screen ().get_active_workspace ());
+			// TODO: remove
 			// if (thumbnail_mode) {
 			// 	return window.get_workspace () != window.get_screen
 			// ().get_active_workspace ());
@@ -294,9 +264,9 @@ namespace Gala
 		}
 
 		/**
-		 * Sets a timeout of 500ms after which, if no new resize action reset it,
-		 * the shadow will be resized and a request_reposition() will be emitted to
-		 * make the WindowCloneContainer calculate a new layout to honor the new size.
+		 * Sets a timeout of 500ms after which, if no new resize action reset it, the shadow will be
+		 * resized and a request_reposition() will be emitted to make the WindowCloneContainer
+		 * calculate a new layout to honor the new size.
 		 */
 		void update_shadow_size ()
 		{
@@ -349,12 +319,10 @@ namespace Gala
 
 			var parent = get_parent ();
 			if (parent != null) {
-				// TODO:
-				// in thumbnail_mode the parent has just been added to the stage, so
-				// the
-				// transforme position is not set yet. However, the set position is
-				// correct
-				// for overview anyway, so we can just use that.
+				// TODO: thumbnail
+				// in thumbnail_mode the parent has just been added to the stage, so the transforme
+				// position is not set yet. However, the set position is correct for overview
+				// anyway, so we can just use that.
 				if (thumbnail_mode) {
 					parent.get_position (out offset_x, out offset_y);
 				} else {
@@ -411,8 +379,8 @@ namespace Gala
 			}
 
 			// TODO: thumbnail
-			// for thumbnail mode, windows may be faded out initially. Make sure
-			// to fade those in.
+			// For thumbnail mode, windows may be faded out initially. Make sure to
+			// fade those in.
 			if (thumbnail_mode) {
 				save_easing_state ();
 				set_easing_mode (AnimationMode.EASE_OUT_QUAD);
@@ -424,30 +392,30 @@ namespace Gala
 		}
 
 		/**
-		 * Except for the texture clone and the highlight all children are placed
-		 * according to their given allocations. The first two are placed in a way
-		 * that compensates for invisible borders of the texture.
+		 * Except for the texture clone and the highlight all children are placed according to their
+		 * given allocations. The first two are placed in a way that compensates for invisible
+		 * borders of the texture.
 		 */
 		public override void allocate (ActorBox box, AllocationFlags flags)
 		{
 			base.allocate (box, flags);
 
-			foreach (var child in get_children ())
-			{
+			foreach (var child in get_children ()) {
 				if (child != clone && child != shape) {
 					child.allocate_preferred_size (flags);
 				}
 			}
 
 			ActorBox shape_box = { -shape_border_size, -shape_border_size,
-				box.get_width () + shape_border_size, box.get_height () + shape_border_size };
+								   box.get_width () + shape_border_size,
+								   box.get_height () + shape_border_size };
 			shape.allocate (shape_box, flags);
 
 			if (close_button != null) {
 				var close_box = ActorBox ();
 				close_box.set_size (close_button.width, close_button.height);
 				close_box.set_origin (box.get_width () - close_box.get_width () * 0.60f,
-					-close_button.height * 0.40f);
+									  -close_button.height * 0.40f);
 				close_button.allocate (close_box, flags);
 			}
 
@@ -455,7 +423,7 @@ namespace Gala
 				var icon_box = ActorBox ();
 				icon_box.set_size (WINDOW_ICON_SIZE, WINDOW_ICON_SIZE);
 				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
-					box.get_height () - icon_box.get_height () * 0.75f);
+									 box.get_height () - icon_box.get_height () * 0.75f);
 				window_icon.allocate (icon_box, flags);
 			}
 
@@ -480,7 +448,7 @@ namespace Gala
 
 				var clone_box = ActorBox ();
 				clone_box.set_origin ((input_rect.x - outer_rect.x) * scale_factor,
-					(input_rect.y - outer_rect.y) * scale_factor);
+									  (input_rect.y - outer_rect.y) * scale_factor);
 				clone_box.set_size (actor.width * scale_factor, actor.height * scale_factor);
 
 				clone.allocate (clone_box, flags);
@@ -523,18 +491,16 @@ namespace Gala
 		}
 
 		/**
-		 * Send the window the delete signal and listen for new windows to be added
-		 * to the window's workspace, in which case we check if the new window is a
-		 * dialog of the window we were going to delete. If that's the case, we
-		 * request
-		 * to select our window.
+		 * Send the window the delete signal and listen for new windows to be added to the window's
+		 * workspace, in which case we check if the new window is a dialog of the window we were
+		 * going to delete. If that's the case, we request to select our window.
 		 */
 		void close_window ()
 		{
 			var screen = window.get_screen ();
 			check_confirm_dialog_cb = screen.window_entered_monitor.connect (check_confirm_dialog);
 
-			window.@ delete (screen.get_display ().get_current_time ());
+			window.@delete (screen.get_display ().get_current_time ());
 		}
 
 		void check_confirm_dialog (int monitor, Meta.Window new_window)
@@ -551,8 +517,7 @@ namespace Gala
 		}
 
 		/**
-		 * The window unmanaged by the compositor, so we need to destroy ourselves
-		 * too.
+		 * The window unmanaged by the compositor, so we need to destroy ourselves too.
 		 */
 		void unmanaged ()
 		{
@@ -590,10 +555,9 @@ namespace Gala
 		}
 
 		/**
-		 * A drag action has been initiated on us, we reparent ourselves to the stage
-		 * so
-		 * we can move freely, scale ourselves to a smaller scale and request that the
-		 * position we just freed is immediately filled by the WindowCloneContainer.
+		 * A drag action has been initiated on us, we reparent ourselves to the stage so we can move
+		 * freely, scale ourselves to a smaller scale and request that the position we just freed is
+		 * immediately filled by the WindowCloneContainer.
 		 */
 		Actor drag_begin (float click_x, float click_y)
 		{
@@ -618,14 +582,14 @@ namespace Gala
 			}
 
 			// clone.get_transformed_position (out abs_x, out abs_y);
-			clone.set_pivot_point (
-				(click_x - abs_x) / clone.width, (click_y - abs_y) / clone.height);
+			clone.set_pivot_point ((click_x - abs_x) / clone.width,
+								   (click_y - abs_y) / clone.height);
 			clone.save_easing_state ();
 			clone.set_easing_duration (200);
 			clone.set_easing_mode (AnimationMode.EASE_IN_CUBIC);
 			clone.set_scale (scale, scale);
-			clone.set_position (
-				click_x - abs_x - clone.width / 2, click_y - abs_y - clone.height / 2);
+			clone.set_position (click_x - abs_x - clone.width / 2,
+								click_y - abs_y - clone.height / 2);
 			clone.restore_easing_state ();
 
 			request_reposition ();
@@ -652,16 +616,14 @@ namespace Gala
 		}
 
 		/**
-		 * When we cross an DeepinWorkspaceThumbClone, we animate to an even smaller
-		 * size and
-		 * slightly
-		 * less opacity and add ourselves as temporary window to the group. When left,
-		 * we reverse those steps.
+		 * When we cross an DeepinWorkspaceThumbClone, we animate to an even smaller size and
+		 * slightly less opacity and add 16ourselves as temporary window to the group. When left, we
+		 * reverse those steps.
 		 */
 		void drag_destination_crossed (Actor destination, bool hovered)
 		{
-			DeepinWorkspaceThumbClone ? workspace_thumb = destination as DeepinWorkspaceThumbClone;
-			WorkspaceInsertThumb ? insert_thumb = destination as WorkspaceInsertThumb;
+			DeepinWorkspaceThumbClone? workspace_thumb = destination as DeepinWorkspaceThumbClone;
+			WorkspaceInsertThumb? insert_thumb = destination as WorkspaceInsertThumb;
 
 			// if we have don't dynamic workspace, we don't allow inserting
 			if (workspace_thumb == null && insert_thumb == null ||
@@ -669,8 +631,7 @@ namespace Gala
 				return;
 			}
 
-			// for an workspace thumbnail, we only do animations if there is an actual
-			// movement
+			// for an workspace thumbnail, we only do animations if there is an actual movement
 			// possible
 			if (workspace_thumb != null && workspace_thumb.workspace == window.get_workspace ()) {
 				return;
@@ -685,7 +646,6 @@ namespace Gala
 
 			clone.set_easing_mode (AnimationMode.LINEAR);
 			clone.set_easing_duration (duration);
-			// clone.set_scale (scale, scale);
 			clone.set_opacity (opacity);
 
 			clone.restore_easing_state ();
@@ -705,10 +665,8 @@ namespace Gala
 		}
 
 		/**
-		 * Depending on the destination we have different ways to find the correct
-		 * destination.
-		 * After we found one we destroy ourselves so the dragged clone immediately
-		 * disappears,
+		 * Depending on the destination we have different ways to find the correct destination.
+		 * After we found one we destroy ourselves so the dragged clone immediately disappears,
 		 * otherwise we cancel the drag and animate back to our old place.
 		 */
 		void drag_end (Actor destination)
@@ -737,9 +695,8 @@ namespace Gala
 
 				InternalUtils.insert_workspace_with_window (inserter.workspace_index, window);
 
-				// if we don't actually change workspaces, the window-added/removed
-				// signals won't
-				// be emitted so we can just keep our window here
+				// if we don't actually change workspaces, the window-added/removed signals won't be
+				// emitted so we can just keep our window here
 				if (!will_move) {
 					drag_canceled ();
 				} else {
@@ -774,8 +731,7 @@ namespace Gala
 			if (did_move) {
 				unmanaged ();
 			} else {
-				// if we're dropped at the place where we came from interpret as
-				// cancel
+				// if we're dropped at the place where we came from interpret as cancel
 				drag_canceled ();
 			}
 		}
@@ -794,8 +750,7 @@ namespace Gala
 			clone.set_scale (1, 1);
 			clone.opacity = 255;
 
-			Clutter.Callback finished = () =>
-			{
+			Clutter.Callback finished = () => {
 				var shadow_effect = get_effect ("shadow") as ShadowEffect;
 				if (shadow_effect != null) {
 					shadow_effect.shadow_opacity = 255;

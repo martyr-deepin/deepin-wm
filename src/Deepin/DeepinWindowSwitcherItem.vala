@@ -99,11 +99,7 @@ namespace Gala
 	 */
 	public class DeepinWindowSwitcherDesktopItem : DeepinWindowSwitcherItem
 	{
-		public Screen screen
-		{
-			get;
-			construct;
-		}
+		public Screen screen { get; construct; }
 
 		Actor background;
 
@@ -147,7 +143,7 @@ namespace Gala
 			bg_height = bg_prefer_height * scale;
 			bg_box.set_size (bg_width, bg_height);
 			bg_box.set_origin ((box.get_width () - bg_box.get_width ()) / 2,
-				(box.get_height () - bg_box.get_height ()) / 2);
+							   (box.get_height () - bg_box.get_height ()) / 2);
 
 			// scale background to fix the allocated size
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
@@ -162,18 +158,14 @@ namespace Gala
 	}
 
 	/**
-	 * Window item in alt-tab list, which is a container for a clone of the
-	 * texture of MetaWindow, a WindowIcon and a shadow.
+	 * Window item in alt-tab list, which is a container for a clone of the texture of MetaWindow, a
+	 * WindowIcon and a shadow.
 	 */
 	public class DeepinWindowSwitcherWindowItem : DeepinWindowSwitcherItem
 	{
 		const int ICON_PREFER_SIZE = 48;
 
-		public Window window
-		{
-			get;
-			construct;
-		}
+		public Window window { get; construct; }
 
 		uint shadow_update_timeout_id = 0;
 		bool enable_shadow = false;
@@ -222,8 +214,7 @@ namespace Gala
 		}
 
 		/**
-		 * The window unmanaged by the compositor, so we need to destroy ourselves
-		 * too.
+		 * The window unmanaged by the compositor, so we need to destroy ourselves too.
 		 */
 		void on_unmanaged ()
 		{
@@ -261,11 +252,10 @@ namespace Gala
 		}
 
 		/**
-		 * Waits for the texture of a new WindowActor to be available
-		 * and makes a close of it. If it was already was assigned a slot
-		 * at this point it will animate to it. Otherwise it will just place
-		 * itself at the location of the original window. Also adds the shadow
-		 * effect and makes sure the shadow is updated on size changes.
+		 * Waits for the texture of a new WindowActor to be available and makes a close of it. If it
+		 * was already was assigned a slot at this point it will animate to it. Otherwise it will
+		 * just place itself at the location of the original window. Also adds the shadow effect and
+		 * makes sure the shadow is updated on size changes.
 		 */
 		void load_clone ()
 		{
@@ -350,9 +340,9 @@ namespace Gala
 		}
 
 		/**
-		 * Except for the texture clone and the highlight all children are placed
-		 * according to their given allocations. The first two are placed in a way
-		 * that compensates for invisible borders of the texture.
+		 * Except for the texture clone and the highlight all children are placed according to their
+		 * given allocations. The first two are placed in a way that compensates for invisible
+		 * borders of the texture.
 		 */
 		public override void allocate (ActorBox box, AllocationFlags flags)
 		{
@@ -372,10 +362,11 @@ namespace Gala
 					icon_box.set_size (icon_size, icon_size);
 				}
 				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
-					(box.get_height () - icon_box.get_height ()) / 2);
+									 (box.get_height () - icon_box.get_height ()) / 2);
 			} else {
 				icon_box.set_size (ICON_PREFER_SIZE, ICON_PREFER_SIZE);
-				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
+				icon_box.set_origin (
+					(box.get_width () - icon_box.get_width ()) / 2,
 					box.get_height () - icon_box.get_height () - icon_box.get_height () * 0.25f);
 			}
 			window_icon.allocate (icon_box, flags);
@@ -383,8 +374,7 @@ namespace Gala
 			// if actor's size is really small, just show icon only
 			if (box.get_width () <= ICON_PREFER_SIZE * 1.75f) {
 				if (clone_container != null) {
-					// set clone visible to false manually to hide shadow
-					// effect
+					// set clone visible to false manually to hide shadow effect
 					clone_container.visible = false;
 				}
 				return;
@@ -404,7 +394,7 @@ namespace Gala
 			clone_height = clone_prefer_height * scale;
 			clone_box.set_size (clone_width, clone_height);
 			clone_box.set_origin ((box.get_width () - clone_box.get_width ()) / 2,
-				(box.get_height () - clone_box.get_height ()) / 2);
+								  (box.get_height () - clone_box.get_height ()) / 2);
 
 			clone_container.allocate (clone_box, flags);
 

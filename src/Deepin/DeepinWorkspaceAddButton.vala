@@ -21,8 +21,8 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * Will be put at end of workspace thumbnail list in DeepinMultitaskingView
-	 * if number less than MAX_WORKSPACE_NUM.
+	 * Will be put at end of workspace thumbnail list in DeepinMultitaskingView if number less than
+	 * MAX_WORKSPACE_NUM.
 	 */
 	public class DeepinWorkspaceAddButton : DeepinCssStaticActor
 	{

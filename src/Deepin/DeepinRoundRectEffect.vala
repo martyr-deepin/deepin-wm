@@ -21,11 +21,7 @@ namespace Gala
 {
 	public class DeepinRoundRectEffect : Effect
 	{
-		public int radius
-		{
-			get;
-			construct;
-		}
+		public int radius { get; construct; }
 
 		public DeepinRoundRectEffect (int radius)
 		{

@@ -21,9 +21,8 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * Workspace thumnail clone with background, normal windows and
-	 * workspace names.  It also support dragging and dropping to
-	 * move and close workspaces.
+	 * Workspace thumnail clone with background, normal windows and workspace names.  It also
+	 * support dragging and dropping to move and close workspaces.
 	 */
 	public class DeepinWorkspaceThumbClone : Actor
 	{
@@ -31,8 +30,7 @@ namespace Gala
 		const int WORKSPACE_NAME_HEIGHT = 8;  // will pluse NAME_SHAPE_PADDING * 2 when using
 		const int WORKSPACE_NAME_MAX_LENGTH = 32;
 
-		// distance between thumbnail workspace clone and workspace
-		// name field
+		// distance between thumbnail workspace clone and workspace name field
 		const int WORKSPACE_NAME_DISTANCE = 16;
 
 		// layout spacing for workspace name field
@@ -42,8 +40,8 @@ namespace Gala
 		const int NAME_SHAPE_PADDING = 8;
 
 		/**
-		 * The group has been clicked. The MultitaskingView should consider activating
-		 * its workspace.
+		 * The group has been clicked. The MultitaskingView should consider activating its
+		 * workspace.
 		 */
 		public signal void selected ();
 
@@ -89,7 +87,7 @@ namespace Gala
 			workspace_shadow = new Actor ();
 			workspace_shadow.add_effect_with_name (
 				"shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
-							  get_thumb_workspace_prefer_heigth (), 10, 1));
+											get_thumb_workspace_prefer_heigth (), 10, 1));
 			workspace_shadow.opacity = 76;
 			add_child (workspace_shadow);
 
@@ -161,8 +159,8 @@ namespace Gala
 				workspace_name.queue_relayout ();
 			});
 			workspace_name_text.key_focus_in.connect (() => {
-				// make cursor visible even through workspace name is empty,
-				// maybe this is a bug of Clutter.Text
+				// make cursor visible even through workspace name is empty, maybe this is a bug of
+				// Clutter.Text
 				if (workspace_name_text.text.length == 0) {
 					workspace_name_text.text = " ";
 					workspace_name_text.text = "";
@@ -186,9 +184,9 @@ namespace Gala
 			close_button.reactive = true;
 			close_button.opacity = 0;
 
-			// block propagation of button presses on the close button, otherwise
-			// the click action on the WorkspaceTHumbClone will act weirdly
-			// close_button.button_press_event.connect (() => { return true; });
+			// block propagation of button presses on the close button, otherwise the click action
+			// on the WorkspaceTHumbClone will act weirdly close_button.button_press_event.connect
+			// (() => { return true; });
 			close_button.button_press_event.connect (() => {
 				remove_workspace ();
 				return true;
@@ -209,8 +207,8 @@ namespace Gala
 
 		public override bool enter_event (CrossingEvent event)
 		{
-			// don't display the close button when we have dynamic workspaces or
-			// when there is only one workspace
+			// don't display the close button when we have dynamic workspaces or when there is only
+			// one workspace
 			if (Prefs.get_dynamic_workspaces () || Prefs.get_num_workspaces () == 1) {
 				return false;
 			}
@@ -250,8 +248,8 @@ namespace Gala
 			// select current workspace if workspace name is editable
 			selected ();
 
-			// Return false to let event continue to be passed, so the cursor
-			// will be put in the position of the mouse.
+			// Return false to let event continue to be passed, so the cursor will be put in the
+			// position of the mouse.
 			return false;
 		}
 
@@ -361,8 +359,7 @@ namespace Gala
 		}
 
 		/*
-		 * Remove current workspace and moving all the windows to preview
-		 * workspace.
+		 * Remove current workspace and moving all the windows to preview workspace.
 		 */
 		void remove_workspace ()
 		{
@@ -371,8 +368,8 @@ namespace Gala
 				return;
 			}
 
-			// Ensure workspace name field lost focus to avoid invalid
-			// operations even though the workspace already not exists.
+			// Ensure workspace name field lost focus to avoid invalid operations even though the
+			// workspace already not exists.
 			get_stage ().set_key_focus (fallback_key_focus);
 
 			// TODO: animation
@@ -428,15 +425,16 @@ namespace Gala
 
 			var name_shape_box = ActorBox ();
 			name_shape_box.set_size (WORKSPACE_NAME_WIDTH + NAME_SHAPE_PADDING * 2,
-				WORKSPACE_NAME_HEIGHT + NAME_SHAPE_PADDING * 2);
+									 WORKSPACE_NAME_HEIGHT + NAME_SHAPE_PADDING * 2);
 			name_shape_box.set_origin ((box.get_width () - name_shape_box.get_width ()) / 2,
-				thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
+									   thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
 			name_shape.allocate (name_shape_box, flags);
 
 			var name_box = ActorBox ();
 			name_box.set_size (
 				Math.fminf (workspace_name.width, WORKSPACE_NAME_WIDTH), workspace_name.height);
-			name_box.set_origin ((box.get_width () - name_box.get_width ()) / 2,
+			name_box.set_origin (
+				(box.get_width () - name_box.get_width ()) / 2,
 				name_shape_box.y1 + (name_shape_box.get_height () - name_box.get_height ()) / 2);
 			workspace_name.allocate (name_box, flags);
 

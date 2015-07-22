@@ -30,27 +30,19 @@ namespace Gala
 	class DeepinFramedBackground : Background
 #endif
 	{
-		public bool enable_shadow
-		{
-			get;
-			construct;
-		}
-		public bool enable_border
-		{
-			get;
-			construct;
-		}
+		public bool enable_shadow { get; construct; }
+		public bool enable_border { get; construct; }
 
 		public DeepinFramedBackground (
 			Screen screen, bool enable_shadow = true, bool enable_border = true)
 		{
 #if HAS_MUTTER314
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
-				monitor_index: screen.get_primary_monitor (), control_position: false);
+					monitor_index: screen.get_primary_monitor (), control_position: false);
 #else
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
-				monitor: screen.get_primary_monitor (),
-				settings: BackgroundSettings.get_default ().schema);
+					monitor: screen.get_primary_monitor (),
+					settings: BackgroundSettings.get_default ().schema);
 #endif
 		}
 

@@ -21,60 +21,43 @@ using Meta;
 
 namespace Gala
 {
-	// TODO: description
+	// TODO: doc
 	/**
-	 * This is the container which manages a clone of the background
-	 * which will be scaled and animated inwards, a
-	 * DeepinWindowCloneFlowContainer for the windows on this workspace
-	 * and also holds the instance for the DeepinWorkspaceThumbClone.
-	 * The latter is not added to the DeepinWorkspaceFlowClone itself
-	 * though but to a container of the DeepinMultitaskingView.
+	 * This is the container which manages a clone of the background which will be scaled and
+	 * animated inwards, a DeepinWindowCloneFlowContainer for the windows on this workspace and also
+	 * holds the instance for the DeepinWorkspaceThumbClone.  The latter is not added to the
+	 * DeepinWorkspaceFlowClone itself though but to a container of the DeepinMultitaskingView.
 	 */
 	public class DeepinWorkspaceFlowClone : Actor
 	{
 		/**
-		 * The amount of time a window has to be over the DeepinWorkspaceFlowClone
-		 * while in drag
+		 * The amount of time a window has to be over the DeepinWorkspaceFlowClone while in drag
 		 * before we activate the workspace.
 		 */
 		const int HOVER_ACTIVATE_DELAY = 400;
 
 		/**
-		 * A window has been selected, the DeepinMultitaskingView should consider
-		 * activating
-		 * and closing the view.
+		 * A window has been selected, the DeepinMultitaskingView should consider activating and
+		 * closing the view.
 		 */
 		public signal void window_activated (Window window);
 
 		/**
 		 * The background has been selected. Switch to that workspace.
 		 *
-		 * @param close_view If the DeepinMultitaskingView should also consider
-		 * closing itself
-		 *                   after switching.
+		 * @param close_view If the DeepinMultitaskingView should also consider closing itself after
+		 *                   switching.
 		 */
 		public signal void selected (bool close_view);
 
-		public Workspace workspace
-		{
-			get;
-			construct;
-		}
-		public DeepinWindowCloneFlowContainer window_container
-		{
-			get;
-			private set;
-		}
+		public Workspace workspace { get; construct; }
+		public DeepinWindowCloneFlowContainer window_container { get; private set; }
 
 		/**
-		 * Own the related thumbnail workspace clone so that signals
-		 * and events could be dispatched easily.
+		 * Own the related thumbnail workspace clone so that signals and events could be dispatched
+		 * easily.
 		 */
-		public DeepinWorkspaceThumbClone related_thumb_workspace
-		{
-			get;
-			private set;
-		}
+		public DeepinWorkspaceThumbClone related_thumb_workspace { get; private set; }
 
 #if HAS_MUTTER314
 		BackgroundManager background;
@@ -152,8 +135,7 @@ namespace Gala
 
 			// add existing windows
 			var windows = workspace.list_windows ();
-			foreach (var window in windows)
-			{
+			foreach (var window in windows) {
 				if (window.window_type == WindowType.NORMAL && !window.on_all_workspaces &&
 					window.get_monitor () == screen.get_primary_monitor ()) {
 					window_container.add_window (window);
@@ -183,10 +165,8 @@ namespace Gala
 		}
 
 		/**
-		 * Add a window to the DeepinWindowCloneFlowContainer and the
-		 * DeepinWorkspaceThumbClone if
-		 * it really
-		 * belongs to this workspace and this monitor.
+		 * Add a window to the DeepinWindowCloneFlowContainer and the DeepinWorkspaceThumbClone if
+		 * it really belongs to this workspace and this monitor.
 		 */
 		void add_window (Window window)
 		{
@@ -196,8 +176,7 @@ namespace Gala
 				return;
 			}
 
-			foreach (var child in window_container.get_children ())
-			{
+			foreach (var child in window_container.get_children ()) {
 				if (((DeepinWindowClone)child).window == window) {
 					return;
 				}
@@ -208,8 +187,7 @@ namespace Gala
 		}
 
 		/**
-		 * Remove a window from the DeepinWindowCloneFlowContainer and the
-		 * DeepinWorkspaceThumbClone
+		 * Remove a window from the DeepinWindowCloneFlowContainer and the DeepinWorkspaceThumbClone.
 		 */
 		void remove_window (Window window)
 		{
@@ -231,14 +209,10 @@ namespace Gala
 		}
 
 		/**
-		 * Animates the background to its scale, causes a redraw on the
-		 * DeepinWorkspaceThumbClone
-		 * and
-		 * makes sure the DeepinWindowCloneFlowContainer animates its windows to their
-		 * tiled layout.
-		 * Also sets the current_window of the DeepinWindowCloneFlowContainer to the
-		 * active window
-		 * if it belongs to this workspace.
+		 * Animates the background to its scale, causes a redraw on the DeepinWorkspaceThumbClone
+		 * and makes sure the DeepinWindowCloneFlowContainer animates its windows to their tiled
+		 * layout.  Also sets the current_window of the DeepinWindowCloneFlowContainer to the active
+		 * window if it belongs to this workspace.
 		 */
 		public void open ()
 		{
@@ -280,8 +254,8 @@ namespace Gala
 		}
 
 		/**
-		 * Close the view again by animating the background back to its scale and
-		 * the windows back to their old locations.
+		 * Close the view again by animating the background back to its scale and the windows back
+		 * to their old locations.
 		 */
 		public void close ()
 		{

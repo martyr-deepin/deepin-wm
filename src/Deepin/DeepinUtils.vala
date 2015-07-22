@@ -69,8 +69,7 @@ namespace Gala
 				};
 
 				bool matched = false;
-				foreach (var rule in rules)
-				{
+				foreach (var rule in rules) {
 					if (rule.keyword.match_string (debug_env, true)) {
 						matched = true;
 						Meta.Util.add_verbose_topic (rule.topic);
@@ -144,8 +143,7 @@ namespace Gala
 		}
 
 		/**
-		 * Remove a workspace, if workspace is null, use the active workspace in
-		 * screen.
+		 * Remove a workspace, if workspace is null, use the active workspace in screen.
 		 */
 		public static void remove_workspace (Meta.Screen screen, Meta.Workspace? workspace = null)
 		{
@@ -187,8 +185,7 @@ namespace Gala
 		 */
 		public static void show_desktop (Meta.Workspace workspace)
 		{
-			// TODO: this is a temporary solution, use interface in mutter
-			// instead
+			// TODO: this is a temporary solution, use interface in mutter instead
 
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
@@ -198,8 +195,7 @@ namespace Gala
 #else
 			var windows = display.get_tab_list (Meta.TabList.NORMAL, screen, workspace);
 #endif
-			foreach (var w in windows)
-			{
+			foreach (var w in windows) {
 				w.minimize ();
 			}
 		}
@@ -213,8 +209,7 @@ namespace Gala
 #else
 			var windows = display.get_tab_list (Meta.TabList.NORMAL, screen, workspace);
 #endif
-			foreach (var w in windows)
-			{
+			foreach (var w in windows) {
 				if (w == window) {
 					return true;
 				}
@@ -322,8 +317,8 @@ namespace Gala
 		}
 
 		/**
-		 * Shrink a MetaRectangle on all sides for the given size.
-		 * Negative amounts will scale it instead.
+		 * Shrink a MetaRectangle on all sides for the given size.  Negative amounts will scale it
+		 * instead.
 		 */
 		public static void shrink_rectangle (ref Meta.Rectangle rect, int size)
 		{

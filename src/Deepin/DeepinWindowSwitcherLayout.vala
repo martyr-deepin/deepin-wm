@@ -33,12 +33,8 @@ namespace Gala
 		float _max_width = 1024.0f;
 		public float max_width
 		{
-			get
-			{
-				return _max_width;
-			}
-			set
-			{
+			get {return _max_width;}
+			set {
 				_max_width = value;
 				layout_changed ();
 			}
@@ -50,30 +46,30 @@ namespace Gala
 		}
 
 		public override void get_preferred_width (Clutter.Container container, float for_height,
-			out float min_width_p, out float nat_width_p)
+												  out float min_width_p, out float nat_width_p)
 		{
 			float box_width, box_height, item_width, item_height;
 			int max_items_each_row;
 			do_get_preferred_size (container, out box_width, out box_height, out item_width,
-				out item_height, out max_items_each_row);
+								   out item_height, out max_items_each_row);
 			nat_width_p = box_width;
 			min_width_p = box_width;
 		}
 
 		public override void get_preferred_height (Clutter.Container container, float for_width,
-			out float min_height_p, out float nat_height_p)
+												   out float min_height_p, out float nat_height_p)
 		{
 			float box_width, box_height, item_width, item_height;
 			int max_items_each_row;
 			do_get_preferred_size (container, out box_width, out box_height, out item_width,
-				out item_height, out max_items_each_row);
+								   out item_height, out max_items_each_row);
 			nat_height_p = box_height;
 			min_height_p = box_height;
 		}
 
 		void do_get_preferred_size (Clutter.Container container, out float box_width,
-			out float box_height, out float item_width, out float item_height,
-			out int max_items_each_row)
+									out float box_height, out float item_width,
+									out float item_height, out int max_items_each_row)
 		{
 			var actor = container as Actor;
 
@@ -81,12 +77,11 @@ namespace Gala
 			item_width = DeepinWindowSwitcherItem.PREFER_WIDTH;
 			item_height = DeepinWindowSwitcherItem.PREFER_HEIGHT;
 
-			// Calculate maximize item numuber in each row. Firstly,
-			// each row must could own at least 7 items, if the screen
-			// width is limitation, just decrease the size of
+			// Calculate maximize item numuber in each row. Firstly, each row must could own at
+			// least 7 items, if the screen width is limitation, just decrease the size of
 			// item. Secondly, limite the row numbers.
 			max_items_each_row = (int)((_max_width + COLUMN_SPACING) /
-				(DeepinWindowSwitcherItem.PREFER_WIDTH + COLUMN_SPACING));
+									   (DeepinWindowSwitcherItem.PREFER_WIDTH + COLUMN_SPACING));
 			if (max_items_each_row < MIN_ITEMS_EACH_ROW &&
 				actor.get_n_children () > max_items_each_row) {
 				item_need_scale = true;
@@ -127,19 +122,17 @@ namespace Gala
 		}
 
 		/**
-		 * Place items in one row if their prefer size could be put
-		 * down, or the items will be wrap to 2 lines. If still can
-		 * not be put down, just descrease the item's size. At the
-		 * same time, each row must own at least 7 items, or descrease
-		 * the item's size again.
+		 * Place items in one row if their prefer size could be put down, or the items will be wrap
+		 * to 2 lines. If still can not be put down, just descrease the item's size. At the same
+		 * time, each row must own at least 7 items, or descrease the item's size again.
 		 */
-		public override void allocate (
-			Clutter.Container container, Clutter.ActorBox box, Clutter.AllocationFlags flags)
+		public override void allocate (Clutter.Container container, Clutter.ActorBox box,
+									   Clutter.AllocationFlags flags)
 		{
 			float box_width, box_height, item_width, item_height;
 			int max_items_each_row;
 			do_get_preferred_size (container, out box_width, out box_height, out item_width,
-				out item_height, out max_items_each_row);
+								   out item_height, out max_items_each_row);
 
 			var actor = container as Actor;
 			for (int i = 0; i < actor.get_n_children (); i++) {

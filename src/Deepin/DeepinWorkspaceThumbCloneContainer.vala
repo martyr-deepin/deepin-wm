@@ -22,21 +22,18 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * This class contains the DeepinWorkspaceThumbClone at the top
-	 * and will take care of displaying actors for inserting windows
-	 * between the groups once implemented.
+	 * This class contains the DeepinWorkspaceThumbClone at the top and will take care of displaying
+	 * actors for inserting windows between the groups once implemented.
 	 */
 	public class DeepinWorkspaceThumbCloneContainer : Actor
 	{
 		/**
-		 * The percent value between thumbnail workspace clone's width
-		 * and monitor's width.
+		 * The percent value between thumbnail workspace clone's width and monitor's width.
 		 */
 		public const float WORKSPACE_WIDTH_PERCENT = 0.12f;
 
 		/**
-		 * The percent value between distance of thumbnail workspace
-		 * clones and monitor's width.
+		 * The percent value between distance of thumbnail workspace clones and monitor's width.
 		 */
 		const float SPACING_PERCENT = 0.02f;
 
@@ -44,11 +41,7 @@ namespace Gala
 		const int ANIMATION_DURATION = 500;
 		const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 
-		public Screen screen
-		{
-			get;
-			construct;
-		}
+		public Screen screen { get; construct; }
 
 		Actor add_button;
 
@@ -88,8 +81,7 @@ namespace Gala
 
 			// Prevent other workspaces' original name to be reset, so here set
 			// them to gsettings again.
-			foreach (var child in get_children ())
-			{
+			foreach (var child in get_children ()) {
 				if (child is DeepinWorkspaceThumbClone) {
 					(child as DeepinWorkspaceThumbClone).set_workspace_name ();
 				}
@@ -107,8 +99,7 @@ namespace Gala
 			y = (int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
 
 			var i = 0;
-			foreach (var child in get_children ())
-			{
+			foreach (var child in get_children ()) {
 				child.save_easing_state ();
 
 				child.set_easing_duration (ANIMATION_DURATION);
@@ -158,9 +149,8 @@ namespace Gala
 			}
 		}
 
-		/*
-		 * Make pluse button visible if workspace number less than
-		 * MAX_WORKSPACE_NUM.
+		/**
+		 * Make pluse button visible if workspace number less than MAX_WORKSPACE_NUM.
 		 */
 		void setup_pluse_button ()
 		{

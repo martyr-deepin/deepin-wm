@@ -32,11 +32,7 @@ namespace Gala
 		const int POPUP_PADDING = 14;
 		const int POPUP_MAX_WIDTH = 300;
 
-		public Screen screen
-		{
-			get;
-			construct;
-		}
+		public Screen screen { get; construct; }
 
 		Actor popup;
 		Text workspace_name;
