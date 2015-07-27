@@ -73,7 +73,7 @@
 			<_description></_description>
 		</key>
 		<key type="b" name="dynamic-workspaces">
-			<default>true</default>
+			<default>false</default>
 			<_summary>Enable dynamic workspace instead of static ones</_summary>
 			<_description>Use a dynamically increasing or decreseasing number, as needed, of workspaces instead of a static, fixed number</_description>
 		</key>
@@ -81,6 +81,11 @@
 			<default><![CDATA[['docky', 'Docky', 'plank']]]></default>
 			<_summary>Names that are recognized as dock windows for the window switcher</_summary>
 			<_description>When launching the window-switcher, gala iterates over this list and attempts to find a window matching the names. If it does, it will hide this window and fade it back in, once the the switcher is closed.</_description>
+		</key>
+		<key type="as" name="auto-focus-windows">
+			<default><![CDATA[['nautilus', 'Nautilus', 'ddelauncher', 'DDELauncher']]]></default>
+			<_summary>Window class names that will be focused automatically when shown</_summary>
+			<_description>Some windows could not grab focus correctly when shown, just put their class names here to avoid such issue.</_description>
 		</key>
 	</schema>
 
@@ -142,12 +147,12 @@
 		</key>
 		<key type="as" name="preview-workspace">
 			<default><![CDATA[['<Super>s']]]></default>
-			<summary>Preview all workspace</summary>
+			<summary>Preview all workspaces</summary>
 		</key>
 	</schema>
 
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/appearance/" id="com.deepin.wrap.pantheon.desktop.gala.appearance" gettext-domain="@GETTEXT_PACKAGE@">
-	
+
 		<key type="b" name="attach-modal-dialogs">
 			<default>false</default>
 			<_summary>Attach modal dialogs</_summary>
