@@ -87,6 +87,12 @@
 			<_summary>Window class names that will be focused automatically when shown</_summary>
 			<_description>Some windows could not grab focus correctly when shown, just put their class names here to avoid such issue.</_description>
 		</key>
+        <key type="b" name="show-desktop-in-alt-tab">
+            <default>true</default>
+			<_summary>Enable show-desktop item in Alt-Tab popup window</_summary>
+			<_description>The show-desktop item will be put at end of the window list. show-desktop action of window manager will be performed if selected.</_description>
+        </key>
+
 	</schema>
 
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/keybindings/" id="com.deepin.wrap.pantheon.desktop.gala.keybindings" gettext-domain="@GETTEXT_PACKAGE@">

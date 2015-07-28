@@ -252,7 +252,7 @@ namespace Gala
 			popup_delay_timeout_id = Timeout.add (POPUP_DELAY_TIMEOUT, () => {
 				if (visible && !closing) {
 					// add desktop item if need after popup shown
-					if (DeepinUtils.is_show_desktop_in_tab_list ()) {
+					if (BehaviorSettings.get_default ().show_desktop_in_alt_tab) {
 						if (visible && window_type == TabList.NORMAL) {
 							add_desktop_item ();
 						}
@@ -444,28 +444,33 @@ namespace Gala
 			var window_opacity =
 				(int)Math.floor (AppearanceSettings.get_default ().alt_tab_window_opacity * 255);
 
-			foreach (var actor in window_clones.get_children ()) {
-				unowned SafeWindowClone clone = (SafeWindowClone)actor;
+			foreach (var child in window_clones.get_children ()) {
+				var clone = child as SafeWindowClone;
 
-				actor.save_easing_state ();
-				actor.set_easing_duration (animate ? 250 : 0);
-				actor.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+				clone.save_easing_state ();
+				clone.set_easing_duration (animate ? 250 : 0);
+				clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 
-				if (current_item is DeepinWindowSwitcherWindowItem &&
-					clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
-					window_clones.set_child_above_sibling (actor, null);
-					actor.z_position = 0;
-					actor.opacity = 255;
+				if (current_item is DeepinWindowSwitcherWindowItem) {
+					if (clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
+						window_clones.set_child_above_sibling (clone, null);
+						clone.z_position = 0;
+						clone.opacity = 255;
+					} else {
+						clone.z_position = -200;
+						clone.opacity = window_opacity;
+					}
 				} else {
-					actor.z_position = -200;
-					actor.opacity = window_opacity;
+					// when desktop item selected, hide all clones
+					clone.z_position = -200;
+					clone.opacity = 0;
 				}
 
-				actor.restore_easing_state ();
+				clone.restore_easing_state ();
 			}
 
-			foreach (var actor in item_container.get_children ()) {
-				unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem)actor;
+			foreach (var child in item_container.get_children ()) {
+				var item = child as DeepinWindowSwitcherItem;
 				if (item == current_item) {
 					item.select (true, animate);
 				} else {

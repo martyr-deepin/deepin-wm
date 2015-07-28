@@ -174,12 +174,6 @@ namespace Gala
 			workspace.activate (timestamp);
 		}
 
-		// TODO: use gsettings instead
-		public static bool is_show_desktop_in_tab_list ()
-		{
-			return true;
-		}
-
 		/**
 		 * Show desktop by minimizing all windows.
 		 */
