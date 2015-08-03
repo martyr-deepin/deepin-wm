@@ -124,7 +124,8 @@ namespace Gala
 
 			// fix window focus issue
 			foreach (var w in BehaviorSettings.get_default ().auto_focus_windows) {
-				if (w == window.wm_class && window.window_type == WindowType.NORMAL) {
+				if (w == window.wm_class && window.window_type == WindowType.NORMAL &&
+					window.showing_on_its_workspace ()) {
 					window.activate (screen.get_display ().get_current_time ());
 					break;
 				}
