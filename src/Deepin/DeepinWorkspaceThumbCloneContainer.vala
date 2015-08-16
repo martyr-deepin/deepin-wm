@@ -22,6 +22,39 @@ using Meta;
 namespace Gala
 {
 	/**
+	 * Will be put at end of workspace thumbnail list in DeepinMultitaskingView if number less than
+	 * MAX_WORKSPACE_NUM.
+	 */
+	public class DeepinWorkspaceAddButton : DeepinCssStaticActor
+	{
+		const double PLUS_SIZE = 32.0;
+		const double PLUS_LINE_WIDTH = 2.0;
+
+		public DeepinWorkspaceAddButton ()
+		{
+			base ("deepin-workspace-add-button");
+
+			(content as Canvas).draw.connect (on_draw_content);
+		}
+
+		bool on_draw_content (Cairo.Context cr, int width, int height)
+		{
+			// draw tha plus button
+			cr.move_to (width / 2 - PLUS_SIZE / 2, height / 2);
+			cr.line_to (width / 2 + PLUS_SIZE / 2, height / 2);
+
+			cr.move_to (width / 2, height / 2 - PLUS_SIZE / 2);
+			cr.line_to (width / 2, height / 2 + PLUS_SIZE / 2);
+
+			cr.set_line_width (PLUS_LINE_WIDTH);
+			cr.set_source_rgba (0.5, 0.5, 0.5, 1.0);
+			cr.stroke_preserve ();
+
+			return false;
+		}
+	}
+
+	/**
 	 * This class contains the DeepinWorkspaceThumbClone at the top and will take care of displaying
 	 * actors for inserting windows between the groups once implemented.
 	 */

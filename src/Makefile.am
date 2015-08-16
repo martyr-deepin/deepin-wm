@@ -56,7 +56,6 @@ gala_VALASOURCES = \
 	Deepin/DeepinWindowSwitcher.vala \
 	Deepin/DeepinWindowSwitcherItem.vala \
 	Deepin/DeepinWindowSwitcherLayout.vala \
-	Deepin/DeepinWorkspaceAddButton.vala \
 	Deepin/DeepinWorkspaceName.vala \
 	Deepin/DeepinWorkspaceFlowClone.vala \
 	Deepin/DeepinWorkspaceThumbClone.vala \
