@@ -155,25 +155,23 @@ namespace Gala
 			workspace_name_text.activate.connect (() => {
 				get_stage ().set_key_focus (fallback_key_focus);
 				workspace_name_text.editable = false;
-				// TODO: relayout
-				workspace_name.queue_relayout ();
 			});
 			workspace_name_text.key_focus_in.connect (() => {
-				// make cursor visible even through workspace name is empty, maybe this is a bug of
-				// Clutter.Text
 				if (workspace_name_text.text.length == 0) {
-					workspace_name_text.text = " ";
-					workspace_name_text.text = "";
+					workspace_name_text.visible = true;
 				}
 			});
 			workspace_name_text.key_focus_out.connect (() => {
 				set_workspace_name ();
-				workspace_name.queue_relayout ();
-
-				stdout.printf ("name queue relayout..%d\n", workspace.index () + 1);  // TODO:
+				if (workspace_name_text.text.length == 0) {
+					workspace_name_text.visible = false;
+				}
 			});
 
 			get_workspace_name ();
+			if (workspace_name_text.text.length == 0) {
+				workspace_name_text.visible = false;
+			}
 
 			workspace_name.add_child (workspace_name_num);
 			workspace_name.add_child (workspace_name_text);
