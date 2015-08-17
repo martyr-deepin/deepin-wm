@@ -43,6 +43,7 @@ namespace Gala
 
 		public int shadow_size { get; construct; }
 		public int shadow_spread { get; construct; }
+		public int shadow_offset { get; construct; }
 
 		public float scale_factor { get; set; default = 1; }
 		public uint8 shadow_opacity { get; set; default = 255; }
@@ -50,9 +51,11 @@ namespace Gala
 		Cogl.Material material;
 		string? current_key = null;
 
-		public ShadowEffect (int actor_width, int actor_height, int shadow_size, int shadow_spread)
+		public ShadowEffect (int actor_width, int actor_height, int shadow_size, int shadow_spread,
+							 int shadow_offset=0)
 		{
-			Object (shadow_size: shadow_size, shadow_spread: shadow_spread);
+			Object (shadow_size: shadow_size, shadow_spread: shadow_spread,
+					shadow_offset: shadow_offset);
 
 			material = new Cogl.Material ();
 
@@ -139,4 +142,3 @@ namespace Gala
 		}
 	}
 }
-

@@ -61,6 +61,7 @@ namespace Gala
 		{
 			reactive = true;
 
+			// TODO: improve shadow effect
 			// workspace shadow effect
 			workspace_shadow = new Actor ();
 			workspace_shadow.add_effect_with_name (
