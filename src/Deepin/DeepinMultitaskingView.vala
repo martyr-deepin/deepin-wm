@@ -28,7 +28,9 @@ namespace Gala
 	 */
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
-		public const int ANIMATION_DURATION = 250;
+		// TODO: animation duration
+		// public const int ANIMATION_DURATION = 250;
+		public const int ANIMATION_DURATION = 500;
 		public const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 		public const AnimationMode WORKSPACE_ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 		const int SMOOTH_SCROLL_DELAY = 500;
@@ -58,10 +60,9 @@ namespace Gala
 
 		bool is_smooth_scrolling = false;
 
-		Actor dock_clones;
-
 		List<MonitorClone> window_containers_monitors;
 
+		Actor dock_clones;
 		Actor flow_workspaces;
 		DeepinWorkspaceThumbCloneContainer thumb_workspaces;
 
@@ -561,6 +562,17 @@ namespace Gala
 			}
 
 			update_positions (false);
+
+			thumb_workspaces.save_easing_state ();
+			thumb_workspaces.set_easing_duration (ANIMATION_DURATION);
+			thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_BACK);
+			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
+			if (opening) {
+				thumb_workspaces.y = (int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			} else {
+				thumb_workspaces.y = -(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			}
+			thumb_workspaces.restore_easing_state ();
 
 			foreach (var child in flow_workspaces.get_children ()) {
 				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;

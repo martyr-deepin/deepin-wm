@@ -123,8 +123,6 @@ namespace Gala
 
 		void on_window_activated (DeepinWindowClone clone)
 		{
-			// TODO: restore state before selecting
-			clone.select = false;
 			window_activated (clone.window);
 		}
 

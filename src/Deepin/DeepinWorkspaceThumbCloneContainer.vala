@@ -127,10 +127,6 @@ namespace Gala
 		{
 			setup_pluse_button ();
 
-			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
-
-			y = (int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
-
 			var i = 0;
 			foreach (var child in get_children ()) {
 				child.save_easing_state ();

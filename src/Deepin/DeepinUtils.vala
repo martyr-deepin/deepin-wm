@@ -292,7 +292,31 @@ namespace Gala
 			return (int)((float)fontdsc.get_size () / Pango.SCALE);
 		}
 
+		/* Clutter progress functions */
+
+		// TODO: remove
+		public static double clutter_progress_func_linear_out_back (Clutter.Timeline timeline,
+																	double elapsed, double total)
+		{
+			double p = elapsed / total;
+			if (p <= 0.9) {
+				return p * 1.25;
+			} else {
+				return p * -0.125 + 1.125;
+			}
+		}
+
+		// TODO: clutter progress mode
+		public static double clutter_progress_func_ease_out_back (Clutter.Timeline timeline,
+																  double elapsed, double total)
+		{
+			double p = elapsed / total - 1;
+
+			return p * p * ((1.70158 + 1) * p + 1.70158) + 1;
+		}
+
 		/* Others */
+
 		public static GLib.Settings get_general_gsettings ()
 		{
 			if (general_gsettings == null) {

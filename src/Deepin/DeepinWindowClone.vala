@@ -56,19 +56,6 @@ namespace Gala
 		 * indicating the WindowCloneContainer's current_window.
 		 */
 		bool _select = false;
-		public bool select {
-			get { return _select; }
-			set {
-				_select = value;
-
-				shape.save_easing_state ();
-
-				shape.set_easing_duration (200);
-				shape.opacity = _select ? 255 : 0;
-
-				shape.restore_easing_state ();
-			}
-		}
 
 		// for thumbnail mode, shadow, icon and close button will be disabed
 		public bool thumbnail_mode { get; construct; }
@@ -228,10 +215,6 @@ namespace Gala
 #endif
 			}
 
-			if (should_fade ()) {
-				opacity = 0;
-			}
-
 			// If we were waiting the view was most probably already opened when our window finally
 			// got available. So we fade-in and make sure we took the took place.  If the slot is
 			// not available however, the view was probably closed while this window was opened, so
@@ -243,24 +226,6 @@ namespace Gala
 
 				request_reposition ();
 			}
-		}
-
-		// TODO: thumbnail
-		/**
-		 * If we are in overview mode, we may display windows from workspaces other than the current
-		 * one. To ease their appearance we have to fade them in. And if the window is identify, it
-		 * should be fade, too,
-		 */
-		bool should_fade ()
-		{
-			return (thumbnail_mode &&
-					window.get_workspace () != window.get_screen ().get_active_workspace ());
-			// TODO: remove
-			// if (thumbnail_mode) {
-			// 	return window.get_workspace () != window.get_screen
-			// ().get_active_workspace ());
-			// }
-			// return window.is_hidden ();
 		}
 
 		/**
@@ -302,6 +267,31 @@ namespace Gala
 			}
 		}
 
+		public void select (bool value, bool animate = true) {
+			_select = value;
+
+			shape.save_easing_state ();
+
+			shape.set_easing_duration (animate ? 300 : 0);
+			shape.opacity = _select ? 255 : 0;
+
+			shape.restore_easing_state ();
+		}
+		public bool is_selected () {
+			return _select;
+		}
+
+		/**
+		 * If we are in multitaskingview mode, we may display windows from workspaces other than the
+		 * current one. To ease their appearance we have to fade them in. And if the window is
+		 * minimized, it should be fade, too,
+		 */
+		public bool should_fade ()
+		{
+			return (window.get_workspace () != window.get_screen ().get_active_workspace () ||
+					!window.showing_on_its_workspace ());
+		}
+
 		/**
 		 * Place the window at the location of the original MetaWindow
 		 *
@@ -319,22 +309,46 @@ namespace Gala
 
 			var parent = get_parent ();
 			if (parent != null) {
-				// TODO: thumbnail
-				// in thumbnail_mode the parent has just been added to the stage, so the transforme
-				// position is not set yet. However, the set position is correct for overview
-				// anyway, so we can just use that.
-				if (thumbnail_mode) {
-					parent.get_position (out offset_x, out offset_y);
-				} else {
-					parent.get_transformed_position (out offset_x, out offset_y);
-				}
+				parent.get_transformed_position (out offset_x, out offset_y);
 			}
 
-			set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-			set_easing_duration (animate ? 300 : 0);
+			// TODO: animation
+			if (animate) {
+				var transgroup = new TransitionGroup ();
 
-			set_position (outer_rect.x - offset_x, outer_rect.y - offset_y);
-			set_size (outer_rect.width, outer_rect.height);
+				var transition = new PropertyTransition ("position");
+				transition.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
+				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				var position = Point.alloc ();
+				position.x = outer_rect.x - offset_x;
+				position.y = outer_rect.y - offset_y;
+				transition.set_to_value (position);
+				transgroup.add_transition(transition);
+
+				transition = new PropertyTransition ("size");
+				transition.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
+				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				var size = Size.alloc ();
+				size.width = outer_rect.width;
+				size.height = outer_rect.height;
+				transition.set_to_value (size);
+				transgroup.add_transition(transition);
+
+				transgroup.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+
+				remove_transition ("window-slot");
+				add_transition ("window-slot", transgroup);
+			} else {
+				save_easing_state ();
+				set_easing_duration (0);
+
+				set_position (outer_rect.x - offset_x, outer_rect.y - offset_y);
+				set_size (outer_rect.width, outer_rect.height);
+
+				restore_easing_state ();
+			}
 
 			if (window_icon != null) {
 				window_icon.save_easing_state ();
@@ -355,27 +369,60 @@ namespace Gala
 
 				close_button.restore_easing_state ();
 			}
-
-			if (should_fade ()) {
-				opacity = 0;
-			}
 		}
 
 		/**
 		 * Animate the window to the given slot
 		 */
-		public void take_slot (Meta.Rectangle rect)
+		public void take_slot (Meta.Rectangle rect, bool animate = true)
 		{
 			slot = rect;
 
-			set_easing_duration (250);
-			set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+			// TODO: animation
+			if (animate) {
+				var transgroup = new TransitionGroup ();
 
-			set_size (rect.width, rect.height);
-			set_position (rect.x, rect.y);
+				var transition = new PropertyTransition ("position");
+				transition.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
+				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				var position = Point.alloc ();
+				position.x = rect.x;
+				position.y = rect.y;
+				transition.set_to_value (position);
+				transgroup.add_transition(transition);
+
+				transition = new PropertyTransition ("size");
+				transition.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
+				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				var size = Size.alloc ();
+				size.width = rect.width;
+				size.height = rect.height;
+				transition.set_to_value (size);
+				transgroup.add_transition(transition);
+
+				transgroup.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				remove_transition ("window-slot");
+				add_transition ("window-slot", transgroup);
+			} else {
+				save_easing_state ();
+				set_easing_duration (0);
+
+				set_position (rect.x, rect.y);
+				set_size (rect.width, rect.height);
+
+				restore_easing_state ();
+			}
 
 			if (window_icon != null) {
+				window_icon.save_easing_state ();
+
+				window_icon.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+				window_icon.set_easing_duration (animate ? 300 : 0);
 				window_icon.opacity = 255;
+
+				window_icon.restore_easing_state ();
 			}
 
 			// TODO: thumbnail
@@ -384,7 +431,7 @@ namespace Gala
 			if (thumbnail_mode) {
 				save_easing_state ();
 				set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-				set_easing_duration (300);
+				set_easing_duration (animate ? 300 : 0);
 
 				opacity = 255;
 				restore_easing_state ();
@@ -788,11 +835,12 @@ namespace Gala
 
 			if (window_icon != null) {
 				window_icon.save_easing_state ();
+
 				window_icon.set_easing_duration (250);
 				window_icon.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-				// TODO: panic issue
 				window_icon.set_position (
 					(slot.width - WINDOW_ICON_SIZE) / 2, slot.height - WINDOW_ICON_SIZE * 0.75f);
+
 				window_icon.restore_easing_state ();
 			}
 

@@ -129,8 +129,6 @@ namespace Gala
 
 		void on_window_activated (DeepinWindowClone clone)
 		{
-			// TODO: restore state before selecting
-			clone.select = false;
 			window_activated (clone.window);
 		}
 
@@ -227,7 +225,7 @@ namespace Gala
 
 			foreach (var tilable in window_positions) {
 				unowned DeepinWindowClone window = (DeepinWindowClone)tilable.id;
-				if (!window.select) {
+				if (!window.is_selected ()) {
 					DeepinUtils.scale_rectangle_in_center (ref tilable.rect, 0.9f);
 				}
 				window.take_slot (tilable.rect);
@@ -241,17 +239,17 @@ namespace Gala
 		{
 			if (window == null) {
 				if (current_window != null) {
-					current_window.select = false;
+					current_window.select (false);
 					current_window = null;
 				}
 			} else {
 				if (current_window != window) {
 					if (current_window != null) {
-						current_window.select = false;
+						current_window.select (false);
 					}
 					current_window = window;
 				}
-				current_window.select = true;
+				current_window.select (true);
 				window_selected (current_window.window);
 			}
 
@@ -439,7 +437,17 @@ namespace Gala
 			change_current_window (selected_clone, false);
 
 			foreach (var window in get_children ()) {
-				((DeepinWindowClone)window).transition_to_original_state (false);
+				var window_clone = window as DeepinWindowClone;
+
+				window_clone.save_easing_state ();
+
+				window_clone.set_easing_duration (300);
+				window_clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+				window_clone.opacity = 255;
+
+				window_clone.restore_easing_state ();
+
+				window_clone.transition_to_original_state (false);
 			}
 
 			relayout ();
@@ -458,7 +466,19 @@ namespace Gala
 			opened = false;
 
 			foreach (var window in get_children ()) {
-				((DeepinWindowClone)window).transition_to_original_state (true);
+				var window_clone = window as DeepinWindowClone;
+				window_clone.select (false);
+				if (window_clone.should_fade ()) {
+					window_clone.save_easing_state ();
+
+					window_clone.set_easing_duration (300);
+					window_clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+					window_clone.opacity = 0;
+
+					window_clone.restore_easing_state ();
+				} else {
+					window_clone.transition_to_original_state (true);
+				}
 			}
 		}
 	}
