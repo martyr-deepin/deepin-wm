@@ -319,7 +319,7 @@ namespace Gala
 				parent.get_transformed_position (out offset_x, out offset_y);
 			}
 
-			// TODO: animation
+			// TODO: ask for animation, take slot
 			if (animate) {
 				var transgroup = new TransitionGroup ();
 				int duration = DeepinMultitaskingView.ANIMATION_DURATION;
@@ -389,7 +389,7 @@ namespace Gala
 		{
 			slot = rect;
 
-			// TODO: animation
+			// TODO: ask for animation, take slot
 			if (animate) {
 				var transgroup = new TransitionGroup ();
 				int duration = DeepinMultitaskingView.ANIMATION_DURATION;
@@ -567,6 +567,7 @@ namespace Gala
 
 		public void start_closing_animation ()
 		{
+			// TODO: ask for animation, window closing
 			set_easing_duration (300);
 			set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 			scale_x = 0.0f;

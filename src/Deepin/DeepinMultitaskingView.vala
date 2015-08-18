@@ -28,11 +28,12 @@ namespace Gala
 	 */
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
-		// TODO: animation duration
+		// TODO: ask for animation, multitaskingview toggle
 		// public const int ANIMATION_DURATION = 250;
 		public const int ANIMATION_DURATION = 500;
 		public const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
 		public const AnimationMode WORKSPACE_ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
+
 		const int SMOOTH_SCROLL_DELAY = 500;
 
 		/**
@@ -271,6 +272,7 @@ namespace Gala
 
 				workspace_clone.save_easing_state ();
 
+				// TODO: ask for animation, multitaskingview, switching workspaces
 				workspace_clone.set_easing_duration (animate ? 200 : 0);
 				workspace_clone.x = dest_x;
 
@@ -568,6 +570,7 @@ namespace Gala
 
 			update_positions (false);
 
+			// TODO: ask for animation, multitaskingview, toggle, thumb workspaces
 			thumb_workspaces.save_easing_state ();
 			thumb_workspaces.set_easing_duration (ANIMATION_DURATION);
 			thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_BACK);

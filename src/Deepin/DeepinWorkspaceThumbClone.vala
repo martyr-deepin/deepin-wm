@@ -270,6 +270,7 @@ namespace Gala
 
 		public void get_workspace_name ()
 		{
+			// TODO: ask for workspace name format, dot
 			workspace_name_num.text = "%d".printf (workspace.index () + 1);
 			workspace_name_text.text = DeepinUtils.get_workspace_name (workspace.index ());
 		}

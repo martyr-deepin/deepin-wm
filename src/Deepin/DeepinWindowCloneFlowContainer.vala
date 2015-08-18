@@ -185,7 +185,7 @@ namespace Gala
 		 */
 		public void restack_windows (Screen screen)
 		{
-			// stdout.printf ("restack windows...\n");	// TODO
+			stdout.printf ("restack windows...\n");	// TODO test
 			unowned Meta.Display display = screen.get_display ();
 			var children = get_children ();
 
