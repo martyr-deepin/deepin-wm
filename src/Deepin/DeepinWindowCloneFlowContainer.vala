@@ -117,9 +117,11 @@ namespace Gala
 			// top most or no other children
 			if (!added) {
 				add_child (new_window);
-				relayout ();
 				window_added (window);
 			}
+
+			// make new window selected default
+			change_current_window (new_window);
 		}
 
 		/**
@@ -130,11 +132,11 @@ namespace Gala
 			foreach (var child in get_children ()) {
 				if (((DeepinWindowClone)child).window == window) {
 					remove_child (child);
-					relayout ();
 					window_removed (window);
 					break;
 				}
 			}
+			relayout ();
 		}
 
 		void on_window_activated (DeepinWindowClone clone)
