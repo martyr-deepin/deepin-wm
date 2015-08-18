@@ -27,6 +27,9 @@ namespace Gala
 	public class DeepinWindowCloneThumbContainer : Actor
 	{
 		public signal void window_activated (Window window);
+		public signal void window_added (Window window);
+		public signal void window_removed (Window window);
+		public signal void window_dragging (Window window);
 
 		public Workspace workspace { get; construct; }
 
@@ -78,6 +81,11 @@ namespace Gala
 			new_window.activated.connect (on_window_activated);
 			new_window.destroy.connect (on_window_destroyed);
 			new_window.request_reposition.connect (relayout);
+			new_window.notify["dragging"].connect (() => {
+				if (new_window.dragging) {
+					window_dragging (new_window.window);
+				}
+			});
 
 			var added = false;
 			unowned Meta.Window? target = null;
@@ -104,6 +112,7 @@ namespace Gala
 			}
 
 			relayout ();
+			window_added (window);
 		}
 
 		/**
@@ -119,6 +128,7 @@ namespace Gala
 			}
 
 			relayout ();
+			window_removed (window);
 		}
 
 		void on_window_activated (DeepinWindowClone clone)

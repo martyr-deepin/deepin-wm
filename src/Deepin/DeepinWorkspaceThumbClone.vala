@@ -116,6 +116,7 @@ namespace Gala
 
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
 			window_container.window_activated.connect ((w) => selected ());
+			window_container.window_dragging.connect ((w) => show_close_button (false));
 			workspace_clone.add_child (window_container);
 
 			// selected shape for workspace name field
@@ -183,8 +184,7 @@ namespace Gala
 			close_button.opacity = 0;
 
 			// block propagation of button presses on the close button, otherwise the click action
-			// on the WorkspaceTHumbClone will act weirdly close_button.button_press_event.connect
-			// (() => { return true; });
+			// on the WorkspaceTHumbClone will act weirdly
 			close_button.button_press_event.connect (() => {
 				remove_workspace ();
 				return true;
@@ -208,31 +208,34 @@ namespace Gala
 			// don't display the close button when we have dynamic workspaces or when there is only
 			// one workspace
 			if (Prefs.get_dynamic_workspaces () || Prefs.get_num_workspaces () == 1) {
-				return false;
+				show_close_button (false);
+			} else {
+				show_close_button (true);
 			}
-
-			close_button.save_easing_state ();
-
-			close_button.set_easing_duration (300);
-			close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-			close_button.opacity = 255;
-
-			close_button.restore_easing_state ();
 
 			return false;
 		}
 
 		public override bool leave_event (CrossingEvent event)
 		{
+			show_close_button (false);
+			return false;
+		}
+
+		void show_close_button (bool show)
+		{
 			close_button.save_easing_state ();
 
 			close_button.set_easing_duration (300);
 			close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-			close_button.opacity = 0;
+
+			if (show) {
+				close_button.opacity = 255;
+			} else {
+				close_button.opacity = 0;
+			}
 
 			close_button.restore_easing_state ();
-
-			return false;
 		}
 
 		bool on_name_button_press_event ()
@@ -331,7 +334,6 @@ namespace Gala
 				DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
-		// TODO: necessary?
 		/**
 		 * Remove all currently added WindowIconActors
 		 */
