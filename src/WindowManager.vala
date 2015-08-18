@@ -116,7 +116,6 @@ namespace Gala
 			}
 
 			stage = Compositor.get_stage_for_screen (screen) as Clutter.Stage;
-			stage.name = "Stage";// TODO: test
 
 			var color = BackgroundSettings.get_default ().primary_color;
 			stage.background_color = Clutter.Color.from_string (color);
@@ -1271,11 +1270,18 @@ namespace Gala
 			var out_group = new Clutter.Actor ();
 			windows = new List<WindowActor> ();
 			parents = new List<Clutter.Actor> ();
-			tmp_actors = new List<Clutter.Clone> ();
+			tmp_actors = new List<Clutter.Actor> ();
+
+			// Handle desktop windows specially instead appending theme to in_group and out_group to
+			// fix desktop always top issue when switching workspaces.
+			var desktop_in_group  = new Clutter.Actor ();
+			var desktop_out_group  = new Clutter.Actor ();
 
 			tmp_actors.prepend (main_container);
 			tmp_actors.prepend (in_group);
 			tmp_actors.prepend (out_group);
+			tmp_actors.prepend (desktop_in_group);
+			tmp_actors.prepend (desktop_out_group);
 			tmp_actors.prepend (static_windows);
 
 			window_group.add_child (main_container);
@@ -1297,8 +1303,10 @@ namespace Gala
 			// pack all containers
 			clutter_actor_reparent (wallpaper, main_container);
 			main_container.add_child (wallpaper_clone);
-			main_container.add_child (out_group);
+			main_container.add_child (desktop_in_group);
+			main_container.add_child (desktop_out_group);
 			main_container.add_child (in_group);
+			main_container.add_child (out_group);
 			main_container.add_child (static_windows);
 
 			// if we have a move action, pack that window to the static ones
@@ -1329,21 +1337,21 @@ namespace Gala
 					continue;
 
 				if (window.is_on_all_workspaces ()) {
-					// only collect docks here that need to be displayed on both workspaces
+					// collect docks and desktops here that need to be displayed on both workspaces
 					// all other windows will be collected below
 					if (window.window_type == WindowType.DOCK) {
 						docks.prepend (actor);
 					} else if (window.window_type == WindowType.DESKTOP) {
-						// TODO: fix desktop flash issue when switching workspace
-						var clone = new SafeWindowClone (window);
-						clone.x = actor.x;
-						clone.y = actor.y;
-						in_group.insert_child_at_index (clone, 0);
-						tmp_actors.prepend (clone);
-
 						windows.prepend (actor);
 						parents.prepend (actor.get_parent ());
-						clutter_actor_reparent (actor, out_group);
+						actor.set_translation (-clone_offset_x, -clone_offset_y, 0);
+						clutter_actor_reparent (actor, desktop_out_group);
+
+						var clone = new SafeWindowClone (actor.get_meta_window ());
+						clone.x = actor.x - clone_offset_x;
+						clone.y = actor.y - clone_offset_y;
+						desktop_in_group.add_child (clone);
+						tmp_actors.prepend (clone);
 					} else {
 						// windows that are on all workspaces will be faded out and back in
 						windows.prepend (actor);
@@ -1415,13 +1423,17 @@ namespace Gala
 				x2 = -x2;
 
 			out_group.x = 0;
+			desktop_out_group.x = 0;
 			wallpaper.x = 0;
 			in_group.x = -x2;
+			desktop_in_group.x = -x2;
 			wallpaper_clone.x = -x2;
 
 			in_group.clip_to_allocation = out_group.clip_to_allocation = true;
 			in_group.width = out_group.width = move_primary_only ? monitor_geom.width : screen_width;
 			in_group.height = out_group.height = move_primary_only ? monitor_geom.height : screen_height;
+			desktop_in_group.width = desktop_out_group.width = in_group.width;
+			desktop_in_group.height = desktop_out_group.height = in_group.height;
 
 			var animation_mode = Clutter.AnimationMode.EASE_OUT_CUBIC;
 
@@ -1429,6 +1441,10 @@ namespace Gala
 			out_group.set_easing_duration (animation_duration);
 			in_group.set_easing_mode (animation_mode);
 			in_group.set_easing_duration (animation_duration);
+			desktop_out_group.set_easing_mode (animation_mode);
+			desktop_out_group.set_easing_duration (animation_duration);
+			desktop_in_group.set_easing_mode (animation_mode);
+			desktop_in_group.set_easing_duration (animation_duration);
 			wallpaper_clone.set_easing_mode (animation_mode);
 			wallpaper_clone.set_easing_duration (animation_duration);
 
@@ -1438,6 +1454,9 @@ namespace Gala
 
 			out_group.x = x2;
 			in_group.x = 0;
+
+			desktop_out_group.x = x2;
+			desktop_in_group.x = 0;
 
 			wallpaper.x = x2;
 			wallpaper_clone.x = 0;
