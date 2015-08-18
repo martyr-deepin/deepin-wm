@@ -431,6 +431,11 @@ namespace Gala
 			change_current_window (closest);
 		}
 
+		public bool has_selected_window ()
+		{
+			return current_window != null;
+		}
+
 		/**
 		 * Emit the selected signal for the current_window.
 		 */

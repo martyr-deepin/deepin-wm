@@ -412,8 +412,13 @@ namespace Gala
 				break;
 			case Clutter.Key.Return:
 			case Clutter.Key.KP_Enter:
-				// TODO: how about there is no selected window?
-				get_active_workspace_clone ().window_container.activate_selected_window ();
+				if (get_active_workspace_clone ().window_container.has_selected_window ()) {
+					get_active_workspace_clone ().window_container.activate_selected_window ();
+				} else {
+					if (opened) {
+						toggle ();
+					}
+				}
 				break;
 			}
 
