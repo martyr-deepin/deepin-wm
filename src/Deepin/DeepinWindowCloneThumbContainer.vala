@@ -187,7 +187,7 @@ namespace Gala
 			}
 		}
 
-		// TODO:
+		// TODO: merge to relayout
 		/**
 		 * Sort the windows z-order by their actual stacking to make intersections
 		 * during animations correct.

@@ -100,6 +100,7 @@ namespace Gala
 				(w) => thumb_workspace.window_container.select_window (w));
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
+			// TODO: sort window
 			screen.restacked.connect (window_container.restack_windows);
 
 			// sync window closing animation

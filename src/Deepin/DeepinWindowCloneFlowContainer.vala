@@ -178,14 +178,12 @@ namespace Gala
 			}
 		}
 
-		// TODO: check window order
 		/**
 		 * Sort the windows z-order by their actual stacking to make intersections during animations
 		 * correct.
 		 */
 		public void restack_windows (Screen screen)
 		{
-			stdout.printf ("restack windows...\n");	// TODO test
 			unowned Meta.Display display = screen.get_display ();
 			var children = get_children ();
 
@@ -234,14 +232,12 @@ namespace Gala
 				return;
 			}
 
-			// TODO: sort windows
-
 			// make sure the windows are always in the same order so the algorithm doesn't give us
 			// different slots based on stacking order, which can lead to windows flying around
 			// weirdly
 			windows.sort ((a, b) => {
-				var seq_a = ((DeepinWindowClone)a.id).window.get_stable_sequence ();
-				var seq_b = ((DeepinWindowClone)b.id).window.get_stable_sequence ();
+				var seq_a = (a.id as DeepinWindowClone).window.get_stable_sequence ();
+				var seq_b = (b.id as DeepinWindowClone).window.get_stable_sequence ();
 				return (int)(seq_b - seq_a);
 			});
 
@@ -250,11 +246,12 @@ namespace Gala
 									(int)height - padding_top - padding_bottom };
 
 			// reset window_positions
-			window_positions = InternalUtils.calculate_grid_placement (area, windows);
+			window_positions = InternalUtils.calculate_grid_placement (area, windows, false);
 
 			foreach (var tilable in window_positions) {
-				unowned DeepinWindowClone window = (DeepinWindowClone)tilable.id;
+				unowned DeepinWindowClone window = tilable.id as DeepinWindowClone;
 				if (!window.is_selected ()) {
+					// TODO: ask for select window scale size
 					DeepinUtils.scale_rectangle_in_center (ref tilable.rect, 0.9f);
 				}
 				window.take_slot (tilable.rect);
