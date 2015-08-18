@@ -27,7 +27,11 @@ namespace Gala
 	 */
 	public class DeepinWindowCloneFlowContainer : Actor
 	{
+		public signal void window_added (Window window);
 		public signal void window_activated (Window window);
+		public signal void window_closing (Window window);
+		public signal void window_dragging (Window window);
+		public signal void window_removed (Window window);
 		public signal void window_selected (Window window);
 
 		public int padding_top { get; set; default = 12; }
@@ -82,8 +86,14 @@ namespace Gala
 			var new_window = new DeepinWindowClone (window);
 
 			new_window.activated.connect (on_window_activated);
+			new_window.closing.connect (on_window_closing);
 			new_window.destroy.connect (on_window_destroyed);
 			new_window.request_reposition.connect (relayout);
+			new_window.notify["dragging"].connect (() => {
+				if (new_window.dragging) {
+					window_dragging (new_window.window);
+				}
+			});
 
 			var added = false;
 			unowned Meta.Window? target = null;
@@ -107,9 +117,9 @@ namespace Gala
 			// top most or no other children
 			if (!added) {
 				add_child (new_window);
+				relayout ();
+				window_added (window);
 			}
-
-			relayout ();
 		}
 
 		/**
@@ -120,16 +130,21 @@ namespace Gala
 			foreach (var child in get_children ()) {
 				if (((DeepinWindowClone)child).window == window) {
 					remove_child (child);
+					relayout ();
+					window_removed (window);
 					break;
 				}
 			}
-
-			relayout ();
 		}
 
 		void on_window_activated (DeepinWindowClone clone)
 		{
 			window_activated (clone.window);
+		}
+
+		void on_window_closing (DeepinWindowClone clone)
+		{
+			window_closing (clone.window);
 		}
 
 		void on_window_destroyed (Actor actor)
@@ -141,12 +156,26 @@ namespace Gala
 
 			window.destroy.disconnect (on_window_destroyed);
 			window.activated.disconnect (on_window_activated);
+			window.closing.disconnect (on_window_closing);
 			window.request_reposition.disconnect (relayout);
 
 			Idle.add (() => {
 				relayout ();
 				return false;
 			});
+		}
+
+		/**
+		 * Another window clone with same Meta.Window is closing, sync closing animation with it.
+		 */
+		public void sync_closing_animation (Window window)
+		{
+			foreach (var child in get_children ()) {
+				if ((child as DeepinWindowClone).window == window) {
+					(child as DeepinWindowClone).start_closing_animation ();
+					break;
+				}
+			}
 		}
 
 		// TODO: check window order

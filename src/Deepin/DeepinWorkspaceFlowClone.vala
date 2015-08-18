@@ -57,7 +57,7 @@ namespace Gala
 		 * Own the related thumbnail workspace clone so that signals and events could be dispatched
 		 * easily.
 		 */
-		public DeepinWorkspaceThumbClone related_thumb_workspace { get; private set; }
+		public DeepinWorkspaceThumbClone thumb_workspace { get; private set; }
 
 #if HAS_MUTTER314
 		BackgroundManager background;
@@ -87,24 +87,30 @@ namespace Gala
 				return false;
 			});
 
-			related_thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
-			related_thumb_workspace.selected.connect (() => {
+			thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
+			thumb_workspace.selected.connect (() => {
 				if (workspace != screen.get_active_workspace ()) {
 					selected (false);
 				}
 			});
 
 			window_container = new DeepinWindowCloneFlowContainer ();
-			window_container.window_activated.connect ((w) => { window_activated (w); });
+			window_container.window_activated.connect ((w) => window_activated (w));
 			window_container.window_selected.connect (
-				(w) => { related_thumb_workspace.select_window (w); });
+				(w) => thumb_workspace.window_container.select_window (w));
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
 			screen.restacked.connect (window_container.restack_windows);
 
+			// sync window closing animation
+			thumb_workspace.window_container.window_closing.connect (
+				window_container.sync_closing_animation);
+			window_container.window_closing.connect (
+				thumb_workspace.window_container.sync_closing_animation);
+
 			var thumb_drop_action = new DragDropAction (
 				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
-			related_thumb_workspace.add_action (thumb_drop_action);
+			thumb_workspace.add_action (thumb_drop_action);
 
 			var background_drop_action = new DragDropAction (
 				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
@@ -139,7 +145,7 @@ namespace Gala
 				if (window.window_type == WindowType.NORMAL && !window.on_all_workspaces &&
 					window.get_monitor () == screen.get_primary_monitor ()) {
 					window_container.add_window (window);
-					related_thumb_workspace.add_window (window);
+					thumb_workspace.window_container.add_window (window);
 				}
 			}
 
@@ -183,7 +189,8 @@ namespace Gala
 			}
 
 			window_container.add_window (window);
-			related_thumb_workspace.add_window (window);
+			thumb_workspace.window_container.add_window (window);
+			thumb_workspace.start_window_added_animation ();
 		}
 
 		/**
@@ -192,8 +199,7 @@ namespace Gala
 		void remove_window (Window window)
 		{
 			window_container.remove_window (window);
-			// TODO: animate
-			related_thumb_workspace.remove_window (window);
+			thumb_workspace.window_container.remove_window (window);
 		}
 
 		void window_entered_monitor (Screen screen, int monitor, Window window)

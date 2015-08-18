@@ -37,6 +37,11 @@ namespace Gala
 		public signal void activated ();
 
 		/**
+		 * The window will be closed after closing animation finished.
+		 */
+		public signal void closing ();
+
+		/**
 		 * The window was moved or resized and a relayout of the tiling layout may be sensible right
 		 * now.
 		 */
@@ -97,6 +102,7 @@ namespace Gala
 			}
 
 			reactive = true;
+			set_pivot_point (0.5f, 0.5f);
 			shape_border_size =
 				DeepinUtils.get_css_border_radius ("deepin-window-clone", Gtk.StateFlags.SELECTED);
 
@@ -109,7 +115,8 @@ namespace Gala
 			drag_action =
 				new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
 			drag_action.drag_begin.connect (drag_begin);
-			drag_action.destination_crossed.connect (drag_destination_crossed);
+			// TODO:
+			// drag_action.destination_crossed.connect (drag_destination_crossed);
 			drag_action.drag_end.connect (drag_end);
 			drag_action.drag_canceled.connect (drag_canceled);
 			drag_action.actor_clicked.connect (actor_clicked);
@@ -315,9 +322,10 @@ namespace Gala
 			// TODO: animation
 			if (animate) {
 				var transgroup = new TransitionGroup ();
+				int duration = DeepinMultitaskingView.ANIMATION_DURATION;
 
 				var transition = new PropertyTransition ("position");
-				transition.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				transition.set_duration (duration);
 				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
 				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
 				var position = Point.alloc ();
@@ -327,7 +335,7 @@ namespace Gala
 				transgroup.add_transition(transition);
 
 				transition = new PropertyTransition ("size");
-				transition.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				transition.set_duration (duration);
 				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
 				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
 				var size = Size.alloc ();
@@ -336,9 +344,12 @@ namespace Gala
 				transition.set_to_value (size);
 				transgroup.add_transition(transition);
 
-				transgroup.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				transgroup.set_duration (duration);
+				transgroup.remove_on_complete = true;
 
-				remove_transition ("window-slot");
+				if (get_transition ("window-slot") != null) {
+					remove_transition ("window-slot");
+				}
 				add_transition ("window-slot", transgroup);
 			} else {
 				save_easing_state ();
@@ -381,9 +392,10 @@ namespace Gala
 			// TODO: animation
 			if (animate) {
 				var transgroup = new TransitionGroup ();
+				int duration = DeepinMultitaskingView.ANIMATION_DURATION;
 
 				var transition = new PropertyTransition ("position");
-				transition.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				transition.set_duration (duration);
 				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
 				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
 				var position = Point.alloc ();
@@ -393,7 +405,7 @@ namespace Gala
 				transgroup.add_transition(transition);
 
 				transition = new PropertyTransition ("size");
-				transition.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+				transition.set_duration (duration);
 				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
 				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
 				var size = Size.alloc ();
@@ -402,8 +414,12 @@ namespace Gala
 				transition.set_to_value (size);
 				transgroup.add_transition(transition);
 
-				transgroup.set_duration (DeepinMultitaskingView.ANIMATION_DURATION);
-				remove_transition ("window-slot");
+				transgroup.set_duration (duration);
+				transgroup.remove_on_complete = true;
+
+				if (get_transition ("window-slot") != null) {
+					remove_transition ("window-slot");
+				}
 				add_transition ("window-slot", transgroup);
 			} else {
 				save_easing_state ();
@@ -549,12 +565,28 @@ namespace Gala
 			return false;
 		}
 
+		public void start_closing_animation ()
+		{
+			set_easing_duration (300);
+			set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+			scale_x = 0.0f;
+			scale_y = 0.0f;
+		}
+
 		/**
 		 * Send the window the delete signal and listen for new windows to be added to the window's
 		 * workspace, in which case we check if the new window is a dialog of the window we were
 		 * going to delete. If that's the case, we request to select our window.
 		 */
 		void close_window ()
+		{
+			start_closing_animation ();
+			transitions_completed.connect (() => {
+				do_close_window ();
+			});
+			closing ();
+		}
+		void do_close_window ()
 		{
 			var screen = window.get_screen ();
 			check_confirm_dialog_cb = screen.window_entered_monitor.connect (check_confirm_dialog);
@@ -715,10 +747,9 @@ namespace Gala
 
 			if (workspace_thumb != null) {
 				if (hovered) {
-					// TODO: animation
-					workspace_thumb.add_window (window);
+					workspace_thumb.window_container.add_window (window);
 				} else {
-					workspace_thumb.remove_window (window);
+					workspace_thumb.window_container.remove_window (window);
 				}
 			}
 		}

@@ -25,7 +25,7 @@ namespace Gala
 	 * Will be put at end of workspace thumbnail list in DeepinMultitaskingView if number less than
 	 * MAX_WORKSPACE_NUM.
 	 */
-	public class DeepinWorkspaceAddButton : DeepinCssStaticActor
+	class DeepinWorkspaceAddButton : DeepinCssStaticActor
 	{
 		const double PLUS_SIZE = 32.0;
 		const double PLUS_LINE_WIDTH = 2.0;

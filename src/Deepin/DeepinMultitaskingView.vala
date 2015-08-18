@@ -127,7 +127,7 @@ namespace Gala
 							workspace_clone.selected.disconnect (activate_workspace);
 
 							thumb_workspaces.remove_workspace (
-								workspace_clone.related_thumb_workspace);
+								workspace_clone.thumb_workspace);
 
 							workspace_clone.destroy ();
 						}
@@ -264,9 +264,9 @@ namespace Gala
 
 				if (index == active_index) {
 					active_x = dest_x;
-					workspace_clone.related_thumb_workspace.select (true);
+					workspace_clone.thumb_workspace.select (true);
 				} else {
-					workspace_clone.related_thumb_workspace.select (false);
+					workspace_clone.thumb_workspace.select (false);
 				}
 
 				workspace_clone.save_easing_state ();
@@ -291,8 +291,8 @@ namespace Gala
 			workspace.selected.connect (activate_workspace);
 
 			flow_workspaces.insert_child_at_index (workspace, num);
-			workspace.related_thumb_workspace.fallback_key_focus = this;
-			thumb_workspaces.add_workspace (workspace.related_thumb_workspace);
+			workspace.thumb_workspace.fallback_key_focus = this;
+			thumb_workspaces.add_workspace (workspace.thumb_workspace);
 
 			update_positions (opened);
 
@@ -323,7 +323,7 @@ namespace Gala
 			workspace.window_activated.disconnect (activate_window);
 			workspace.selected.disconnect (activate_workspace);
 
-			thumb_workspaces.remove_workspace (workspace.related_thumb_workspace);
+			thumb_workspaces.remove_workspace (workspace.thumb_workspace);
 
 			workspace.destroy ();
 

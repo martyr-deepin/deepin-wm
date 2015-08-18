@@ -51,6 +51,8 @@ namespace Gala
 			construct;
 		}
 
+		public DeepinWindowCloneThumbContainer window_container;
+
 		public Actor? fallback_key_focus = null;
 
 		// selected shape for workspace thumbnail clone
@@ -62,7 +64,6 @@ namespace Gala
 		Actor workspace_shadow;
 		Actor workspace_clone;
 		Actor background;
-		DeepinWindowCloneThumbContainer window_container;
 
 		Actor workspace_name;
 		Text workspace_name_num;
@@ -102,8 +103,10 @@ namespace Gala
 
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
+			workspace_clone.set_pivot_point (0.5f, 0.5f);
 			int radius = DeepinUtils.get_css_border_radius (
 				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+			// TODO: round effect
 			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 			add_child (workspace_clone);
 
@@ -306,11 +309,6 @@ namespace Gala
 			workspace_name_text.restore_easing_state ();
 		}
 
-		public void select_window (Window window)
-		{
-			window_container.select_window (window);
-		}
-
 		void update_workspace_shadow ()
 		{
 			var shadow_effect = workspace_clone.get_effect ("shadow") as ShadowEffect;
@@ -342,20 +340,40 @@ namespace Gala
 			window_container.destroy_all_children ();
 		}
 
-		/**
-		 * Creates a Clone for the given window and adds it to the group
-		 */
-		public void add_window (Window window)
+		public void start_window_added_animation ()
 		{
-			window_container.add_window (window);
-		}
+			// TODO: bulge animation
+			var transgroup = new TransitionGroup ();
 
-		/**
-		 * Remove the Clone for a MetaWindow from the container
-		 */
-		public void remove_window (Window window)
-		{
-			window_container.remove_window (window);
+			double[] keyframes = { 0.28, 0.58 };
+			GLib.Value[] values = { 1.1f, 1.1f };
+			int duration = DeepinMultitaskingView.ANIMATION_DURATION;
+
+			var transition = new KeyframeTransition ("scale-x");
+			transition.set_duration (duration);
+			transition.set_progress_mode (AnimationMode.LINEAR);
+			transition.set_from_value (1.0f);
+			transition.set_to_value (1.0f);
+			transition.set_key_frames (keyframes);
+			transition.set_values (values);
+			transgroup.add_transition (transition);
+
+			transition = new KeyframeTransition ("scale-y");
+			transition.set_duration (duration);
+			transition.set_progress_mode (AnimationMode.LINEAR);
+			transition.set_from_value (1.0f);
+			transition.set_to_value (1.0f);
+			transition.set_key_frames (keyframes);
+			transition.set_values (values);
+			transgroup.add_transition (transition);
+
+			transgroup.set_duration (duration);
+			transgroup.remove_on_complete = true;
+
+			if (workspace_clone.get_transition ("bulge") != null) {
+				workspace_clone.remove_transition ("bulge");
+			}
+			workspace_clone.add_transition ("bulge", transgroup);
 		}
 
 		/*
