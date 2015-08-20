@@ -322,7 +322,7 @@ namespace Gala
 			// TODO: ask for animation, take slot
 			if (animate) {
 				var transgroup = new TransitionGroup ();
-				int duration = DeepinMultitaskingView.ANIMATION_DURATION;
+				int duration = DeepinMultitaskingView.TOGGLE_DURATION;
 
 				var transition = new PropertyTransition ("position");
 				transition.set_duration (duration);
@@ -392,7 +392,7 @@ namespace Gala
 			// TODO: ask for animation, take slot
 			if (animate) {
 				var transgroup = new TransitionGroup ();
-				int duration = DeepinMultitaskingView.ANIMATION_DURATION;
+				int duration = DeepinMultitaskingView.TOGGLE_DURATION;
 
 				var transition = new PropertyTransition ("position");
 				transition.set_duration (duration);

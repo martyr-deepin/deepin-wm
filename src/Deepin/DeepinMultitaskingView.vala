@@ -29,10 +29,12 @@ namespace Gala
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
 		// TODO: ask for animation, multitaskingview toggle
-		// public const int ANIMATION_DURATION = 250;
-		public const int ANIMATION_DURATION = 500;
-		public const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
-		public const AnimationMode WORKSPACE_ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
+		// public const int TOGGLE_DURATION = 250;
+		public const int TOGGLE_DURATION = 500;
+		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUAD;
+		// TODO: ask for animation, multitaskingview, workspace switch
+		public const int WORKSPACE_SWITCH_DURATION = 500;
+		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUAD;
 
 		const int SMOOTH_SCROLL_DELAY = 500;
 
@@ -82,7 +84,6 @@ namespace Gala
 			screen = wm.get_screen ();
 
 			flow_workspaces = new Actor ();
-			flow_workspaces.set_easing_mode (WORKSPACE_ANIMATION_MODE);
 
 			thumb_workspaces = new DeepinWorkspaceThumbCloneContainer (screen);
 			thumb_workspaces.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
@@ -272,16 +273,20 @@ namespace Gala
 
 				workspace_clone.save_easing_state ();
 
-				// TODO: ask for animation, multitaskingview, switching workspaces
+				// TODO: ask for animation, multitaskingview, place workspace
 				workspace_clone.set_easing_duration (animate ? 200 : 0);
 				workspace_clone.x = dest_x;
 
 				workspace_clone.restore_easing_state ();
 			}
 
-			flow_workspaces.set_easing_duration (
-				animate ? AnimationSettings.get_default ().workspace_switch_duration : 0);
+			flow_workspaces.save_easing_state ();
+
+			flow_workspaces.set_easing_mode (WORKSPACE_SWITCH_MODE);
+			flow_workspaces.set_easing_duration (animate ? WORKSPACE_SWITCH_DURATION : 0);
 			flow_workspaces.x = -active_x;
+
+			flow_workspaces.restore_easing_state ();
 
 			thumb_workspaces.relayout ();
 		}
@@ -572,7 +577,7 @@ namespace Gala
 
 			// TODO: ask for animation, multitaskingview, toggle, thumb workspaces
 			thumb_workspaces.save_easing_state ();
-			thumb_workspaces.set_easing_duration (ANIMATION_DURATION);
+			thumb_workspaces.set_easing_duration (TOGGLE_DURATION);
 			thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_BACK);
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
 			if (opening) {
@@ -611,14 +616,14 @@ namespace Gala
 				foreach (var child in dock_clones.get_children ()) {
 					var dock = (Clone)child;
 
-					dock.set_easing_duration (ANIMATION_DURATION);
-					dock.set_easing_mode (ANIMATION_MODE);
+					dock.set_easing_duration (TOGGLE_DURATION);
+					dock.set_easing_mode (TOGGLE_MODE);
 					dock.opacity = 255;
 				}
 			}
 
 			if (!opening) {
-				Timeout.add (ANIMATION_DURATION, () => {
+				Timeout.add (TOGGLE_DURATION, () => {
 					foreach (var container in window_containers_monitors) {
 						container.visible = false;
 					}
@@ -638,7 +643,7 @@ namespace Gala
 					return false;
 				});
 			} else {
-				Timeout.add (ANIMATION_DURATION, () => {
+				Timeout.add (TOGGLE_DURATION, () => {
 					animating = false;
 					return false;
 				});

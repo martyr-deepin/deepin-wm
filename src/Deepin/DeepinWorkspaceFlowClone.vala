@@ -246,7 +246,7 @@ namespace Gala
 
 			background.save_easing_state ();
 
-			background.set_easing_duration (DeepinMultitaskingView.ANIMATION_DURATION);
+			background.set_easing_duration (DeepinMultitaskingView.TOGGLE_DURATION);
 			background.set_easing_mode (AnimationMode.EASE_OUT_BACK);
 			background.set_scale (scale, scale);
 

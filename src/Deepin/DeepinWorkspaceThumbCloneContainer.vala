@@ -71,8 +71,8 @@ namespace Gala
 		const float SPACING_PERCENT = 0.02f;
 
 		// TODO: animation
-		const int ANIMATION_DURATION = 500;
-		const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_QUAD;
+		const int LAYOUT_DURATION = 500;
+		const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
 
 		public Screen screen { get; construct; }
 
@@ -84,8 +84,8 @@ namespace Gala
 
 			add_button = new DeepinWorkspaceAddButton ();
 			add_button.reactive = true;
-			add_button.set_easing_duration (ANIMATION_DURATION);
-			add_button.set_easing_mode (ANIMATION_MODE);
+			add_button.set_easing_duration (LAYOUT_DURATION);
+			add_button.set_easing_mode (LAYOUT_MODE);
 			add_button.button_press_event.connect (() => {
 				DeepinUtils.append_new_workspace (screen);
 				return false;
@@ -96,8 +96,8 @@ namespace Gala
 		{
 			// TODO: animation
 			// workspace_clone.opacity = 0;
-			// workspace_clone.set_easing_duration (ANIMATION_DURATION);
-			workspace_clone.set_easing_mode (ANIMATION_MODE);
+			// workspace_clone.set_easing_duration (LAYOUT_DURATION);
+			workspace_clone.set_easing_mode (LAYOUT_MODE);
 			// workspace_clone.opacity = 255;
 
 			var index = workspace_clone.workspace.index ();
@@ -131,7 +131,7 @@ namespace Gala
 			foreach (var child in get_children ()) {
 				child.save_easing_state ();
 
-				child.set_easing_duration (ANIMATION_DURATION);
+				child.set_easing_duration (LAYOUT_DURATION);
 
 				place_child (child, i);
 				i++;

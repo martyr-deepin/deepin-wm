@@ -25,8 +25,8 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceName : Clutter.Actor
 	{
-		const int ANIMATION_DURATION = 200;
-		const AnimationMode ANIMATION_MODE = AnimationMode.EASE_OUT_CUBIC;
+		const int FADE_DURATION = 200;
+		const AnimationMode FADE_MODE = AnimationMode.EASE_OUT_CUBIC;
 
 		const int POPUP_TIMEOUT = 200;
 		const int POPUP_PADDING = 14;
@@ -48,8 +48,8 @@ namespace Gala
 		{
 			popup = new DeepinCssStaticActor ("deepin-workspace-name");
 			popup.opacity = 0;
-			popup.set_easing_duration (ANIMATION_DURATION);
-			popup.set_easing_mode (ANIMATION_MODE);
+			popup.set_easing_duration (FADE_DURATION);
+			popup.set_easing_mode (FADE_MODE);
 			popup.layout_manager = new BoxLayout ();
 			popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
 

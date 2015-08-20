@@ -98,7 +98,7 @@ namespace Gala
 			thumb_shape =
 				new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
 			thumb_shape.opacity = 0;
-			thumb_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
+			thumb_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);
 			add_child (thumb_shape);
 
 			// workspace thumbnail clone
@@ -125,7 +125,7 @@ namespace Gala
 			// selected shape for workspace name field
 			name_shape = new DeepinCssActor ("deepin-workspace-thumb-clone-name");
 			name_shape.reactive = true;
-			name_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
+			name_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);
 
 			name_shape.button_press_event.connect (on_name_button_press_event);
 
@@ -138,7 +138,7 @@ namespace Gala
 			var name_font = DeepinUtils.get_css_font ("deepin-workspace-thumb-clone-name");
 
 			workspace_name_num = new Text ();
-			workspace_name_num.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
+			workspace_name_num.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);
 			workspace_name_num.set_font_description (name_font);
 
 			workspace_name_text = new Text ();
@@ -148,7 +148,7 @@ namespace Gala
 			workspace_name_text.ellipsize = Pango.EllipsizeMode.END;
 			workspace_name_text.max_length = WORKSPACE_NAME_MAX_LENGTH;
 			workspace_name_text.single_line_mode = true;
-			workspace_name_text.set_easing_mode (DeepinMultitaskingView.WORKSPACE_ANIMATION_MODE);
+			workspace_name_text.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);
 			workspace_name_text.set_font_description (name_font);
 			workspace_name_text.selection_color =
 				DeepinUtils.get_css_background_color ("deepin-text-selection");
@@ -348,7 +348,7 @@ namespace Gala
 
 			double[] keyframes = { 0.28, 0.58 };
 			GLib.Value[] values = { 1.1f, 1.1f };
-			int duration = DeepinMultitaskingView.ANIMATION_DURATION;
+			int duration = DeepinMultitaskingView.TOGGLE_DURATION;
 
 			var transition = new KeyframeTransition ("scale-x");
 			transition.set_duration (duration);
