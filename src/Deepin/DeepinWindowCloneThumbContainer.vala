@@ -26,6 +26,11 @@ namespace Gala
 	 */
 	public class DeepinWindowCloneThumbContainer : Actor
 	{
+		const int WINDOW_FADE_DURATION = 200;
+		const AnimationMode WINDOW_FADE_MODE = AnimationMode.EASE_IN_OUT_CUBIC;
+		const int WINDOW_OPACITY_SELECTED = 255;
+		const int WINDOW_OPACITY_UNSELECTED = 100;
+
 		public signal void window_added (Window window);
 		public signal void window_activated (Window window);
 		public signal void window_closing (Window window);
@@ -39,20 +44,9 @@ namespace Gala
 		public int padding_right { get; set; default = 12; }
 		public int padding_bottom { get; set; default = 12; }
 
-		/**
-		 * The window that is currently selected via keyboard shortcuts. It is not necessarily the
-		 * same as the active window.
-		 */
-		DeepinWindowClone? current_window;
-
 		public DeepinWindowCloneThumbContainer (Workspace workspace)
 		{
 			Object (workspace: workspace);
-		}
-
-		construct
-		{
-			current_window = null;
 		}
 
 		/**
@@ -113,6 +107,14 @@ namespace Gala
 				// TODO: add window animation
 				add_child (new_window);
 				window_added (window);
+
+				new_window.save_easing_state ();
+
+				new_window.set_easing_duration (WINDOW_FADE_DURATION);
+				new_window.set_easing_mode (WINDOW_FADE_MODE);
+				new_window.opacity = WINDOW_OPACITY_UNSELECTED;
+
+				new_window.restore_easing_state ();
 			}
 
 			relayout ();
@@ -180,42 +182,19 @@ namespace Gala
 		public void select_window (Window window)
 		{
 			foreach (var child in get_children ()) {
+				child.save_easing_state ();
+
+				child.set_easing_duration (WINDOW_FADE_DURATION);
+				child.set_easing_mode (WINDOW_FADE_MODE);
+
 				if (((DeepinWindowClone)child).window == window) {
 					set_child_at_index (child, -1);
-					break;
+					child.opacity = WINDOW_OPACITY_SELECTED;
+				} else {
+					child.opacity = WINDOW_OPACITY_UNSELECTED;
 				}
-			}
-		}
 
-		// TODO: merge to relayout
-		/**
-		 * Sort the windows z-order by their actual stacking to make intersections
-		 * during animations correct.
-		 */
-		public void restack_windows (Screen screen)
-		{
-			unowned Meta.Display display = screen.get_display ();
-			var children = get_children ();
-
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
-				windows.prepend (window_clone.window);
-			}
-
-			var windows_ordered = display.sort_windows_by_stacking (windows);
-			windows_ordered.reverse ();
-
-			foreach (unowned Meta.Window window in windows_ordered) {
-				var i = 0;
-				foreach (unowned Actor child in children) {
-					if (((DeepinWindowClone)child).window == window) {
-						set_child_at_index (child, i);
-						children.remove (child);
-						i++;
-						break;
-					}
-				}
+				child.restore_easing_state ();
 			}
 		}
 
@@ -241,26 +220,6 @@ namespace Gala
 #endif
 				DeepinUtils.scale_rectangle (ref rect, scale);
 				window_clone.take_slot (rect);
-			}
-
-			// TODO: windows order
-			// make sure the windows are always in the same order so the algorithm
-			// doesn't give us different slots based on stacking order, which can lead
-			// to windows flying around weirdly
-			// windows.sort ((a, b) => {
-			// 	var seq_a = ((DeepinWindowClone) a.id).window.get_stable_sequence ();
-			// 	var seq_b = ((DeepinWindowClone) b.id).window.get_stable_sequence ();
-			// 	return (int) (seq_b - seq_a);
-			// });
-		}
-
-		/**
-		 * Emit the selected signal for the current_window.
-		 */
-		public void activate_selected_window ()
-		{
-			if (current_window != null) {
-				current_window.activated ();
 			}
 		}
 	}

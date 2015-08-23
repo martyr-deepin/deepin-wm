@@ -440,18 +440,6 @@ namespace Gala
 
 				window_icon.restore_easing_state ();
 			}
-
-			// TODO: thumbnail
-			// For thumbnail mode, windows may be faded out initially. Make sure to
-			// fade those in.
-			if (thumbnail_mode) {
-				save_easing_state ();
-				set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-				set_easing_duration (animate ? 300 : 0);
-
-				opacity = 255;
-				restore_easing_state ();
-			}
 		}
 
 		/**
