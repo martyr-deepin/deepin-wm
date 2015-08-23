@@ -119,7 +119,11 @@ namespace Gala
 
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
 			window_container.window_activated.connect ((w) => selected ());
-			window_container.window_dragging.connect ((w) => show_close_button (false));
+			window_container.window_dragging.connect ((w) => {
+				// If window is dragging in thumbnail workspace, make close button manually or it
+				// will keep shown only mouse move in and out again.
+				show_close_button (false);
+			});
 			workspace_clone.add_child (window_container);
 
 			// selected shape for workspace name field
@@ -409,8 +413,6 @@ namespace Gala
 			base.allocate (box, flags);
 
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-			float scale =
-				box.get_width () != 0 ? box.get_width () / (float)monitor_geom.width : 0.5f;
 
 			// calculate monitor width height ratio
 			float monitor_whr = (float)monitor_geom.height / monitor_geom.width;
@@ -425,9 +427,13 @@ namespace Gala
 			workspace_shadow.allocate (thumb_box, flags);
 			window_container.allocate (thumb_box, flags);
 
+			// TODO
 			// scale background
+			float scale =
+				box.get_width () != 0 ? box.get_width () / (float)monitor_geom.width : 0.5f;
 			background.scale_x = scale;
 			background.scale_y = scale;
+			// background.allocate (thumb_box, flags);
 
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (

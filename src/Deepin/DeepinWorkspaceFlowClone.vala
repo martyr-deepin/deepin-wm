@@ -104,9 +104,20 @@ namespace Gala
 
 			// sync window closing animation
 			thumb_workspace.window_container.window_closing.connect (
-				window_container.sync_closing_animation);
+				window_container.sync_window_close_animation);
 			window_container.window_closing.connect (
-				thumb_workspace.window_container.sync_closing_animation);
+				thumb_workspace.window_container.sync_window_close_animation);
+
+			// sync windows in two containers
+			thumb_workspace.window_container.actor_added.connect ((a) =>
+				window_container.sync_add_window ((a as DeepinWindowClone).window));
+			thumb_workspace.window_container.actor_removed.connect ((a) =>
+				window_container.sync_remove_window ((a as DeepinWindowClone).window));
+			// TODO: window activate issue
+			window_container.actor_added.connect ((a) =>
+				thumb_workspace.window_container.sync_add_window ((a as DeepinWindowClone).window));
+			window_container.actor_removed.connect ((a) =>
+				thumb_workspace.window_container.sync_remove_window ((a as DeepinWindowClone).window));
 
 			var thumb_drop_action = new DragDropAction (
 				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
@@ -196,7 +207,7 @@ namespace Gala
 		}
 
 		/**
-		 * Remove a window from the DeepinWindowCloneFlowContainer and the DeepinWorkspaceThumbClone.
+		 * Remove a window from DeepinWindowCloneFlowContainer and DeepinWorkspaceThumbClone.
 		 */
 		void remove_window (Window window)
 		{
@@ -257,6 +268,16 @@ namespace Gala
 				(int)(monitor_geom.width - monitor_geom.width * scale) / 2;
 			window_container.padding_bottom = bottom_offset;
 
+			// TODO: select default window
+			// Window selected_window = null;
+			// var tab_list = display.get_tab_list (TabList.NORMAL, workspace);
+			// foreach (var w in tab_list) {
+			// 	if (w.showing_on_its_workspace ()) {
+			// 		selected_window = w;
+			// 		break;
+			// 	}
+			// }
+			// window_container.open (selected_window);
 			window_container.open (
 				screen.get_active_workspace () == workspace ? display.get_focus_window () : null);
 		}

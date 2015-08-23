@@ -27,6 +27,14 @@ namespace Gala
 	 */
 	public class DeepinWindowClone : Actor
 	{
+		// TODO: ask for animation,  window select
+		public const int SELECT_DURATION = 400;
+		public const AnimationMode SELECT_MODE = AnimationMode.EASE_OUT_QUAD;
+
+		// TODO: ask for animation, window closing
+		const int CLOSE_DURATION = 300;
+		const AnimationMode CLOSE_MODE = AnimationMode.EASE_OUT_QUAD;
+
 		const int WINDOW_ICON_SIZE = 64;
 		const int DRAGING_SIZE = 200;
 
@@ -279,7 +287,8 @@ namespace Gala
 
 			shape.save_easing_state ();
 
-			shape.set_easing_duration (animate ? 300 : 0);
+			shape.set_easing_duration (animate ? SELECT_DURATION : 0);
+			shape.set_easing_mode (SELECT_MODE);
 			shape.opacity = _select ? 255 : 0;
 
 			shape.restore_easing_state ();
@@ -385,14 +394,16 @@ namespace Gala
 		/**
 		 * Animate the window to the given slot
 		 */
-		public void take_slot (Meta.Rectangle rect, bool animate = true)
+		public void take_slot (Meta.Rectangle rect, bool animate = true,
+							   bool toggle_multitaskingview = false)
 		{
 			slot = rect;
 
 			// TODO: ask for animation, take slot
 			if (animate) {
 				var transgroup = new TransitionGroup ();
-				int duration = DeepinMultitaskingView.TOGGLE_DURATION;
+				int duration = toggle_multitaskingview ?
+					DeepinMultitaskingView.TOGGLE_DURATION : SELECT_DURATION;
 
 				var transition = new PropertyTransition ("position");
 				transition.set_duration (duration);
@@ -553,13 +564,28 @@ namespace Gala
 			return false;
 		}
 
-		public void start_closing_animation ()
+		public void start_close_animation ()
 		{
-			// TODO: ask for animation, window closing
-			set_easing_duration (300);
-			set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+			save_easing_state ();
+
+			set_easing_duration (CLOSE_DURATION);
+			set_easing_mode (CLOSE_MODE);
 			scale_x = 0.0f;
 			scale_y = 0.0f;
+
+			restore_easing_state ();
+		}
+
+		public void restore_close_animation ()
+		{
+			save_easing_state ();
+
+			set_easing_duration (CLOSE_DURATION);
+			set_easing_mode (CLOSE_MODE);
+			scale_x = 1.0f;
+			scale_y = 1.0f;
+
+			restore_easing_state ();
 		}
 
 		/**
@@ -569,7 +595,7 @@ namespace Gala
 		 */
 		void close_window ()
 		{
-			start_closing_animation ();
+			start_close_animation ();
 			transitions_completed.connect (() => {
 				do_close_window ();
 			});

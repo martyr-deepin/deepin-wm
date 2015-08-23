@@ -26,8 +26,6 @@ namespace Gala
 	 */
 	public class DeepinWindowCloneThumbContainer : Actor
 	{
-		const int WINDOW_FADE_DURATION = 200;
-		const AnimationMode WINDOW_FADE_MODE = AnimationMode.EASE_IN_OUT_CUBIC;
 		const int WINDOW_OPACITY_SELECTED = 255;
 		const int WINDOW_OPACITY_UNSELECTED = 100;
 
@@ -49,6 +47,16 @@ namespace Gala
 			Object (workspace: workspace);
 		}
 
+		public bool contains_window (Window window)
+		{
+			foreach (var child in get_children ()) {
+				if ((child as DeepinWindowClone).window == window) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		/**
 		 * Create a DeepinWindowClone for a MetaWindow and add it to the group
 		 *
@@ -56,6 +64,10 @@ namespace Gala
 		 */
 		public void add_window (Window window)
 		{
+			if (contains_window (window)) {
+				return;
+			}
+
 			unowned Meta.Display display = window.get_display ();
 			var children = get_children ();
 
@@ -69,7 +81,6 @@ namespace Gala
 
 			var windows_ordered = display.sort_windows_by_stacking (windows);
 
-			// TODO: thumbnail mode
 			// enable thumbnail mode for window clone to hide shadow and icon
 			var new_window = new DeepinWindowClone (window, true);
 
@@ -110,13 +121,14 @@ namespace Gala
 
 				new_window.save_easing_state ();
 
-				new_window.set_easing_duration (WINDOW_FADE_DURATION);
-				new_window.set_easing_mode (WINDOW_FADE_MODE);
+				new_window.set_easing_duration (DeepinWindowClone.SELECT_DURATION);
+				new_window.set_easing_mode (DeepinWindowClone.SELECT_MODE);
 				new_window.opacity = WINDOW_OPACITY_UNSELECTED;
 
 				new_window.restore_easing_state ();
 			}
 
+			// TODO: add window animation
 			relayout ();
 		}
 
@@ -126,7 +138,7 @@ namespace Gala
 		public void remove_window (Window window)
 		{
 			foreach (var child in get_children ()) {
-				if (((DeepinWindowClone)child).window == window) {
+				if ((child as DeepinWindowClone).window == window) {
 					remove_child (child);
 					window_removed (window);
 					break;
@@ -163,14 +175,50 @@ namespace Gala
 			});
 		}
 
-		/**
-		 * Another window clone with same Meta.Window is closing, sync closing animation with it.
-		 */
-		public void sync_closing_animation (Window window)
+		// TODO: doc
+		ulong transitions_completed_id = 0;
+		public void sync_add_window (Window window)
+		{
+			// remove signals and transitions if exists
+			foreach (var child in get_children ()) {
+				if ((child as DeepinWindowClone).window == window) {
+					if (transitions_completed_id != 0) {
+						SignalHandler.disconnect (child, transitions_completed_id);
+						transitions_completed_id = 0;
+					}
+					child.remove_all_transitions ();
+					(child as DeepinWindowClone).restore_close_animation ();
+					return;
+				}
+			}
+
+			// add window as normal if not exists
+			add_window (window);
+		}
+
+		// TODO: doc
+		public void sync_remove_window (Window window)
 		{
 			foreach (var child in get_children ()) {
 				if ((child as DeepinWindowClone).window == window) {
-					(child as DeepinWindowClone).start_closing_animation ();
+					(child as DeepinWindowClone).start_close_animation ();
+					transitions_completed_id = child.transitions_completed.connect (() => {
+						remove_window (window);
+					});
+					break;
+				}
+			}
+		}
+
+		/**
+		 * Window clone with same Meta.Window in another container is closing, sync closing
+		 * animation with it.
+		 */
+		public void sync_window_close_animation (Window window)
+		{
+			foreach (var child in get_children ()) {
+				if ((child as DeepinWindowClone).window == window) {
+					(child as DeepinWindowClone).start_close_animation ();
 					break;
 				}
 			}
@@ -184,8 +232,8 @@ namespace Gala
 			foreach (var child in get_children ()) {
 				child.save_easing_state ();
 
-				child.set_easing_duration (WINDOW_FADE_DURATION);
-				child.set_easing_mode (WINDOW_FADE_MODE);
+				child.set_easing_duration (DeepinWindowClone.SELECT_DURATION);
+				child.set_easing_mode (DeepinWindowClone.SELECT_MODE);
 
 				if (((DeepinWindowClone)child).window == window) {
 					set_child_at_index (child, -1);
@@ -219,6 +267,8 @@ namespace Gala
 				rect = window_clone.window.get_outer_rect ();
 #endif
 				DeepinUtils.scale_rectangle (ref rect, scale);
+				// TODO: layout for windows in thumbnail workspace
+				DeepinUtils.scale_rectangle_in_center (ref rect, 0.9f);
 				window_clone.take_slot (rect);
 			}
 		}

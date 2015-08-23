@@ -97,7 +97,7 @@ namespace Gala
 			// TODO: animation
 			// workspace_clone.opacity = 0;
 			// workspace_clone.set_easing_duration (LAYOUT_DURATION);
-			workspace_clone.set_easing_mode (LAYOUT_MODE);
+			// workspace_clone.set_easing_mode (LAYOUT_MODE);
 			// workspace_clone.opacity = 255;
 
 			var index = workspace_clone.workspace.index ();

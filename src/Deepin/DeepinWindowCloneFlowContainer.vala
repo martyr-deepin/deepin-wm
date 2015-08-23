@@ -25,6 +25,7 @@ namespace Gala
 	 * Container which controls the layout of a set of WindowClones. The WindowClones will be placed
 	 * in rows and columns.
 	 */
+	// TODO: refactor code, implement DeepinWindowCloneBaseContainer
 	public class DeepinWindowCloneFlowContainer : Actor
 	{
 		public signal void window_added (Window window);
@@ -63,6 +64,16 @@ namespace Gala
 			current_window = null;
 		}
 
+		public bool contains_window (Window window)
+		{
+			foreach (var child in get_children ()) {
+				if ((child as DeepinWindowClone).window == window) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		/**
 		 * Create a DeepinWindowClone for a MetaWindow and add it to the group
 		 *
@@ -70,6 +81,10 @@ namespace Gala
 		 */
 		public void add_window (Window window)
 		{
+			if (contains_window (window)) {
+				return;
+			}
+
 			unowned Meta.Display display = window.get_display ();
 			var children = get_children ();
 
@@ -130,12 +145,13 @@ namespace Gala
 		public void remove_window (Window window)
 		{
 			foreach (var child in get_children ()) {
-				if (((DeepinWindowClone)child).window == window) {
+				if ((child as DeepinWindowClone).window == window) {
 					remove_child (child);
 					window_removed (window);
 					break;
 				}
 			}
+
 			relayout ();
 		}
 
@@ -167,14 +183,50 @@ namespace Gala
 			});
 		}
 
-		/**
-		 * Another window clone with same Meta.Window is closing, sync closing animation with it.
-		 */
-		public void sync_closing_animation (Window window)
+		// TODO: doc
+		ulong transitions_completed_id = 0;
+		public void sync_add_window (Window window)
+		{
+			// remove signals and transitions if exists
+			foreach (var child in get_children ()) {
+				if ((child as DeepinWindowClone).window == window) {
+					if (transitions_completed_id != 0) {
+						SignalHandler.disconnect (child, transitions_completed_id);
+						transitions_completed_id = 0;
+					}
+					child.remove_all_transitions ();
+					(child as DeepinWindowClone).restore_close_animation ();
+					return;
+				}
+			}
+
+			// add window as normal if not exists
+			add_window (window);
+		}
+
+		// TODO: doc
+		public void sync_remove_window (Window window)
 		{
 			foreach (var child in get_children ()) {
 				if ((child as DeepinWindowClone).window == window) {
-					(child as DeepinWindowClone).start_closing_animation ();
+					(child as DeepinWindowClone).start_close_animation ();
+					transitions_completed_id = child.transitions_completed.connect (() => {
+						remove_window (window);
+					});
+					break;
+				}
+			}
+		}
+
+		/**
+		 * Window clone with same Meta.Window in another container is closing, sync closing
+		 * animation with it.
+		 */
+		public void sync_window_close_animation (Window window)
+		{
+			foreach (var child in get_children ()) {
+				if ((child as DeepinWindowClone).window == window) {
+					(child as DeepinWindowClone).start_close_animation ();
 					break;
 				}
 			}
@@ -216,6 +268,10 @@ namespace Gala
 		 */
 		public void relayout ()
 		{
+			do_relayout (false);
+		}
+		void do_relayout (bool toggle_multitaskingview = false)
+		{
 			if (!opened) {
 				return;
 			}
@@ -253,17 +309,17 @@ namespace Gala
 			foreach (var tilable in window_positions) {
 				unowned DeepinWindowClone window = tilable.id as DeepinWindowClone;
 				if (!window.is_selected ()) {
-					// TODO: ask for select window scale size
+					// TODO: ask for selected window's scale size
 					DeepinUtils.scale_rectangle_in_center (ref tilable.rect, 0.9f);
 				}
-				window.take_slot (tilable.rect);
+				window.take_slot (tilable.rect, true, toggle_multitaskingview);
 			}
 		}
 
 		/**
 		 * Change current selected window and call relayout to adjust windows size.
 		 */
-		void change_current_window (DeepinWindowClone? window, bool need_relayout = true)
+		public void change_current_window (DeepinWindowClone? window, bool need_relayout = true)
 		{
 			if (window == null) {
 				if (current_window != null) {
@@ -432,7 +488,7 @@ namespace Gala
 
 		public bool has_selected_window ()
 		{
-			return current_window != null;
+			return current_window != null && contains (current_window);
 		}
 
 		/**
@@ -483,7 +539,7 @@ namespace Gala
 				window_clone.transition_to_original_state (false);
 			}
 
-			relayout ();
+			do_relayout (true);
 		}
 
 		/**
