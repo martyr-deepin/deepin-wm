@@ -266,9 +266,9 @@ namespace Gala
 
 				if (index == active_index) {
 					active_x = dest_x;
-					workspace_clone.thumb_workspace.select (true);
+					workspace_clone.thumb_workspace.set_select (true);
 				} else {
-					workspace_clone.thumb_workspace.select (false);
+					workspace_clone.thumb_workspace.set_select (false);
 				}
 
 				workspace_clone.save_easing_state ();

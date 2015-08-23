@@ -63,7 +63,7 @@ namespace Gala
 			add_child (shape);
 		}
 
-		public void select (bool value, bool animate = true)
+		public void set_select (bool value, bool animate = true)
 		{
 			shape.save_easing_state ();
 

@@ -275,7 +275,7 @@ namespace Gala
 			workspace_name_text.text = DeepinUtils.get_workspace_name (workspace.index ());
 		}
 
-		public void select (bool value, bool animate = true)
+		public void set_select (bool value, bool animate = true)
 		{
 			int duration = animate ? AnimationSettings.get_default ().workspace_switch_duration : 0;
 

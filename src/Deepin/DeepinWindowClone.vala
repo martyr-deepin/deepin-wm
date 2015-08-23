@@ -274,7 +274,7 @@ namespace Gala
 			}
 		}
 
-		public void select (bool value, bool animate = true) {
+		public void set_select (bool value, bool animate = true) {
 			_select = value;
 
 			shape.save_easing_state ();

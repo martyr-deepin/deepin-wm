@@ -267,17 +267,17 @@ namespace Gala
 		{
 			if (window == null) {
 				if (current_window != null) {
-					current_window.select (false);
+					current_window.set_select (false);
 					current_window = null;
 				}
 			} else {
 				if (current_window != window) {
 					if (current_window != null) {
-						current_window.select (false);
+						current_window.set_select (false);
 					}
 					current_window = window;
 				}
-				current_window.select (true);
+				current_window.set_select (true);
 				window_selected (current_window.window);
 			}
 
@@ -500,7 +500,7 @@ namespace Gala
 
 			foreach (var window in get_children ()) {
 				var window_clone = window as DeepinWindowClone;
-				window_clone.select (false);
+				window_clone.set_select (false);
 				if (window_clone.should_fade ()) {
 					window_clone.save_easing_state ();
 

@@ -472,9 +472,9 @@ namespace Gala
 			foreach (var child in item_container.get_children ()) {
 				var item = child as DeepinWindowSwitcherItem;
 				if (item == current_item) {
-					item.select (true, animate);
+					item.set_select (true, animate);
 				} else {
-					item.select (false, animate);
+					item.set_select (false, animate);
 				}
 			}
 		}
