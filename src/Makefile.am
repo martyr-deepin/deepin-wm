@@ -51,6 +51,7 @@ gala_VALASOURCES = \
 	Deepin/DeepinRoundRectEffect.vala \
 	Deepin/DeepinUtils.vala \
 	Deepin/DeepinWindowClone.vala \
+	Deepin/DeepinWindowCloneBaseContainer.vala \
 	Deepin/DeepinWindowCloneFlowContainer.vala \
 	Deepin/DeepinWindowCloneThumbContainer.vala \
 	Deepin/DeepinWindowSwitcher.vala \

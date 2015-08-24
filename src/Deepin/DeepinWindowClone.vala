@@ -680,14 +680,13 @@ namespace Gala
 			prev_parent.remove_child (this);
 			stage.add_child (this);
 
-			var scale = DRAGING_SIZE / clone.width;
-
 			var shadow_effect = get_effect ("shadow") as ShadowEffect;
 			if (shadow_effect != null) {
 				shadow_effect.shadow_opacity = 0;
 			}
 
-			// clone.get_transformed_position (out abs_x, out abs_y);
+			var scale = DRAGING_SIZE / clone.width;
+
 			clone.set_pivot_point ((click_x - abs_x) / clone.width,
 								   (click_y - abs_y) / clone.height);
 			clone.save_easing_state ();

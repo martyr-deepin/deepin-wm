@@ -431,8 +431,7 @@ namespace Gala
 			// scale background
 			float scale =
 				box.get_width () != 0 ? box.get_width () / (float)monitor_geom.width : 0.5f;
-			background.scale_x = scale;
-			background.scale_y = scale;
+			background.set_scale (scale, scale);
 			// background.allocate (thumb_box, flags);
 
 			var thumb_shape_box = ActorBox ();

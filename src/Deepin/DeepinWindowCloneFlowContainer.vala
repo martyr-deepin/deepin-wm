@@ -22,19 +22,11 @@ using Meta;
 namespace Gala
 {
 	/**
-	 * Container which controls the layout of a set of WindowClones. The WindowClones will be placed
+	 * Container which controls the layout of a set of window clones. The clones will be placed
 	 * in rows and columns.
 	 */
-	// TODO: refactor code, implement DeepinWindowCloneBaseContainer
-	public class DeepinWindowCloneFlowContainer : Actor
+	public class DeepinWindowCloneFlowContainer : DeepinWindowCloneBaseContainer
 	{
-		public signal void window_added (Window window);
-		public signal void window_activated (Window window);
-		public signal void window_closing (Window window);
-		public signal void window_dragging (Window window);
-		public signal void window_removed (Window window);
-		public signal void window_selected (Window window);
-
 		public int padding_top { get; set; default = 12; }
 		public int padding_left { get; set; default = 12; }
 		public int padding_right { get; set; default = 12; }
@@ -43,19 +35,13 @@ namespace Gala
 		bool opened;
 
 		/**
-		 * The window that is currently selected via keyboard shortcuts. It is not necessarily the
-		 * same as the active window.
-		 */
-		DeepinWindowClone? current_window;
-
-		/**
 		 * Own all window positions to find next or preview window in position.
 		 */
 		List<InternalUtils.TilableWindow?> window_positions;
 
-		public DeepinWindowCloneFlowContainer ()
+		public DeepinWindowCloneFlowContainer (Workspace workspace)
 		{
-			Object ();
+			Object (workspace: workspace);
 		}
 
 		construct
@@ -64,209 +50,36 @@ namespace Gala
 			current_window = null;
 		}
 
-		public bool contains_window (Window window)
-		{
-			foreach (var child in get_children ()) {
-				if ((child as DeepinWindowClone).window == window) {
-					return true;
-				}
-			}
-			return false;
-		}
-
 		/**
-		 * Create a DeepinWindowClone for a MetaWindow and add it to the group
-		 *
-		 * @param window The window for which to create the DeepinWindowClone for
+		 * {@inheritDoc}
 		 */
-		public void add_window (Window window)
+		public override void change_current_window (DeepinWindowClone? window, bool need_relayout = true)
 		{
-			if (contains_window (window)) {
-				return;
-			}
-
-			unowned Meta.Display display = window.get_display ();
-			var children = get_children ();
-
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
-				windows.prepend (clone.window);
-			}
-			windows.prepend (window);
-			windows.reverse ();
-
-			var windows_ordered = display.sort_windows_by_stacking (windows);
-
-			var new_window = new DeepinWindowClone (window);
-
-			new_window.activated.connect (on_window_activated);
-			new_window.closing.connect (on_window_closing);
-			new_window.destroy.connect (on_window_destroyed);
-			new_window.request_reposition.connect (relayout);
-			new_window.notify["dragging"].connect (() => {
-				if (new_window.dragging) {
-					window_dragging (new_window.window);
-				}
-			});
-
-			var added = false;
-			unowned Meta.Window? target = null;
-			foreach (unowned Meta.Window w in windows_ordered) {
-				if (w != window) {
-					target = w;
-					continue;
-				}
-				break;
-			}
-
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
-				if (target == clone.window) {
-					insert_child_above (new_window, clone);
-					added = true;
-					break;
-				}
-			}
-
-			// top most or no other children
-			if (!added) {
-				add_child (new_window);
-				window_added (window);
-			}
-
-			// make new window selected default
-			change_current_window (new_window);
-		}
-
-		/**
-		 * Find and remove the DeepinWindowClone for a MetaWindow.
-		 */
-		public void remove_window (Window window)
-		{
-			foreach (var child in get_children ()) {
-				if ((child as DeepinWindowClone).window == window) {
-					remove_child (child);
-					window_removed (window);
-					break;
-				}
-			}
-
-			relayout ();
-		}
-
-		void on_window_activated (DeepinWindowClone clone)
-		{
-			window_activated (clone.window);
-		}
-
-		void on_window_closing (DeepinWindowClone clone)
-		{
-			window_closing (clone.window);
-		}
-
-		void on_window_destroyed (Actor actor)
-		{
-			var window = actor as DeepinWindowClone;
 			if (window == null) {
-				return;
+				if (current_window != null) {
+					current_window.set_select (false);
+					current_window = null;
+				}
+			} else {
+				if (current_window != window) {
+					if (current_window != null) {
+						current_window.set_select (false);
+					}
+					current_window = window;
+				}
+				current_window.set_select (true);
+				window_selected (current_window.window);
 			}
 
-			window.destroy.disconnect (on_window_destroyed);
-			window.activated.disconnect (on_window_activated);
-			window.closing.disconnect (on_window_closing);
-			window.request_reposition.disconnect (relayout);
-
-			Idle.add (() => {
+			if (need_relayout) {
 				relayout ();
-				return false;
-			});
-		}
-
-		// TODO: doc
-		ulong transitions_completed_id = 0;
-		public void sync_add_window (Window window)
-		{
-			// remove signals and transitions if exists
-			foreach (var child in get_children ()) {
-				if ((child as DeepinWindowClone).window == window) {
-					if (transitions_completed_id != 0) {
-						SignalHandler.disconnect (child, transitions_completed_id);
-						transitions_completed_id = 0;
-					}
-					child.remove_all_transitions ();
-					(child as DeepinWindowClone).restore_close_animation ();
-					return;
-				}
-			}
-
-			// add window as normal if not exists
-			add_window (window);
-		}
-
-		// TODO: doc
-		public void sync_remove_window (Window window)
-		{
-			foreach (var child in get_children ()) {
-				if ((child as DeepinWindowClone).window == window) {
-					(child as DeepinWindowClone).start_close_animation ();
-					transitions_completed_id = child.transitions_completed.connect (() => {
-						remove_window (window);
-					});
-					break;
-				}
 			}
 		}
 
 		/**
-		 * Window clone with same Meta.Window in another container is closing, sync closing
-		 * animation with it.
+		 * {@inheritDoc}
 		 */
-		public void sync_window_close_animation (Window window)
-		{
-			foreach (var child in get_children ()) {
-				if ((child as DeepinWindowClone).window == window) {
-					(child as DeepinWindowClone).start_close_animation ();
-					break;
-				}
-			}
-		}
-
-		/**
-		 * Sort the windows z-order by their actual stacking to make intersections during animations
-		 * correct.
-		 */
-		public void restack_windows (Screen screen)
-		{
-			unowned Meta.Display display = screen.get_display ();
-			var children = get_children ();
-
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
-				windows.prepend (clone.window);
-			}
-
-			var windows_ordered = display.sort_windows_by_stacking (windows);
-			windows_ordered.reverse ();
-
-			foreach (unowned Meta.Window window in windows_ordered) {
-				var i = 0;
-				foreach (unowned Actor child in children) {
-					if (((DeepinWindowClone)child).window == window) {
-						set_child_at_index (child, i);
-						children.remove (child);
-						i++;
-						break;
-					}
-				}
-			}
-		}
-
-		/**
-		 * Recalculate the tiling positions of the windows and animate them to the resulting spots.
-		 */
-		public void relayout ()
+		public override void relayout ()
 		{
 			do_relayout (false);
 		}
@@ -317,28 +130,33 @@ namespace Gala
 		}
 
 		/**
-		 * Change current selected window and call relayout to adjust windows size.
+		 * Sort the windows z-order by their actual stacking to make intersections during animations
+		 * correct.
 		 */
-		public void change_current_window (DeepinWindowClone? window, bool need_relayout = true)
+		public void restack_windows (Screen screen)
 		{
-			if (window == null) {
-				if (current_window != null) {
-					current_window.set_select (false);
-					current_window = null;
-				}
-			} else {
-				if (current_window != window) {
-					if (current_window != null) {
-						current_window.set_select (false);
-					}
-					current_window = window;
-				}
-				current_window.set_select (true);
-				window_selected (current_window.window);
+			unowned Meta.Display display = screen.get_display ();
+			var children = get_children ();
+
+			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
+			foreach (unowned Actor child in children) {
+				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
+				windows.prepend (clone.window);
 			}
 
-			if (need_relayout) {
-				relayout ();
+			var windows_ordered = display.sort_windows_by_stacking (windows);
+			windows_ordered.reverse ();
+
+			foreach (unowned Meta.Window window in windows_ordered) {
+				var i = 0;
+				foreach (unowned Actor child in children) {
+					if (((DeepinWindowClone)child).window == window) {
+						set_child_at_index (child, i);
+						children.remove (child);
+						i++;
+						break;
+					}
+				}
 			}
 		}
 
@@ -484,11 +302,6 @@ namespace Gala
 			}
 
 			change_current_window (closest);
-		}
-
-		public bool has_selected_window ()
-		{
-			return current_window != null && contains (current_window);
 		}
 
 		/**

@@ -21,7 +21,6 @@ using Meta;
 
 namespace Gala
 {
-	// TODO: doc
 	/**
 	 * This is the container which manages a clone of the background which will be scaled and
 	 * animated inwards, a DeepinWindowCloneFlowContainer for the windows on this workspace and also
@@ -94,7 +93,7 @@ namespace Gala
 				}
 			});
 
-			window_container = new DeepinWindowCloneFlowContainer ();
+			window_container = new DeepinWindowCloneFlowContainer (workspace);
 			window_container.window_activated.connect ((w) => window_activated (w));
 			window_container.window_selected.connect (
 				(w) => thumb_workspace.window_container.select_window (w));
