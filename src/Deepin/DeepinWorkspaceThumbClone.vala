@@ -347,16 +347,16 @@ namespace Gala
 
 		public void start_window_added_animation ()
 		{
-			// TODO: bulge animation
+			// TODO: ask for animation, thumbnail bulge
 			var transgroup = new TransitionGroup ();
 
 			double[] keyframes = { 0.28, 0.58 };
 			GLib.Value[] values = { 1.1f, 1.1f };
-			int duration = DeepinMultitaskingView.TOGGLE_DURATION;
+			int duration = DeepinWindowClone.LAYOUT_DURATION;
 
 			var transition = new KeyframeTransition ("scale-x");
 			transition.set_duration (duration);
-			transition.set_progress_mode (AnimationMode.LINEAR);
+			transition.set_progress_mode (DeepinWindowClone.LAYOUT_MODE);
 			transition.set_from_value (1.0f);
 			transition.set_to_value (1.0f);
 			transition.set_key_frames (keyframes);
@@ -365,7 +365,7 @@ namespace Gala
 
 			transition = new KeyframeTransition ("scale-y");
 			transition.set_duration (duration);
-			transition.set_progress_mode (AnimationMode.LINEAR);
+			transition.set_progress_mode (DeepinWindowClone.LAYOUT_MODE);
 			transition.set_from_value (1.0f);
 			transition.set_to_value (1.0f);
 			transition.set_key_frames (keyframes);

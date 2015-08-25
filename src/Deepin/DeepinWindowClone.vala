@@ -28,8 +28,8 @@ namespace Gala
 	public class DeepinWindowClone : Actor
 	{
 		// TODO: ask for animation,  window select
-		public const int SELECT_DURATION = 400;
-		public const AnimationMode SELECT_MODE = AnimationMode.EASE_OUT_QUAD;
+		public const int LAYOUT_DURATION = 400;
+		public const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
 
 		// TODO: ask for animation, window closing
 		const int CLOSE_DURATION = 300;
@@ -85,6 +85,7 @@ namespace Gala
 
 		Actor prev_parent = null;
 		int prev_index = -1;
+		uint prev_opacity = 255;
 		ulong check_confirm_dialog_cb = 0;
 		uint shadow_update_timeout = 0;
 
@@ -287,8 +288,8 @@ namespace Gala
 
 			shape.save_easing_state ();
 
-			shape.set_easing_duration (animate ? SELECT_DURATION : 0);
-			shape.set_easing_mode (SELECT_MODE);
+			shape.set_easing_duration (animate ? LAYOUT_DURATION : 0);
+			shape.set_easing_mode (LAYOUT_MODE);
 			shape.opacity = _select ? 255 : 0;
 
 			shape.restore_easing_state ();
@@ -403,12 +404,16 @@ namespace Gala
 			if (animate) {
 				var transgroup = new TransitionGroup ();
 				int duration = toggle_multitaskingview ?
-					DeepinMultitaskingView.TOGGLE_DURATION : SELECT_DURATION;
+					DeepinMultitaskingView.TOGGLE_DURATION : LAYOUT_DURATION;
 
 				var transition = new PropertyTransition ("position");
 				transition.set_duration (duration);
-				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
-				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				if (toggle_multitaskingview) {
+					// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
+					transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				} else {
+					transition.set_progress_mode (LAYOUT_MODE);
+				}
 				var position = Point.alloc ();
 				position.x = rect.x;
 				position.y = rect.y;
@@ -417,8 +422,12 @@ namespace Gala
 
 				transition = new PropertyTransition ("size");
 				transition.set_duration (duration);
-				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
-				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				if (toggle_multitaskingview) {
+					// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
+					transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				} else {
+					transition.set_progress_mode (LAYOUT_MODE);
+				}
 				var size = Size.alloc ();
 				size.width = rect.width;
 				size.height = rect.height;
@@ -568,20 +577,20 @@ namespace Gala
 		{
 			save_easing_state ();
 
-			set_easing_duration (CLOSE_DURATION);
-			set_easing_mode (CLOSE_MODE);
+			set_easing_duration (LAYOUT_DURATION);
+			set_easing_mode (LAYOUT_MODE);
 			scale_x = 0.0f;
 			scale_y = 0.0f;
 
 			restore_easing_state ();
 		}
 
-		public void restore_close_animation ()
+		public void start_open_animation ()
 		{
 			save_easing_state ();
 
-			set_easing_duration (CLOSE_DURATION);
-			set_easing_mode (CLOSE_MODE);
+			set_easing_duration (LAYOUT_DURATION);
+			set_easing_mode (LAYOUT_MODE);
 			scale_x = 1.0f;
 			scale_y = 1.0f;
 
@@ -687,21 +696,38 @@ namespace Gala
 
 			var scale = DRAGING_SIZE / clone.width;
 
-			clone.set_pivot_point ((click_x - abs_x) / clone.width,
+			// TODO: dragging begin
+			set_pivot_point ((click_x - abs_x) / clone.width,
 								   (click_y - abs_y) / clone.height);
-			clone.save_easing_state ();
-			clone.set_easing_duration (200);
-			clone.set_easing_mode (AnimationMode.EASE_IN_CUBIC);
-			clone.set_scale (scale, scale);
-			clone.set_position (click_x - abs_x - clone.width / 2,
+			save_easing_state ();
+
+			set_easing_duration (200);
+			set_easing_mode (AnimationMode.EASE_IN_CUBIC);
+			set_scale (scale, scale);
+			set_position (click_x - abs_x - clone.width / 2,
 								click_y - abs_y - clone.height / 2);
-			clone.restore_easing_state ();
+			prev_opacity = opacity;
+			opacity = 255;
+
+			restore_easing_state ();
+			// clone.set_pivot_point ((click_x - abs_x) / clone.width,
+			// 					   (click_y - abs_y) / clone.height);
+			// clone.save_easing_state ();
+			// clone.set_easing_duration (200);
+			// clone.set_easing_mode (AnimationMode.EASE_IN_CUBIC);
+			// clone.set_scale (scale, scale);
+			// clone.set_position (click_x - abs_x - clone.width / 2,
+			// 					click_y - abs_y - clone.height / 2);
+			// clone.restore_easing_state ();
 
 			request_reposition ();
 
 			save_easing_state ();
 			set_easing_duration (0);
 			set_position (abs_x, abs_y);
+
+			// TODO: dragging opacity
+			// opacity = 255;
 
 			if (window_icon != null) {
 				window_icon.opacity = 0;
@@ -848,11 +874,23 @@ namespace Gala
 			get_parent ().remove_child (this);
 			prev_parent.insert_child_at_index (this, prev_index);
 
-			clone.save_easing_state ();
-			clone.set_easing_duration (250);
-			clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-			clone.set_scale (1, 1);
-			clone.opacity = 255;
+			// TODO: drag cancel
+			save_easing_state ();
+
+			set_easing_duration (250);
+			set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+			set_scale (1, 1);
+			opacity = prev_opacity;
+
+			restore_easing_state ();
+			// clone.save_easing_state ();
+
+			// clone.set_easing_duration (250);
+			// clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+			// clone.set_scale (1, 1);
+			// clone.opacity = 255;
+
+			// clone.restore_easing_state ();
 
 			Clutter.Callback finished = () => {
 				var shadow_effect = get_effect ("shadow") as ShadowEffect;
@@ -870,8 +908,6 @@ namespace Gala
 			} else {
 				finished (this);
 			}
-
-			clone.restore_easing_state ();
 
 			request_reposition ();
 

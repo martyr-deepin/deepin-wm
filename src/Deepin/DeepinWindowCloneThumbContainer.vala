@@ -27,7 +27,7 @@ namespace Gala
 	public class DeepinWindowCloneThumbContainer : DeepinWindowCloneBaseContainer
 	{
 		const int WINDOW_OPACITY_SELECTED = 255;
-		const int WINDOW_OPACITY_UNSELECTED = 100;
+		const int WINDOW_OPACITY_UNSELECTED = 150;
 
 		public DeepinWindowCloneThumbContainer (Workspace workspace)
 		{
@@ -37,47 +37,48 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public override void change_current_window (DeepinWindowClone? window, bool need_relayout = true)
+		public override void do_select_clone (DeepinWindowClone window_clone, bool select,
+											  bool animate = true)
 		{
-			if (window == null) {
-				if (current_window != null) {
-					do_select_window (current_window, false);
-					current_window = null;
-				}
-			} else {
-				if (current_window != window) {
-					if (current_window != null) {
-						do_select_window (current_window, false);
-					}
-					current_window = window;
-				}
-				do_select_window (current_window, true);
-				window_selected (current_window.window);
-			}
+			window_clone.save_easing_state ();
 
-			if (need_relayout) {
-				relayout ();
-			}
-		}
-
-		public void do_select_window (DeepinWindowClone window, bool select)
-		{
-			window.save_easing_state ();
-
-			window.set_easing_duration (DeepinWindowClone.SELECT_DURATION);
-			window.set_easing_mode (DeepinWindowClone.SELECT_MODE);
+			window_clone.set_easing_duration (animate ? DeepinWindowClone.LAYOUT_DURATION : 0);
+			window_clone.set_easing_mode (DeepinWindowClone.LAYOUT_MODE);
 
 			if (select) {
-				set_child_at_index (window, -1);
-				window.opacity = WINDOW_OPACITY_SELECTED;
+				set_child_at_index (window_clone, -1);
+				window_clone.opacity = WINDOW_OPACITY_SELECTED;
 			} else {
-				window.opacity = WINDOW_OPACITY_UNSELECTED;
+				window_clone.opacity = WINDOW_OPACITY_UNSELECTED;
 			}
 
-			window.restore_easing_state ();
+			window_clone.restore_easing_state ();
 		}
 
-		Meta.Rectangle get_window_rect (DeepinWindowClone window_clone)
+		/**
+		 * {@inheritDoc}
+		 */
+		public override DeepinWindowClone? add_window (Window window, bool thumbnail_mode = false)
+		{
+			return base.add_window (window, true);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public override void relayout ()
+		{
+			foreach (var child in get_children ()) {
+				var window_clone = child as DeepinWindowClone;
+				var rect = get_layout_rect_for_window (window_clone);
+				window_clone.take_slot (rect);
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public override Meta.Rectangle get_layout_rect_for_window (DeepinWindowClone window_clone)
 		{
 			float thumb_width, thumb_height;
 			DeepinWorkspaceThumbCloneContainer.get_thumb_size (
@@ -98,18 +99,6 @@ namespace Gala
 			DeepinUtils.scale_rectangle_in_center (ref rect, 0.9f);
 
 			return rect;
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public override void relayout ()
-		{
-			foreach (var child in get_children ()) {
-				var window_clone = child as DeepinWindowClone;
-				var rect = get_window_rect (window_clone);
-				window_clone.take_slot (rect);
-			}
 		}
 	}
 }

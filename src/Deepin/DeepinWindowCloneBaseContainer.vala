@@ -38,7 +38,7 @@ namespace Gala
 		 * The window that is currently selected via keyboard shortcuts. It is not necessarily the
 		 * same as the active window.
 		 */
-		internal DeepinWindowClone? current_window;
+		internal Window? selected_window;
 
 		/**
 		 * Recalculate the positions of the windows and animate them to the resulting spots.
@@ -46,13 +46,40 @@ namespace Gala
 		public abstract void relayout ();
 
 		/**
+		 * Get position rectangle for target window.
+		 */
+		public abstract Meta.Rectangle get_layout_rect_for_window (DeepinWindowClone window_clone);
+
+		/**
 		 * Change current selected window and call relayout to adjust the size.
 		 */
-		public abstract void change_current_window (DeepinWindowClone? window, bool need_relayout = true);
+		public abstract void do_select_clone (DeepinWindowClone window_clone, bool select,
+											  bool animate = true);
 
 		public DeepinWindowCloneBaseContainer (Workspace workspace)
 		{
 			Object (workspace: workspace);
+		}
+
+		construct
+		{
+			actor_added.connect (on_actor_added);
+		}
+
+		~DeepinWindowCloneBaseContainer ()
+		{
+			actor_added.disconnect (on_actor_added);
+		}
+
+		public virtual void on_actor_added (Actor new_actor)
+		{
+			// setup animation for window that added
+			var new_window = new_actor as DeepinWindowClone;
+			var rect = get_layout_rect_for_window (new_window);
+			new_window.take_slot (rect, false);
+
+			new_window.set_scale (0, 0);
+			new_window.start_open_animation ();
 		}
 
 		/**
@@ -60,32 +87,69 @@ namespace Gala
 		 */
 		public bool has_selected_window ()
 		{
-			return current_window != null && contains (current_window);
-		}
-
-		public void select_window (Window window)
-		{
-			foreach (var child in get_children ()) {
-				if ((child as DeepinWindowClone).window == window) {
-					change_current_window ((child as DeepinWindowClone));
-					return;
-				}
-			}
+			return get_selected_clone () != null;
 		}
 
 		/**
-		 * Check if releated child DeepinWindowClone exsits for a MetaWindow.
+		 * Check if related child DeepinWindowClone exsits for a MetaWindow.
 		 *
 		 * @param window The window to searching for
 		 */
 		public bool contains_window (Window window)
 		{
+			return get_clone_for_window (window) != null;
+		}
+
+		/**
+		 * Get current selected window clone if exists.
+		 */
+		public DeepinWindowClone? get_selected_clone ()
+		{
+			return get_clone_for_window (selected_window);
+		}
+
+		/**
+		 * Get related window clone for MetaWindow.
+		 */
+		public DeepinWindowClone? get_clone_for_window (Window? window)
+		{
 			foreach (var child in get_children ()) {
 				if ((child as DeepinWindowClone).window == window) {
-					return true;
+					return child as DeepinWindowClone;
 				}
 			}
-			return false;
+			return null;
+		}
+
+		/**
+		 * Select related window clone for MetaWindow.
+		 */
+		public void select_window (Window window, bool need_relayout = true)
+		{
+			select_clone (get_clone_for_window (window), need_relayout);
+		}
+
+		/**
+		 * Selecte target window clone.
+		 */
+		public void select_clone (DeepinWindowClone? window_clone, bool need_relayout = true)
+		{
+			restack_windows (workspace.get_screen ());
+
+			foreach (var child in get_children ()) {
+				var child_clone = child as DeepinWindowClone;
+				if (child_clone == window_clone) {
+					do_select_clone (child_clone, true);
+					selected_window = child_clone.window;
+					window_selected (selected_window);
+				} else {
+					do_select_clone (child_clone, false);
+				}
+			}
+
+			if (need_relayout) {
+				relayout ();
+			}
 		}
 
 		/**
@@ -93,10 +157,10 @@ namespace Gala
 		 *
 		 * @param window The window for which to add the DeepinWindowClone for
 		 */
-		public virtual void add_window (Window window)
+		public virtual DeepinWindowClone? add_window (Window window, bool thumbnail_mode = false)
 		{
 			if (contains_window (window)) {
-				return;
+				return null;
 			}
 
 			unowned Meta.Display display = window.get_display ();
@@ -112,8 +176,7 @@ namespace Gala
 
 			var windows_ordered = display.sort_windows_by_stacking (windows);
 
-			// enable thumbnail mode for window clone to hide shadow and icon
-			var new_window = new DeepinWindowClone (window, true);
+			var new_window = new DeepinWindowClone (window, thumbnail_mode);
 
 			new_window.activated.connect (on_window_activated);
 			new_window.closing.connect (on_window_closing);
@@ -140,6 +203,7 @@ namespace Gala
 				if (target == window_clone.window) {
 					insert_child_above (new_window, window_clone);
 					added = true;
+					window_added (window);
 					break;
 				}
 			}
@@ -150,12 +214,19 @@ namespace Gala
 				window_added (window);
 			}
 
-			// make new window selected default and relayout
-			change_current_window (new_window, true);
+			if (selected_window == window) {
+				do_select_clone (new_window, true, false);
+			} else {
+				do_select_clone (new_window, false, false);
+			}
+
+			relayout ();
+
+			return new_window;
 		}
 
 		/**
-		 * Find and remove the releated DeepinWindowClone for a MetaWindow.
+		 * Find and remove the related DeepinWindowClone for a MetaWindow.
 		 *
 		 * @param window The window for which to remove the DeepinWindowClone for
 		 */
@@ -173,14 +244,14 @@ namespace Gala
 
 		/* Child DeepinWindowClone signals */
 
-		void on_window_activated (DeepinWindowClone clone)
+		void on_window_activated (DeepinWindowClone window_clone)
 		{
-			window_activated (clone.window);
+			window_activated (window_clone.window);
 		}
 
-		void on_window_closing (DeepinWindowClone clone)
+		void on_window_closing (DeepinWindowClone window_clone)
 		{
-			window_closing (clone.window);
+			window_closing (window_clone.window);
 		}
 
 		void on_window_destroyed (Actor actor)
@@ -208,15 +279,16 @@ namespace Gala
 		 */
 		public void sync_add_window (Window window)
 		{
-			// remove signals and transitions if exists
+			// remove closing signals and transitions if exists
 			foreach (var child in get_children ()) {
-				if ((child as DeepinWindowClone).window == window) {
+				var window_clone = child as DeepinWindowClone;
+				if (window_clone.window == window) {
 					if (transitions_completed_id != 0) {
 						SignalHandler.disconnect (child, transitions_completed_id);
 						transitions_completed_id = 0;
 					}
-					child.remove_all_transitions ();
-					(child as DeepinWindowClone).restore_close_animation ();
+					window_clone.remove_all_transitions ();
+					window_clone.start_open_animation ();
 					return;
 				}
 			}
@@ -234,6 +306,7 @@ namespace Gala
 				if ((child as DeepinWindowClone).window == window) {
 					(child as DeepinWindowClone).start_close_animation ();
 					transitions_completed_id = child.transitions_completed.connect (() => {
+						transitions_completed_id = 0;
 						remove_window (window);
 					});
 					break;
@@ -251,6 +324,37 @@ namespace Gala
 				if ((child as DeepinWindowClone).window == window) {
 					(child as DeepinWindowClone).start_close_animation ();
 					break;
+				}
+			}
+		}
+
+		/**
+		 * Sort the windows z-order by their actual stacking to make intersections during animations
+		 * correct.
+		 */
+		public virtual void restack_windows (Screen screen)
+		{
+			unowned Meta.Display display = screen.get_display ();
+			var children = get_children ();
+
+			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
+			foreach (unowned Actor child in children) {
+				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
+				windows.prepend (clone.window);
+			}
+
+			var windows_ordered = display.sort_windows_by_stacking (windows);
+			windows_ordered.reverse ();
+
+			foreach (unowned Meta.Window window in windows_ordered) {
+				var i = 0;
+				foreach (unowned Actor child in children) {
+					if (((DeepinWindowClone)child).window == window) {
+						set_child_at_index (child, i);
+						children.remove (child);
+						i++;
+						break;
+					}
 				}
 			}
 		}

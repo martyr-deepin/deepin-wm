@@ -96,7 +96,7 @@ namespace Gala
 			window_container = new DeepinWindowCloneFlowContainer (workspace);
 			window_container.window_activated.connect ((w) => window_activated (w));
 			window_container.window_selected.connect (
-				(w) => thumb_workspace.window_container.select_window (w));
+				(w) => thumb_workspace.window_container.select_window (w, false));
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
 			screen.restacked.connect (window_container.restack_windows);
@@ -201,7 +201,7 @@ namespace Gala
 			thumb_workspace.window_container.add_window (window);
 			window_container.add_window (window);
 
-			// start animation after all containers added window
+			// start bulge animation after window added by all containers
 			thumb_workspace.start_window_added_animation ();
 		}
 
