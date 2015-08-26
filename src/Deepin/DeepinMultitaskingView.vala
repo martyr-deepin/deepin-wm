@@ -301,7 +301,7 @@ namespace Gala
 			workspace.selected.connect (activate_workspace);
 
 			flow_workspaces.insert_child_at_index (workspace, num);
-			workspace.thumb_workspace.fallback_key_focus = this;
+			workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
 			thumb_workspaces.add_workspace (workspace.thumb_workspace);
 
 			update_positions (opened);

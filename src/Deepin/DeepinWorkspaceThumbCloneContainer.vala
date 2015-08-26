@@ -103,7 +103,7 @@ namespace Gala
 			var index = workspace_clone.workspace.index ();
 			insert_child_at_index (workspace_clone, index);
 
-			workspace_clone.grab_key_focus_for_name ();
+			workspace_clone.workspace_name.grab_key_focus_for_name ();
 
 			relayout ();
 		}
@@ -116,7 +116,7 @@ namespace Gala
 			// them to gsettings again.
 			foreach (var child in get_children ()) {
 				if (child is DeepinWorkspaceThumbClone) {
-					(child as DeepinWorkspaceThumbClone).set_workspace_name ();
+					(child as DeepinWorkspaceThumbClone).workspace_name.set_workspace_name ();
 				}
 			}
 
@@ -139,7 +139,7 @@ namespace Gala
 				child.restore_easing_state ();
 
 				if (child is DeepinWorkspaceThumbClone) {
-					(child as DeepinWorkspaceThumbClone).get_workspace_name ();
+					(child as DeepinWorkspaceThumbClone).workspace_name.get_workspace_name ();
 				}
 			}
 		}
