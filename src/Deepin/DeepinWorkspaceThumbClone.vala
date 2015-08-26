@@ -27,7 +27,7 @@ namespace Gala
 	public class DeepinWorkspaceThumbClone : Actor
 	{
 		const int WORKSPACE_NAME_WIDTH = 70;
-		const int WORKSPACE_NAME_HEIGHT = 8;  // will pluse NAME_SHAPE_PADDING * 2 when using
+		const int WORKSPACE_NAME_HEIGHT = 8;  // will plus NAME_SHAPE_PADDING * 2 when using
 		const int WORKSPACE_NAME_MAX_LENGTH = 32;
 
 		// distance between thumbnail workspace clone and workspace name field
@@ -356,7 +356,7 @@ namespace Gala
 
 			var transition = new KeyframeTransition ("scale-x");
 			transition.set_duration (duration);
-			transition.set_progress_mode (DeepinWindowClone.LAYOUT_MODE);
+			transition.set_progress_mode (AnimationMode.EASE_IN_OUT_SINE);
 			transition.set_from_value (1.0f);
 			transition.set_to_value (1.0f);
 			transition.set_key_frames (keyframes);
@@ -365,7 +365,7 @@ namespace Gala
 
 			transition = new KeyframeTransition ("scale-y");
 			transition.set_duration (duration);
-			transition.set_progress_mode (DeepinWindowClone.LAYOUT_MODE);
+			transition.set_progress_mode (AnimationMode.EASE_IN_OUT_SINE);
 			transition.set_from_value (1.0f);
 			transition.set_to_value (1.0f);
 			transition.set_key_frames (keyframes);

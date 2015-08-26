@@ -597,6 +597,37 @@ namespace Gala
 			restore_easing_state ();
 		}
 
+		void start_drag_animation ()
+		{
+			// TODO: pivot point z
+			// set_pivot_point (0.5f, 0.5f);
+
+			double[] keyframes = {0.25, 0.75};
+			GLib.Value[] values = {-45f, 45f};
+
+			// TODO: ask for drag animation
+			var transition = new KeyframeTransition ("rotation-angle-z");
+			transition.set_duration (1000);
+			transition.set_progress_mode (AnimationMode.EASE_OUT_QUAD);
+			transition.set_repeat_count (-1);
+			transition.set_from_value (0.0f);
+			transition.set_to_value (0.0f);
+			transition.set_key_frames (keyframes);
+			transition.set_values (values);
+
+			if (get_transition ("weave") != null) {
+				remove_transition ("weave");
+			}
+			add_transition ("weave", transition);
+		}
+
+		void stop_drag_animation ()
+		{
+			if (get_transition ("weave") != null) {
+				remove_transition ("weave");
+			}
+		}
+
 		/**
 		 * Send the window the delete signal and listen for new windows to be added to the window's
 		 * workspace, in which case we check if the new window is a dialog of the window we were
@@ -698,18 +729,24 @@ namespace Gala
 
 			// TODO: dragging begin
 			set_pivot_point ((click_x - abs_x) / clone.width,
-								   (click_y - abs_y) / clone.height);
+							 (click_y - abs_y) / clone.height);
 			save_easing_state ();
 
 			set_easing_duration (200);
 			set_easing_mode (AnimationMode.EASE_IN_CUBIC);
 			set_scale (scale, scale);
 			set_position (click_x - abs_x - clone.width / 2,
-								click_y - abs_y - clone.height / 2);
+						  click_y - abs_y - clone.height / 2);
 			prev_opacity = opacity;
 			opacity = 255;
 
 			restore_easing_state ();
+
+			// TODO: drag animation
+			start_drag_animation ();
+			// transitions_completed.connect (start_drag_animation);
+
+			// TODO:
 			// clone.set_pivot_point ((click_x - abs_x) / clone.width,
 			// 					   (click_y - abs_y) / clone.height);
 			// clone.save_easing_state ();
@@ -725,9 +762,6 @@ namespace Gala
 			save_easing_state ();
 			set_easing_duration (0);
 			set_position (abs_x, abs_y);
-
-			// TODO: dragging opacity
-			// opacity = 255;
 
 			if (window_icon != null) {
 				window_icon.opacity = 0;
@@ -874,6 +908,8 @@ namespace Gala
 			get_parent ().remove_child (this);
 			prev_parent.insert_child_at_index (this, prev_index);
 
+			stop_drag_animation ();
+
 			// TODO: drag cancel
 			save_easing_state ();
 
@@ -881,6 +917,7 @@ namespace Gala
 			set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 			set_scale (1, 1);
 			opacity = prev_opacity;
+			rotation_angle_z = 0.0;
 
 			restore_easing_state ();
 			// clone.save_easing_state ();
