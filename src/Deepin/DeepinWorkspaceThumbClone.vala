@@ -45,15 +45,11 @@ namespace Gala
 		 */
 		public signal void selected ();
 
-		public Workspace workspace
-		{
-			get;
-			construct;
-		}
-
-		public DeepinWindowCloneThumbContainer window_container;
+		public Workspace workspace { get; construct; }
 
 		public Actor? fallback_key_focus = null;
+
+		public DeepinWindowCloneThumbContainer window_container;
 
 		// selected shape for workspace thumbnail clone
 		Actor thumb_shape;

@@ -254,13 +254,39 @@ namespace Gala
 
 			background.set_pivot_point (0.5f, pivot_y);
 
-			background.save_easing_state ();
+			// TODO: ask for flow workspace open animation
+			var transgroup = new TransitionGroup ();
+			int duration = DeepinMultitaskingView.TOGGLE_DURATION;
 
-			background.set_easing_duration (DeepinMultitaskingView.TOGGLE_DURATION);
-			background.set_easing_mode (AnimationMode.EASE_OUT_BACK);
-			background.set_scale (scale, scale);
+			var transition = new PropertyTransition ("scale-x");
+			transition.set_duration (duration);
+			DeepinUtils.clutter_set_cubic_bezier_progress_style1 (transition);
+			transition.set_to_value (scale);
+			transgroup.add_transition(transition);
 
-			background.restore_easing_state ();
+			transition = new PropertyTransition ("scale-y");
+			transition.set_duration (duration);
+			DeepinUtils.clutter_set_cubic_bezier_progress_style1 (transition);
+			transition.set_to_value (scale);
+			transgroup.add_transition(transition);
+
+			transgroup.set_duration (duration);
+			transgroup.remove_on_complete = true;
+
+			if (background.get_transition ("open") != null) {
+				background.remove_transition ("open");
+			}
+			background.add_transition ("open", transgroup);
+
+			// TODO: remove
+			// background.save_easing_state ();
+
+			// background.set_easing_duration (DeepinMultitaskingView.TOGGLE_DURATION);
+			// // background.set_easing_mode (AnimationMode.EASE_OUT_BACK);
+			// background.set_easing_mode (AnimationMode.EASE_OUT_BACK);
+			// background.set_scale (scale, scale);
+
+			// background.restore_easing_state ();
 
 			window_container.padding_top = top_offset;
 			window_container.padding_left = window_container.padding_right =

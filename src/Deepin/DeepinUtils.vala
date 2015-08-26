@@ -307,6 +307,28 @@ namespace Gala
 		}
 
 		// TODO: clutter progress mode
+		public static void clutter_set_cubic_bezier_progress_style1 (Clutter.Timeline timeline)
+		{
+			float x1 = 0.27f;
+			float y1 = 1.51f;
+			float x2 = 0.19f;
+			float y2 = 0.97f;
+			clutter_set_cubic_bezier_progress (timeline, x1, y1, x2, y2);
+		}
+
+		public static void clutter_set_cubic_bezier_progress (Clutter.Timeline timeline,
+															  float x1, float y1,
+															  float x2, float y2)
+		{
+			var c1 = Clutter.Point.alloc ();
+			var c2 = Clutter.Point.alloc ();
+			c1.x = x1;
+			c1.y = y1;
+			c2.x = x2;
+			c2.y = y2;
+			timeline.set_cubic_bezier_progress (c1, c2);
+		}
+
 		public static double clutter_progress_func_ease_out_back (Clutter.Timeline timeline,
 																  double elapsed, double total)
 		{

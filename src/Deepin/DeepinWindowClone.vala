@@ -333,11 +333,18 @@ namespace Gala
 			if (animate) {
 				var transgroup = new TransitionGroup ();
 				int duration = DeepinMultitaskingView.TOGGLE_DURATION;
+				// float cb_x1 = 0.27f;
+				// float cb_y1 = 1.51f;
+				// float cb_x2 = 0.68f;
+				// float cb_y2 = 0.92f;
 
 				var transition = new PropertyTransition ("position");
 				transition.set_duration (duration);
-				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
+				// transition.set_progress_mode (AnimationMode.EASE_OUT_ELASTIC);
 				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				// transition.set_cubic_bezier_progress (0.43f, );
+				// DeepinUtils.clutter_set_cubic_bezier_progress (transition,
+				// 											   cb_x1, cb_y1, cb_x2, cb_y2);
 				var position = Point.alloc ();
 				position.x = outer_rect.x - offset_x;
 				position.y = outer_rect.y - offset_y;
@@ -346,8 +353,10 @@ namespace Gala
 
 				transition = new PropertyTransition ("size");
 				transition.set_duration (duration);
-				// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
+				// transition.set_progress_mode (AnimationMode.EASE_OUT_ELASTIC);
 				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+				// DeepinUtils.clutter_set_cubic_bezier_progress (transition,
+				// 											   cb_x1, cb_y1, cb_x2, cb_y2);
 				var size = Size.alloc ();
 				size.width = outer_rect.width;
 				size.height = outer_rect.height;
@@ -411,6 +420,7 @@ namespace Gala
 				if (toggle_multitaskingview) {
 					// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
 					transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+					DeepinUtils.clutter_set_cubic_bezier_progress_style1 (transition);
 				} else {
 					transition.set_progress_mode (LAYOUT_MODE);
 				}
@@ -424,7 +434,8 @@ namespace Gala
 				transition.set_duration (duration);
 				if (toggle_multitaskingview) {
 					// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
-					transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+					// transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
+					DeepinUtils.clutter_set_cubic_bezier_progress_style1 (transition);
 				} else {
 					transition.set_progress_mode (LAYOUT_MODE);
 				}
@@ -597,6 +608,7 @@ namespace Gala
 			restore_easing_state ();
 		}
 
+		// TODO: remove
 		void start_drag_animation ()
 		{
 			// TODO: pivot point z
@@ -605,7 +617,6 @@ namespace Gala
 			double[] keyframes = {0.25, 0.75};
 			GLib.Value[] values = {-45f, 45f};
 
-			// TODO: ask for drag animation
 			var transition = new KeyframeTransition ("rotation-angle-z");
 			transition.set_duration (1000);
 			transition.set_progress_mode (AnimationMode.EASE_OUT_QUAD);
@@ -741,10 +752,6 @@ namespace Gala
 			opacity = 255;
 
 			restore_easing_state ();
-
-			// TODO: drag animation
-			start_drag_animation ();
-			// transitions_completed.connect (start_drag_animation);
 
 			// TODO:
 			// clone.set_pivot_point ((click_x - abs_x) / clone.width,
@@ -907,8 +914,6 @@ namespace Gala
 		{
 			get_parent ().remove_child (this);
 			prev_parent.insert_child_at_index (this, prev_index);
-
-			stop_drag_animation ();
 
 			// TODO: drag cancel
 			save_easing_state ();

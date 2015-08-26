@@ -32,6 +32,7 @@ namespace Gala
 		// public const int TOGGLE_DURATION = 250;
 		public const int TOGGLE_DURATION = 500;
 		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUAD;
+		// public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_ELASTIC;
 		// TODO: ask for animation, multitaskingview, workspace switch
 		public const int WORKSPACE_SWITCH_DURATION = 500;
 		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUAD;
@@ -86,7 +87,9 @@ namespace Gala
 			flow_workspaces = new Actor ();
 
 			thumb_workspaces = new DeepinWorkspaceThumbCloneContainer (screen);
+			// TODO: layout binding
 			thumb_workspaces.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
+			// thumb_workspaces.add_constraint (new BindConstraint (flow_workspaces, BindCoordinate.X, 0));
 
 			dock_clones = new Actor ();
 
