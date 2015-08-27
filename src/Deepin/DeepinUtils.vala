@@ -340,23 +340,28 @@ namespace Gala
 			}
 		}
 
-		// TODO: custom clutter progress modes
+		// custom clutter progress modes
 
 		/**
 		 * Setup multitaskingview toggle animation for target actor.
 		 *
-		 * @parm name Transition name.
-		 * @parm ... Property name and value pairs for transition.
+		 * Example:
+		 *     var scale_value = new GLib.Value (typeof (float));
+		 *     scale_value.set_float (0.5f);
+		 *     start_multitaskingview_toggle_animation (
+		 *         actor, "open", "scale-x", &scale_value, "scale-y", &scale_value);
+		 *
+		 * @param name Transition name.
+		 * @param ... Property name and value pairs for transition.
 		 */
-		// TODO: fix issue
 		public static void start_multitaskingview_toggle_animation (Clutter.Actor actor,
 																	string name, ...)
 		{
-			// int duration = DeepinMultitaskingView.TOGGLE_DURATION;
+			int duration = DeepinMultitaskingView.TOGGLE_DURATION;
 
-			// var trans_group = new Clutter.TransitionGroup ();
-			// trans_group.set_duration (duration);
-			// trans_group.remove_on_complete = true;
+			var trans_group = new Clutter.TransitionGroup ();
+			trans_group.set_duration (duration);
+			trans_group.remove_on_complete = true;
 
 			var vl = va_list ();
 			while (true) {
@@ -364,26 +369,20 @@ namespace Gala
 				if (prop_name == null) {
 					break;
 				}
-				// GLib.Value value = vl.arg ();
-				float? value = vl.arg ();
-				if (value == null) {
-					stdout.printf ("toggle: %s is null\n", prop_name);// TODO: test
-					break;
-				}
+				GLib.Value* value = vl.arg ();
 
-				stdout.printf ("toggle: %s: %f\n", prop_name, value);// TODO: test
-				// var transition = new Clutter.PropertyTransition (prop_name);
-				// transition.set_duration (duration);
-				// DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
-				// transition.set_to_value (value);
+				var transition = new Clutter.PropertyTransition (prop_name);
+				transition.set_duration (duration);
+				DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
+				transition.set_to_value (*value);
 
-				// trans_group.add_transition(transition);
+				trans_group.add_transition(transition);
 			}
 
-			// if (actor.get_transition (name) != null) {
-			// 	actor.remove_transition (name);
-			// }
-			// actor.add_transition (name, trans_group);
+			if (actor.get_transition (name) != null) {
+				actor.remove_transition (name);
+			}
+			actor.add_transition (name, trans_group);
 		}
 
 		public static void clutter_set_mode_multitaskingview_toggle (Clutter.Timeline timeline)

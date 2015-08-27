@@ -93,7 +93,7 @@ namespace Gala
 				return true;
 			});
 			// TODO: background size
-			// workspace_clone.add_child (background);
+			workspace_clone.add_child (background);
 
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
 			window_container.window_activated.connect ((w) => selected ());

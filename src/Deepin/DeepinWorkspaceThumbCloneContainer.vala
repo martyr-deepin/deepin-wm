@@ -152,11 +152,13 @@ namespace Gala
 
 			child.set_easing_duration (0);
 			child.set_scale (0, 0);
+			child.opacity = 12;
 
 			// TODO: ask for animation, plus_button add/remove
 			child.set_easing_duration (CHILD_ADD_REMOVE_DURATION);// TODO:
 			child.set_easing_mode (CHILD_ADD_REMOVE_MODE);
 			child.set_scale (1.0, 1.0);
+			child.opacity = 255;
 
 			child.restore_easing_state ();
 
@@ -174,12 +176,12 @@ namespace Gala
 			child.set_scale (1.0, 1.0);
 			child.opacity = 255;
 
-			// 85% %5opacity, %2,, 1.3s
+			// TODO 85%time, 1.3s duration
 			// TODO: ask for animation, plus_button add/remove
 			child.set_easing_duration (CHILD_ADD_REMOVE_DURATION);// TODO:
 			child.set_easing_mode (CHILD_ADD_REMOVE_MODE);
-			child.set_scale (0, 0);
-			child.opacity = 255;
+			child.set_scale (0.2, 0.2);
+			child.opacity = 12;
 
 			child.restore_easing_state ();
 

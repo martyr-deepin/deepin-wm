@@ -329,47 +329,21 @@ namespace Gala
 				parent.get_transformed_position (out offset_x, out offset_y);
 			}
 
-			// TODO: ask for animation, take slot
 			if (animate) {
-				// var position = Point.alloc ();
-				// position.x = outer_rect.x - offset_x;
-				// position.y = outer_rect.y - offset_y;
-				// var size = Size.alloc ();
-				// size.width = outer_rect.width;
-				// size.height = outer_rect.height;
-				// DeepinUtils.start_multitaskingview_toggle_animation (
-				// 	this, "window_slot", "position", position, "size", size);
-
-				var transgroup = new TransitionGroup ();
-				int duration = DeepinMultitaskingView.TOGGLE_DURATION;
-
-				var transition = new PropertyTransition ("position");
-				transition.set_duration (duration);
-				// transition.set_progress_mode (AnimationMode.EASE_OUT_ELASTIC);
-				transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_back);
 				var position = Point.alloc ();
 				position.x = outer_rect.x - offset_x;
 				position.y = outer_rect.y - offset_y;
-				transition.set_to_value (position);
-				transgroup.add_transition(transition);
+				var position_value = new GLib.Value (typeof (Point));
+				position_value.set_boxed (position);
 
-				transition = new PropertyTransition ("size");
-				transition.set_duration (duration);
-				// transition.set_progress_mode (AnimationMode.EASE_OUT_ELASTIC);
-				transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_back);
 				var size = Size.alloc ();
 				size.width = outer_rect.width;
 				size.height = outer_rect.height;
-				transition.set_to_value (size);
-				transgroup.add_transition(transition);
+				var size_value = new GLib.Value (typeof (Size));
+				size_value.set_boxed (size);
 
-				transgroup.set_duration (duration);
-				transgroup.remove_on_complete = true;
-
-				if (get_transition ("window-slot") != null) {
-					remove_transition ("window-slot");
-				}
-				add_transition ("window-slot", transgroup);
+				DeepinUtils.start_multitaskingview_toggle_animation (
+					this, "window_slot", "position", &position_value, "size", &size_value);
 			} else {
 				save_easing_state ();
 				set_easing_duration (0);
@@ -402,68 +376,31 @@ namespace Gala
 		}
 
 		/**
-		 * Animate the window to the given slot
+		 * Animate the window to the given slot.
+		 *
+		 * @param animate Determine if need animation.
+		 * @param toggle_multitaskingview Check if action when multitaskingview is toggling.
 		 */
 		public void take_slot (Meta.Rectangle rect, bool animate = true,
 							   bool toggle_multitaskingview = false)
 		{
 			slot = rect;
 
-			// TODO: ask for animation, take slot
 			if (animate) {
-				// TODO: check toggle_multitaskingview
-				var transgroup = new TransitionGroup ();
-				int duration = toggle_multitaskingview ?
-					DeepinMultitaskingView.TOGGLE_DURATION : LAYOUT_DURATION;
-
-				// var position = Point.alloc ();
-				// position.x = rect.x;
-				// position.y = rect.y;
-				// var size = Size.alloc ();
-				// size.width = rect.width;
-				// size.height = rect.height;
-				// DeepinUtils.start_multitaskingview_toggle_animation (
-				// 	this, "window_slot", "position", position, "size", size);
-
-				var transition = new PropertyTransition ("position");
-				transition.set_duration (duration);
-				if (toggle_multitaskingview) {
-					// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
-					// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_back);
-					transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_bounce);
-					DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
-				} else {
-					transition.set_progress_mode (LAYOUT_MODE);
-				}
 				var position = Point.alloc ();
 				position.x = rect.x;
 				position.y = rect.y;
-				transition.set_to_value (position);
-				transgroup.add_transition(transition);
+				var position_value = new GLib.Value (typeof (Point));
+				position_value.set_boxed (position);
 
-				transition = new PropertyTransition ("size");
-				transition.set_duration (duration);
-				if (toggle_multitaskingview) {
-					// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
-					// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_back);
-					// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_bounce);
-					DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
-				} else {
-					transition.set_progress_mode (LAYOUT_MODE);
-				}
 				var size = Size.alloc ();
 				size.width = rect.width;
 				size.height = rect.height;
-				transition.set_to_value (size);
-				transgroup.add_transition(transition);
+				var size_value = new GLib.Value (typeof (Size));
+				size_value.set_boxed (size);
 
-				transgroup.set_duration (duration);
-				transgroup.remove_on_complete = true;
-
-				if (get_transition ("window-slot") != null) {
-					remove_transition ("window-slot");
-				}
-				add_transition ("window-slot", transgroup);
+				DeepinUtils.start_multitaskingview_toggle_animation (
+					this, "window_slot", "position", &position_value, "size", &size_value);
 			} else {
 				save_easing_state ();
 				set_easing_duration (0);

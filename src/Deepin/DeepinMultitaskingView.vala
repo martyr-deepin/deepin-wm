@@ -583,34 +583,18 @@ namespace Gala
 
 			update_positions (false);
 
-			// TODO: ask for animation, multitaskingview, toggle, thumb workspaces
-			// thumb_workspaces.save_easing_state ();
-			// thumb_workspaces.set_easing_duration (TOGGLE_DURATION);
-			// thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_BACK);
-			// var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
-			// if (opening) {
-			// 	thumb_workspaces.y = (int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
-			// } else {
-			// 	thumb_workspaces.y = -(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
-			// }
-			// thumb_workspaces.restore_easing_state ();
-
-			var transition = new PropertyTransition ("y");
-			transition.set_duration (TOGGLE_DURATION);
-			transition.set_remove_on_complete (true);
-			DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
-			// transition.set_easing_mode (AnimationMode.EASE_OUT_BACK);
+			// TODO: adjust animation, multitaskingview, toggle, thumb workspaces
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
+			var thumb_y_value = new GLib.Value (typeof (float));
 			if (opening) {
-				transition.set_to_value ((int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
+				thumb_y_value.set_float ((monitor_geom.height *
+										  DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
 			} else {
-				transition.set_to_value (-(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
+				thumb_y_value.set_float (-(monitor_geom.height *
+										   DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
 			}
-			string trans_name = "toggle";
-			if (thumb_workspaces.get_transition (trans_name) != null) {
-				thumb_workspaces.remove_transition (trans_name);
-			}
-			thumb_workspaces.add_transition (trans_name, transition);
+			DeepinUtils.start_multitaskingview_toggle_animation (thumb_workspaces,
+																 "toggle", "y", &thumb_y_value);
 
 			foreach (var child in flow_workspaces.get_children ()) {
 				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;

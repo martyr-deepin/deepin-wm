@@ -254,48 +254,10 @@ namespace Gala
 
 			background.set_pivot_point (0.5f, pivot_y);
 
-			// TODO: ask for flow workspace open animation
-			// stdout.printf ("scale: %f\n", scale);// TODO: test
-			// // DeepinUtils.start_multitaskingview_toggle_animation (
-			// // 	background, "open", "scale-x", scale, "scale-y", scale);
-			// DeepinUtils.start_multitaskingview_toggle_animation (
-			// 	background, "open", "test", 0.1f, "test2", 0.2f);
-
-			// TODO: remove
-			var transgroup = new TransitionGroup ();
-			int duration = DeepinMultitaskingView.TOGGLE_DURATION;
-
-			var transition = new PropertyTransition ("scale-x");
-			transition.set_duration (duration);
-			DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
-			// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_bounce);
-			transition.set_to_value (scale);
-			transgroup.add_transition(transition);
-
-			transition = new PropertyTransition ("scale-y");
-			transition.set_duration (duration);
-			DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
-			// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_bounce);
-			transition.set_to_value (scale);
-			transgroup.add_transition(transition);
-
-			transgroup.set_duration (duration);
-			transgroup.remove_on_complete = true;
-
-			if (background.get_transition ("open") != null) {
-				background.remove_transition ("open");
-			}
-			background.add_transition ("open", transgroup);
-
-			// TODO: remove
-			background.save_easing_state ();
-
-			background.set_easing_duration (DeepinMultitaskingView.TOGGLE_DURATION);
-			// background.set_easing_mode (AnimationMode.EASE_OUT_BACK);
-			background.set_easing_mode (AnimationMode.EASE_OUT_BACK);
-			background.set_scale (scale, scale);
-
-			background.restore_easing_state ();
+			var scale_value = new GLib.Value (typeof (float));
+			scale_value.set_float (scale);
+			DeepinUtils.start_multitaskingview_toggle_animation (
+				background, "open", "scale-x", &scale_value, "scale-y", &scale_value);
 
 			window_container.padding_top = top_offset;
 			window_container.padding_left = window_container.padding_right =
