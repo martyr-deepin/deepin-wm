@@ -30,7 +30,7 @@ namespace Gala
 	{
 		// TODO: ask for animation, multitaskingview toggle
 		// public const int TOGGLE_DURATION = 250;
-		public const int TOGGLE_DURATION = 500;
+		public const int TOGGLE_DURATION = 800;
 		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUAD;
 		// public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_ELASTIC;
 		// TODO: ask for animation, multitaskingview, workspace switch
@@ -300,11 +300,16 @@ namespace Gala
 			workspace.window_activated.connect (activate_window);
 			workspace.selected.connect (activate_workspace);
 
+			// TODO: add workspace animation
+			DeepinWorkspaceThumbCloneContainer.start_child_add_animation (workspace);
+
 			flow_workspaces.insert_child_at_index (workspace, num);
+
 			workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
 			thumb_workspaces.add_workspace (workspace.thumb_workspace);
 
-			update_positions (opened);
+			// TODO:
+			// update_positions (opened);
 
 			if (opened) {
 				workspace.open ();
@@ -579,16 +584,33 @@ namespace Gala
 			update_positions (false);
 
 			// TODO: ask for animation, multitaskingview, toggle, thumb workspaces
-			thumb_workspaces.save_easing_state ();
-			thumb_workspaces.set_easing_duration (TOGGLE_DURATION);
-			thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_BACK);
+			// thumb_workspaces.save_easing_state ();
+			// thumb_workspaces.set_easing_duration (TOGGLE_DURATION);
+			// thumb_workspaces.set_easing_mode (AnimationMode.EASE_OUT_BACK);
+			// var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
+			// if (opening) {
+			// 	thumb_workspaces.y = (int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			// } else {
+			// 	thumb_workspaces.y = -(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			// }
+			// thumb_workspaces.restore_easing_state ();
+
+			var transition = new PropertyTransition ("y");
+			transition.set_duration (TOGGLE_DURATION);
+			transition.set_remove_on_complete (true);
+			DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
+			// transition.set_easing_mode (AnimationMode.EASE_OUT_BACK);
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
 			if (opening) {
-				thumb_workspaces.y = (int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+				transition.set_to_value ((int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
 			} else {
-				thumb_workspaces.y = -(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+				transition.set_to_value (-(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
 			}
-			thumb_workspaces.restore_easing_state ();
+			string trans_name = "toggle";
+			if (thumb_workspaces.get_transition (trans_name) != null) {
+				thumb_workspaces.remove_transition (trans_name);
+			}
+			thumb_workspaces.add_transition (trans_name, transition);
 
 			foreach (var child in flow_workspaces.get_children ()) {
 				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;

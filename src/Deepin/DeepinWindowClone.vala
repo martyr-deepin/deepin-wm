@@ -32,8 +32,8 @@ namespace Gala
 		public const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
 
 		// TODO: ask for animation, window closing
-		const int CLOSE_DURATION = 300;
-		const AnimationMode CLOSE_MODE = AnimationMode.EASE_OUT_QUAD;
+		const int CLOSE_DURATION = 500;
+		const AnimationMode CLOSE_MODE = AnimationMode.EASE_IN_QUAD;
 
 		const int WINDOW_ICON_SIZE = 64;
 		const int DRAGING_SIZE = 200;
@@ -331,20 +331,22 @@ namespace Gala
 
 			// TODO: ask for animation, take slot
 			if (animate) {
+				// var position = Point.alloc ();
+				// position.x = outer_rect.x - offset_x;
+				// position.y = outer_rect.y - offset_y;
+				// var size = Size.alloc ();
+				// size.width = outer_rect.width;
+				// size.height = outer_rect.height;
+				// DeepinUtils.start_multitaskingview_toggle_animation (
+				// 	this, "window_slot", "position", position, "size", size);
+
 				var transgroup = new TransitionGroup ();
 				int duration = DeepinMultitaskingView.TOGGLE_DURATION;
-				// float cb_x1 = 0.27f;
-				// float cb_y1 = 1.51f;
-				// float cb_x2 = 0.68f;
-				// float cb_y2 = 0.92f;
 
 				var transition = new PropertyTransition ("position");
 				transition.set_duration (duration);
 				// transition.set_progress_mode (AnimationMode.EASE_OUT_ELASTIC);
-				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
-				// transition.set_cubic_bezier_progress (0.43f, );
-				// DeepinUtils.clutter_set_cubic_bezier_progress (transition,
-				// 											   cb_x1, cb_y1, cb_x2, cb_y2);
+				transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_back);
 				var position = Point.alloc ();
 				position.x = outer_rect.x - offset_x;
 				position.y = outer_rect.y - offset_y;
@@ -354,9 +356,7 @@ namespace Gala
 				transition = new PropertyTransition ("size");
 				transition.set_duration (duration);
 				// transition.set_progress_mode (AnimationMode.EASE_OUT_ELASTIC);
-				transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
-				// DeepinUtils.clutter_set_cubic_bezier_progress (transition,
-				// 											   cb_x1, cb_y1, cb_x2, cb_y2);
+				transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_back);
 				var size = Size.alloc ();
 				size.width = outer_rect.width;
 				size.height = outer_rect.height;
@@ -411,16 +411,27 @@ namespace Gala
 
 			// TODO: ask for animation, take slot
 			if (animate) {
+				// TODO: check toggle_multitaskingview
 				var transgroup = new TransitionGroup ();
 				int duration = toggle_multitaskingview ?
 					DeepinMultitaskingView.TOGGLE_DURATION : LAYOUT_DURATION;
+
+				// var position = Point.alloc ();
+				// position.x = rect.x;
+				// position.y = rect.y;
+				// var size = Size.alloc ();
+				// size.width = rect.width;
+				// size.height = rect.height;
+				// DeepinUtils.start_multitaskingview_toggle_animation (
+				// 	this, "window_slot", "position", position, "size", size);
 
 				var transition = new PropertyTransition ("position");
 				transition.set_duration (duration);
 				if (toggle_multitaskingview) {
 					// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
-					transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
-					DeepinUtils.clutter_set_cubic_bezier_progress_style1 (transition);
+					// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_back);
+					transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_bounce);
+					DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
 				} else {
 					transition.set_progress_mode (LAYOUT_MODE);
 				}
@@ -434,8 +445,9 @@ namespace Gala
 				transition.set_duration (duration);
 				if (toggle_multitaskingview) {
 					// transition.set_progress_mode (AnimationMode.EASE_OUT_BACK);
-					// transition.set_progress_func (DeepinUtils.clutter_progress_func_ease_out_back);
-					DeepinUtils.clutter_set_cubic_bezier_progress_style1 (transition);
+					// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_back);
+					// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_bounce);
+					DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
 				} else {
 					transition.set_progress_mode (LAYOUT_MODE);
 				}
@@ -584,26 +596,26 @@ namespace Gala
 			return false;
 		}
 
-		public void start_close_animation ()
-		{
-			save_easing_state ();
-
-			set_easing_duration (LAYOUT_DURATION);
-			set_easing_mode (LAYOUT_MODE);
-			scale_x = 0.0f;
-			scale_y = 0.0f;
-
-			restore_easing_state ();
-		}
-
 		public void start_open_animation ()
 		{
 			save_easing_state ();
 
-			set_easing_duration (LAYOUT_DURATION);
-			set_easing_mode (LAYOUT_MODE);
+			set_easing_duration (CLOSE_DURATION);
+			set_easing_mode (CLOSE_MODE);
 			scale_x = 1.0f;
 			scale_y = 1.0f;
+
+			restore_easing_state ();
+		}
+
+		public void start_close_animation ()
+		{
+			save_easing_state ();
+
+			set_easing_duration (CLOSE_DURATION);
+			set_easing_mode (CLOSE_MODE);
+			scale_x = 0.0f;
+			scale_y = 0.0f;
 
 			restore_easing_state ();
 		}

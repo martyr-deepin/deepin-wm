@@ -74,34 +74,144 @@ namespace Gala
 		const int LAYOUT_DURATION = 500;
 		const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
 
+		// TODO: ask for animation, plus_button add/remove
+		const int CHILD_ADD_REMOVE_DURATION = 400;
+		const AnimationMode CHILD_ADD_REMOVE_MODE = AnimationMode.EASE_OUT_QUAD;
+
 		public Screen screen { get; construct; }
 
-		Actor add_button;
+		Actor plus_button;
 
 		public DeepinWorkspaceThumbCloneContainer (Screen screen)
 		{
 			Object (screen: screen);
 
-			add_button = new DeepinWorkspaceAddButton ();
-			add_button.reactive = true;
-			add_button.set_easing_duration (LAYOUT_DURATION);
-			add_button.set_easing_mode (LAYOUT_MODE);
-			add_button.button_press_event.connect (() => {
-				DeepinUtils.append_new_workspace (screen);
+			plus_button = new DeepinWorkspaceAddButton ();
+			plus_button.reactive = true;
+			plus_button.set_pivot_point (0.5f, 0.5f);
+			plus_button.set_easing_duration (LAYOUT_DURATION);
+			plus_button.set_easing_mode (LAYOUT_MODE);
+			plus_button.button_press_event.connect (() => {
+				name = start_child_remove_animation (plus_button);
+
+				var transition = plus_button.get_transition (name);
+				if (transition != null) {
+					transition.completed.connect (() => {
+						remove_child (plus_button);
+						DeepinUtils.append_new_workspace (screen);
+					});
+				} else {
+					remove_child (plus_button);
+					DeepinUtils.append_new_workspace (screen);
+				}
+
 				return false;
 			});
+
+			append_plus_button ();
+		}
+
+		// void on_append_workspace ()
+		// {
+		// 	plus_button.transitions_completed.disconnect (on_append_workspace);
+		// 	remove_child (plus_button);
+		// 	DeepinUtils.append_new_workspace (screen);
+		// }
+
+		/**
+		 * Make plus button visible if workspace number less than MAX_WORKSPACE_NUM.
+		 */
+		void append_plus_button ()
+		{
+			if (Prefs.get_num_workspaces () < WindowManagerGala.MAX_WORKSPACE_NUM &&
+				!contains (plus_button)) {
+				place_child (plus_button, get_n_children ());
+				insert_child_at_index (plus_button, get_n_children ());
+				start_child_add_animation (plus_button);
+			}
+		}
+
+		// TODO: remove
+		// void remove_plus_button ()
+		// {
+		// 	if (contains (plus_button)) {
+		// 		start_child_remove_animation (plus_button);
+		// 		plus_button.transitions_completed.connect (() => {
+		// 			remove_child (plus_button);
+		// 			relayout ();
+		// 		});
+		// 	}
+		// }
+
+		public static string start_child_add_animation (Actor child)
+		{
+			// TODO:
+			child.set_pivot_point (0.5f, 0.5f);
+
+			child.save_easing_state ();
+
+			child.set_easing_duration (0);
+			child.set_scale (0, 0);
+
+			// TODO: ask for animation, plus_button add/remove
+			child.set_easing_duration (CHILD_ADD_REMOVE_DURATION);// TODO:
+			child.set_easing_mode (CHILD_ADD_REMOVE_MODE);
+			child.set_scale (1.0, 1.0);
+
+			child.restore_easing_state ();
+
+			return "scale-x";
+		}
+
+		public static string start_child_remove_animation (Actor child)
+		{
+			// TODO:
+			child.set_pivot_point (0.5f, 0.5f);
+
+			child.save_easing_state ();
+
+			child.set_easing_duration (0);
+			child.set_scale (1.0, 1.0);
+			child.opacity = 255;
+
+			// 85% %5opacity, %2,, 1.3s
+			// TODO: ask for animation, plus_button add/remove
+			child.set_easing_duration (CHILD_ADD_REMOVE_DURATION);// TODO:
+			child.set_easing_mode (CHILD_ADD_REMOVE_MODE);
+			child.set_scale (0, 0);
+			child.opacity = 255;
+
+			child.restore_easing_state ();
+
+			return "scale-x";
 		}
 
 		public void add_workspace (DeepinWorkspaceThumbClone workspace_clone)
 		{
-			// TODO: animation
-			// workspace_clone.opacity = 0;
-			// workspace_clone.set_easing_duration (LAYOUT_DURATION);
-			// workspace_clone.set_easing_mode (LAYOUT_MODE);
-			// workspace_clone.opacity = 255;
-
 			var index = workspace_clone.workspace.index ();
+
+			// TODO: animation relayout
+			workspace_clone.save_easing_state ();
+			workspace_clone.set_easing_duration (0);
+			place_child (workspace_clone, index);
+			workspace_clone.restore_easing_state ();
+
 			insert_child_at_index (workspace_clone, index);
+
+			// TODO:
+			workspace_clone.start_show_animation ();
+			workspace_clone.transitions_completed.connect (append_plus_button);
+
+			// TODO:
+			// workspace_clone.set_pivot_point (0.5f, 0.5f);
+			// var name = start_child_add_animation (workspace_clone);
+
+			// var transition = workspace_clone.get_transition (name);
+			// if (transition != null) {
+			// 	transition.completed.connect (append_plus_button);
+			// } else {
+			// 	append_plus_button ();
+			// }
 
 			workspace_clone.workspace_name.grab_key_focus_for_name ();
 
@@ -111,6 +221,9 @@ namespace Gala
 		public void remove_workspace (DeepinWorkspaceThumbClone workspace_clone)
 		{
 			remove_child (workspace_clone);
+
+			// TODO:
+			append_plus_button ();
 
 			// Prevent other workspaces' original name to be reset, so here set
 			// them to gsettings again.
@@ -122,16 +235,34 @@ namespace Gala
 
 			relayout ();
 		}
+		// TODO:
+		// void do_remove_workspace (DeepinWorkspaceThumbClone workspace_clone)
+		// {
+		// 	remove_child (workspace_clone);
+
+		// 	// TODO:
+		// 	append_plus_button ();
+
+		// 	// Prevent other workspaces' original name to be reset, so here set
+		// 	// them to gsettings again.
+		// 	foreach (var child in get_children ()) {
+		// 		if (child is DeepinWorkspaceThumbClone) {
+		// 			(child as DeepinWorkspaceThumbClone).workspace_name.set_workspace_name ();
+		// 		}
+		// 	}
+
+		// 	relayout ();
+		// }
 
 		public void relayout ()
 		{
-			setup_pluse_button ();
-
 			var i = 0;
 			foreach (var child in get_children ()) {
 				child.save_easing_state ();
 
+				// TODO: animation relayout
 				child.set_easing_duration (LAYOUT_DURATION);
+				// child.set_easing_duration (0);
 
 				place_child (child, i);
 				i++;
@@ -172,26 +303,9 @@ namespace Gala
 			child.y = child_y;
 			child.width = child_width;
 
-			// For DeepinWorkspaceThumbClone, its height will be allocate by iteself
+			// For DeepinWorkspaceThumbClone, its height will be allocated by iteself
 			if (child is DeepinWorkspaceAddButton) {
 				child.height = child_height;
-			}
-		}
-
-		/**
-		 * Make pluse button visible if workspace number less than MAX_WORKSPACE_NUM.
-		 */
-		void setup_pluse_button ()
-		{
-			if (Prefs.get_num_workspaces () >= WindowManagerGala.MAX_WORKSPACE_NUM) {
-				if (contains (add_button)) {
-					remove_child (add_button);
-				}
-			} else {
-				if (!contains (add_button)) {
-					place_child (add_button, get_n_children ());
-					insert_child_at_index (add_button, get_n_children ());
-				}
 			}
 		}
 	}

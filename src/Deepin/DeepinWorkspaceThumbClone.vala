@@ -77,7 +77,6 @@ namespace Gala
 			thumb_shape =
 				new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
 			thumb_shape.opacity = 0;
-			thumb_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);
 			add_child (thumb_shape);
 
 			// workspace thumbnail clone
@@ -93,8 +92,8 @@ namespace Gala
 				selected ();
 				return true;
 			});
-			// TODO:
-			workspace_clone.add_child (background);
+			// TODO: background size
+			// workspace_clone.add_child (background);
 
 			window_container = new DeepinWindowCloneThumbContainer (workspace);
 			window_container.window_activated.connect ((w) => selected ());
@@ -116,7 +115,7 @@ namespace Gala
 			// block propagation of button presses on the close button, otherwise the click action
 			// on the WorkspaceTHumbClone will act weirdly
 			close_button.button_press_event.connect (() => {
-				remove_workspace ();
+				closing ();
 				return true;
 			});
 
@@ -171,40 +170,18 @@ namespace Gala
 		public void set_select (bool value, bool animate = true)
 		{
 			// TODO: ask for workspace switch duration
-			int duration = animate ? AnimationSettings.get_default ().workspace_switch_duration : 0;
+			// int duration = animate ? AnimationSettings.get_default ().workspace_switch_duration : 0;
+			int duration = animate ? DeepinMultitaskingView.WORKSPACE_SWITCH_DURATION : 0;
+			// duration = DeepinWorkspaceNameField.SELECT_DURATION;
 
 			// selected shape for workspace thumbnail clone
 			thumb_shape.save_easing_state ();
 
 			thumb_shape.set_easing_duration (duration);
+			thumb_shape.set_easing_mode (DeepinWorkspaceNameField.SELECT_MODE);// TODO:
 			thumb_shape.opacity = value ? 255 : 0;
 
 			thumb_shape.restore_easing_state ();
-		}
-
-		/*
-		 * Remove current workspace and moving all the windows to preview workspace.
-		 */
-		void remove_workspace ()
-		{
-			if (Prefs.get_num_workspaces () <= 1) {
-				// there is only one workspace, just ignore
-				return;
-			}
-
-			closing ();
-
-			// TODO: animation
-			opacity = 0;
-			var transition = get_transition ("opacity");
-			if (transition != null) {
-				// stdout.printf ("transition is not null\n");// TODO:
-				transition.completed.connect (
-					() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
-			} else {
-				// stdout.printf ("transition is null\n");// TODO:
-				DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
-			}
 		}
 
 		void update_workspace_shadow ()
@@ -286,7 +263,12 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceNameField : Actor
 	{
-		public const int WORKSPACE_NAME_WIDTH = 86;
+		public const int SELECT_DURATION = 500;
+		public const AnimationMode SELECT_MODE = AnimationMode.LINEAR;
+
+		public const int WORKSPACE_NAME_WIDTH = 70;
+		// TODO:
+		// public const int WORKSPACE_NAME_WIDTH = 86;
 		public const int WORKSPACE_NAME_HEIGHT = 24;
 
 		const int WORKSPACE_NAME_MAX_LENGTH = 32;
@@ -321,7 +303,8 @@ namespace Gala
 			// selected shape for workspace name field
 			name_shape = new DeepinCssActor ("deepin-workspace-thumb-clone-name");
 			name_shape.reactive = true;
-			name_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);
+			name_shape.set_pivot_point (0.5f, 0.5f);
+			// name_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);// TODO:
 
 			name_shape.button_press_event.connect (on_name_button_press_event);
 
@@ -334,7 +317,7 @@ namespace Gala
 			var name_font = DeepinUtils.get_css_font ("deepin-workspace-thumb-clone-name");
 
 			workspace_name_num = new Text ();
-			workspace_name_num.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);
+			// workspace_name_num.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);// TODO:
 			workspace_name_num.set_font_description (name_font);
 
 			workspace_name_text = new Text ();
@@ -344,7 +327,7 @@ namespace Gala
 			workspace_name_text.ellipsize = Pango.EllipsizeMode.END;
 			workspace_name_text.max_length = WORKSPACE_NAME_MAX_LENGTH;
 			workspace_name_text.single_line_mode = true;
-			workspace_name_text.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);
+			// workspace_name_text.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);// TODO:
 			workspace_name_text.set_font_description (name_font);
 			workspace_name_text.selection_color =
 				DeepinUtils.get_css_background_color ("deepin-text-selection");
@@ -415,13 +398,34 @@ namespace Gala
 
 		public void set_select (bool value, bool animate = true)
 		{
-			int duration = animate ? AnimationSettings.get_default ().workspace_switch_duration : 0;
+			// TODO:
+			// int duration = animate ? AnimationSettings.get_default ().workspace_switch_duration : 0;
+			int duration = animate ? DeepinMultitaskingView.WORKSPACE_SWITCH_DURATION : 0;
+			// duration = SELECT_DURATION;
 
 			// selected shape for workspace name field
 			name_shape.save_easing_state ();
 
-			name_shape.set_easing_duration (duration);
+			name_shape.set_easing_duration (duration);// TODO:
+			// name_shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
+			name_shape.set_easing_mode (SELECT_MODE);
 			name_shape.select = value;
+
+			// TODO: scale
+			if (value) {
+				name_shape.scale_x = 1.1;
+				name_shape.scale_y = 1.1;
+				// name_shape.scale_x = 1.033;
+				// name_shape.scale_y = 1.033;
+			} else {
+				name_shape.scale_x = 1.0;
+				name_shape.scale_y = 1.0;
+			}
+			// if (value) {
+			// 	name_shape.set_scale (1.1, 1.1);
+			// } else {
+			// 	name_shape.set_scale (1.0, 1.0);
+			// }
 
 			name_shape.restore_easing_state ();
 
@@ -431,6 +435,10 @@ namespace Gala
 
 			workspace_name_num.set_easing_duration (duration);
 			workspace_name_text.set_easing_duration (duration);
+
+			workspace_name_num.set_easing_mode (SELECT_MODE);
+			workspace_name_text.set_easing_mode (SELECT_MODE);
+
 			var text_color = DeepinUtils.get_css_color ("deepin-workspace-thumb-clone-name",
 				value ? Gtk.StateFlags.SELECTED : Gtk.StateFlags.NORMAL);
 			workspace_name_num.color = text_color;
@@ -482,6 +490,11 @@ namespace Gala
 		// distance between thumbnail workspace clone and workspace name field
 		const int WORKSPACE_NAME_DISTANCE = 16;
 
+		// TODO: ask for animation, show new added thumbnail workspace
+		const int SHOW_DURATION = 500;
+		// const AnimationMode SHOW_MODE = AnimationMode.EASE_OUT_CUBIC;
+		const AnimationMode SHOW_MODE = AnimationMode.EASE_IN_QUAD;
+
 		public signal void selected ();
 
 		public Workspace workspace { get; construct; }
@@ -504,20 +517,48 @@ namespace Gala
 			thumb_clone = new DeepinWorkspaceThumbCloneCore (workspace);
 			window_container = thumb_clone.window_container;
 
-			// Ensure workspace name field lost focus to avoid invalid operations even though the
-			// workspace already not exists.
-			thumb_clone.closing.connect (workspace_name.reset_key_focus);
-
 			thumb_clone.selected.connect (() => selected ());
 
 			add_child (thumb_clone);
 
 			workspace_name = new DeepinWorkspaceNameField (workspace);
-			workspace_name.selected.connect (() => selected ());
+
+			// TODO:
+			// workspace_name.selected.connect (() => selected ());
 
 			add_child (workspace_name);
+
+			// Ensure workspace name field lost focus to avoid invalid operations even though the
+			// workspace already not exists.
+			thumb_clone.closing.connect (remove_workspace);
 		}
 
+
+		/*
+		 * Remove current workspace and moving all the windows to preview workspace.
+		 */
+		void remove_workspace ()
+		{
+			if (Prefs.get_num_workspaces () <= 1) {
+				// there is only one workspace, just ignore
+				return;
+			}
+
+			workspace_name.reset_key_focus ();
+
+			// TODO: animation
+			DeepinWorkspaceThumbCloneContainer.start_child_remove_animation (this);
+
+			var transition = get_transition ("scale-x");
+			if (transition != null) {
+				// stdout.printf ("transition is not null\n");// TODO:
+				transition.completed.connect (
+					() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
+			} else {
+				// stdout.printf ("transition is null\n");// TODO:
+				DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
+			}
+		}
 
 		public void set_select (bool value, bool animate = true)
 		{
@@ -525,18 +566,58 @@ namespace Gala
 			workspace_name.set_select (value, animate);
 		}
 
+		public void start_show_animation ()
+		{
+			// TODO:
+			thumb_clone.set_pivot_point (0.5f, 0.5f);
+			workspace_name.set_pivot_point (0.5f, 0.5f);
+
+			thumb_clone.save_easing_state ();
+			workspace_name.save_easing_state ();
+
+			thumb_clone.set_easing_duration (0);
+			thumb_clone.set_scale (0, 0);
+
+			workspace_name.set_easing_duration (0);
+			workspace_name.set_scale (0, 0);
+
+			thumb_clone.set_easing_duration (SHOW_DURATION);
+			thumb_clone.set_easing_mode (SHOW_MODE);
+			thumb_clone.set_scale (1, 1);
+
+			thumb_clone.restore_easing_state ();
+
+			var transition = thumb_clone.get_transition ("scale-x");
+			if (transition != null) {
+				transition.completed.connect (() => {
+					workspace_name.set_easing_duration (SHOW_DURATION);
+					workspace_name.set_easing_mode (SHOW_MODE);
+					workspace_name.set_scale (1, 1);
+					workspace_name.restore_easing_state ();
+				});
+			} else {
+				workspace_name.set_easing_duration (SHOW_DURATION);
+				workspace_name.set_easing_mode (SHOW_MODE);
+				workspace_name.set_scale (1, 1);
+				workspace_name.restore_easing_state ();
+			}
+		}
+
+		// TODO: rename
 		public void start_window_added_animation ()
 		{
 			// TODO: ask for animation, thumbnail bulge
 			var transgroup = new TransitionGroup ();
 
-			double[] keyframes = { 0.28, 0.58 };
-			GLib.Value[] values = { 1.1f, 1.1f };
-			int duration = DeepinWindowClone.LAYOUT_DURATION;
+			double[] keyframes = { 0.25, 0.75 };
+			GLib.Value[] values = { 1.05f, 1.05f };
+			// TODO:
+			int duration = 500;
+			// int duration = DeepinWindowClone.LAYOUT_DURATION;
 
 			var transition = new KeyframeTransition ("scale-x");
 			transition.set_duration (duration);
-			transition.set_progress_mode (AnimationMode.EASE_IN_OUT_SINE);
+			transition.set_progress_mode (AnimationMode.EASE_IN_BACK);
 			transition.set_from_value (1.0f);
 			transition.set_to_value (1.0f);
 			transition.set_key_frames (keyframes);
@@ -545,7 +626,7 @@ namespace Gala
 
 			transition = new KeyframeTransition ("scale-y");
 			transition.set_duration (duration);
-			transition.set_progress_mode (AnimationMode.EASE_IN_OUT_SINE);
+			transition.set_progress_mode (AnimationMode.EASE_IN_BACK);
 			transition.set_from_value (1.0f);
 			transition.set_to_value (1.0f);
 			transition.set_key_frames (keyframes);

@@ -295,7 +295,7 @@ namespace Gala
 		/* Clutter progress functions */
 
 		// TODO: remove
-		public static double clutter_progress_func_linear_out_back (Clutter.Timeline timeline,
+		public static double clutter_custom_mode_linear_out_back (Clutter.Timeline timeline,
 																	double elapsed, double total)
 		{
 			double p = elapsed / total;
@@ -306,19 +306,108 @@ namespace Gala
 			}
 		}
 
-		// TODO: clutter progress mode
-		public static void clutter_set_cubic_bezier_progress_style1 (Clutter.Timeline timeline)
+		public static double clutter_custom_mode_ease_out_bounce (Clutter.Timeline timeline,
+																  double t, double d)
+		{
+			return clutter_ease_out_bounce_internal (t, d);
+		}
+
+		public static double clutter_ease_out_bounce_internal (double t, double d)
+		{
+			double p = t / d;
+
+			if (p < (1 / 2.75))
+			{
+				return 7.5625 * p * p;
+			}
+			else if (p < (2 / 2.75))
+			{
+				p -= (1.5 / 2.75);
+
+				return 7.5625 * p * p + 0.75;
+			}
+			else if (p < (2.5 / 2.75))
+			{
+				p -= (2.25 / 2.75);
+
+				return 7.5625 * p * p + 0.9375;
+			}
+			else
+			{
+				p -= (2.625 / 2.75);
+
+				return 7.5625 * p * p + 0.984375;
+			}
+		}
+
+		// TODO: custom clutter progress modes
+
+		/**
+		 * Setup multitaskingview toggle animation for target actor.
+		 *
+		 * @parm name Transition name.
+		 * @parm ... Property name and value pairs for transition.
+		 */
+		// TODO: fix issue
+		public static void start_multitaskingview_toggle_animation (Clutter.Actor actor,
+																	string name, ...)
+		{
+			// int duration = DeepinMultitaskingView.TOGGLE_DURATION;
+
+			// var trans_group = new Clutter.TransitionGroup ();
+			// trans_group.set_duration (duration);
+			// trans_group.remove_on_complete = true;
+
+			var vl = va_list ();
+			while (true) {
+				string? prop_name = vl.arg ();
+				if (prop_name == null) {
+					break;
+				}
+				// GLib.Value value = vl.arg ();
+				float? value = vl.arg ();
+				if (value == null) {
+					stdout.printf ("toggle: %s is null\n", prop_name);// TODO: test
+					break;
+				}
+
+				stdout.printf ("toggle: %s: %f\n", prop_name, value);// TODO: test
+				// var transition = new Clutter.PropertyTransition (prop_name);
+				// transition.set_duration (duration);
+				// DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
+				// transition.set_to_value (value);
+
+				// trans_group.add_transition(transition);
+			}
+
+			// if (actor.get_transition (name) != null) {
+			// 	actor.remove_transition (name);
+			// }
+			// actor.add_transition (name, trans_group);
+		}
+
+		public static void clutter_set_mode_multitaskingview_toggle (Clutter.Timeline timeline)
 		{
 			float x1 = 0.27f;
 			float y1 = 1.51f;
 			float x2 = 0.19f;
 			float y2 = 0.97f;
-			clutter_set_cubic_bezier_progress (timeline, x1, y1, x2, y2);
+			clutter_set_mode_cubic_bezier (timeline, x1, y1, x2, y2);
 		}
 
-		public static void clutter_set_cubic_bezier_progress (Clutter.Timeline timeline,
-															  float x1, float y1,
-															  float x2, float y2)
+		// TODO: rename
+		public static void clutter_set_mode_multitaskingview_background_close (Clutter.Timeline timeline)
+		{
+			float x1 = 0.25f;
+			float y1 = 1.23f;
+			float x2 = 0.24f;
+			float y2 = 1.0f;
+			clutter_set_mode_cubic_bezier (timeline, x1, y1, x2, y2);
+		}
+
+		public static void clutter_set_mode_cubic_bezier (Clutter.Timeline timeline,
+														  float x1, float y1,
+														  float x2, float y2)
 		{
 			var c1 = Clutter.Point.alloc ();
 			var c2 = Clutter.Point.alloc ();
@@ -329,7 +418,7 @@ namespace Gala
 			timeline.set_cubic_bezier_progress (c1, c2);
 		}
 
-		public static double clutter_progress_func_ease_out_back (Clutter.Timeline timeline,
+		public static double clutter_custom_mode_ease_out_back (Clutter.Timeline timeline,
 																  double elapsed, double total)
 		{
 			double p = elapsed / total - 1;

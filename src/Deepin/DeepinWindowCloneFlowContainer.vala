@@ -103,6 +103,7 @@ namespace Gala
 				var w = tilable.id as DeepinWindowClone;
 				if (window_clone == w) {
 					rect = tilable.rect;
+					DeepinUtils.scale_rectangle_in_center (ref rect, 0.9f);
 					if (!window_clone.is_selected ()) {
 						// TODO: ask for selected window's scale size
 						DeepinUtils.scale_rectangle_in_center (ref rect, 0.9f);
