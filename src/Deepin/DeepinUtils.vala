@@ -371,6 +371,11 @@ namespace Gala
 			timeline.set_cubic_bezier_progress (c1, c2);
 		}
 
+		public static void clutter_set_mode_ease_out_quad (Clutter.Timeline timeline)
+		{
+			timeline.set_progress_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
+		}
+
 		public static double clutter_custom_mode_ease_out_back (Clutter.Timeline timeline,
 																  double elapsed, double total)
 		{

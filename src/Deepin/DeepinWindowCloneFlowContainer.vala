@@ -72,12 +72,7 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public override void relayout ()
-		{
-			do_relayout (false);
-		}
-		// TODO: select
-		void do_relayout (bool toggle_multitaskingview = false)
+		public override void relayout (bool selecting = false)
 		{
 			if (!opened) {
 				return;
@@ -90,7 +85,7 @@ namespace Gala
 			foreach (var child in get_children ()) {
 				var window_clone = child as DeepinWindowClone;
 				var rect = get_layout_rect_for_window (window_clone);
-				window_clone.take_slot (rect, true, toggle_multitaskingview);
+				window_clone.take_slot (rect, true, selecting);
 			}
 		}
 
@@ -333,7 +328,7 @@ namespace Gala
 				window_clone.transition_to_original_state (false);
 			}
 
-			do_relayout (true);
+			relayout ();
 		}
 
 		/**

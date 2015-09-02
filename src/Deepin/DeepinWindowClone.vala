@@ -27,11 +27,9 @@ namespace Gala
 	 */
 	public class DeepinWindowClone : Actor
 	{
-		// TODO: ask for animation,  window select
 		public const int LAYOUT_DURATION = 400;
 		public const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
 
-		// TODO: ask for animation, window closing
 		const int CLOSE_DURATION = 500;
 		const AnimationMode CLOSE_MODE = AnimationMode.EASE_IN_QUAD;
 
@@ -381,10 +379,10 @@ namespace Gala
 		 * Animate the window to the given slot.
 		 *
 		 * @param animate Determine if need animation.
-		 * @param toggle_multitaskingview Check if action when multitaskingview is toggling.
+		 * @param selecting Check if is action that window clone is selecting.
 		 */
 		public void take_slot (Meta.Rectangle rect, bool animate = true,
-							   bool toggle_multitaskingview = false)
+							   bool selecting = false)
 		{
 			slot = rect;
 
@@ -401,10 +399,18 @@ namespace Gala
 				var size_value = new GLib.Value (typeof (Size));
 				size_value.set_boxed (size);
 
-				DeepinUtils.start_animation (this, "window_slot",
-											 DeepinMultitaskingView.TOGGLE_DURATION,
-											 DeepinUtils.clutter_set_mode_bezier_out_back,
-											 "position", &position_value, "size", &size_value);
+				if (!selecting) {
+					DeepinUtils.start_animation (this, "window_slot",
+												 DeepinMultitaskingView.TOGGLE_DURATION,
+												 DeepinUtils.clutter_set_mode_bezier_out_back,
+												 "position", &position_value, "size", &size_value);
+				} else {
+					// TODO:
+					DeepinUtils.start_animation (this, "window_slot",
+												 LAYOUT_DURATION,
+												 DeepinUtils.clutter_set_mode_ease_out_quad,
+												 "position", &position_value, "size", &size_value);
+				}
 			} else {
 				save_easing_state ();
 				set_easing_duration (0);

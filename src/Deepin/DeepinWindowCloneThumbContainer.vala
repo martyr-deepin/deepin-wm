@@ -66,7 +66,7 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public override void relayout ()
+		public override void relayout (bool selecting = false)
 		{
 			foreach (var child in get_children ()) {
 				var window_clone = child as DeepinWindowClone;

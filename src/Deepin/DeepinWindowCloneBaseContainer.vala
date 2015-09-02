@@ -42,8 +42,10 @@ namespace Gala
 
 		/**
 		 * Recalculate the positions of the windows and animate them to the resulting spots.
+		 *
+		 * @param selecting Check if is action that window clone is selecting.
 		 */
-		public abstract void relayout ();
+		public abstract void relayout (bool selecting = false);
 
 		/**
 		 * Get position rectangle for target window.
@@ -148,7 +150,7 @@ namespace Gala
 			}
 
 			if (need_relayout) {
-				relayout ();
+				relayout (true);
 			}
 		}
 
@@ -181,7 +183,7 @@ namespace Gala
 			new_window.activated.connect (on_window_activated);
 			new_window.closing.connect (on_window_closing);
 			new_window.destroy.connect (on_window_destroyed);
-			new_window.request_reposition.connect (relayout);
+			new_window.request_reposition.connect (on_request_reposition);
 			new_window.notify["dragging"].connect (() => {
 				if (new_window.dragging) {
 					window_dragging (new_window.window);
@@ -254,6 +256,11 @@ namespace Gala
 			window_closing (window_clone.window);
 		}
 
+		void on_request_reposition (DeepinWindowClone window_clone)
+		{
+			relayout ();
+		}
+
 		void on_window_destroyed (Actor actor)
 		{
 			var window = actor as DeepinWindowClone;
@@ -264,7 +271,7 @@ namespace Gala
 			window.destroy.disconnect (on_window_destroyed);
 			window.activated.disconnect (on_window_activated);
 			window.closing.disconnect (on_window_closing);
-			window.request_reposition.disconnect (relayout);
+			window.request_reposition.disconnect (on_request_reposition);
 
 			Idle.add (() => {
 				relayout ();
