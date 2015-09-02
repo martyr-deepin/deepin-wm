@@ -256,8 +256,10 @@ namespace Gala
 
 			var scale_value = new GLib.Value (typeof (float));
 			scale_value.set_float (scale);
-			DeepinUtils.start_multitaskingview_toggle_animation (
-				background, "open", "scale-x", &scale_value, "scale-y", &scale_value);
+			DeepinUtils.start_animation (background, "open",
+										 DeepinMultitaskingView.TOGGLE_DURATION,
+										 DeepinUtils.clutter_set_mode_bezier_out_back,
+										 "scale-x", &scale_value, "scale-y", &scale_value);
 
 			window_container.padding_top = top_offset;
 			window_container.padding_left = window_container.padding_right =
@@ -290,43 +292,12 @@ namespace Gala
 
 			opened = false;
 
-			// background.save_easing_state ();
-
-			// // TODO: ask for animation, toggle close flow workspace
-			// background.set_easing_duration (DeepinMultitaskingView.TOGGLE_DURATION);
-			// // background.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-			// background.set_easing_mode (AnimationMode.EASE_OUT_BACK);
-			// background.set_scale (1, 1);
-
-			// background.restore_easing_state ();
-
-			// TODO: ask for flow workspace close animation
-			var transgroup = new TransitionGroup ();
-			int duration = DeepinMultitaskingView.TOGGLE_DURATION;
-
-			var transition = new PropertyTransition ("scale-x");
-			transition.set_duration (duration);
-			// DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
-			DeepinUtils.clutter_set_mode_multitaskingview_background_close (transition);
-			// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_bounce);
-			transition.set_to_value (1.0f);
-			transgroup.add_transition(transition);
-
-			transition = new PropertyTransition ("scale-y");
-			transition.set_duration (duration);
-			// DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
-			DeepinUtils.clutter_set_mode_multitaskingview_background_close (transition);
-			// transition.set_progress_func (DeepinUtils.clutter_custom_mode_ease_out_bounce);
-			transition.set_to_value (1.0f);
-			transgroup.add_transition(transition);
-
-			transgroup.set_duration (duration);
-			transgroup.remove_on_complete = true;
-
-			if (background.get_transition ("close") != null) {
-				background.remove_transition ("close");
-			}
-			background.add_transition ("close", transgroup);
+			var scale_value = new GLib.Value (typeof (float));
+			scale_value.set_float (1.0f);
+			DeepinUtils.start_animation (background, "close",
+										 DeepinMultitaskingView.TOGGLE_DURATION,
+										 DeepinUtils.clutter_set_mode_bezier_out_back_small,
+										 "scale-x", &scale_value, "scale-y", &scale_value);
 
 			window_container.close ();
 		}

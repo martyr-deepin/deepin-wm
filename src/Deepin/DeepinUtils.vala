@@ -26,6 +26,8 @@ namespace Gala
 		const string KEY_WORKSPACE_NAMES = "workspace-names";
 		static GLib.Settings general_gsettings;
 
+		public delegate void CustomTimelineSetupFunc (Clutter.Timeline timeline);
+
 		/* WM functions */
 
 		struct DebugRule {
@@ -292,73 +294,26 @@ namespace Gala
 			return (int)((float)fontdsc.get_size () / Pango.SCALE);
 		}
 
-		/* Clutter progress functions */
-
-		// TODO: remove
-		public static double clutter_custom_mode_linear_out_back (Clutter.Timeline timeline,
-																	double elapsed, double total)
-		{
-			double p = elapsed / total;
-			if (p <= 0.9) {
-				return p * 1.25;
-			} else {
-				return p * -0.125 + 1.125;
-			}
-		}
-
-		public static double clutter_custom_mode_ease_out_bounce (Clutter.Timeline timeline,
-																  double t, double d)
-		{
-			return clutter_ease_out_bounce_internal (t, d);
-		}
-
-		public static double clutter_ease_out_bounce_internal (double t, double d)
-		{
-			double p = t / d;
-
-			if (p < (1 / 2.75))
-			{
-				return 7.5625 * p * p;
-			}
-			else if (p < (2 / 2.75))
-			{
-				p -= (1.5 / 2.75);
-
-				return 7.5625 * p * p + 0.75;
-			}
-			else if (p < (2.5 / 2.75))
-			{
-				p -= (2.25 / 2.75);
-
-				return 7.5625 * p * p + 0.9375;
-			}
-			else
-			{
-				p -= (2.625 / 2.75);
-
-				return 7.5625 * p * p + 0.984375;
-			}
-		}
-
-		// custom clutter progress modes
+		/* Custom clutter animation progress modes */
 
 		/**
-		 * Setup multitaskingview toggle animation for target actor.
+		 * Setup animations for target actor.
 		 *
 		 * Example:
 		 *     var scale_value = new GLib.Value (typeof (float));
 		 *     scale_value.set_float (0.5f);
-		 *     start_multitaskingview_toggle_animation (
-		 *         actor, "open", "scale-x", &scale_value, "scale-y", &scale_value);
+		 *     start_animation (
+		 *         actor, "name", 500, clutter_set_mode_bezier_out_back,
+		 *         "scale-x", &scale_value, "scale-y", &scale_value);
 		 *
 		 * @param name Transition name.
+		 * @param duration Transition duration.
+		 * @param func Custom transition progress function.
 		 * @param ... Property name and value pairs for transition.
 		 */
-		public static void start_multitaskingview_toggle_animation (Clutter.Actor actor,
-																	string name, ...)
+		public static void start_animation (Clutter.Actor actor, string name, int duration,
+											CustomTimelineSetupFunc func, ...)
 		{
-			int duration = DeepinMultitaskingView.TOGGLE_DURATION;
-
 			var trans_group = new Clutter.TransitionGroup ();
 			trans_group.set_duration (duration);
 			trans_group.remove_on_complete = true;
@@ -373,7 +328,7 @@ namespace Gala
 
 				var transition = new Clutter.PropertyTransition (prop_name);
 				transition.set_duration (duration);
-				DeepinUtils.clutter_set_mode_multitaskingview_toggle (transition);
+				func (transition);
 				transition.set_to_value (*value);
 
 				trans_group.add_transition(transition);
@@ -385,17 +340,16 @@ namespace Gala
 			actor.add_transition (name, trans_group);
 		}
 
-		public static void clutter_set_mode_multitaskingview_toggle (Clutter.Timeline timeline)
+		public static void clutter_set_mode_bezier_out_back (Clutter.Timeline timeline)
 		{
 			float x1 = 0.27f;
 			float y1 = 1.51f;
 			float x2 = 0.19f;
-			float y2 = 0.97f;
+			float y2 = 1.0f;
 			clutter_set_mode_cubic_bezier (timeline, x1, y1, x2, y2);
 		}
 
-		// TODO: rename
-		public static void clutter_set_mode_multitaskingview_background_close (Clutter.Timeline timeline)
+		public static void clutter_set_mode_bezier_out_back_small (Clutter.Timeline timeline)
 		{
 			float x1 = 0.25f;
 			float y1 = 1.23f;

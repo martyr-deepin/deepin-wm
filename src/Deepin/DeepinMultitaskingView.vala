@@ -593,8 +593,10 @@ namespace Gala
 				thumb_y_value.set_float (-(monitor_geom.height *
 										   DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
 			}
-			DeepinUtils.start_multitaskingview_toggle_animation (thumb_workspaces,
-																 "toggle", "y", &thumb_y_value);
+			DeepinUtils.start_animation (thumb_workspaces, "toggle",
+										 DeepinMultitaskingView.TOGGLE_DURATION,
+										 DeepinUtils.clutter_set_mode_bezier_out_back,
+										 "y", &thumb_y_value);
 
 			foreach (var child in flow_workspaces.get_children ()) {
 				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;

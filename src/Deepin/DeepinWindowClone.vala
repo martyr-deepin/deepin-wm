@@ -342,8 +342,10 @@ namespace Gala
 				var size_value = new GLib.Value (typeof (Size));
 				size_value.set_boxed (size);
 
-				DeepinUtils.start_multitaskingview_toggle_animation (
-					this, "window_slot", "position", &position_value, "size", &size_value);
+				DeepinUtils.start_animation (this, "window_slot",
+											 DeepinMultitaskingView.TOGGLE_DURATION,
+											 DeepinUtils.clutter_set_mode_bezier_out_back,
+											 "position", &position_value, "size", &size_value);
 			} else {
 				save_easing_state ();
 				set_easing_duration (0);
@@ -399,8 +401,10 @@ namespace Gala
 				var size_value = new GLib.Value (typeof (Size));
 				size_value.set_boxed (size);
 
-				DeepinUtils.start_multitaskingview_toggle_animation (
-					this, "window_slot", "position", &position_value, "size", &size_value);
+				DeepinUtils.start_animation (this, "window_slot",
+											 DeepinMultitaskingView.TOGGLE_DURATION,
+											 DeepinUtils.clutter_set_mode_bezier_out_back,
+											 "position", &position_value, "size", &size_value);
 			} else {
 				save_easing_state ();
 				set_easing_duration (0);

@@ -76,6 +76,7 @@ namespace Gala
 		{
 			do_relayout (false);
 		}
+		// TODO: select
 		void do_relayout (bool toggle_multitaskingview = false)
 		{
 			if (!opened) {
