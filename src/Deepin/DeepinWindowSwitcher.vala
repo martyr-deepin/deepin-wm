@@ -207,11 +207,11 @@ namespace Gala
 				return;
 			}
 
-			var window_type = TabList.NORMAL;
+			bool only_group_windows = false;
 			if (binding_name == "switch-group" || binding_name == "switch-group-backward") {
-				window_type = TabList.GROUP;
+				only_group_windows = true;
 			}
-			if (!collect_windows (workspace, window_type)) {
+			if (!collect_windows (workspace, only_group_windows)) {
 				return;
 			}
 
@@ -253,7 +253,7 @@ namespace Gala
 				if (visible && !closing) {
 					// add desktop item if need after popup shown
 					if (BehaviorSettings.get_default ().show_desktop_in_alt_tab) {
-						if (visible && window_type == TabList.NORMAL) {
+						if (visible && !only_group_windows) {
 							add_desktop_item ();
 						}
 					}
@@ -342,18 +342,30 @@ namespace Gala
 		 * @return whether the switcher should actually be started or if there are not enough
 		 *         windows
 		 */
-		bool collect_windows (Workspace workspace, TabList type)
+		bool collect_windows (Workspace workspace, bool only_group_windows)
 		{
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
 
 #if HAS_MUTTER314
-			var windows = display.get_tab_list (type, workspace);
-			var current = display.get_tab_current (type, workspace);
+			var all_windows = display.get_tab_list (TabList.NORMAL, workspace);
+			var current = display.get_tab_current (TabList.NORMAL, workspace);
 #else
-			var windows = display.get_tab_list (type, screen, workspace);
-			var current = display.get_tab_current (type, screen, workspace);
+			var all_windows = display.get_tab_list (TabList.NORMAL, screen, workspace);
+			var current = display.get_tab_current (TabList.NORMAL, screen, workspace);
 #endif
+
+			GLib.List<weak Meta.Window> windows;
+			if (!only_group_windows) {
+				windows = all_windows.copy ();
+			} else {
+				windows = new GLib.List<weak Meta.Window> ();
+				foreach (var window in all_windows) {
+					if (window.wm_class == current.wm_class) {
+						windows.append (window);
+					}
+				}
+			}
 
 			if (windows.length () < 1) {
 				return false;
