@@ -611,7 +611,7 @@ namespace Gala
 				unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
 
 				foreach (var actor in actors) {
-					const int MAX_OFFSET = 100;
+					// const int MAX_OFFSET = 100;
 
 					var window = actor.get_meta_window ();
 
@@ -619,9 +619,11 @@ namespace Gala
 						continue;
 					}
 
-					var clone = new SafeWindowClone (window, true);
-					clone.opacity = 0;
-					dock_clones.add_child (clone);
+					var dock = new SafeWindowClone (window, true);
+					dock.x = actor.x;
+					dock.y = actor.y;
+					dock.opacity = 0;
+					dock_clones.add_child (dock);
 				}
 			} else {
 				foreach (var child in dock_clones.get_children ()) {
