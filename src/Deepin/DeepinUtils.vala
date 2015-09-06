@@ -137,13 +137,14 @@ namespace Gala
 		/**
 		 * Append a new workspace.
 		 */
-		public static void append_new_workspace (Meta.Screen screen, bool activate = true)
+		public static unowned Meta.Workspace? append_new_workspace (Meta.Screen screen,
+																	bool activate = true)
 		{
 			if (Meta.Prefs.get_num_workspaces () >= WindowManagerGala.MAX_WORKSPACE_NUM) {
-				return;
+				return null;
 			}
 			uint32 timestamp = screen.get_display ().get_current_time ();
-			screen.append_new_workspace (activate, timestamp);
+			return screen.append_new_workspace (activate, timestamp);
 		}
 
 		/**

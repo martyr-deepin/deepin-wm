@@ -424,7 +424,7 @@ namespace Gala
 			case Clutter.Key.plus:
 			case Clutter.Key.equal:
 			case Clutter.Key.KP_Add:
-				DeepinUtils.append_new_workspace (screen);
+				thumb_workspaces.append_new_workspace ();
 				break;
 			case Clutter.Key.minus:
 			case Clutter.Key.KP_Subtract:
@@ -432,7 +432,7 @@ namespace Gala
 				var workspace = thumb_workspaces.get_child_at_index (i);
 				(workspace as DeepinWorkspaceThumbClone).remove_workspace ();
 				break;
-			// TODO: F2, rename, show help dialog etc
+			// TODO: F2(rename), Ctrl-?(show help dialog), etc
 			case Clutter.Key.Return:
 			case Clutter.Key.KP_Enter:
 				if (get_active_workspace_clone ().window_container.has_selected_window ()) {
