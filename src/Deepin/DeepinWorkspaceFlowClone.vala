@@ -202,7 +202,7 @@ namespace Gala
 			window_container.add_window (window);
 
 			// start bulge animation after window added by all containers
-			thumb_workspace.start_window_added_animation ();
+			thumb_workspace.start_bulge_animation ();
 		}
 
 		/**
@@ -256,10 +256,10 @@ namespace Gala
 
 			var scale_value = new GLib.Value (typeof (float));
 			scale_value.set_float (scale);
-			DeepinUtils.start_animation (background, "open",
-										 DeepinMultitaskingView.TOGGLE_DURATION,
-										 DeepinUtils.clutter_set_mode_bezier_out_back,
-										 "scale-x", &scale_value, "scale-y", &scale_value);
+			DeepinUtils.start_animation_group (background, "open",
+											   DeepinMultitaskingView.TOGGLE_DURATION,
+											   DeepinUtils.clutter_set_mode_bezier_out_back,
+											   "scale-x", &scale_value, "scale-y", &scale_value);
 
 			window_container.padding_top = top_offset;
 			window_container.padding_left = window_container.padding_right =
@@ -294,10 +294,10 @@ namespace Gala
 
 			var scale_value = new GLib.Value (typeof (float));
 			scale_value.set_float (1.0f);
-			DeepinUtils.start_animation (background, "close",
-										 DeepinMultitaskingView.TOGGLE_DURATION,
-										 DeepinUtils.clutter_set_mode_bezier_out_back_small,
-										 "scale-x", &scale_value, "scale-y", &scale_value);
+			DeepinUtils.start_animation_group (background, "close",
+											   DeepinMultitaskingView.TOGGLE_DURATION,
+											   DeepinUtils.clutter_set_mode_bezier_out_back_small,
+											   "scale-x", &scale_value, "scale-y", &scale_value);
 
 			window_container.close ();
 		}

@@ -84,6 +84,9 @@ namespace Gala
 			opened = false;
 			screen = wm.get_screen ();
 
+			// TODO: ask for workspace switch duration
+			// WORKSPACE_SWITCH_DURATION = AnimationSettings.get_default ().workspace_switch_duration;
+
 			flow_workspaces = new Actor ();
 
 			thumb_workspaces = new DeepinWorkspaceThumbContainer (screen);
@@ -301,7 +304,9 @@ namespace Gala
 			workspace.selected.connect (activate_workspace);
 
 			// TODO: add workspace animation
-			DeepinWorkspaceThumbContainer.start_child_add_animation (workspace);
+			DeepinUtils.start_fade_in_animation (workspace,
+												 DeepinWorkspaceThumbContainer.CHILD_FADE_DURATION,
+												 DeepinWorkspaceThumbContainer.CHILD_FADE_MODE);
 
 			flow_workspaces.insert_child_at_index (workspace, num);
 
@@ -423,8 +428,11 @@ namespace Gala
 				break;
 			case Clutter.Key.minus:
 			case Clutter.Key.KP_Subtract:
-				DeepinUtils.remove_workspace (screen);
+				var i = screen.get_active_workspace_index ();
+				var workspace = thumb_workspaces.get_child_at_index (i);
+				(workspace as DeepinWorkspaceThumbClone).remove_workspace ();
 				break;
+			// TODO: F2, rename, show help dialog etc
 			case Clutter.Key.Return:
 			case Clutter.Key.KP_Enter:
 				if (get_active_workspace_clone ().window_container.has_selected_window ()) {
@@ -593,10 +601,10 @@ namespace Gala
 				thumb_y_value.set_float (-(monitor_geom.height *
 										   DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
 			}
-			DeepinUtils.start_animation (thumb_workspaces, "toggle",
-										 DeepinMultitaskingView.TOGGLE_DURATION,
-										 DeepinUtils.clutter_set_mode_bezier_out_back,
-										 "y", &thumb_y_value);
+			DeepinUtils.start_animation_group (thumb_workspaces, "toggle",
+											   DeepinMultitaskingView.TOGGLE_DURATION,
+											   DeepinUtils.clutter_set_mode_bezier_out_back,
+											   "y", &thumb_y_value);
 
 			foreach (var child in flow_workspaces.get_children ()) {
 				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;

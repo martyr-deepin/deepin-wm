@@ -26,6 +26,8 @@ namespace Gala
 		const string KEY_WORKSPACE_NAMES = "workspace-names";
 		static GLib.Settings general_gsettings;
 
+		public delegate void PlainCallback ();
+
 		public delegate void CustomTimelineSetupFunc (Clutter.Timeline timeline);
 
 		/* WM functions */
@@ -297,22 +299,122 @@ namespace Gala
 		/* Custom clutter animation progress modes */
 
 		/**
-		 * Setup animations for target actor.
+		 * Start fade-in animation for target actor which used for actor adding.
+		 *
+		 * @param actor Target actor.
+		 * @param duration Animation duration.
+		 * @param mode Animation progress mode.
+		 * @param cb Callback function when animation completed.
+		 * @param cb_progress The marker progress to excuted the callback function, default value is
+		 *                    1.0 means the callback function will be run when animation completed.
+		 * @return Transition name.
+		 */
+		public static string start_fade_in_animation (
+			Clutter.Actor actor, int duration,
+			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUAD,
+			PlainCallback? cb = null, double cb_progress = 1.0)
+		{
+			var trans_name = "scale-x";
+
+			actor.set_pivot_point (0.5f, 0.5f);
+
+			actor.save_easing_state ();
+
+			actor.set_easing_duration (0);
+			actor.set_scale (0.2, 0.2);
+			actor.opacity = 12;
+
+			actor.set_easing_duration (duration);
+			actor.set_easing_mode (mode);
+			actor.set_scale (1.0, 1.0);
+			actor.opacity = 255;
+
+			actor.restore_easing_state ();
+
+			// run callback function if exists
+			if (cb != null) {
+				var transition = actor.get_transition (trans_name);
+				if (transition != null) {
+					transition.add_marker ("callback-marker", cb_progress);
+					transition.marker_reached.connect ((marker_name, msecs) => {
+						cb ();
+					});
+				} else {
+					cb ();
+				}
+			}
+
+			return trans_name;
+		}
+
+		/**
+		 * Start fade-out animation for target actor which used for actor removing.
+		 *
+		 * @param actor Target actor.
+		 * @param duration Animation duration.
+		 * @param mode Animation progress mode.
+		 * @param cb Callback function when animation completed.
+		 * @param cb_progress The marker progress to excuted the callback function, default value is
+		 *                    1.0 means the callback function will be run when animation completed.
+		 * @return Transition name.
+		 */
+		public static string start_fade_out_animation (
+			Clutter.Actor actor, int duration,
+			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUAD,
+			PlainCallback? cb = null, double cb_progress = 1.0)
+		{
+			var trans_name = "scale-x";
+
+			actor.set_pivot_point (0.5f, 0.5f);
+
+			actor.save_easing_state ();
+
+			actor.set_easing_duration (0);
+			actor.set_scale (1.0, 1.0);
+			actor.opacity = 255;
+
+			// TODO 85%time, 1.3s duration
+			actor.set_easing_duration (duration);
+			actor.set_easing_mode (mode);
+			actor.set_scale (0.2, 0.2);
+			actor.opacity = 12;
+
+			actor.restore_easing_state ();
+
+			// run callback function if exists
+			if (cb != null) {
+				var transition = actor.get_transition (trans_name);
+				if (transition != null) {
+					transition.add_marker ("callback-marker", cb_progress);
+					transition.marker_reached.connect ((marker_name, msecs) => {
+						cb ();
+					});
+				} else {
+					cb ();
+				}
+			}
+
+			return trans_name;
+		}
+
+		/**
+		 * Setup animation group for target actor.
 		 *
 		 * Example:
 		 *     var scale_value = new GLib.Value (typeof (float));
 		 *     scale_value.set_float (0.5f);
-		 *     start_animation (
+		 *     start_animation_group (
 		 *         actor, "name", 500, clutter_set_mode_bezier_out_back,
 		 *         "scale-x", &scale_value, "scale-y", &scale_value);
 		 *
-		 * @param name Transition name.
-		 * @param duration Transition duration.
+		 * @param actor Target actor.
+		 * @param name Animation name.
+		 * @param duration Animation duration.
 		 * @param func Custom transition progress function.
 		 * @param ... Property name and value pairs for transition.
 		 */
-		public static void start_animation (Clutter.Actor actor, string name, int duration,
-											CustomTimelineSetupFunc func, ...)
+		public static void start_animation_group (Clutter.Actor actor, string name, int duration,
+												  CustomTimelineSetupFunc func, ...)
 		{
 			var trans_group = new Clutter.TransitionGroup ();
 			trans_group.set_duration (duration);

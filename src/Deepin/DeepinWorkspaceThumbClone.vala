@@ -169,10 +169,7 @@ namespace Gala
 
 		public void set_select (bool value, bool animate = true)
 		{
-			// TODO: ask for workspace switch duration
-			// int duration = animate ? AnimationSettings.get_default ().workspace_switch_duration : 0;
 			int duration = animate ? DeepinMultitaskingView.WORKSPACE_SWITCH_DURATION : 0;
-			// duration = DeepinWorkspaceNameField.SELECT_DURATION;
 
 			// selected shape for workspace thumbnail clone
 			thumb_shape.save_easing_state ();
@@ -267,13 +264,11 @@ namespace Gala
 		public const AnimationMode SELECT_MODE = AnimationMode.LINEAR;
 
 		public const int WORKSPACE_NAME_WIDTH = 70;
-		// TODO:
-		// public const int WORKSPACE_NAME_WIDTH = 86;
 		public const int WORKSPACE_NAME_HEIGHT = 24;
 
 		const int WORKSPACE_NAME_MAX_LENGTH = 32;
 
-		const int NAME_SHAPE_PADDING = 8;
+		const int NAME_SHAPE_PADDING = 5;
 
 		// layout spacing for workspace name field
 		const int WORKSPACE_NAME_SPACING = 5;
@@ -304,7 +299,6 @@ namespace Gala
 			name_shape = new DeepinCssActor ("deepin-workspace-thumb-clone-name");
 			name_shape.reactive = true;
 			name_shape.set_pivot_point (0.5f, 0.5f);
-			// name_shape.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);// TODO:
 
 			name_shape.button_press_event.connect (on_name_button_press_event);
 
@@ -317,7 +311,6 @@ namespace Gala
 			var name_font = DeepinUtils.get_css_font ("deepin-workspace-thumb-clone-name");
 
 			workspace_name_num = new Text ();
-			// workspace_name_num.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);// TODO:
 			workspace_name_num.set_font_description (name_font);
 
 			workspace_name_text = new Text ();
@@ -327,7 +320,6 @@ namespace Gala
 			workspace_name_text.ellipsize = Pango.EllipsizeMode.END;
 			workspace_name_text.max_length = WORKSPACE_NAME_MAX_LENGTH;
 			workspace_name_text.single_line_mode = true;
-			// workspace_name_text.set_easing_mode (DeepinMultitaskingView.WORKSPACE_SWITCH_MODE);// TODO:
 			workspace_name_text.set_font_description (name_font);
 			workspace_name_text.selection_color =
 				DeepinUtils.get_css_background_color ("deepin-text-selection");
@@ -398,34 +390,22 @@ namespace Gala
 
 		public void set_select (bool value, bool animate = true)
 		{
-			// TODO:
-			// int duration = animate ? AnimationSettings.get_default ().workspace_switch_duration : 0;
 			int duration = animate ? DeepinMultitaskingView.WORKSPACE_SWITCH_DURATION : 0;
-			// duration = SELECT_DURATION;
 
 			// selected shape for workspace name field
 			name_shape.save_easing_state ();
 
-			name_shape.set_easing_duration (duration);// TODO:
-			// name_shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
+			name_shape.set_easing_duration (duration);
 			name_shape.set_easing_mode (SELECT_MODE);
 			name_shape.select = value;
 
-			// TODO: scale
 			if (value) {
 				name_shape.scale_x = 1.1;
 				name_shape.scale_y = 1.1;
-				// name_shape.scale_x = 1.033;
-				// name_shape.scale_y = 1.033;
 			} else {
 				name_shape.scale_x = 1.0;
 				name_shape.scale_y = 1.0;
 			}
-			// if (value) {
-			// 	name_shape.set_scale (1.1, 1.1);
-			// } else {
-			// 	name_shape.set_scale (1.0, 1.0);
-			// }
 
 			name_shape.restore_easing_state ();
 
@@ -448,7 +428,6 @@ namespace Gala
 			workspace_name_text.restore_easing_state ();
 		}
 
-		// TODO: when setup fallback_key_focus
 		public void reset_key_focus ()
 		{
 			get_stage ().set_key_focus (fallback_key_focus);
@@ -537,7 +516,7 @@ namespace Gala
 		/*
 		 * Remove current workspace and moving all the windows to preview workspace.
 		 */
-		void remove_workspace ()
+		public void remove_workspace ()
 		{
 			if (Prefs.get_num_workspaces () <= 1) {
 				// there is only one workspace, just ignore
@@ -547,17 +526,11 @@ namespace Gala
 			workspace_name.reset_key_focus ();
 
 			// TODO: animation
-			DeepinWorkspaceThumbContainer.start_child_remove_animation (this);
-
-			var transition = get_transition ("scale-x");
-			if (transition != null) {
-				// stdout.printf ("transition is not null\n");// TODO:
-				transition.completed.connect (
-					() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
-			} else {
-				// stdout.printf ("transition is null\n");// TODO:
-				DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
-			}
+			DeepinUtils.start_fade_out_animation (
+				this,
+				DeepinWorkspaceThumbContainer.CHILD_FADE_DURATION,
+				DeepinWorkspaceThumbContainer.CHILD_FADE_MODE,
+				() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
 		}
 
 		public void set_select (bool value, bool animate = true)
@@ -566,9 +539,9 @@ namespace Gala
 			workspace_name.set_select (value, animate);
 		}
 
+		// TODO: refactor
 		public void start_show_animation ()
 		{
-			// TODO:
 			thumb_clone.set_pivot_point (0.5f, 0.5f);
 			workspace_name.set_pivot_point (0.5f, 0.5f);
 
@@ -603,8 +576,7 @@ namespace Gala
 			}
 		}
 
-		// TODO: rename
-		public void start_window_added_animation ()
+		public void start_bulge_animation ()
 		{
 			// TODO: ask for animation, thumbnail bulge
 			var transgroup = new TransitionGroup ();

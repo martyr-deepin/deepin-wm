@@ -55,8 +55,9 @@ namespace Gala
 	}
 
 	/**
-	 * This class contains the DeepinWorkspaceThumbClone at the top and will take care of displaying
-	 * actors for inserting windows between the groups once implemented.
+	 * This class contains the DeepinWorkspaceThumbClone which placed in the top of multitaskingview
+	 * and will take care of displaying actors for inserting windows between the groups once
+	 * implemented.
 	 */
 	public class DeepinWorkspaceThumbContainer : Actor
 	{
@@ -64,6 +65,10 @@ namespace Gala
 		 * The percent value between thumbnail workspace clone's width and monitor's width.
 		 */
 		public const float WORKSPACE_WIDTH_PERCENT = 0.12f;
+
+		public const int CHILD_FADE_DURATION = 400;
+		// public const int CHILD_FADE_DURATION = 1500;// TODO: test
+		public const AnimationMode CHILD_FADE_MODE = AnimationMode.EASE_OUT_QUAD;
 
 		/**
 		 * The percent value between distance of thumbnail workspace clones and monitor's width.
@@ -73,10 +78,6 @@ namespace Gala
 		// TODO: animation
 		const int LAYOUT_DURATION = 500;
 		const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
-
-		// TODO: ask for animation, plus_button add/remove
-		const int CHILD_ADD_REMOVE_DURATION = 400;
-		const AnimationMode CHILD_ADD_REMOVE_MODE = AnimationMode.EASE_OUT_QUAD;
 
 		public Screen screen { get; construct; }
 
@@ -92,25 +93,19 @@ namespace Gala
 			plus_button.set_easing_duration (LAYOUT_DURATION);
 			plus_button.set_easing_mode (LAYOUT_MODE);
 			plus_button.button_press_event.connect (() => {
-				name = start_child_remove_animation (plus_button);
-
-				var transition = plus_button.get_transition (name);
-				if (transition != null) {
-					transition.completed.connect (() => {
-						remove_child (plus_button);
-						DeepinUtils.append_new_workspace (screen);
-					});
-				} else {
-					remove_child (plus_button);
+				var trans_name = DeepinUtils.start_fade_out_animation (plus_button,
+																	  CHILD_FADE_DURATION,
+																	  CHILD_FADE_MODE, () => {
+				 	remove_child (plus_button);
 					DeepinUtils.append_new_workspace (screen);
-				}
-
+				});
 				return false;
 			});
 
 			append_plus_button ();
 		}
 
+		// TODO: remove
 		// void on_append_workspace ()
 		// {
 		// 	plus_button.transitions_completed.disconnect (on_append_workspace);
@@ -127,7 +122,7 @@ namespace Gala
 				!contains (plus_button)) {
 				place_child (plus_button, get_n_children ());
 				insert_child_at_index (plus_button, get_n_children ());
-				start_child_add_animation (plus_button);
+				DeepinUtils.start_fade_in_animation (plus_button, CHILD_FADE_DURATION, CHILD_FADE_MODE);
 			}
 		}
 
@@ -142,51 +137,6 @@ namespace Gala
 		// 		});
 		// 	}
 		// }
-
-		public static string start_child_add_animation (Actor child)
-		{
-			// TODO:
-			child.set_pivot_point (0.5f, 0.5f);
-
-			child.save_easing_state ();
-
-			child.set_easing_duration (0);
-			child.set_scale (0, 0);
-			child.opacity = 12;
-
-			// TODO: ask for animation, plus_button add/remove
-			child.set_easing_duration (CHILD_ADD_REMOVE_DURATION);// TODO:
-			child.set_easing_mode (CHILD_ADD_REMOVE_MODE);
-			child.set_scale (1.0, 1.0);
-			child.opacity = 255;
-
-			child.restore_easing_state ();
-
-			return "scale-x";
-		}
-
-		public static string start_child_remove_animation (Actor child)
-		{
-			// TODO:
-			child.set_pivot_point (0.5f, 0.5f);
-
-			child.save_easing_state ();
-
-			child.set_easing_duration (0);
-			child.set_scale (1.0, 1.0);
-			child.opacity = 255;
-
-			// TODO 85%time, 1.3s duration
-			// TODO: ask for animation, plus_button add/remove
-			child.set_easing_duration (CHILD_ADD_REMOVE_DURATION);// TODO:
-			child.set_easing_mode (CHILD_ADD_REMOVE_MODE);
-			child.set_scale (0.2, 0.2);
-			child.opacity = 12;
-
-			child.restore_easing_state ();
-
-			return "scale-x";
-		}
 
 		public void add_workspace (DeepinWorkspaceThumbClone workspace_clone)
 		{
@@ -215,6 +165,7 @@ namespace Gala
 			// 	append_plus_button ();
 			// }
 
+			// TODO:
 			workspace_clone.workspace_name.grab_key_focus_for_name ();
 
 			relayout ();
@@ -260,16 +211,8 @@ namespace Gala
 		{
 			var i = 0;
 			foreach (var child in get_children ()) {
-				child.save_easing_state ();
-
-				// TODO: animation relayout
-				child.set_easing_duration (LAYOUT_DURATION);
-				// child.set_easing_duration (0);
-
 				place_child (child, i);
 				i++;
-
-				child.restore_easing_state ();
 
 				if (child is DeepinWorkspaceThumbClone) {
 					(child as DeepinWorkspaceThumbClone).workspace_name.get_workspace_name ();
@@ -289,7 +232,7 @@ namespace Gala
 			height = width * monitor_whr;
 		}
 
-		void place_child (Actor child, int index)
+		void place_child (Actor child, int index, bool animate = true)
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
@@ -301,8 +244,20 @@ namespace Gala
 			get_thumb_size (screen, out child_width, out child_height);
 			child_x = (child_width + child_spacing) * index;
 
-			child.x = child_x;
-			child.y = child_y;
+			if (animate) {
+				var position = Point.alloc ();
+				position.x = child_x;
+				position.y = child_y;
+				var position_value = new GLib.Value (typeof (Point));
+				position_value.set_boxed (position);
+				DeepinUtils.start_animation_group (child, "thumb-workspace-slot", LAYOUT_DURATION,
+												   DeepinUtils.clutter_set_mode_bezier_out_back,
+												   "position", &position_value);
+			} else {
+				child.x = child_x;
+				child.y = child_y;
+			}
+
 			child.width = child_width;
 
 			// For DeepinWorkspaceThumbClone, its height will be allocated by iteself
