@@ -25,7 +25,7 @@ namespace Gala
 	 * Container which controls the layout of a set of window clones. The clones will be placed
 	 * in rows and columns.
 	 */
-	public class DeepinWindowCloneFlowContainer : DeepinWindowCloneBaseContainer
+	public class DeepinWindowFlowContainer : DeepinWindowBaseContainer
 	{
 		public int padding_top { get; set; default = 12; }
 		public int padding_left { get; set; default = 12; }
@@ -39,7 +39,7 @@ namespace Gala
 		 */
 		List<InternalUtils.TilableWindow?> window_positions;
 
-		public DeepinWindowCloneFlowContainer (Workspace workspace)
+		public DeepinWindowFlowContainer (Workspace workspace)
 		{
 			Object (workspace: workspace);
 		}

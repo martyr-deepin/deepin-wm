@@ -23,7 +23,7 @@ namespace Gala
 	/**
 	 * Base container to controls the layout of a set of window clones.
 	 */
-	public abstract class DeepinWindowCloneBaseContainer : Actor
+	public abstract class DeepinWindowBaseContainer : Actor
 	{
 		public signal void window_added (Window window);
 		public signal void window_activated (Window window);
@@ -58,7 +58,7 @@ namespace Gala
 		public abstract void do_select_clone (DeepinWindowClone window_clone, bool select,
 											  bool animate = true);
 
-		public DeepinWindowCloneBaseContainer (Workspace workspace)
+		public DeepinWindowBaseContainer (Workspace workspace)
 		{
 			Object (workspace: workspace);
 		}
@@ -68,7 +68,7 @@ namespace Gala
 			actor_added.connect (on_actor_added);
 		}
 
-		~DeepinWindowCloneBaseContainer ()
+		~DeepinWindowBaseContainer ()
 		{
 			actor_added.disconnect (on_actor_added);
 		}

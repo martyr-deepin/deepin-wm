@@ -24,12 +24,12 @@ namespace Gala
 	 * Container which controls the layout of a set of window clones. The clones will be placed in
 	 * their real position with scaled size.
 	 */
-	public class DeepinWindowCloneThumbContainer : DeepinWindowCloneBaseContainer
+	public class DeepinWindowThumbContainer : DeepinWindowBaseContainer
 	{
 		const int WINDOW_OPACITY_SELECTED = 255;
 		const int WINDOW_OPACITY_UNSELECTED = 150;
 
-		public DeepinWindowCloneThumbContainer (Workspace workspace)
+		public DeepinWindowThumbContainer (Workspace workspace)
 		{
 			Object (workspace: workspace);
 		}
@@ -81,8 +81,8 @@ namespace Gala
 		public override Meta.Rectangle get_layout_rect_for_window (DeepinWindowClone window_clone)
 		{
 			float thumb_width, thumb_height;
-			DeepinWorkspaceThumbCloneContainer.get_thumb_size (
-				workspace.get_screen (), out thumb_width, out thumb_height);
+			DeepinWorkspaceThumbContainer.get_thumb_size (workspace.get_screen (), 
+														  out thumb_width, out thumb_height);
 
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 			float scale = thumb_width != 0 ? thumb_width / (float)monitor_geom.width : 0.5f;

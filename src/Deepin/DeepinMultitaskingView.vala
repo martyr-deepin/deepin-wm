@@ -68,7 +68,7 @@ namespace Gala
 
 		Actor dock_clones;
 		Actor flow_workspaces;
-		DeepinWorkspaceThumbCloneContainer thumb_workspaces;
+		DeepinWorkspaceThumbContainer thumb_workspaces;
 
 		public DeepinMultitaskingView (WindowManager wm)
 		{
@@ -86,7 +86,7 @@ namespace Gala
 
 			flow_workspaces = new Actor ();
 
-			thumb_workspaces = new DeepinWorkspaceThumbCloneContainer (screen);
+			thumb_workspaces = new DeepinWorkspaceThumbContainer (screen);
 			// TODO: layout binding
 			thumb_workspaces.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
 			// thumb_workspaces.add_constraint (new BindConstraint (flow_workspaces, BindCoordinate.X, 0));
@@ -301,7 +301,7 @@ namespace Gala
 			workspace.selected.connect (activate_workspace);
 
 			// TODO: add workspace animation
-			DeepinWorkspaceThumbCloneContainer.start_child_add_animation (workspace);
+			DeepinWorkspaceThumbContainer.start_child_add_animation (workspace);
 
 			flow_workspaces.insert_child_at_index (workspace, num);
 

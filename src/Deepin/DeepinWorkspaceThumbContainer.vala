@@ -58,7 +58,7 @@ namespace Gala
 	 * This class contains the DeepinWorkspaceThumbClone at the top and will take care of displaying
 	 * actors for inserting windows between the groups once implemented.
 	 */
-	public class DeepinWorkspaceThumbCloneContainer : Actor
+	public class DeepinWorkspaceThumbContainer : Actor
 	{
 		/**
 		 * The percent value between thumbnail workspace clone's width and monitor's width.
@@ -82,7 +82,7 @@ namespace Gala
 
 		Actor plus_button;
 
-		public DeepinWorkspaceThumbCloneContainer (Screen screen)
+		public DeepinWorkspaceThumbContainer (Screen screen)
 		{
 			Object (screen: screen);
 

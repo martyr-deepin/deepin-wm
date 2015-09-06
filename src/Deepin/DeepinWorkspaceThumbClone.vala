@@ -41,7 +41,7 @@ namespace Gala
 
 		public Workspace workspace { get; construct; }
 
-		public DeepinWindowCloneThumbContainer window_container;
+		public DeepinWindowThumbContainer window_container;
 
 		// selected shape for workspace thumbnail clone
 		Actor thumb_shape;
@@ -95,7 +95,7 @@ namespace Gala
 			// TODO: background size
 			workspace_clone.add_child (background);
 
-			window_container = new DeepinWindowCloneThumbContainer (workspace);
+			window_container = new DeepinWindowThumbContainer (workspace);
 			window_container.window_activated.connect ((w) => selected ());
 			window_container.window_dragging.connect ((w) => {
 				// If window is dragging in thumbnail workspace, make close button manually or it
@@ -197,14 +197,14 @@ namespace Gala
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 			return (int)(monitor_geom.width *
-				DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
+				DeepinWorkspaceThumbContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
 		int get_thumb_workspace_prefer_heigth ()
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 			return (int)(monitor_geom.height *
-				DeepinWorkspaceThumbCloneContainer.WORKSPACE_WIDTH_PERCENT);
+				DeepinWorkspaceThumbContainer.WORKSPACE_WIDTH_PERCENT);
 		}
 
 		public override void allocate (ActorBox box, AllocationFlags flags)
@@ -499,7 +499,7 @@ namespace Gala
 
 		public Workspace workspace { get; construct; }
 
-		public DeepinWindowCloneThumbContainer window_container;
+		public DeepinWindowThumbContainer window_container;
 
 		// TODO: rename
 		DeepinWorkspaceThumbCloneCore thumb_clone;
@@ -547,7 +547,7 @@ namespace Gala
 			workspace_name.reset_key_focus ();
 
 			// TODO: animation
-			DeepinWorkspaceThumbCloneContainer.start_child_remove_animation (this);
+			DeepinWorkspaceThumbContainer.start_child_remove_animation (this);
 
 			var transition = get_transition ("scale-x");
 			if (transition != null) {

@@ -23,7 +23,7 @@ namespace Gala
 {
 	/**
 	 * This is the container which manages a clone of the background which will be scaled and
-	 * animated inwards, a DeepinWindowCloneFlowContainer for the windows on this workspace and also
+	 * animated inwards, a DeepinWindowFlowContainer for the windows on this workspace and also
 	 * holds the instance for the DeepinWorkspaceThumbClone.  The latter is not added to the
 	 * DeepinWorkspaceFlowClone itself though but to a container of the DeepinMultitaskingView.
 	 */
@@ -50,7 +50,7 @@ namespace Gala
 		public signal void selected (bool close_view);
 
 		public Workspace workspace { get; construct; }
-		public DeepinWindowCloneFlowContainer window_container { get; private set; }
+		public DeepinWindowFlowContainer window_container { get; private set; }
 
 		/**
 		 * Own the related thumbnail workspace clone so that signals and events could be dispatched
@@ -93,7 +93,7 @@ namespace Gala
 				}
 			});
 
-			window_container = new DeepinWindowCloneFlowContainer (workspace);
+			window_container = new DeepinWindowFlowContainer (workspace);
 			window_container.window_activated.connect ((w) => window_activated (w));
 			window_container.window_selected.connect (
 				(w) => thumb_workspace.window_container.select_window (w, false));
@@ -181,7 +181,7 @@ namespace Gala
 		}
 
 		/**
-		 * Add a window to the DeepinWindowCloneFlowContainer and the DeepinWorkspaceThumbClone if
+		 * Add a window to the DeepinWindowFlowContainer and the DeepinWorkspaceThumbClone if
 		 * it really belongs to this workspace and this monitor.
 		 */
 		void add_window (Window window)
@@ -206,7 +206,7 @@ namespace Gala
 		}
 
 		/**
-		 * Remove a window from DeepinWindowCloneFlowContainer and DeepinWorkspaceThumbClone.
+		 * Remove a window from DeepinWindowFlowContainer and DeepinWorkspaceThumbClone.
 		 */
 		void remove_window (Window window)
 		{
@@ -228,8 +228,8 @@ namespace Gala
 
 		/**
 		 * Animates the background to its scale, causes a redraw on the DeepinWorkspaceThumbClone
-		 * and makes sure the DeepinWindowCloneFlowContainer animates its windows to their tiled
-		 * layout.  Also sets the current_window of the DeepinWindowCloneFlowContainer to the active
+		 * and makes sure the DeepinWindowFlowContainer animates its windows to their tiled
+		 * layout.  Also sets the current_window of the DeepinWindowFlowContainer to the active
 		 * window if it belongs to this workspace.
 		 */
 		public void open ()
