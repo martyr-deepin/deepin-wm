@@ -75,9 +75,7 @@ namespace Gala
 		 */
 		const float SPACING_PERCENT = 0.02f;
 
-		// TODO: animation
-		const int LAYOUT_DURATION = 500;
-		const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
+		const int LAYOUT_DURATION = 800;
 
 		public Screen screen { get; construct; }
 
@@ -92,8 +90,6 @@ namespace Gala
 			plus_button = new DeepinWorkspaceAddButton ();
 			plus_button.reactive = true;
 			plus_button.set_pivot_point (0.5f, 0.5f);
-			plus_button.set_easing_duration (LAYOUT_DURATION);
-			plus_button.set_easing_mode (LAYOUT_MODE);
 			plus_button.button_press_event.connect (() => {
 				append_new_workspace ();
 				return false;
@@ -101,39 +97,6 @@ namespace Gala
 
 			append_plus_button ();
 		}
-
-		// TODO: remove
-		// void on_append_workspace ()
-		// {
-		// 	plus_button.transitions_completed.disconnect (on_append_workspace);
-		// 	remove_child (plus_button);
-		// 	DeepinUtils.append_new_workspace (screen);
-		// }
-
-		/**
-		 * Make plus button visible if workspace number less than MAX_WORKSPACE_NUM.
-		 */
-		void append_plus_button ()
-		{
-			if (Prefs.get_num_workspaces () < WindowManagerGala.MAX_WORKSPACE_NUM &&
-				!contains (plus_button)) {
-				place_child (plus_button, get_n_children ());
-				insert_child_at_index (plus_button, get_n_children ());
-				DeepinUtils.start_fade_in_animation (plus_button, CHILD_FADE_DURATION, CHILD_FADE_MODE);
-			}
-		}
-
-		// TODO: remove
-		// void remove_plus_button ()
-		// {
-		// 	if (contains (plus_button)) {
-		// 		start_child_remove_animation (plus_button);
-		// 		plus_button.transitions_completed.connect (() => {
-		// 			remove_child (plus_button);
-		// 			relayout ();
-		// 		});
-		// 	}
-		// }
 
 		public void append_new_workspace ()
 		{
@@ -157,20 +120,8 @@ namespace Gala
 
 			insert_child_at_index (workspace_clone, index);
 
-			// TODO:
-			workspace_clone.start_show_animation ();
-			workspace_clone.transitions_completed.connect (append_plus_button);
-
-			// TODO:
-			// workspace_clone.set_pivot_point (0.5f, 0.5f);
-			// var name = start_child_add_animation (workspace_clone);
-
-			// var transition = workspace_clone.get_transition (name);
-			// if (transition != null) {
-			// 	transition.completed.connect (append_plus_button);
-			// } else {
-			// 	append_plus_button ();
-			// }
+			workspace_clone.start_fade_in_animation ();
+			workspace_clone.thumb_clone.transitions_completed.connect (append_plus_button);
 
 			if (workspace_clone.workspace.index () == new_workspace_index_manually) {
 				workspace_clone.workspace_name.grab_key_focus_for_name ();
@@ -229,7 +180,32 @@ namespace Gala
 			}
 		}
 
-		public static void get_thumb_size (Screen screen, out float width, out float height)
+		/**
+		 * Make plus button visible if workspace number less than MAX_WORKSPACE_NUM.
+		 */
+		void append_plus_button ()
+		{
+			if (Prefs.get_num_workspaces () < WindowManagerGala.MAX_WORKSPACE_NUM &&
+				!contains (plus_button)) {
+				place_child (plus_button, get_n_children ());
+				insert_child_at_index (plus_button, get_n_children ());
+				DeepinUtils.start_fade_in_animation (plus_button, CHILD_FADE_DURATION, CHILD_FADE_MODE);
+			}
+		}
+
+		// TODO: remove
+		// void remove_plus_button ()
+		// {
+		// 	if (contains (plus_button)) {
+		// 		start_child_remove_animation (plus_button);
+		// 		plus_button.transitions_completed.connect (() => {
+		// 			remove_child (plus_button);
+		// 			relayout ();
+		// 		});
+		// 	}
+		// }
+
+		public static void get_prefer_thumb_size (Screen screen, out float width, out float height)
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
@@ -237,41 +213,54 @@ namespace Gala
 			float monitor_whr = (float)monitor_geom.height / monitor_geom.width;
 
 			width = monitor_geom.width * WORKSPACE_WIDTH_PERCENT;
-			;
 			height = width * monitor_whr;
+		}
+
+		public static ActorBox get_child_layout_box (Screen screen, int index,
+													 bool is_thumb_clone = false)
+		{
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+
+			var box = ActorBox ();
+
+			float child_x = 0, child_y = 0;
+			float child_width = 0, child_height = 0;
+			float child_spacing = monitor_geom.width * SPACING_PERCENT;
+
+			get_prefer_thumb_size (screen, out child_width, out child_height);
+			child_x = (child_width + child_spacing) * index;
+
+			// for DeepinWorkspaceThumbClone, will plus workspace name field's height
+			if (is_thumb_clone) {
+				child_height += DeepinWorkspaceThumbClone.WORKSPACE_NAME_DISTANCE +
+								DeepinWorkspaceNameField.WORKSPACE_NAME_HEIGHT;
+			}
+
+			box.set_size (child_width, child_height);
+			box.set_origin (child_x, child_y);
+
+			return box;
 		}
 
 		void place_child (Actor child, int index, bool animate = true)
 		{
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
-
-			float child_x = 0;
-			float child_y = 0;
-			float child_spacing = monitor_geom.width * SPACING_PERCENT;
-
-			float child_width, child_height = 0;
-			get_thumb_size (screen, out child_width, out child_height);
-			child_x = (child_width + child_spacing) * index;
+			ActorBox child_box = get_child_layout_box (screen, index,
+													   child is DeepinWorkspaceThumbClone);
+			child.width = child_box.get_width ();
+			child.height = child_box.get_height ();
 
 			if (animate) {
 				var position = Point.alloc ();
-				position.x = child_x;
-				position.y = child_y;
+				position.x = child_box.get_x ();
+				position.y = child_box.get_y ();
 				var position_value = new GLib.Value (typeof (Point));
 				position_value.set_boxed (position);
 				DeepinUtils.start_animation_group (child, "thumb-workspace-slot", LAYOUT_DURATION,
 												   DeepinUtils.clutter_set_mode_bezier_out_back,
 												   "position", &position_value);
 			} else {
-				child.x = child_x;
-				child.y = child_y;
-			}
-
-			child.width = child_width;
-
-			// For DeepinWorkspaceThumbClone, its height will be allocated by iteself
-			if (child is DeepinWorkspaceAddButton) {
-				child.height = child_height;
+				child.x = child_box.get_x ();
+				child.y = child_box.get_y ();
 			}
 		}
 	}

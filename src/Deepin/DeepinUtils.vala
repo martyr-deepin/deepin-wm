@@ -184,7 +184,8 @@ namespace Gala
 		 */
 		public static void show_desktop (Meta.Workspace workspace)
 		{
-			// TODO: this is a temporary solution, use interface in mutter instead
+			// TODO: this is a temporary solution, should send _NET_SHOWING_DESKTOP instead, but
+			// mutter could not dispatch it correctly for issue
 
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
@@ -305,9 +306,9 @@ namespace Gala
 		 * @param actor Target actor.
 		 * @param duration Animation duration.
 		 * @param mode Animation progress mode.
-		 * @param cb Callback function when animation completed.
+		 * @param cb Callback function to be run after animation completed.
 		 * @param cb_progress The marker progress to excuted the callback function, default value is
-		 *                    1.0 means the callback function will be run when animation completed.
+		 *                    1.0 means the callback function will be run after animation completed.
 		 * @return Transition name.
 		 */
 		public static string start_fade_in_animation (
@@ -332,18 +333,47 @@ namespace Gala
 
 			actor.restore_easing_state ();
 
-			// run callback function if exists
-			if (cb != null) {
-				var transition = actor.get_transition (trans_name);
-				if (transition != null) {
-					transition.add_marker ("callback-marker", cb_progress);
-					transition.marker_reached.connect ((marker_name, msecs) => {
-						cb ();
-					});
-				} else {
-					cb ();
-				}
-			}
+			run_clutter_callback (actor, trans_name, cb, cb_progress);
+
+			return trans_name;
+		}
+
+		/**
+		 * Start fade-in-back animation for target actor which used for actor adding.
+		 *
+		 * @param actor Target actor.
+		 * @param duration Animation duration.
+		 * @param cb Callback function to be run after animation completed.
+		 * @param cb_progress The marker progress to excuted the callback function, default value is
+		 *                    1.0 means the callback function will be run after animation completed.
+		 * @return Transition name.
+		 */
+		public static string start_fade_in_back_animation (
+			Clutter.Actor actor, int duration,
+			PlainCallback? cb = null, double cb_progress = 1.0)
+		{
+			var trans_name = "fade-in-back";
+
+			actor.set_pivot_point (0.5f, 0.5f);
+
+			actor.save_easing_state ();
+
+			actor.set_easing_duration (0);
+			actor.set_scale (0.2, 0.2);
+			actor.opacity = 12;
+
+			actor.set_easing_duration (duration);
+			actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
+			actor.opacity = 255;
+
+			actor.restore_easing_state ();
+
+			var scale_value = new GLib.Value (typeof (float));
+			scale_value.set_float (1.0f);
+			start_animation_group (actor, trans_name, duration, clutter_set_mode_bezier_out_back,
+								   "scale-x", &scale_value, "scale-y", &scale_value);
+
+			run_clutter_callback (actor, trans_name, cb, cb_progress);
 
 			return trans_name;
 		}
@@ -374,7 +404,6 @@ namespace Gala
 			actor.set_scale (1.0, 1.0);
 			actor.opacity = 255;
 
-			// TODO 85%time, 1.3s duration
 			actor.set_easing_duration (duration);
 			actor.set_easing_mode (mode);
 			actor.set_scale (0.2, 0.2);
@@ -382,20 +411,28 @@ namespace Gala
 
 			actor.restore_easing_state ();
 
+			run_clutter_callback (actor, trans_name, cb, cb_progress);
+
+			return trans_name;
+		}
+
+		public static void run_clutter_callback (Clutter.Actor actor, string trans_name,
+												 PlainCallback? cb = null, double cb_progress = 1.0)
+		{
 			// run callback function if exists
 			if (cb != null) {
 				var transition = actor.get_transition (trans_name);
 				if (transition != null) {
 					transition.add_marker ("callback-marker", cb_progress);
 					transition.marker_reached.connect ((marker_name, msecs) => {
-						cb ();
+						if (marker_name == "callback-marker") {
+							cb ();
+						}
 					});
 				} else {
 					cb ();
 				}
 			}
-
-			return trans_name;
 		}
 
 		/**
@@ -414,8 +451,8 @@ namespace Gala
 		 * @param func Custom transition progress function.
 		 * @param ... Property name and value pairs for transition.
 		 */
-		public static void start_animation_group (Clutter.Actor actor, string name, int duration,
-												  CustomTimelineSetupFunc func, ...)
+		public static Clutter.TransitionGroup start_animation_group (
+			Clutter.Actor actor, string name, int duration, CustomTimelineSetupFunc func, ...)
 		{
 			var trans_group = new Clutter.TransitionGroup ();
 			trans_group.set_duration (duration);
@@ -441,6 +478,8 @@ namespace Gala
 				actor.remove_transition (name);
 			}
 			actor.add_transition (name, trans_group);
+
+			return trans_group;
 		}
 
 		public static void clutter_set_mode_bezier_out_back (Clutter.Timeline timeline)

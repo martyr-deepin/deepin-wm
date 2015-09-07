@@ -50,6 +50,7 @@ namespace Gala
 		/**
 		 * Get position rectangle for target window.
 		 */
+		// TODO: use ActorBox instead of Rectangle
 		public abstract Meta.Rectangle get_layout_rect_for_window (DeepinWindowClone window_clone);
 
 		/**

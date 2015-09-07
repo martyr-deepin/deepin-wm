@@ -85,7 +85,7 @@ namespace Gala
 			int radius = DeepinUtils.get_css_border_radius (
 				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
 			// TODO: round effect
-			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
+			// workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 
 			background = new DeepinFramedBackground (workspace.get_screen (), false, false);
 			background.button_press_event.connect (() => {
@@ -362,7 +362,6 @@ namespace Gala
 
 			grab_key_focus_for_name ();
 
-			// select current workspace if workspace name is editable
 			selected ();
 
 			// Return false to let event continue to be passed, so the cursor will be put in the
@@ -467,12 +466,10 @@ namespace Gala
 	public class DeepinWorkspaceThumbClone : Actor
 	{
 		// distance between thumbnail workspace clone and workspace name field
-		const int WORKSPACE_NAME_DISTANCE = 16;
+		public const int WORKSPACE_NAME_DISTANCE = 16;
 
-		// TODO: ask for animation, show new added thumbnail workspace
-		const int SHOW_DURATION = 500;
-		// const AnimationMode SHOW_MODE = AnimationMode.EASE_OUT_CUBIC;
-		const AnimationMode SHOW_MODE = AnimationMode.EASE_IN_QUAD;
+		// TODO: duration
+		const int FADE_DURATION = 1300;
 
 		public signal void selected ();
 
@@ -480,10 +477,8 @@ namespace Gala
 
 		public DeepinWindowThumbContainer window_container;
 
-		// TODO: rename
-		DeepinWorkspaceThumbCloneCore thumb_clone;
+		public DeepinWorkspaceThumbCloneCore thumb_clone;
 
-		// TODO: rename
 		public DeepinWorkspaceNameField workspace_name;
 
 		public DeepinWorkspaceThumbClone (Workspace workspace)
@@ -494,6 +489,7 @@ namespace Gala
 		construct
 		{
 			thumb_clone = new DeepinWorkspaceThumbCloneCore (workspace);
+			thumb_clone.opacity = 0;
 			window_container = thumb_clone.window_container;
 
 			thumb_clone.selected.connect (() => selected ());
@@ -501,8 +497,9 @@ namespace Gala
 			add_child (thumb_clone);
 
 			workspace_name = new DeepinWorkspaceNameField (workspace);
+			workspace_name.opacity = 0;
 
-			// TODO:
+			// TODO: select current workspace if workspace name is clicked
 			// workspace_name.selected.connect (() => selected ());
 
 			add_child (workspace_name);
@@ -525,7 +522,6 @@ namespace Gala
 
 			workspace_name.reset_key_focus ();
 
-			// TODO: animation
 			DeepinUtils.start_fade_out_animation (
 				this,
 				DeepinWorkspaceThumbContainer.CHILD_FADE_DURATION,
@@ -539,41 +535,14 @@ namespace Gala
 			workspace_name.set_select (value, animate);
 		}
 
-		// TODO: refactor
-		public void start_show_animation ()
+		public void start_fade_in_animation ()
 		{
-			thumb_clone.set_pivot_point (0.5f, 0.5f);
-			workspace_name.set_pivot_point (0.5f, 0.5f);
-
-			thumb_clone.save_easing_state ();
-			workspace_name.save_easing_state ();
-
-			thumb_clone.set_easing_duration (0);
-			thumb_clone.set_scale (0, 0);
-
-			workspace_name.set_easing_duration (0);
-			workspace_name.set_scale (0, 0);
-
-			thumb_clone.set_easing_duration (SHOW_DURATION);
-			thumb_clone.set_easing_mode (SHOW_MODE);
-			thumb_clone.set_scale (1, 1);
-
-			thumb_clone.restore_easing_state ();
-
-			var transition = thumb_clone.get_transition ("scale-x");
-			if (transition != null) {
-				transition.completed.connect (() => {
-					workspace_name.set_easing_duration (SHOW_DURATION);
-					workspace_name.set_easing_mode (SHOW_MODE);
-					workspace_name.set_scale (1, 1);
-					workspace_name.restore_easing_state ();
-				});
-			} else {
-				workspace_name.set_easing_duration (SHOW_DURATION);
-				workspace_name.set_easing_mode (SHOW_MODE);
-				workspace_name.set_scale (1, 1);
-				workspace_name.restore_easing_state ();
-			}
+			// TODO 85%time, 1.3s duration
+			DeepinUtils.start_fade_in_back_animation (
+				thumb_clone, FADE_DURATION,
+				() => DeepinUtils.start_fade_in_back_animation (workspace_name,
+																(int) (FADE_DURATION * 0.4)),
+				0.6);
 		}
 
 		public void start_bulge_animation ()
@@ -634,9 +603,9 @@ namespace Gala
 			// allocate workspace name field
 			var name_box = ActorBox ();
 			name_box.set_size (DeepinWorkspaceNameField.WORKSPACE_NAME_WIDTH,
-									 DeepinWorkspaceNameField.WORKSPACE_NAME_HEIGHT);
+							   DeepinWorkspaceNameField.WORKSPACE_NAME_HEIGHT);
 			name_box.set_origin ((box.get_width () - name_box.get_width ()) / 2,
-									   thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
+								 thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
 			workspace_name.allocate (name_box, flags);
 		}
 	}

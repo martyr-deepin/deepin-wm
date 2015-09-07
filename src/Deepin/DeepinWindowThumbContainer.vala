@@ -81,8 +81,8 @@ namespace Gala
 		public override Meta.Rectangle get_layout_rect_for_window (DeepinWindowClone window_clone)
 		{
 			float thumb_width, thumb_height;
-			DeepinWorkspaceThumbContainer.get_thumb_size (workspace.get_screen (), 
-														  out thumb_width, out thumb_height);
+			DeepinWorkspaceThumbContainer.get_prefer_thumb_size (workspace.get_screen (),
+																 out thumb_width, out thumb_height);
 
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 			float scale = thumb_width != 0 ? thumb_width / (float)monitor_geom.width : 0.5f;
