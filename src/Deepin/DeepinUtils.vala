@@ -138,7 +138,7 @@ namespace Gala
 		 * Append a new workspace.
 		 */
 		public static unowned Meta.Workspace? append_new_workspace (Meta.Screen screen,
-																	bool activate = true)
+																	bool activate = false)
 		{
 			if (Meta.Prefs.get_num_workspaces () >= WindowManagerGala.MAX_WORKSPACE_NUM) {
 				return null;

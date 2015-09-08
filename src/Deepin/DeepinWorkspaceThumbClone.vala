@@ -275,6 +275,11 @@ namespace Gala
 
 		public signal void selected ();
 
+		/**
+		 * Send setup_completed signal only when finish edit new added workpsace name.
+		 */
+		public signal void setup_completed ();
+
 		public Workspace workspace { get; construct; }
 
 		public Actor? fallback_key_focus = null;
@@ -287,6 +292,8 @@ namespace Gala
 
 		// selected shape for workspace name field
 		DeepinCssActor name_shape;
+
+		bool first_setup = true;
 
 		public DeepinWorkspaceNameField (Workspace workspace)
 		{
@@ -330,6 +337,11 @@ namespace Gala
 			workspace_name_text.activate.connect (() => {
 				reset_key_focus ();
 				workspace_name_text.editable = false;
+
+				if (first_setup) {
+					first_setup = false;
+					setup_completed ();
+				}
 			});
 			workspace_name_text.key_focus_in.connect (() => {
 				if (workspace_name_text.text.length == 0) {
@@ -469,7 +481,7 @@ namespace Gala
 		public const int WORKSPACE_NAME_DISTANCE = 16;
 
 		// TODO: duration
-		const int FADE_DURATION = 1300;
+		const int FADE_IN_DURATION = 1300;
 
 		public signal void selected ();
 
@@ -524,8 +536,8 @@ namespace Gala
 
 			DeepinUtils.start_fade_out_animation (
 				this,
-				DeepinWorkspaceThumbContainer.CHILD_FADE_DURATION,
-				DeepinWorkspaceThumbContainer.CHILD_FADE_MODE,
+				DeepinWorkspaceThumbContainer.CHILD_FADE_OUT_DURATION,
+				DeepinWorkspaceThumbContainer.CHILD_FADE_OUT_MODE,
 				() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
 		}
 
@@ -538,10 +550,11 @@ namespace Gala
 		public void start_fade_in_animation ()
 		{
 			// TODO 85%time, 1.3s duration
+			// this.set_pivot_point (0.5f, 0.5f);
 			DeepinUtils.start_fade_in_back_animation (
-				thumb_clone, FADE_DURATION,
+				thumb_clone, FADE_IN_DURATION,
 				() => DeepinUtils.start_fade_in_back_animation (workspace_name,
-																(int) (FADE_DURATION * 0.4)),
+																(int) (FADE_IN_DURATION * 0.4)),
 				0.6);
 		}
 

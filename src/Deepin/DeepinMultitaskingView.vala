@@ -91,7 +91,7 @@ namespace Gala
 
 			thumb_workspaces = new DeepinWorkspaceThumbContainer (screen);
 			// TODO: layout binding
-			thumb_workspaces.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
+			// thumb_workspaces.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
 			// thumb_workspaces.add_constraint (new BindConstraint (flow_workspaces, BindCoordinate.X, 0));
 
 			dock_clones = new Actor ();
@@ -107,7 +107,7 @@ namespace Gala
 			screen.workspace_added.connect (add_workspace);
 			screen.workspace_removed.connect (remove_workspace);
 			screen.workspace_switched.connect_after (
-				(from, to, direction) => { update_positions (opened); });
+				(from, to, direction) => { relayout (opened); });
 
 			window_containers_monitors = new List<MonitorClone> ();
 			update_monitors ();
@@ -142,7 +142,7 @@ namespace Gala
 					}
 
 					update_monitors ();
-					update_positions (false);
+					relayout (false);
 
 					return false;
 				});
@@ -257,8 +257,7 @@ namespace Gala
 		 * @param animate Whether to animate the movement or have all elements take their positions
 		 *                immediately.
 		 */
-		// TODO: rename
-		void update_positions (bool animate)
+		void relayout (bool animate)
 		{
 			var active_index = screen.get_active_workspace ().index ();
 			var active_x = 0.0f;
@@ -294,33 +293,32 @@ namespace Gala
 
 			flow_workspaces.restore_easing_state ();
 
-			thumb_workspaces.relayout ();
+			// TODO: thumb relayout
+			// thumb_workspaces.relayout ();
 		}
 
 		void add_workspace (int num)
 		{
-			var workspace = new DeepinWorkspaceFlowClone (screen.get_workspace_by_index (num));
-			workspace.window_activated.connect (activate_window);
-			workspace.selected.connect (activate_workspace);
+			var flow_workspace = new DeepinWorkspaceFlowClone (screen.get_workspace_by_index (num));
+			flow_workspace.window_activated.connect (activate_window);
+			flow_workspace.selected.connect (activate_workspace);
 
-			// TODO: add workspace animation
-			DeepinUtils.start_fade_in_animation (workspace,
-												 DeepinWorkspaceThumbContainer.CHILD_FADE_DURATION,
-												 DeepinWorkspaceThumbContainer.CHILD_FADE_MODE);
+			// TODO: add flow_workspace animation
+			// DeepinUtils.start_fade_in_animation (flow_workspace,
+			// 									 DeepinWorkspaceThumbContainer.CHILD_FADE_OUT_DURATION,
+			// 									 DeepinWorkspaceThumbContainer.CHILD_FADE_OUT_MODE);
 
-			flow_workspaces.insert_child_at_index (workspace, num);
+			flow_workspaces.insert_child_at_index (flow_workspace, num);
 
-			workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
-			thumb_workspaces.add_workspace (workspace.thumb_workspace);
-
-			// TODO:
-			// update_positions (opened);
+			flow_workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
+			thumb_workspaces.add_workspace (flow_workspace.thumb_workspace, () => relayout (opened));
 
 			if (opened) {
-				workspace.open ();
+				flow_workspace.open ();
 			}
 		}
 
+		// TODO: animation
 		void remove_workspace (int num)
 		{
 			DeepinWorkspaceFlowClone? workspace = null;
@@ -347,7 +345,7 @@ namespace Gala
 
 			workspace.destroy ();
 
-			update_positions (opened);
+			relayout (opened);
 		}
 
 		/**
@@ -589,7 +587,7 @@ namespace Gala
 				child.remove_all_transitions ();
 			}
 
-			update_positions (false);
+			relayout (false);
 
 			// TODO: adjust animation, multitaskingview, toggle, thumb workspaces
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());

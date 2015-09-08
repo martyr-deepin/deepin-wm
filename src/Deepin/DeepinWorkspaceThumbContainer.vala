@@ -66,15 +66,17 @@ namespace Gala
 		 */
 		public const float WORKSPACE_WIDTH_PERCENT = 0.12f;
 
-		public const int CHILD_FADE_DURATION = 400;
-		// public const int CHILD_FADE_DURATION = 1500;// TODO: test
-		public const AnimationMode CHILD_FADE_MODE = AnimationMode.EASE_OUT_QUAD;
+		// TODO: duration
+		public const int CHILD_FADE_IN_DURATION = 700;
+		public const int CHILD_FADE_OUT_DURATION = 400;
+		public const AnimationMode CHILD_FADE_OUT_MODE = AnimationMode.EASE_OUT_QUAD;
 
 		/**
 		 * The percent value between distance of thumbnail workspace clones and monitor's width.
 		 */
 		const float SPACING_PERCENT = 0.02f;
 
+		// TODO: workspace switch duration
 		const int LAYOUT_DURATION = 800;
 
 		public Screen screen { get; construct; }
@@ -100,7 +102,7 @@ namespace Gala
 
 		public void append_new_workspace ()
 		{
-			DeepinUtils.start_fade_out_animation (plus_button, CHILD_FADE_DURATION, CHILD_FADE_MODE,
+			DeepinUtils.start_fade_out_animation (plus_button, CHILD_FADE_OUT_DURATION, CHILD_FADE_OUT_MODE,
 												  () => {
 			 	remove_child (plus_button);
 				new_workspace_index_manually = Prefs.get_num_workspaces ();
@@ -108,21 +110,24 @@ namespace Gala
 			});
 		}
 
-		public void add_workspace (DeepinWorkspaceThumbClone workspace_clone)
+		public void add_workspace (DeepinWorkspaceThumbClone workspace_clone,
+								   DeepinUtils.PlainCallback? cb = null)
 		{
 			var index = workspace_clone.workspace.index ();
 
-			// TODO: animation relayout
-			workspace_clone.save_easing_state ();
-			workspace_clone.set_easing_duration (0);
-			place_child (workspace_clone, index);
-			workspace_clone.restore_easing_state ();
-
 			insert_child_at_index (workspace_clone, index);
 
-			workspace_clone.start_fade_in_animation ();
-			workspace_clone.thumb_clone.transitions_completed.connect (append_plus_button);
+			place_child (workspace_clone, index, false);
 
+			workspace_clone.start_fade_in_animation ();
+			workspace_clone.workspace_name.setup_completed.connect (() => {
+				append_plus_button ();
+				if (cb != null) {
+					cb ();
+				}
+			});
+
+			// if workspace is added manually, set workspace name field editable
 			if (workspace_clone.workspace.index () == new_workspace_index_manually) {
 				workspace_clone.workspace_name.grab_key_focus_for_name ();
 				new_workspace_index_manually = -1;
@@ -135,11 +140,10 @@ namespace Gala
 		{
 			remove_child (workspace_clone);
 
-			// TODO:
 			append_plus_button ();
 
-			// Prevent other workspaces' original name to be reset, so here set
-			// them to gsettings again.
+			// Prevent other workspaces original name to be reset, so set them to gsettings again
+			// here.
 			foreach (var child in get_children ()) {
 				if (child is DeepinWorkspaceThumbClone) {
 					(child as DeepinWorkspaceThumbClone).workspace_name.set_workspace_name ();
@@ -148,24 +152,22 @@ namespace Gala
 
 			relayout ();
 		}
-		// TODO:
-		// void do_remove_workspace (DeepinWorkspaceThumbClone workspace_clone)
-		// {
-		// 	remove_child (workspace_clone);
 
-		// 	// TODO:
-		// 	append_plus_button ();
+		/**
+		 * Make plus button visible if workspace number less than MAX_WORKSPACE_NUM.
+		 */
+		public void append_plus_button ()
+		{
+			if (Prefs.get_num_workspaces () < WindowManagerGala.MAX_WORKSPACE_NUM &&
+				!contains (plus_button)) {
+				plus_button.opacity = 0;
+				add_child (plus_button);
+				place_child (plus_button, get_n_children () - 1, false);
+				DeepinUtils.start_fade_in_back_animation (plus_button, CHILD_FADE_IN_DURATION);
 
-		// 	// Prevent other workspaces' original name to be reset, so here set
-		// 	// them to gsettings again.
-		// 	foreach (var child in get_children ()) {
-		// 		if (child is DeepinWorkspaceThumbClone) {
-		// 			(child as DeepinWorkspaceThumbClone).workspace_name.set_workspace_name ();
-		// 		}
-		// 	}
-
-		// 	relayout ();
-		// }
+				relayout ();
+			}
+		}
 
 		public void relayout ()
 		{
@@ -180,31 +182,6 @@ namespace Gala
 			}
 		}
 
-		/**
-		 * Make plus button visible if workspace number less than MAX_WORKSPACE_NUM.
-		 */
-		void append_plus_button ()
-		{
-			if (Prefs.get_num_workspaces () < WindowManagerGala.MAX_WORKSPACE_NUM &&
-				!contains (plus_button)) {
-				place_child (plus_button, get_n_children ());
-				insert_child_at_index (plus_button, get_n_children ());
-				DeepinUtils.start_fade_in_animation (plus_button, CHILD_FADE_DURATION, CHILD_FADE_MODE);
-			}
-		}
-
-		// TODO: remove
-		// void remove_plus_button ()
-		// {
-		// 	if (contains (plus_button)) {
-		// 		start_child_remove_animation (plus_button);
-		// 		plus_button.transitions_completed.connect (() => {
-		// 			remove_child (plus_button);
-		// 			relayout ();
-		// 		});
-		// 	}
-		// }
-
 		public static void get_prefer_thumb_size (Screen screen, out float width, out float height)
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
@@ -216,8 +193,7 @@ namespace Gala
 			height = width * monitor_whr;
 		}
 
-		public static ActorBox get_child_layout_box (Screen screen, int index,
-													 bool is_thumb_clone = false)
+		ActorBox get_child_layout_box (Screen screen, int index, bool is_thumb_clone = false)
 		{
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
@@ -235,6 +211,11 @@ namespace Gala
 				child_height += DeepinWorkspaceThumbClone.WORKSPACE_NAME_DISTANCE +
 								DeepinWorkspaceNameField.WORKSPACE_NAME_HEIGHT;
 			}
+
+			// place child center of monitor
+			float container_width = child_width * get_n_children () + child_spacing * (get_n_children () - 1);
+			float offset_x = ((float)monitor_geom.width - container_width) / 2;
+			child_x += offset_x;
 
 			box.set_size (child_width, child_height);
 			box.set_origin (child_x, child_y);
