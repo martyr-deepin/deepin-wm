@@ -27,6 +27,7 @@ namespace Gala
 	 */
 	public class DeepinWindowFlowContainer : DeepinWindowBaseContainer
 	{
+		// TODO: int -> float
 		public int padding_top { get; set; default = 12; }
 		public int padding_left { get; set; default = 12; }
 		public int padding_right { get; set; default = 12; }
@@ -134,6 +135,7 @@ namespace Gala
 				return (int)(seq_b - seq_a);
 			});
 
+			// TODO: ActorBox, int -> float
 			Meta.Rectangle area = { padding_left, padding_top,
 									(int)width - padding_left - padding_right,
 									(int)height - padding_top - padding_bottom };
@@ -342,19 +344,16 @@ namespace Gala
 
 			opened = false;
 
+			bool animate_to_orig = (workspace.get_screen ().get_active_workspace () == workspace);
+
 			foreach (var window in get_children ()) {
 				var window_clone = window as DeepinWindowClone;
 				window_clone.set_select (false);
-				if (window_clone.should_fade ()) {
-					window_clone.save_easing_state ();
-
-					window_clone.set_easing_duration (300);
-					window_clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-					window_clone.opacity = 0;
-
-					window_clone.restore_easing_state ();
-				} else {
+				if (animate_to_orig) {
 					window_clone.transition_to_original_state (true);
+				} else {
+					DeepinUtils.start_fade_out_opacity_animation (
+						window_clone, 300, AnimationMode.EASE_OUT_QUAD);
 				}
 			}
 		}

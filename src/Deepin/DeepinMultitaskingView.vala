@@ -32,8 +32,6 @@ namespace Gala
 		// public const int TOGGLE_DURATION = 250;
 		public const int TOGGLE_DURATION = 800;
 		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUAD;
-		// public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_ELASTIC;
-		// TODO: ask for animation, multitaskingview, workspace switch
 		public const int WORKSPACE_SWITCH_DURATION = 500;
 		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUAD;
 
@@ -47,13 +45,13 @@ namespace Gala
 		/**
 		 * The percent value between flow workspace's top offset and monitor's height.
 		 */
-		public const float FLOW_CLONE_TOP_OFFSET_PERCENT = 0.24f;
+		public const float FLOW_WORKSPACE_TOP_OFFSET_PERCENT = 0.24f;
 
 		// TODO: layout, use container for flow workspaces
 		/**
 		 * The percent value between distance of flow workspaces and its width.
 		 */
-		public const float FLOW_CLONE_DISTANCE_PERCENT = 0.10f;
+		public const float FLOW_WORKSPACE_DISTANCE_PERCENT = 0.10f;
 
 		public WindowManager wm { get; construct; }
 
@@ -67,8 +65,8 @@ namespace Gala
 		List<MonitorClone> window_containers_monitors;
 
 		Actor dock_clones;
-		Actor flow_workspaces;
-		DeepinWorkspaceThumbContainer thumb_workspaces;
+		Actor flow_container;
+		DeepinWorkspaceThumbContainer thumb_container;
 
 		public DeepinMultitaskingView (WindowManager wm)
 		{
@@ -87,17 +85,17 @@ namespace Gala
 			// TODO: ask for workspace switch duration
 			// WORKSPACE_SWITCH_DURATION = AnimationSettings.get_default ().workspace_switch_duration;
 
-			flow_workspaces = new Actor ();
+			flow_container = new Actor ();
 
-			thumb_workspaces = new DeepinWorkspaceThumbContainer (screen);
+			thumb_container = new DeepinWorkspaceThumbContainer (screen);
 			// TODO: layout binding
-			// thumb_workspaces.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
-			// thumb_workspaces.add_constraint (new BindConstraint (flow_workspaces, BindCoordinate.X, 0));
+			// thumb_container.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
+			// thumb_container.add_constraint (new BindConstraint (flow_container, BindCoordinate.X, 0));
 
 			dock_clones = new Actor ();
 
-			add_child (thumb_workspaces);
-			add_child (flow_workspaces);
+			add_child (thumb_container);
+			add_child (flow_container);
 			add_child (dock_clones);
 
 			foreach (var workspace in screen.get_workspaces ()) {
@@ -127,17 +125,17 @@ namespace Gala
 				Idle.add (() => {
 					unowned List<Workspace> existing_workspaces = screen.get_workspaces ();
 
-					foreach (var child in flow_workspaces.get_children ()) {
-						unowned DeepinWorkspaceFlowClone workspace_clone =
+					foreach (var child in flow_container.get_children ()) {
+						unowned DeepinWorkspaceFlowClone flow_workspace =
 							(DeepinWorkspaceFlowClone)child;
-						if (existing_workspaces.index (workspace_clone.workspace) < 0) {
-							workspace_clone.window_activated.disconnect (activate_window);
-							workspace_clone.selected.disconnect (activate_workspace);
+						if (existing_workspaces.index (flow_workspace.workspace) < 0) {
+							flow_workspace.window_activated.disconnect (activate_window);
+							flow_workspace.selected.disconnect (activate_workspace);
 
-							thumb_workspaces.remove_workspace (
-								workspace_clone.thumb_workspace);
+							thumb_container.remove_workspace (
+								flow_workspace.thumb_workspace);
 
-							workspace_clone.destroy ();
+							flow_workspace.destroy ();
 						}
 					}
 
@@ -199,7 +197,7 @@ namespace Gala
 		}
 
 		/**
-		 * Scroll through flow_workspaces.
+		 * Scroll through flow_container.
 		 */
 		public override bool scroll_event (ScrollEvent scroll_event)
 		{
@@ -260,90 +258,116 @@ namespace Gala
 		void relayout (bool animate)
 		{
 			var active_index = screen.get_active_workspace ().index ();
-			var active_x = 0.0f;
 
-			// TODO: layout, use container for flow workspaces
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
-				var index = workspace_clone.workspace.index ();
-				var dest_x =
-					index * (int)(workspace_clone.width * (1 - FLOW_CLONE_DISTANCE_PERCENT * 2));
+			foreach (var child in flow_container.get_children ()) {
+				var flow_workspace = child as DeepinWorkspaceFlowClone;
+				var index = flow_workspace.workspace.index ();
 
-				if (index == active_index) {
-					active_x = dest_x;
-					workspace_clone.thumb_workspace.set_select (true);
-				} else {
-					workspace_clone.thumb_workspace.set_select (false);
-				}
-
-				workspace_clone.save_easing_state ();
-
-				// TODO: ask for animation, multitaskingview, place workspace
-				workspace_clone.set_easing_duration (animate ? 200 : 0);
-				workspace_clone.x = dest_x;
-
-				workspace_clone.restore_easing_state ();
+				// use workspace index to place flow workspaces clones instead of the index of
+				// container, for that the active workspace always make above others.
+				place_flow_workspace (child, index, animate);
 			}
 
-			flow_workspaces.save_easing_state ();
-
-			flow_workspaces.set_easing_mode (WORKSPACE_SWITCH_MODE);
-			flow_workspaces.set_easing_duration (animate ? WORKSPACE_SWITCH_DURATION : 0);
-			flow_workspaces.x = -active_x;
-
-			flow_workspaces.restore_easing_state ();
+			// TODO: select thumbnail workspace
+			foreach (var child in thumb_container.get_children ()) {
+				if (child is DeepinWorkspaceThumbClone) {
+					var thumb_workspace = child as DeepinWorkspaceThumbClone;
+					var index = thumb_workspace.workspace.index ();
+					if (index == active_index) {
+						thumb_workspace.set_select (true);
+					} else {
+						thumb_workspace.set_select (false);
+					}
+				}
+			}
 
 			// TODO: thumb relayout
-			// thumb_workspaces.relayout ();
+			// thumb_container.relayout ();
 		}
 
-		void add_workspace (int num)
+		void place_flow_workspace (Actor child, int index, bool animate = true)
 		{
-			var flow_workspace = new DeepinWorkspaceFlowClone (screen.get_workspace_by_index (num));
-			flow_workspace.window_activated.connect (activate_window);
-			flow_workspace.selected.connect (activate_workspace);
+			ActorBox child_box = get_flow_workspace_layout_box (child, index);
+			// TODO: flow workspace size
+			// child.width = child_box.get_width ();
+			// child.height = child_box.get_height ();
 
-			// TODO: add flow_workspace animation
-			// DeepinUtils.start_fade_in_animation (flow_workspace,
-			// 									 DeepinWorkspaceThumbContainer.CHILD_FADE_OUT_DURATION,
-			// 									 DeepinWorkspaceThumbContainer.CHILD_FADE_OUT_MODE);
+			child.save_easing_state ();
 
-			flow_workspaces.insert_child_at_index (flow_workspace, num);
+			child.set_easing_mode (WORKSPACE_SWITCH_MODE);
+			child.set_easing_duration (animate ? WORKSPACE_SWITCH_DURATION : 0);
+			child.x = child_box.get_x ();
+			child.y = child_box.get_y ();
 
-			flow_workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
-			thumb_workspaces.add_workspace (flow_workspace.thumb_workspace, () => relayout (opened));
+			child.restore_easing_state ();
+		}
 
-			if (opened) {
-				flow_workspace.open ();
-			}
+		ActorBox get_flow_workspace_layout_box (Actor child, int index)
+		{
+			var active_index = screen.get_active_workspace ().index ();
+			var box = ActorBox ();
+
+			stdout.printf ("flow width: %f, flow height: %f\n", child.width, child.height);// TODO: test
+			float child_x =
+				(index - active_index) * (child.width * (1 - FLOW_WORKSPACE_DISTANCE_PERCENT * 2));
+			float child_y = 0;
+
+			// box.set_size (child_width, child_height);
+			box.set_origin (child_x, child_y);
+
+			return box;
 		}
 
 		// TODO: animation
-		void remove_workspace (int num)
+		void add_workspace (int index)
 		{
-			DeepinWorkspaceFlowClone? workspace = null;
+			var flow_workspace = new DeepinWorkspaceFlowClone (screen.get_workspace_by_index (index));
+			flow_workspace.window_activated.connect (activate_window);
+			flow_workspace.selected.connect (activate_workspace);
+
+			flow_workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
+
+			thumb_container.add_workspace (flow_workspace.thumb_workspace, () => relayout (opened));
+
+			flow_workspace.opacity = 0;
+			if (opened) {
+				flow_workspace.scale_in (false);
+			}
+
+			flow_container.add_child (flow_workspace);
+
+			place_flow_workspace (flow_workspace, index, false);
+
+			// TODO: ask for animation for new flow workspace
+			DeepinUtils.start_fade_in_opacity_animation (flow_workspace, 400, AnimationMode.LINEAR);
+		}
+
+		// TODO: animation
+		void remove_workspace (int index)
+		{
+			DeepinWorkspaceFlowClone? flow_workspace = null;
 
 			// FIXME is there a better way to get the removed workspace?
 			unowned List<Meta.Workspace> existing_workspaces = screen.get_workspaces ();
 
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
-				if (existing_workspaces.index (workspace_clone.workspace) < 0) {
-					workspace = workspace_clone;
+			foreach (var child in flow_container.get_children ()) {
+				unowned DeepinWorkspaceFlowClone child_workspace = (DeepinWorkspaceFlowClone)child;
+				if (existing_workspaces.index (child_workspace.workspace) < 0) {
+					flow_workspace = child_workspace;
 					break;
 				}
 			}
 
-			if (workspace == null) {
+			if (flow_workspace == null) {
 				return;
 			}
 
-			workspace.window_activated.disconnect (activate_window);
-			workspace.selected.disconnect (activate_workspace);
+			flow_workspace.window_activated.disconnect (activate_window);
+			flow_workspace.selected.disconnect (activate_workspace);
 
-			thumb_workspaces.remove_workspace (workspace.thumb_workspace);
+			thumb_container.remove_workspace (flow_workspace.thumb_workspace);
 
-			workspace.destroy ();
+			flow_workspace.destroy ();
 
 			relayout (opened);
 		}
@@ -355,11 +379,11 @@ namespace Gala
 		 *                   workspace is also the currently active workspace.  Otherwise it will
 		 *                   only be made active, but the view won't be closed.
 		 */
-		void activate_workspace (DeepinWorkspaceFlowClone clone, bool close_view)
+		void activate_workspace (DeepinWorkspaceFlowClone flow_workspace, bool close_view)
 		{
-			close_view = close_view && screen.get_active_workspace () == clone.workspace;
+			close_view = close_view && screen.get_active_workspace () == flow_workspace.workspace;
 
-			clone.workspace.activate (screen.get_display ().get_current_time ());
+			flow_workspace.workspace.activate (screen.get_display ().get_current_time ());
 
 			if (close_view) {
 				toggle ();
@@ -422,13 +446,13 @@ namespace Gala
 			case Clutter.Key.plus:
 			case Clutter.Key.equal:
 			case Clutter.Key.KP_Add:
-				thumb_workspaces.append_new_workspace ();
+				thumb_container.append_new_workspace ();
 				break;
 			case Clutter.Key.minus:
 			case Clutter.Key.KP_Subtract:
 				var i = screen.get_active_workspace_index ();
-				var workspace = thumb_workspaces.get_child_at_index (i);
-				(workspace as DeepinWorkspaceThumbClone).remove_workspace ();
+				var thumb_workspace = thumb_container.get_child_at_index (i);
+				(thumb_workspace as DeepinWorkspaceThumbClone).remove_workspace ();
 				break;
 			// TODO: F2(rename), Ctrl-?(show help dialog), etc
 			case Clutter.Key.Return:
@@ -474,10 +498,10 @@ namespace Gala
 		 */
 		DeepinWorkspaceFlowClone get_active_workspace_clone ()
 		{
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
-				if (workspace_clone.workspace == screen.get_active_workspace ()) {
-					return workspace_clone;
+			foreach (var child in flow_container.get_children ()) {
+				unowned DeepinWorkspaceFlowClone flow_workspace = (DeepinWorkspaceFlowClone)child;
+				if (flow_workspace.workspace == screen.get_active_workspace ()) {
+					return flow_workspace;
 				}
 			}
 
@@ -571,19 +595,19 @@ namespace Gala
 			// transitioning
 			DeepinWorkspaceFlowClone? active_workspace = null;
 			var active = screen.get_active_workspace ();
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
-				if (workspace_clone.workspace == active) {
-					active_workspace = workspace_clone;
+			foreach (var child in flow_container.get_children ()) {
+				unowned DeepinWorkspaceFlowClone child_workspace = (DeepinWorkspaceFlowClone)child;
+				if (child_workspace.workspace == active) {
+					active_workspace = child_workspace;
 					break;
 				}
 			}
 			if (active_workspace != null) {
-				flow_workspaces.set_child_above_sibling (active_workspace, null);
+				flow_container.set_child_above_sibling (active_workspace, null);
 			}
 
-			flow_workspaces.remove_all_transitions ();
-			foreach (var child in flow_workspaces.get_children ()) {
+			flow_container.remove_all_transitions ();
+			foreach (var child in flow_container.get_children ()) {
 				child.remove_all_transitions ();
 			}
 
@@ -599,17 +623,17 @@ namespace Gala
 				thumb_y_value.set_float (-(monitor_geom.height *
 										   DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
 			}
-			DeepinUtils.start_animation_group (thumb_workspaces, "toggle",
+			DeepinUtils.start_animation_group (thumb_container, "toggle",
 											   DeepinMultitaskingView.TOGGLE_DURATION,
 											   DeepinUtils.clutter_set_mode_bezier_out_back,
 											   "y", &thumb_y_value);
 
-			foreach (var child in flow_workspaces.get_children ()) {
-				unowned DeepinWorkspaceFlowClone workspace_clone = (DeepinWorkspaceFlowClone)child;
+			foreach (var child in flow_container.get_children ()) {
+				unowned DeepinWorkspaceFlowClone flow_workspace = (DeepinWorkspaceFlowClone)child;
 				if (opening) {
-					workspace_clone.open ();
+					flow_workspace.open ();
 				} else {
-					workspace_clone.close ();
+					flow_workspace.close ();
 				}
 			}
 

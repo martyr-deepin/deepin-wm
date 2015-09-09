@@ -301,7 +301,8 @@ namespace Gala
 		/* Custom clutter animation progress modes */
 
 		/**
-		 * Start fade-in animation for target actor which used for actor adding.
+		 * Start fade-in animation for target actor which used for actor adding. The actor's size will
+		 * be scaled to 1.0 and opacity will be set to 255.
 		 *
 		 * @param actor Target actor.
 		 * @param duration Animation duration.
@@ -339,7 +340,45 @@ namespace Gala
 		}
 
 		/**
-		 * Start fade-in-back animation for target actor which used for actor adding.
+		 * Start fade-in animation for target actor which used for actor adding. The actor's opaticy
+		 * will be set to 255.
+		 *
+		 * @param actor Target actor.
+		 * @param duration Animation duration.
+		 * @param mode Animation progress mode.
+		 * @param cb Callback function to be run after animation completed.
+		 * @param cb_progress The marker progress to excuted the callback function, default value is
+		 *                    1.0 means the callback function will be run after animation completed.
+		 * @return Transition name.
+		 */
+		public static string start_fade_in_opacity_animation (
+			Clutter.Actor actor, int duration,
+			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUAD,
+			PlainCallback? cb = null, double cb_progress = 1.0)
+		{
+			var trans_name = "opacity";
+
+			actor.save_easing_state ();
+
+			actor.set_easing_duration (0);
+			actor.opacity = 12;
+
+			actor.set_easing_duration (duration);
+			actor.set_easing_mode (mode);
+			actor.opacity = 255;
+
+			actor.restore_easing_state ();
+
+			run_clutter_callback (actor, trans_name, cb, cb_progress);
+
+			return trans_name;
+		}
+
+		/**
+		 * Start fade-in-back animation for target actor which used for actor adding. The actor's
+		 * size will be scaled to 1.0 and opacity will be set to 255. The different with
+		 * start_fade_in_animation is that the animation progress function is set to
+		 * clutter_set_mode_bezier_out_back.
 		 *
 		 * @param actor Target actor.
 		 * @param duration Animation duration.
@@ -349,8 +388,7 @@ namespace Gala
 		 * @return Transition name.
 		 */
 		public static string start_fade_in_back_animation (
-			Clutter.Actor actor, int duration,
-			PlainCallback? cb = null, double cb_progress = 1.0)
+			Clutter.Actor actor, int duration, PlainCallback? cb = null, double cb_progress = 1.0)
 		{
 			var trans_name = "fade-in-back";
 
@@ -379,7 +417,8 @@ namespace Gala
 		}
 
 		/**
-		 * Start fade-out animation for target actor which used for actor removing.
+		 * Start fade-out animation for target actor which used for actor adding. The actor's size will
+		 * be scaled to 0 and opacity will be set to 0.
 		 *
 		 * @param actor Target actor.
 		 * @param duration Animation duration.
@@ -407,6 +446,41 @@ namespace Gala
 			actor.set_easing_duration (duration);
 			actor.set_easing_mode (mode);
 			actor.set_scale (0.2, 0.2);
+			actor.opacity = 12;
+
+			actor.restore_easing_state ();
+
+			run_clutter_callback (actor, trans_name, cb, cb_progress);
+
+			return trans_name;
+		}
+
+		/**
+		 * Start fade-out-opacity animation for target actor which used for actor removing. The
+		 * actor's opaticy will be set to 0.
+		 *
+		 * @param actor Target actor.
+		 * @param duration Animation duration.
+		 * @param mode Animation progress mode.
+		 * @param cb Callback function to be run after animation completed.
+		 * @param cb_progress The marker progress to excuted the callback function, default value is
+		 *                    1.0 means the callback function will be run after animation completed.
+		 * @return Transition name.
+		 */
+		public static string start_fade_out_opacity_animation (
+			Clutter.Actor actor, int duration,
+			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUAD,
+			PlainCallback? cb = null, double cb_progress = 1.0)
+		{
+			var trans_name = "opacity";
+
+			actor.save_easing_state ();
+
+			actor.set_easing_duration (0);
+			actor.opacity = 255;
+
+			actor.set_easing_duration (duration);
+			actor.set_easing_mode (mode);
 			actor.opacity = 12;
 
 			actor.restore_easing_state ();

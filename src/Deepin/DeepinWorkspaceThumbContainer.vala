@@ -169,6 +169,7 @@ namespace Gala
 			}
 		}
 
+		// TODO: add animate argument
 		public void relayout ()
 		{
 			var i = 0;

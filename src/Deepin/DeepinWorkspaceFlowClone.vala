@@ -36,7 +36,7 @@ namespace Gala
 		const int HOVER_ACTIVATE_DELAY = 400;
 
 		/**
-		 * A window has been selected, the DeepinMultitaskingView should consider activating and
+		 * A window has been activated, the DeepinMultitaskingView should consider activating it and
 		 * closing the view.
 		 */
 		public signal void window_activated (Window window);
@@ -86,8 +86,10 @@ namespace Gala
 				return false;
 			});
 
+			// TODO: disconnect signals
 			thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
 			thumb_workspace.selected.connect (() => {
+				// TODO: refactor code
 				if (workspace != screen.get_active_workspace ()) {
 					selected (false);
 				}
@@ -97,6 +99,7 @@ namespace Gala
 			window_container.window_activated.connect ((w) => window_activated (w));
 			window_container.window_selected.connect (
 				(w) => thumb_workspace.window_container.select_window (w, false));
+			// TODO: scale size
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
 			screen.restacked.connect (window_container.restack_windows);
@@ -240,31 +243,7 @@ namespace Gala
 
 			opened = true;
 
-			var screen = workspace.get_screen ();
-			var display = screen.get_display ();
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-
-			int top_offset =
-				(int)(monitor_geom.height * DeepinMultitaskingView.FLOW_CLONE_TOP_OFFSET_PERCENT);
-			int bottom_offset =
-				(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
-			float scale =
-				(float)(monitor_geom.height - top_offset - bottom_offset) / monitor_geom.height;
-			float pivot_y = top_offset / (monitor_geom.height - monitor_geom.height * scale);
-
-			background.set_pivot_point (0.5f, pivot_y);
-
-			var scale_value = new GLib.Value (typeof (float));
-			scale_value.set_float (scale);
-			DeepinUtils.start_animation_group (background, "open",
-											   DeepinMultitaskingView.TOGGLE_DURATION,
-											   DeepinUtils.clutter_set_mode_bezier_out_back,
-											   "scale-x", &scale_value, "scale-y", &scale_value);
-
-			window_container.padding_top = top_offset;
-			window_container.padding_left = window_container.padding_right =
-				(int)(monitor_geom.width - monitor_geom.width * scale) / 2;
-			window_container.padding_bottom = bottom_offset;
+			scale_in (true);
 
 			// TODO: select default window
 			// Window selected_window = null;
@@ -276,6 +255,8 @@ namespace Gala
 			// 	}
 			// }
 			// window_container.open (selected_window);
+			var screen = workspace.get_screen ();
+			var display = screen.get_display ();
 			window_container.open (
 				screen.get_active_workspace () == workspace ? display.get_focus_window () : null);
 		}
@@ -292,14 +273,57 @@ namespace Gala
 
 			opened = false;
 
-			var scale_value = new GLib.Value (typeof (float));
-			scale_value.set_float (1.0f);
-			DeepinUtils.start_animation_group (background, "close",
-											   DeepinMultitaskingView.TOGGLE_DURATION,
-											   DeepinUtils.clutter_set_mode_bezier_out_back_small,
-											   "scale-x", &scale_value, "scale-y", &scale_value);
+			scale_out (true);
 
 			window_container.close ();
+		}
+
+		public void scale_in (bool animate)
+		{
+			var screen = workspace.get_screen ();
+			var display = screen.get_display ();
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+
+			int top_offset =
+				(int)(monitor_geom.height * DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT);
+			int bottom_offset =
+				(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			float scale =
+				(float)(monitor_geom.height - top_offset - bottom_offset) / monitor_geom.height;
+			float pivot_y = top_offset / (monitor_geom.height - monitor_geom.height * scale);
+
+			background.set_pivot_point (0.5f, pivot_y);
+
+			if (animate) {
+				var scale_value = new GLib.Value (typeof (float));
+				scale_value.set_float (scale);
+				DeepinUtils.start_animation_group (background, "open",
+												   DeepinMultitaskingView.TOGGLE_DURATION,
+												   DeepinUtils.clutter_set_mode_bezier_out_back,
+												   "scale-x", &scale_value,
+												   "scale-y", &scale_value);
+			} else {
+				background.set_scale (scale, scale);
+			}
+
+			window_container.padding_top = top_offset;
+			window_container.padding_left = window_container.padding_right =
+				(int)(monitor_geom.width - monitor_geom.width * scale) / 2;
+			window_container.padding_bottom = bottom_offset;
+		}
+
+		public void scale_out (bool animate)
+		{
+			if (animate) {
+				var scale_value = new GLib.Value (typeof (float));
+				scale_value.set_float (1.0f);
+				DeepinUtils.start_animation_group (background, "close",
+												   DeepinMultitaskingView.TOGGLE_DURATION,
+												   DeepinUtils.clutter_set_mode_bezier_out_back_small,
+												   "scale-x", &scale_value, "scale-y", &scale_value);
+			} else {
+				background.set_scale (1.0f, 1.0f);
+			}
 		}
 	}
 }
