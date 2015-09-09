@@ -105,7 +105,7 @@ namespace Gala
 			screen.workspace_added.connect (add_workspace);
 			screen.workspace_removed.connect (remove_workspace);
 			screen.workspace_switched.connect_after (
-				(from, to, direction) => { relayout (opened); });
+				(from, to, direction) => { relayout (opened, direction); });
 
 			window_containers_monitors = new List<MonitorClone> ();
 			update_monitors ();
@@ -255,7 +255,7 @@ namespace Gala
 		 * @param animate Whether to animate the movement or have all elements take their positions
 		 *                immediately.
 		 */
-		void relayout (bool animate)
+		void relayout (bool animate, Meta.MotionDirection direction = Meta.MotionDirection.LEFT)
 		{
 			var active_index = screen.get_active_workspace ().index ();
 
@@ -263,9 +263,28 @@ namespace Gala
 				var flow_workspace = child as DeepinWorkspaceFlowClone;
 				var index = flow_workspace.workspace.index ();
 
+				int delay = 0;
+				if (direction == Meta.MotionDirection.LEFT) {
+					if (index < active_index) {
+						delay = 100;
+					} else if (index == active_index) {
+						delay = 50;
+					} else if (index > active_index) {
+						delay = 0;
+					}
+				} else if (direction == Meta.MotionDirection.RIGHT) {
+					if (index < active_index) {
+						delay = 0;
+					} else if (index == active_index) {
+						delay = 50;
+					} else if (index > active_index) {
+						delay = 100;
+					}
+				}
+
 				// use workspace index to place flow workspaces clones instead of the index of
 				// container, for that the active workspace always make above others.
-				place_flow_workspace (child, index, animate);
+				place_flow_workspace (child, index, animate, delay);
 			}
 
 			// TODO: select thumbnail workspace
@@ -285,8 +304,21 @@ namespace Gala
 			// thumb_container.relayout ();
 		}
 
-		void place_flow_workspace (Actor child, int index, bool animate = true)
+		void place_flow_workspace (Actor child, int index, bool animate, int delay)
 		{
+			if (animate) {
+				Timeout.add (delay, () => {
+					do_place_flow_workspace (child, index, animate);
+					return false;
+				});
+			} else {
+				do_place_flow_workspace (child, index, animate);
+			}
+		}
+
+		void do_place_flow_workspace (Actor child, int index, bool animate)
+		{
+			var active_index = screen.get_active_workspace ().index ();
 			ActorBox child_box = get_flow_workspace_layout_box (child, index);
 			// TODO: flow workspace size
 			// child.width = child_box.get_width ();
@@ -336,7 +368,7 @@ namespace Gala
 
 			flow_container.add_child (flow_workspace);
 
-			place_flow_workspace (flow_workspace, index, false);
+			do_place_flow_workspace (flow_workspace, index, false);
 
 			// TODO: ask for animation for new flow workspace
 			DeepinUtils.start_fade_in_opacity_animation (flow_workspace, 400, AnimationMode.LINEAR);
