@@ -83,7 +83,7 @@ namespace Gala
 
 		Actor plus_button;
 
-		int new_workspace_index_manually = -1;
+		int new_workspace_index_by_manual = -1;
 
 		public DeepinWorkspaceThumbContainer (Screen screen)
 		{
@@ -102,10 +102,10 @@ namespace Gala
 
 		public void append_new_workspace ()
 		{
-			DeepinUtils.start_fade_out_animation (plus_button, CHILD_FADE_OUT_DURATION, CHILD_FADE_OUT_MODE,
-												  () => {
+			DeepinUtils.start_fade_out_animation (plus_button, CHILD_FADE_OUT_DURATION,
+												  CHILD_FADE_OUT_MODE, () => {
 			 	remove_child (plus_button);
-				new_workspace_index_manually = Prefs.get_num_workspaces ();
+				new_workspace_index_by_manual = Prefs.get_num_workspaces ();
 				DeepinUtils.append_new_workspace (screen);
 			});
 		}
@@ -114,23 +114,27 @@ namespace Gala
 								   DeepinUtils.PlainCallback? cb = null)
 		{
 			var index = workspace_clone.workspace.index ();
-
 			insert_child_at_index (workspace_clone, index);
-
 			place_child (workspace_clone, index, false);
+			select_workspace (workspace_clone.workspace.index (), true);
 
 			workspace_clone.start_fade_in_animation ();
-			workspace_clone.workspace_name.setup_completed.connect (() => {
-				append_plus_button ();
-				if (cb != null) {
-					cb ();
-				}
-			});
 
 			// if workspace is added manually, set workspace name field editable
-			if (workspace_clone.workspace.index () == new_workspace_index_manually) {
+			if (workspace_clone.workspace.index () == new_workspace_index_by_manual) {
 				workspace_clone.workspace_name.grab_key_focus_for_name ();
-				new_workspace_index_manually = -1;
+				new_workspace_index_by_manual = -1;
+
+				workspace_clone.workspace_name.setup_completed.connect (() => {
+					// after new workspace setup completed, append the plus button and activate
+					// the workspace
+					append_plus_button ();
+					DeepinUtils.switch_to_workspace (workspace_clone.workspace.get_screen (),
+													 workspace_clone.workspace.index ());
+					if (cb != null) {
+						cb ();
+					}
+				});
 			}
 
 			relayout ();
@@ -179,6 +183,20 @@ namespace Gala
 
 				if (child is DeepinWorkspaceThumbClone) {
 					(child as DeepinWorkspaceThumbClone).workspace_name.get_workspace_name ();
+				}
+			}
+		}
+
+		public void select_workspace (int index, bool animate)
+		{
+			foreach (var child in get_children ()) {
+				if (child is DeepinWorkspaceThumbClone) {
+					var thumb_workspace = child as DeepinWorkspaceThumbClone;
+					if (thumb_workspace.workspace.index () == index) {
+						thumb_workspace.set_select (true, animate);
+					} else {
+						thumb_workspace.set_select (false, animate);
+					}
 				}
 			}
 		}

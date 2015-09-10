@@ -104,8 +104,7 @@ namespace Gala
 
 			screen.workspace_added.connect (add_workspace);
 			screen.workspace_removed.connect (remove_workspace);
-			screen.workspace_switched.connect_after (
-				(from, to, direction) => { relayout (opened, direction); });
+			screen.workspace_switched.connect_after (on_workspace_switched);
 
 			window_containers_monitors = new List<MonitorClone> ();
 			update_monitors ();
@@ -140,11 +139,21 @@ namespace Gala
 					}
 
 					update_monitors ();
-					relayout (false);
+
+					// FIXME: panic for workspace num changed
 
 					return false;
 				});
 			});
+		}
+
+		~DeepinMultitaskingView ()
+		{
+			screen.monitors_changed.disconnect (update_monitors);
+
+			screen.workspace_added.disconnect (add_workspace);
+			screen.workspace_removed.disconnect (remove_workspace);
+			screen.workspace_switched.disconnect (on_workspace_switched);
 		}
 
 		public void connect_key_focus_out_signal ()
@@ -160,6 +169,11 @@ namespace Gala
 					toggle ();
 				}
 			});
+		}
+
+		void on_workspace_switched (int from, int to, Meta.MotionDirection direction)
+		{
+			relayout (opened, direction);
 		}
 
 		/**
@@ -287,18 +301,7 @@ namespace Gala
 				place_flow_workspace (child, index, animate, delay);
 			}
 
-			// TODO: select thumbnail workspace
-			foreach (var child in thumb_container.get_children ()) {
-				if (child is DeepinWorkspaceThumbClone) {
-					var thumb_workspace = child as DeepinWorkspaceThumbClone;
-					var index = thumb_workspace.workspace.index ();
-					if (index == active_index) {
-						thumb_workspace.set_select (true);
-					} else {
-						thumb_workspace.set_select (false);
-					}
-				}
-			}
+			thumb_container.select_workspace (active_index, animate);
 
 			// TODO: thumb relayout
 			// thumb_container.relayout ();
@@ -339,7 +342,6 @@ namespace Gala
 			var active_index = screen.get_active_workspace ().index ();
 			var box = ActorBox ();
 
-			stdout.printf ("flow width: %f, flow height: %f\n", child.width, child.height);// TODO: test
 			float child_x =
 				(index - active_index) * (child.width * (1 - FLOW_WORKSPACE_DISTANCE_PERCENT * 2));
 			float child_y = 0;
@@ -350,26 +352,22 @@ namespace Gala
 			return box;
 		}
 
-		// TODO: animation
 		void add_workspace (int index)
 		{
-			var flow_workspace = new DeepinWorkspaceFlowClone (screen.get_workspace_by_index (index));
+			var flow_workspace = new DeepinWorkspaceFlowClone (
+				screen.get_workspace_by_index (index));
 			flow_workspace.window_activated.connect (activate_window);
 			flow_workspace.selected.connect (activate_workspace);
 
 			flow_workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
-
 			thumb_container.add_workspace (flow_workspace.thumb_workspace, () => relayout (opened));
 
 			flow_workspace.opacity = 0;
 			if (opened) {
 				flow_workspace.scale_in (false);
 			}
-
 			flow_container.add_child (flow_workspace);
-
 			do_place_flow_workspace (flow_workspace, index, false);
-
 			// TODO: ask for animation for new flow workspace
 			DeepinUtils.start_fade_in_opacity_animation (flow_workspace, 400, AnimationMode.LINEAR);
 		}
@@ -642,6 +640,9 @@ namespace Gala
 			foreach (var child in flow_container.get_children ()) {
 				child.remove_all_transitions ();
 			}
+
+			// TODO:
+			thumb_container.append_plus_button ();
 
 			relayout (false);
 

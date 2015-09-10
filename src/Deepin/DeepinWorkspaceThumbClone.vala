@@ -338,10 +338,7 @@ namespace Gala
 				reset_key_focus ();
 				workspace_name_text.editable = false;
 
-				if (first_setup) {
-					first_setup = false;
-					setup_completed ();
-				}
+				notify_setup_completed ();
 			});
 			workspace_name_text.key_focus_in.connect (() => {
 				if (workspace_name_text.text.length == 0) {
@@ -379,6 +376,14 @@ namespace Gala
 			// Return false to let event continue to be passed, so the cursor will be put in the
 			// position of the mouse.
 			return false;
+		}
+
+		void notify_setup_completed ()
+		{
+			if (first_setup) {
+				first_setup = false;
+				setup_completed ();
+			}
 		}
 
 		public void grab_key_focus_for_name ()
