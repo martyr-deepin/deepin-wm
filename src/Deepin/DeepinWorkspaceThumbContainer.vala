@@ -125,14 +125,18 @@ namespace Gala
 				workspace_clone.workspace_name.grab_key_focus_for_name ();
 				new_workspace_index_by_manual = -1;
 
-				workspace_clone.workspace_name.setup_completed.connect (() => {
-					// after new workspace setup completed, append the plus button and activate
-					// the workspace
+				// after new workspace setup completed, append the plus button and activate the
+				// workspace
+				workspace_clone.workspace_name.setup_completed.connect ((complete) => {
 					append_plus_button ();
-					DeepinUtils.switch_to_workspace (workspace_clone.workspace.get_screen (),
-													 workspace_clone.workspace.index ());
-					if (cb != null) {
-						cb ();
+					if (complete) {
+						DeepinUtils.switch_to_workspace (workspace_clone.workspace.get_screen (),
+														 workspace_clone.workspace.index ());
+						if (cb != null) {
+							cb ();
+						}
+					} else {
+						select_workspace (screen.get_active_workspace_index (), true);
 					}
 				});
 			}
