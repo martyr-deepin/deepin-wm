@@ -67,16 +67,15 @@ namespace Gala
 		public const float WORKSPACE_WIDTH_PERCENT = 0.12f;
 
 		// TODO: duration
-		public const int CHILD_FADE_IN_DURATION = 700;
-		public const int CHILD_FADE_OUT_DURATION = 400;
-		public const AnimationMode CHILD_FADE_OUT_MODE = AnimationMode.EASE_OUT_QUAD;
+		const int PLUS_FADE_IN_DURATION = 700;
 
+		public signal void workspace_closing (Workspace workspace);
 		/**
 		 * The percent value between distance of thumbnail workspace clones and monitor's width.
 		 */
 		const float SPACING_PERCENT = 0.02f;
 
-		// TODO: workspace switch duration
+		// TODO: use workspace switching duration?
 		const int LAYOUT_DURATION = 800;
 
 		public Screen screen { get; construct; }
@@ -102,8 +101,10 @@ namespace Gala
 
 		public void append_new_workspace ()
 		{
-			DeepinUtils.start_fade_out_animation (plus_button, CHILD_FADE_OUT_DURATION,
-												  CHILD_FADE_OUT_MODE, () => {
+			DeepinUtils.start_fade_out_animation (plus_button,
+												  DeepinMultitaskingView.WORKSPACE_FADE_DURATION,
+												  DeepinMultitaskingView.WORKSPACE_FADE_MODE,
+												  () => {
 			 	remove_child (plus_button);
 				new_workspace_index_by_manual = Prefs.get_num_workspaces ();
 				DeepinUtils.append_new_workspace (screen);
@@ -141,11 +142,15 @@ namespace Gala
 				});
 			}
 
+			workspace_clone.closing.connect (on_workspace_closing);
+
 			relayout ();
 		}
 
 		public void remove_workspace (DeepinWorkspaceThumbClone workspace_clone)
 		{
+			workspace_clone.closing.disconnect (on_workspace_closing);
+
 			remove_child (workspace_clone);
 
 			append_plus_button ();
@@ -161,6 +166,11 @@ namespace Gala
 			relayout ();
 		}
 
+		void on_workspace_closing (DeepinWorkspaceThumbClone thumb_workspace)
+		{
+			workspace_closing (thumb_workspace.workspace);
+		}
+
 		/**
 		 * Make plus button visible if workspace number less than MAX_WORKSPACE_NUM.
 		 */
@@ -171,7 +181,7 @@ namespace Gala
 				plus_button.opacity = 0;
 				add_child (plus_button);
 				place_child (plus_button, get_n_children () - 1, false);
-				DeepinUtils.start_fade_in_back_animation (plus_button, CHILD_FADE_IN_DURATION);
+				DeepinUtils.start_fade_in_back_animation (plus_button, PLUS_FADE_IN_DURATION);
 
 				relayout ();
 			}

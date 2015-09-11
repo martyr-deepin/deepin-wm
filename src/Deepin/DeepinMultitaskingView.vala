@@ -34,6 +34,8 @@ namespace Gala
 		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUAD;
 		public const int WORKSPACE_SWITCH_DURATION = 500;
 		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUAD;
+		public const int WORKSPACE_FADE_DURATION = 400;
+		public const AnimationMode WORKSPACE_FADE_MODE = AnimationMode.EASE_OUT_QUAD;
 
 		const int SMOOTH_SCROLL_DELAY = 500;
 
@@ -91,6 +93,16 @@ namespace Gala
 			// TODO: layout binding
 			// thumb_container.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
 			// thumb_container.add_constraint (new BindConstraint (flow_container, BindCoordinate.X, 0));
+
+			thumb_container.workspace_closing.connect ((workspace) => {
+				foreach (var child in flow_container.get_children ()) {
+					var flow_workspace = child as DeepinWorkspaceFlowClone;
+					if (flow_workspace.workspace == workspace) {
+						DeepinUtils.start_fade_out_opacity_animation (
+							flow_workspace, WORKSPACE_FADE_DURATION, WORKSPACE_FADE_MODE);
+					}
+				}
+			});
 
 			dock_clones = new Actor ();
 
@@ -368,8 +380,9 @@ namespace Gala
 			}
 			flow_container.add_child (flow_workspace);
 			do_place_flow_workspace (flow_workspace, index, false);
-			// TODO: ask for animation for new flow workspace
-			DeepinUtils.start_fade_in_opacity_animation (flow_workspace, 400, AnimationMode.LINEAR);
+			DeepinUtils.start_fade_in_opacity_animation (flow_workspace,
+														 WORKSPACE_FADE_DURATION,
+														 WORKSPACE_FADE_MODE);
 		}
 
 		// TODO: animation
@@ -650,14 +663,11 @@ namespace Gala
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
 			var thumb_y_value = new GLib.Value (typeof (float));
 			if (opening) {
-				thumb_y_value.set_float ((monitor_geom.height *
-										  DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
+				thumb_y_value.set_float ((monitor_geom.height * HORIZONTAL_OFFSET_PERCENT));
 			} else {
-				thumb_y_value.set_float (-(monitor_geom.height *
-										   DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT));
+				thumb_y_value.set_float (-(monitor_geom.height * HORIZONTAL_OFFSET_PERCENT));
 			}
-			DeepinUtils.start_animation_group (thumb_container, "toggle",
-											   DeepinMultitaskingView.TOGGLE_DURATION,
+			DeepinUtils.start_animation_group (thumb_container, "toggle", TOGGLE_DURATION,
 											   DeepinUtils.clutter_set_mode_bezier_out_back,
 											   "y", &thumb_y_value);
 

@@ -494,17 +494,16 @@ namespace Gala
 		// distance between thumbnail workspace clone and workspace name field
 		public const int WORKSPACE_NAME_DISTANCE = 16;
 
-		// TODO: duration
+		// TODO: ask for duration
 		const int FADE_IN_DURATION = 1300;
 
 		public signal void selected ();
+		public signal void closing ();
 
 		public Workspace workspace { get; construct; }
 
 		public DeepinWindowThumbContainer window_container;
-
 		public DeepinWorkspaceThumbCloneCore thumb_clone;
-
 		public DeepinWorkspaceNameField workspace_name;
 
 		public DeepinWorkspaceThumbClone (Workspace workspace)
@@ -546,12 +545,14 @@ namespace Gala
 				return;
 			}
 
+			closing ();
+
 			workspace_name.reset_key_focus ();
 
 			DeepinUtils.start_fade_out_animation (
 				this,
-				DeepinWorkspaceThumbContainer.CHILD_FADE_OUT_DURATION,
-				DeepinWorkspaceThumbContainer.CHILD_FADE_OUT_MODE,
+				DeepinMultitaskingView.WORKSPACE_FADE_DURATION,
+				DeepinMultitaskingView.WORKSPACE_FADE_MODE,
 				() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
 		}
 
