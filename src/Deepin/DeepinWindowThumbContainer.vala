@@ -70,7 +70,8 @@ namespace Gala
 		{
 			foreach (var child in get_children ()) {
 				var window_clone = child as DeepinWindowClone;
-				var rect = get_layout_rect_for_window (window_clone);
+				var box = get_layout_box_for_window (window_clone);
+				var rect = DeepinUtils.new_rect_for_actor_box (box);
 				window_clone.take_slot (rect);
 			}
 		}
@@ -78,7 +79,8 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public override Meta.Rectangle get_layout_rect_for_window (DeepinWindowClone window_clone)
+		// TODO: layout for windows in thumbnail workspace
+		public override ActorBox get_layout_box_for_window (DeepinWindowClone window_clone)
 		{
 			float thumb_width, thumb_height;
 			DeepinWorkspaceThumbContainer.get_prefer_thumb_size (workspace.get_screen (),
@@ -94,21 +96,21 @@ namespace Gala
 			rect = window_clone.window.get_outer_rect ();
 #endif
 
-			// make window rectangle center of monitor to avoid dock window affect
+			var box = DeepinUtils.new_actor_box_for_rect (rect);
+
+			// make window rectangle center of monitor to avoid affect by _NET_WM_STRUT_PARTIAL
+			// which set by dock window
 			if (!window_clone.window.is_fullscreen ()) {
 				Meta.Rectangle work_area = window_clone.window.get_work_area_current_monitor ();
 				float offset_x = (float)(monitor_geom.width - work_area.width) / 2;
 				float offset_y = (float)(monitor_geom.height - work_area.height) / 2;
-				rect.x += (int) offset_x;
-				rect.y += (int) offset_y;
+				DeepinUtils.offset_actor_box (ref box, offset_x, offset_y);
 			}
 
-			DeepinUtils.scale_rectangle (ref rect, scale);
-			// TODO: layout for windows in thumbnail workspace
-			// TODO: _NET_WM_STRUT_PARTIAL
-			DeepinUtils.scale_rectangle_in_center (ref rect, 0.9f);
+			DeepinUtils.scale_actor_box (ref box, scale);
+			DeepinUtils.scale_actor_box_in_center (ref box, 0.9f);
 
-			return rect;
+			return box;
 		}
 	}
 }

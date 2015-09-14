@@ -50,8 +50,7 @@ namespace Gala
 		/**
 		 * Get position rectangle for target window.
 		 */
-		// TODO: use ActorBox instead of Rectangle
-		public abstract Meta.Rectangle get_layout_rect_for_window (DeepinWindowClone window_clone);
+		public abstract ActorBox get_layout_box_for_window (DeepinWindowClone window_clone);
 
 		/**
 		 * Change current selected window and call relayout to adjust the size.
@@ -76,9 +75,10 @@ namespace Gala
 
 		public virtual void on_actor_added (Actor new_actor)
 		{
-			// setup animation for window that added
+			// setup animation for new window
 			var new_window = new_actor as DeepinWindowClone;
-			var rect = get_layout_rect_for_window (new_window);
+			var box = get_layout_box_for_window (new_window);
+			var rect = DeepinUtils.new_rect_for_actor_box (box);
 			new_window.take_slot (rect, false);
 
 			new_window.set_scale (0, 0);

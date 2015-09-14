@@ -620,10 +620,34 @@ namespace Gala
 		}
 
 		/**
-		 * Shrink a MetaRectangle on all sides for the given size.  Negative amounts will scale it
+		 * Create Clutter.ActorBox through Meta.Rectangle.
+		 */
+		public static Clutter.ActorBox new_actor_box_for_rect (Meta.Rectangle rect)
+		{
+			var box = Clutter.ActorBox ();
+			box.set_origin (rect.x, rect.y);
+			box.set_size (rect.width, rect.height);
+			return box;
+		}
+
+		/**
+		 * Create Meta.Rectangle through Clutter.ActorBox.
+		 */
+		public static Meta.Rectangle new_rect_for_actor_box (Clutter.ActorBox box)
+		{
+			var rect = Meta.Rectangle ();
+			rect.x = (int)box.get_x ();
+			rect.y = (int)box.get_y ();
+			rect.width = (int)box.get_width ();
+			rect.height = (int)box.get_height ();
+			return rect;
+		}
+
+		/**
+		 * Shrink a Meta.Rectangle on all sides for the given size.  Negative amounts will scale it
 		 * instead.
 		 */
-		public static void shrink_rectangle (ref Meta.Rectangle rect, int size)
+		public static void shrink_meta_rectangle (ref Meta.Rectangle rect, int size)
 		{
 			rect.x += size;
 			rect.y += size;
@@ -632,9 +656,9 @@ namespace Gala
 		}
 
 		/**
-		 * Scale a MetaRectangle on size and position.
+		 * Scale a Meta.Rectangle on size and position.
 		 */
-		public static void scale_rectangle (ref Meta.Rectangle rect, float scale)
+		public static void scale_meta_rectangle (ref Meta.Rectangle rect, float scale)
 		{
 			rect.x = (int)Math.round (rect.x * scale);
 			rect.y = (int)Math.round (rect.y * scale);
@@ -643,9 +667,9 @@ namespace Gala
 		}
 
 		/**
-		 * Scale a MetaRectangle on allsides and keep center point not changed.
+		 * Scale a Meta.Rectangle on all sides and keep center point not changed.
 		 */
-		public static void scale_rectangle_in_center (ref Meta.Rectangle rect, float scale)
+		public static void scale_meta_rectangle_in_center (ref Meta.Rectangle rect, float scale)
 		{
 			int distance_x = (int)((scale - 1) / 2 * rect.width);
 			int distance_y = (int)((scale - 1) / 2 * rect.height);
@@ -653,6 +677,44 @@ namespace Gala
 			rect.y -= distance_y;
 			rect.width += distance_x * 2;
 			rect.height += distance_y * 2;
+		}
+
+		/**
+		 * Reset Clutter.ActorBox origin with target offset.
+		 */
+		public static void offset_actor_box (ref Clutter.ActorBox box, float offset_x, float offset_y)
+		{
+			var new_x = box.get_x () + offset_x;
+			var new_y = box.get_y () + offset_y;
+			box.set_origin (new_x, new_y);
+		}
+
+		/**
+		 * Scale a Clutter.ActorBox on size and position.
+		 */
+		public static void scale_actor_box (ref Clutter.ActorBox box, float scale)
+		{
+			var new_x = box.get_x () * scale;
+			var new_y = box.get_y () * scale;
+			var new_width = box.get_width () * scale;
+			var new_height = box.get_height () * scale;
+			box.set_origin (new_x, new_y);
+			box.set_size (new_width, new_height);
+		}
+
+		/**
+		 * Scale a Clutter.ActorBox on all sides and keep center point not changed.
+		 */
+		public static void scale_actor_box_in_center (ref Clutter.ActorBox box, float scale)
+		{
+			var distance_x = (scale - 1) / 2 * box.get_width ();
+			var distance_y = (scale - 1) / 2 * box.get_height ();
+			var new_x = box.get_x () - distance_x;
+			var new_y = box.get_y () - distance_y;
+			var new_width = box.get_width () + distance_x * 2;
+			var new_height = box.get_height () + distance_y * 2;
+			box.set_origin (new_x, new_y);
+			box.set_size (new_width, new_height);
 		}
 	}
 }

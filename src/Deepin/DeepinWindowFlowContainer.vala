@@ -85,7 +85,8 @@ namespace Gala
 
 			foreach (var child in get_children ()) {
 				var window_clone = child as DeepinWindowClone;
-				var rect = get_layout_rect_for_window (window_clone);
+				var box = get_layout_box_for_window (window_clone);
+				var rect = DeepinUtils.new_rect_for_actor_box (box);
 				window_clone.take_slot (rect, true, selecting);
 			}
 		}
@@ -93,18 +94,18 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public override Meta.Rectangle get_layout_rect_for_window (DeepinWindowClone window_clone)
+		public override ActorBox get_layout_box_for_window (DeepinWindowClone window_clone)
 		{
-			Meta.Rectangle rect;
+			ActorBox box;
 			foreach (var tilable in window_positions) {
 				var w = tilable.id as DeepinWindowClone;
 				if (window_clone == w) {
-					rect = tilable.rect;
-					DeepinUtils.scale_rectangle_in_center (ref rect, 0.9f);
+					box = DeepinUtils.new_actor_box_for_rect (tilable.rect);
+					DeepinUtils.scale_actor_box_in_center (ref box, 0.9f);
 					if (!window_clone.is_selected ()) {
-						DeepinUtils.scale_rectangle_in_center (ref rect, 0.9f);
+						DeepinUtils.scale_actor_box_in_center (ref box, 0.9f);
 					}
-					return rect;
+					return box;
 				}
 			}
 			return {};
