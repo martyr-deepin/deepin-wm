@@ -93,6 +93,16 @@ namespace Gala
 #else
 			rect = window_clone.window.get_outer_rect ();
 #endif
+
+			// make window rectangle center of monitor to avoid dock window affect
+			if (!window_clone.window.is_fullscreen ()) {
+				Meta.Rectangle work_area = window_clone.window.get_work_area_current_monitor ();
+				float offset_x = (float)(monitor_geom.width - work_area.width) / 2;
+				float offset_y = (float)(monitor_geom.height - work_area.height) / 2;
+				rect.x += (int) offset_x;
+				rect.y += (int) offset_y;
+			}
+
 			DeepinUtils.scale_rectangle (ref rect, scale);
 			// TODO: layout for windows in thumbnail workspace
 			// TODO: _NET_WM_STRUT_PARTIAL
