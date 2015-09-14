@@ -280,8 +280,6 @@ namespace Gala
 
 		public void scale_in (bool animate)
 		{
-			var screen = workspace.get_screen ();
-			var display = screen.get_display ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 
 			int top_offset =
@@ -295,7 +293,7 @@ namespace Gala
 			background.set_pivot_point (0.5f, pivot_y);
 
 			if (animate) {
-				var scale_value = new GLib.Value (typeof (float));
+				var scale_value = GLib.Value (typeof (float));
 				scale_value.set_float (scale);
 				DeepinUtils.start_animation_group (background, "open",
 												   DeepinMultitaskingView.TOGGLE_DURATION,
@@ -315,7 +313,7 @@ namespace Gala
 		public void scale_out (bool animate)
 		{
 			if (animate) {
-				var scale_value = new GLib.Value (typeof (float));
+				var scale_value = GLib.Value (typeof (float));
 				scale_value.set_float (1.0f);
 				DeepinUtils.start_animation_group (background, "close",
 												   DeepinMultitaskingView.TOGGLE_DURATION,

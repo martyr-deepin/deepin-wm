@@ -331,13 +331,13 @@ namespace Gala
 				var position = Point.alloc ();
 				position.x = outer_rect.x - offset_x;
 				position.y = outer_rect.y - offset_y;
-				var position_value = new GLib.Value (typeof (Point));
+				var position_value = GLib.Value (typeof (Point));
 				position_value.set_boxed (position);
 
 				var size = Size.alloc ();
 				size.width = outer_rect.width;
 				size.height = outer_rect.height;
-				var size_value = new GLib.Value (typeof (Size));
+				var size_value = GLib.Value (typeof (Size));
 				size_value.set_boxed (size);
 
 				DeepinUtils.start_animation_group (this, "window-slot",
@@ -391,13 +391,13 @@ namespace Gala
 				var position = Point.alloc ();
 				position.x = rect.x;
 				position.y = rect.y;
-				var position_value = new GLib.Value (typeof (Point));
+				var position_value = GLib.Value (typeof (Point));
 				position_value.set_boxed (position);
 
 				var size = Size.alloc ();
 				size.width = rect.width;
 				size.height = rect.height;
-				var size_value = new GLib.Value (typeof (Size));
+				var size_value = GLib.Value (typeof (Size));
 				size_value.set_boxed (size);
 
 				if (!selecting) {
@@ -570,37 +570,6 @@ namespace Gala
 			restore_easing_state ();
 		}
 
-		// TODO: remove
-		void start_drag_animation ()
-		{
-			// TODO: pivot point z
-			// set_pivot_point (0.5f, 0.5f);
-
-			double[] keyframes = {0.25, 0.75};
-			GLib.Value[] values = {-45f, 45f};
-
-			var transition = new KeyframeTransition ("rotation-angle-z");
-			transition.set_duration (1000);
-			transition.set_progress_mode (AnimationMode.EASE_OUT_QUAD);
-			transition.set_repeat_count (-1);
-			transition.set_from_value (0.0f);
-			transition.set_to_value (0.0f);
-			transition.set_key_frames (keyframes);
-			transition.set_values (values);
-
-			if (get_transition ("weave") != null) {
-				remove_transition ("weave");
-			}
-			add_transition ("weave", transition);
-		}
-
-		void stop_drag_animation ()
-		{
-			if (get_transition ("weave") != null) {
-				remove_transition ("weave");
-			}
-		}
-
 		/**
 		 * Send the window the delete signal and listen for new windows to be added to the window's
 		 * workspace, in which case we check if the new window is a dialog of the window we were
@@ -771,7 +740,6 @@ namespace Gala
 				return;
 			}
 
-			var scale = hovered ? 0.4 : 1.0;
 			var opacity = hovered ? 0 : 255;
 			var duration =
 				hovered && insert_thumb != null ? WorkspaceInsertThumb.EXPAND_DELAY : 100;

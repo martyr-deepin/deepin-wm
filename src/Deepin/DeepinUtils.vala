@@ -406,7 +406,7 @@ namespace Gala
 
 			actor.restore_easing_state ();
 
-			var scale_value = new GLib.Value (typeof (float));
+			var scale_value = GLib.Value (typeof (float));
 			scale_value.set_float (1.0f);
 			start_animation_group (actor, trans_name, duration, clutter_set_mode_bezier_out_back,
 								   "scale-x", &scale_value, "scale-y", &scale_value);
@@ -513,7 +513,7 @@ namespace Gala
 		 * Setup animation group for target actor.
 		 *
 		 * Example:
-		 *     var scale_value = new GLib.Value (typeof (float));
+		 *     var scale_value = GLib.Value (typeof (float));
 		 *     scale_value.set_float (0.5f);
 		 *     start_animation_group (
 		 *         actor, "name", 500, clutter_set_mode_bezier_out_back,

@@ -52,8 +52,6 @@ namespace Gala
 
 		Actor close_button;
 
-		uint show_close_button_timeout_id = 0;
-
 		public DeepinWorkspaceThumbCloneCore (Workspace workspace)
 		{
 			Object (workspace: workspace);
@@ -287,8 +285,6 @@ namespace Gala
 		Actor workspace_name;
 		Text workspace_name_num;
 		Text workspace_name_text;
-		int workspace_name_width;
-		int workspace_name_height;
 
 		// selected shape for workspace name field
 		DeepinCssActor name_shape;

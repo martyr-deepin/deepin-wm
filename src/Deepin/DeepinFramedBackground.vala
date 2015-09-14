@@ -21,6 +21,28 @@ using Meta;
 
 namespace Gala
 {
+	class DeepinBorderEffect : Effect
+	{
+		public DeepinBorderEffect ()
+		{
+			Object ();
+		}
+
+		public override void paint (EffectPaintFlags flags)
+		{
+			actor.continue_paint ();
+
+			// draw outer rectangle
+			Cogl.set_source_color4ub (0, 0, 0, 100);
+			Cogl.Path.rectangle (0, 0, actor.width, actor.height);
+			Cogl.Path.stroke ();
+
+			Cogl.set_source_color4ub (255, 255, 255, 25);
+			Cogl.Path.rectangle (0.5f, 0.5f, actor.width - 1, actor.height - 1);
+			Cogl.Path.stroke ();
+		}
+	}
+
 /**
  * Utility class which adds a border and a shadow to a Background
  */
@@ -52,21 +74,8 @@ namespace Gala
 				var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 				add_effect (new ShadowEffect (monitor_geom.width, monitor_geom.height, 40, 5));
 			}
-		}
-
-		public override void paint ()
-		{
-			base.paint ();
-
-			// draw outer rectangle
 			if (enable_border) {
-				Cogl.set_source_color4ub (0, 0, 0, 100);
-				Cogl.Path.rectangle (0, 0, width, height);
-				Cogl.Path.stroke ();
-
-				Cogl.set_source_color4ub (255, 255, 255, 25);
-				Cogl.Path.rectangle (0.5f, 0.5f, width - 1, height - 1);
-				Cogl.Path.stroke ();
+				add_effect (new DeepinBorderEffect ());
 			}
 		}
 	}

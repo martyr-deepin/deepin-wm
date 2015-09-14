@@ -333,7 +333,6 @@ namespace Gala
 
 		void do_place_flow_workspace (Actor child, int index, bool animate)
 		{
-			var active_index = screen.get_active_workspace ().index ();
 			ActorBox child_box = get_flow_workspace_layout_box (child, index);
 			// TODO: flow workspace size
 			// child.width = child_box.get_width ();
@@ -664,7 +663,7 @@ namespace Gala
 
 			// TODO: adjust animation in multitaskingview, toggle thumb workspace container
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
-			var thumb_y_value = new GLib.Value (typeof (float));
+			var thumb_y_value = GLib.Value (typeof (float));
 			if (opening) {
 				thumb_y_value.set_float ((monitor_geom.height * HORIZONTAL_OFFSET_PERCENT));
 			} else {

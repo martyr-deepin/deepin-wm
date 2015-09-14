@@ -282,7 +282,7 @@ namespace Gala
 				var position = Point.alloc ();
 				position.x = child_box.get_x ();
 				position.y = child_box.get_y ();
-				var position_value = new GLib.Value (typeof (Point));
+				var position_value = GLib.Value (typeof (Point));
 				position_value.set_boxed (position);
 				DeepinUtils.start_animation_group (child, "thumb-workspace-slot", LAYOUT_DURATION,
 												   DeepinUtils.clutter_set_mode_bezier_out_back,
