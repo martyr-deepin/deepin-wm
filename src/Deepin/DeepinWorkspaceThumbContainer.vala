@@ -96,7 +96,7 @@ namespace Gala
 				return false;
 			});
 
-			append_plus_button ();
+			append_plus_button_if_need ();
 		}
 
 		public void append_new_workspace ()
@@ -111,6 +111,21 @@ namespace Gala
 			});
 		}
 
+		public void open ()
+		{
+			append_plus_button_if_need ();
+		}
+
+		public void close ()
+		{
+			append_plus_button_if_need ();
+			foreach (var child in get_children ()) {
+				if (child is DeepinWorkspaceThumbClone) {
+					(child as DeepinWorkspaceThumbClone).workspace_name.finish_edit ();
+				}
+			}
+		}
+
 		public void add_workspace (DeepinWorkspaceThumbClone workspace_clone,
 								   DeepinUtils.PlainCallback? cb = null)
 		{
@@ -123,13 +138,13 @@ namespace Gala
 
 			// if workspace is added manually, set workspace name field editable
 			if (workspace_clone.workspace.index () == new_workspace_index_by_manual) {
-				workspace_clone.workspace_name.grab_key_focus_for_name ();
+				workspace_clone.workspace_name.start_edit ();
 				new_workspace_index_by_manual = -1;
 
 				// after new workspace setup completed, append the plus button and activate the
 				// workspace
 				workspace_clone.workspace_name.setup_completed.connect ((complete) => {
-					append_plus_button ();
+					append_plus_button_if_need ();
 					if (complete) {
 						DeepinUtils.switch_to_workspace (workspace_clone.workspace.get_screen (),
 														 workspace_clone.workspace.index ());
@@ -153,7 +168,7 @@ namespace Gala
 
 			remove_child (workspace_clone);
 
-			append_plus_button ();
+			append_plus_button_if_need ();
 
 			// Prevent other workspaces original name to be reset, so set them to gsettings again
 			// here.
@@ -174,7 +189,7 @@ namespace Gala
 		/**
 		 * Make plus button visible if workspace number less than MAX_WORKSPACE_NUM.
 		 */
-		public void append_plus_button ()
+		void append_plus_button_if_need ()
 		{
 			if (Prefs.get_num_workspaces () < WindowManagerGala.MAX_WORKSPACE_NUM &&
 				!contains (plus_button)) {

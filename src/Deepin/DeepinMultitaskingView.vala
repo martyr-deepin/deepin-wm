@@ -654,12 +654,15 @@ namespace Gala
 				child.remove_all_transitions ();
 			}
 
-			// TODO:
-			thumb_container.append_plus_button ();
+			if (opening) {
+				thumb_container.open ();
+			} else {
+				thumb_container.close ();
+			}
 
 			relayout (false);
 
-			// TODO: adjust animation, multitaskingview, toggle, thumb workspaces
+			// TODO: adjust animation in multitaskingview, toggle thumb workspace container
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
 			var thumb_y_value = new GLib.Value (typeof (float));
 			if (opening) {

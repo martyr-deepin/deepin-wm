@@ -338,8 +338,7 @@ namespace Gala
 				// Send setup_completed(true) signal if user coplete editing.
 				notify_setup_completed_if_need (true);
 
-				reset_key_focus ();
-				workspace_name_text.editable = false;
+				finish_edit ();
 			});
 			workspace_name_text.key_focus_in.connect (() => {
 				if (workspace_name_text.text.length == 0) {
@@ -375,7 +374,7 @@ namespace Gala
 				return false;
 			}
 
-			grab_key_focus_for_name ();
+			start_edit ();
 
 			selected ();
 
@@ -395,10 +394,16 @@ namespace Gala
 			}
 		}
 
-		public void grab_key_focus_for_name ()
+		public void start_edit ()
 		{
 			workspace_name_text.grab_key_focus ();
 			workspace_name_text.editable = true;
+		}
+
+		public void finish_edit ()
+		{
+			reset_key_focus ();
+			workspace_name_text.editable = false;
 		}
 
 		public void set_workspace_name ()
