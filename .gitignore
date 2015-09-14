@@ -50,3 +50,4 @@ debian/files
 debian/tmp/
 _*
 debian
+**/*~
