@@ -61,13 +61,11 @@ namespace Gala
 		{
 			reactive = true;
 
-			// TODO: improve shadow effect
-			// workspace shadow effect
+			// workspace shadow effect, angle:90°, size:5, distance:1, opacity:30%
 			workspace_shadow = new Actor ();
 			workspace_shadow.add_effect_with_name (
 				"shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
-											get_thumb_workspace_prefer_heigth (), 10, 1));
-			workspace_shadow.opacity = 76;
+											get_thumb_workspace_prefer_heigth (), 10, 1, 76));
 			add_child (workspace_shadow);
 
 			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
@@ -86,7 +84,7 @@ namespace Gala
 			// TODO: round effect
 			// workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 
-			background = new DeepinFramedBackground (workspace.get_screen (), false, false);
+			background = new DeepinFramedBackground (workspace.get_screen (), false);
 			background.button_press_event.connect (() => {
 				selected ();
 				return true;
@@ -410,7 +408,6 @@ namespace Gala
 
 		public void get_workspace_name ()
 		{
-			// TODO: ask for workspace name format, dot
 			workspace_name_num.text = "%d".printf (workspace.index () + 1);
 			workspace_name_text.text = DeepinUtils.get_workspace_name (workspace.index ());
 		}

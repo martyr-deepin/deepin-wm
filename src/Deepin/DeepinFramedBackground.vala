@@ -56,7 +56,7 @@ namespace Gala
 		public bool enable_border { get; construct; }
 
 		public DeepinFramedBackground (
-			Screen screen, bool enable_shadow = true, bool enable_border = true)
+			Screen screen, bool enable_shadow = true, bool enable_border = false)
 		{
 #if HAS_MUTTER314
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
@@ -72,7 +72,9 @@ namespace Gala
 		{
 			if (enable_shadow) {
 				var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
-				add_effect (new ShadowEffect (monitor_geom.width, monitor_geom.height, 40, 5));
+
+				// shadow effect, angle:90°, size:15, distance:5, opacity:50%
+				add_effect (new ShadowEffect (monitor_geom.width, monitor_geom.height, 30, 5, 128));
 			}
 			if (enable_border) {
 				add_effect (new DeepinBorderEffect ());

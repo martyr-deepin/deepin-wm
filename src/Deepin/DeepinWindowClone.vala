@@ -220,8 +220,9 @@ namespace Gala
 #else
 				var outer_rect = window.get_outer_rect ();
 #endif
+				// shadow effect, angle:90°, size:8, distance:5, opacity:35%
 				add_effect_with_name (
-					"shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5));
+					"shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5, 204));
 #if HAS_MUTTER312
 				window.size_changed.connect (update_shadow_size);
 #else
