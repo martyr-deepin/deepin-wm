@@ -204,8 +204,11 @@ namespace Gala
 			thumb_workspace.window_container.add_window (window);
 			window_container.add_window (window);
 
-			// start bulge animation after window added by all containers
-			thumb_workspace.start_bulge_animation ();
+			// start spread animation after window added by all containers
+			if (opened) {
+				stdout.printf ("start spread animation...\n"); // TODO: test
+				DeepinUtils.start_spread_animation (thumb_workspace.thumb_clone, 600, 1.05f);
+			}
 		}
 
 		/**
@@ -235,7 +238,7 @@ namespace Gala
 		 * layout.  Also sets the current_window of the DeepinWindowFlowContainer to the active
 		 * window if it belongs to this workspace.
 		 */
-		public void open ()
+		public void open (bool animate = true)
 		{
 			if (opened) {
 				return;
@@ -243,7 +246,9 @@ namespace Gala
 
 			opened = true;
 
-			scale_in (true);
+			if (animate) {
+				scale_in (true);
+			}
 
 			// TODO: select default window
 			// Window selected_window = null;

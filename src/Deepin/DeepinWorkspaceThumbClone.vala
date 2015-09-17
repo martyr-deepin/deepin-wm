@@ -563,51 +563,11 @@ namespace Gala
 
 		public void start_fade_in_animation ()
 		{
-			// TODO 85%time, 1.3s duration
-			// this.set_pivot_point (0.5f, 0.5f);
 			DeepinUtils.start_fade_in_back_animation (
 				thumb_clone, FADE_IN_DURATION,
 				() => DeepinUtils.start_fade_in_back_animation (workspace_name,
 																(int) (FADE_IN_DURATION * 0.4)),
 				0.6);
-		}
-
-		public void start_bulge_animation ()
-		{
-			// TODO: ask for animation, thumbnail bulge
-			var transgroup = new TransitionGroup ();
-
-			double[] keyframes = { 0.25, 0.75 };
-			GLib.Value[] values = { 1.05f, 1.05f };
-			// TODO:
-			int duration = 500;
-			// int duration = DeepinWindowClone.LAYOUT_DURATION;
-
-			var transition = new KeyframeTransition ("scale-x");
-			transition.set_duration (duration);
-			transition.set_progress_mode (AnimationMode.EASE_IN_BACK);
-			transition.set_from_value (1.0f);
-			transition.set_to_value (1.0f);
-			transition.set_key_frames (keyframes);
-			transition.set_values (values);
-			transgroup.add_transition (transition);
-
-			transition = new KeyframeTransition ("scale-y");
-			transition.set_duration (duration);
-			transition.set_progress_mode (AnimationMode.EASE_IN_BACK);
-			transition.set_from_value (1.0f);
-			transition.set_to_value (1.0f);
-			transition.set_key_frames (keyframes);
-			transition.set_values (values);
-			transgroup.add_transition (transition);
-
-			transgroup.set_duration (duration);
-			transgroup.remove_on_complete = true;
-
-			if (thumb_clone.get_transition ("bulge") != null) {
-				thumb_clone.remove_transition ("bulge");
-			}
-			thumb_clone.add_transition ("bulge", transgroup);
 		}
 
 		public override void allocate (ActorBox box, AllocationFlags flags)

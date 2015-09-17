@@ -367,6 +367,9 @@ namespace Gala
 		{
 			var flow_workspace = new DeepinWorkspaceFlowClone (
 				screen.get_workspace_by_index (index));
+			if (opened) {
+				flow_workspace.open (false);
+			}
 			flow_workspace.window_activated.connect (activate_window);
 			flow_workspace.selected.connect (activate_workspace);
 
