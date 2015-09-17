@@ -82,7 +82,7 @@ namespace Gala
 			new_window.take_slot (rect, false);
 
 			new_window.set_scale (0, 0);
-			new_window.start_open_animation ();
+			new_window.start_fade_in_animation ();
 		}
 
 		/**
@@ -296,7 +296,7 @@ namespace Gala
 						transitions_completed_id = 0;
 					}
 					window_clone.remove_all_transitions ();
-					window_clone.start_open_animation ();
+					window_clone.start_fade_in_animation ();
 					return;
 				}
 			}
@@ -312,7 +312,7 @@ namespace Gala
 		{
 			foreach (var child in get_children ()) {
 				if ((child as DeepinWindowClone).window == window) {
-					(child as DeepinWindowClone).start_close_animation ();
+					(child as DeepinWindowClone).start_fade_out_animation ();
 					transitions_completed_id = child.transitions_completed.connect (() => {
 						transitions_completed_id = 0;
 						remove_window (window);
@@ -330,7 +330,7 @@ namespace Gala
 		{
 			foreach (var child in get_children ()) {
 				if ((child as DeepinWindowClone).window == window) {
-					(child as DeepinWindowClone).start_close_animation ();
+					(child as DeepinWindowClone).start_fade_out_animation ();
 					break;
 				}
 			}

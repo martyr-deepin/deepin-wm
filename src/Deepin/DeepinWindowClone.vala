@@ -30,7 +30,8 @@ namespace Gala
 		public const int LAYOUT_DURATION = 400;
 		public const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
 
-		const int CLOSE_DURATION = 500;
+		const int FADE_IN_DURATION = 500;
+		const int FADE_OUT_DURATION = 300;
 		const AnimationMode CLOSE_MODE = AnimationMode.EASE_IN_QUAD;
 
 		const int WINDOW_ICON_SIZE = 64;
@@ -122,7 +123,7 @@ namespace Gala
 			drag_action =
 				new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
 			drag_action.drag_begin.connect (drag_begin);
-			// TODO:
+			// TODO: remove
 			// drag_action.destination_crossed.connect (drag_destination_crossed);
 			drag_action.drag_end.connect (drag_end);
 			drag_action.drag_canceled.connect (drag_canceled);
@@ -547,28 +548,15 @@ namespace Gala
 			return false;
 		}
 
-		public void start_open_animation ()
+		public void start_fade_in_animation ()
 		{
-			save_easing_state ();
-
-			set_easing_duration (CLOSE_DURATION);
-			set_easing_mode (CLOSE_MODE);
-			scale_x = 1.0f;
-			scale_y = 1.0f;
-
-			restore_easing_state ();
+			DeepinUtils.start_fade_in_back_animation (this, FADE_IN_DURATION);
 		}
 
-		public void start_close_animation ()
+		public void start_fade_out_animation (DeepinUtils.PlainCallback? cb = null)
 		{
-			save_easing_state ();
-
-			set_easing_duration (CLOSE_DURATION);
-			set_easing_mode (CLOSE_MODE);
-			scale_x = 0.0f;
-			scale_y = 0.0f;
-
-			restore_easing_state ();
+			DeepinUtils.start_fade_out_animation (this, FADE_OUT_DURATION,
+												  AnimationMode.EASE_OUT_QUAD, cb);
 		}
 
 		/**
@@ -578,10 +566,7 @@ namespace Gala
 		 */
 		void close_window ()
 		{
-			start_close_animation ();
-			transitions_completed.connect (() => {
-				do_close_window ();
-			});
+			start_fade_out_animation (do_close_window);
 			closing ();
 		}
 		void do_close_window ()

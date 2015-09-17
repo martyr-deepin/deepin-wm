@@ -1242,7 +1242,6 @@ namespace Gala
 		public override void switch_workspace (int from, int to, MotionDirection direction)
 		{
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
-			// TODO: ask for animation, switching workspaces
 			var animation_duration = animation_settings.workspace_switch_duration;
 
 			if (!animation_settings.enable_animations
