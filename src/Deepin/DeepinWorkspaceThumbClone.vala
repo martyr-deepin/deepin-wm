@@ -475,7 +475,7 @@ namespace Gala
 				name_shape_box.y1 + (name_shape_box.get_height () - name_box.get_height ()) / 2);
 			workspace_name.allocate (name_box, flags);
 
-			// update layout for workspace name field.
+			// update layout for workspace name field
 			var name_layout = workspace_name.layout_manager as BoxLayout;
 			if (workspace_name_text.text.length > 0 || workspace_name_text.editable) {
 				name_layout.spacing = WORKSPACE_NAME_SPACING;

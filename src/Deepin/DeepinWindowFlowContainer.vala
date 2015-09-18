@@ -345,12 +345,11 @@ namespace Gala
 
 			opened = false;
 
-			bool animate_to_orig = (workspace.get_screen ().get_active_workspace () == workspace);
-
 			foreach (var window in get_children ()) {
 				var window_clone = window as DeepinWindowClone;
 				window_clone.set_select (false);
-				if (animate_to_orig) {
+				if ((workspace.get_screen ().get_active_workspace () == workspace) &&
+					window_clone.window.showing_on_its_workspace ()) {
 					window_clone.transition_to_original_state (true);
 				} else {
 					DeepinUtils.start_fade_out_opacity_animation (

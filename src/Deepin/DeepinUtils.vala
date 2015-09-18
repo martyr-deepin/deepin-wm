@@ -418,7 +418,7 @@ namespace Gala
 
 		/**
 		 * Start fade-out animation for target actor which used for actor adding. The actor's size will
-		 * be scaled to 0 and opacity will be set to 0.
+		 * be scaled to 0.2 and opacity will be set to 12.
 		 *
 		 * @param actor Target actor.
 		 * @param duration Animation duration.
@@ -481,7 +481,7 @@ namespace Gala
 
 			actor.set_easing_duration (duration);
 			actor.set_easing_mode (mode);
-			actor.opacity = 12;
+			actor.opacity = 0;
 
 			actor.restore_easing_state ();
 
