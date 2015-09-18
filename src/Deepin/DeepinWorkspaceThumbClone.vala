@@ -265,7 +265,7 @@ namespace Gala
 
 		const int WORKSPACE_NAME_MAX_LENGTH = 32;
 
-		const int NAME_SHAPE_PADDING = 5;
+		const int NAME_SHAPE_PADDING = 4;
 
 		// layout spacing for workspace name field
 		const int WORKSPACE_NAME_SPACING = 5;
@@ -466,13 +466,17 @@ namespace Gala
 			name_shape_box.set_origin (0, 0);
 			name_shape.allocate (name_shape_box, flags);
 
+			// place Text actors with offset to make it looks in the middle
+			int text_y_offset = 1;
+
 			var name_box = ActorBox ();
 			name_box.set_size (
 				Math.fminf (workspace_name.width, WORKSPACE_NAME_WIDTH - NAME_SHAPE_PADDING * 2),
-				workspace_name.height);
+				WORKSPACE_NAME_HEIGHT);
 			name_box.set_origin (
 				(box.get_width () - name_box.get_width ()) / 2,
-				name_shape_box.y1 + (name_shape_box.get_height () - name_box.get_height ()) / 2);
+				text_y_offset + name_shape_box.y1 +
+					(name_shape_box.get_height () - name_box.get_height ()) / 2);
 			workspace_name.allocate (name_box, flags);
 
 			// update layout for workspace name field
