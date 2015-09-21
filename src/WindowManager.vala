@@ -987,6 +987,23 @@ namespace Gala
 						map_completed (actor);
 					});
 					break;
+				case WindowType.SPLASHSCREEN:
+					var duration = animation_settings.open_duration;
+					if (duration == 0) {
+						map_completed (actor);
+						return;
+					}
+
+					mapping.add (actor);
+
+					actor.opacity = 0;
+					actor.animate (Clutter.AnimationMode.LINEAR, duration, opacity:255)
+						.completed.connect ( () => {
+
+						mapping.remove (actor);
+						map_completed (actor);
+					});
+					break;
 				case WindowType.MENU:
 				case WindowType.DROPDOWN_MENU:
 				case WindowType.POPUP_MENU:
@@ -1070,6 +1087,25 @@ namespace Gala
 					actor.show ();
 					actor.animate (Clutter.AnimationMode.LINEAR, duration,
 						scale_x:0.8f, scale_y:0.8f, opacity:0)
+						.completed.connect ( () => {
+
+						destroying.remove (actor);
+						destroy_completed (actor);
+						Utils.request_clean_icon_cache (get_all_xids ());
+					});
+					break;
+				case WindowType.SPLASHSCREEN:
+					var duration = animation_settings.close_duration;
+					if (duration == 0) {
+						destroy_completed (actor);
+						return;
+					}
+
+					destroying.add (actor);
+
+					actor.show ();
+					actor.animate (Clutter.AnimationMode.EASE_OUT_QUAD, duration,
+						opacity:12)
 						.completed.connect ( () => {
 
 						destroying.remove (actor);
