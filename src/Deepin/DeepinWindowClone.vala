@@ -198,9 +198,10 @@ namespace Gala
 				return;
 			}
 
-			if (thumbnail_mode) {
-				actor.hide ();
-			}
+			// TODO: hide actor for window-overview mode
+			// if (thumbnail_mode) {
+			// 	actor.hide ();
+			// }
 
 			clone = new Clone (actor.get_texture ());
 			add_child (clone);
