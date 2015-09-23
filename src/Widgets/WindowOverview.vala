@@ -129,16 +129,18 @@ namespace Gala
 
 			foreach (var workspace in workspaces) {
 				foreach (var window in workspace.list_windows ()) {
-					if (window.window_type != WindowType.NORMAL && 
-						window.window_type != WindowType.DOCK && 
-						window.window_type != WindowType.DIALOG || 
+					if (window.window_type != WindowType.NORMAL &&
+						window.window_type != WindowType.DOCK &&
+						window.window_type != WindowType.DESKTOP &&
+						window.window_type != WindowType.DIALOG ||
 						window.is_attached_dialog ()) {
 						var actor = window.get_compositor_private () as WindowActor;
 						if (actor != null)
 							actor.hide ();
 						continue;
 					}
-					if (window.window_type == WindowType.DOCK)
+					if (window.window_type == WindowType.DOCK ||
+						window.window_type == WindowType.DESKTOP)
 						continue;
 
 					// skip windows that are on all workspace except we're currently
