@@ -1104,8 +1104,7 @@ namespace Gala
 					destroying.add (actor);
 
 					actor.show ();
-					actor.animate (Clutter.AnimationMode.EASE_OUT_QUAD, duration,
-						opacity:12)
+					actor.animate (Clutter.AnimationMode.EASE_OUT_QUAD, duration, opacity:0)
 						.completed.connect ( () => {
 
 						destroying.remove (actor);
