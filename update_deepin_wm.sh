@@ -17,5 +17,8 @@ for f in $(find . -type f | grep -v "${grep_ignore_files}" | xargs grep -l -P '(
   sed -e 's=org\.gnome\.\([^A-Z]\)=com.deepin.wrap.gnome.\1=g' \
       -e 's=org\.pantheon\.\([^A-Z]\)=com.deepin.wrap.pantheon.\1=g' \
       -e 's=/org/gnome/\([^A-Z]\)=/com/deepin/wrap/gnome/\1=g' \
-      -e 's=/org/pantheon/\([^A-Z]\)=/com/deepin/wrap/pantheon/\1=g' -i "${f}"
+      -e 's=/org/pantheon/\([^A-Z]\)=/com/deepin/wrap/pantheon/\1=g' \
+      -e 's=GalaActionType=WrapGalaActionType=g' \
+      -e 's=GalaWindowOverviewType=WrapGalaWindowOverviewType=g' \
+      -i "${f}"
 done

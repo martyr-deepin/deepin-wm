@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
-	<enum id="GalaActionType">
+	<enum id="WrapGalaActionType">
 		<value nick='none' value="0" />
 		<value nick="show-workspace-view" value="1" />
 		<value nick="maximize-current" value="2" />
@@ -10,34 +10,34 @@
 		<value nick="window-overview" value="6" />
 		<value nick="window-overview-all" value="7" />
 	</enum>
-	<enum id="GalaWindowOverviewType">
+	<enum id="WrapGalaWindowOverviewType">
 		<value nick='grid' value='0'/>
 		<value nick='natural' value='1'/>
 	</enum>
 
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/behavior/" id="com.deepin.wrap.pantheon.desktop.gala.behavior" gettext-domain="@GETTEXT_PACKAGE@">
-	
-		<key enum="GalaActionType" name="hotcorner-topleft">
+
+		<key enum="WrapGalaActionType" name="hotcorner-topleft">
 			<default>'none'</default>
 			<_summary>Action for the top left corner</_summary>
 			<_description></_description>
 		</key>
-		<key enum="GalaWindowOverviewType" name="window-overview-type">
+		<key enum="WrapGalaWindowOverviewType" name="window-overview-type">
 			<default>'grid'</default>
 			<_summary>Algorithm for window overview layout</_summary>
 			<_description>Choose the algorithm used for exposing the windows</_description>
 		</key>
-		<key enum="GalaActionType" name="hotcorner-topright">
+		<key enum="WrapGalaActionType" name="hotcorner-topright">
 			<default>'none'</default>
 			<_summary>Action for the top right corner</_summary>
 			<_description></_description>
 		</key>
-		<key enum="GalaActionType" name="hotcorner-bottomleft">
+		<key enum="WrapGalaActionType" name="hotcorner-bottomleft">
 			<default>'none'</default>
 			<_summary>Action for the bottom left corner</_summary>
 			<_description></_description>
 		</key>
-		<key enum="GalaActionType" name="hotcorner-bottomright">
+		<key enum="WrapGalaActionType" name="hotcorner-bottomright">
 			<default>'none'</default>
 			<_summary>Action for the bottom right corner</_summary>
 			<_description></_description>
