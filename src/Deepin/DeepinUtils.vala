@@ -498,7 +498,7 @@ namespace Gala
 		 * @param max_scale Max scale value to spread.
 		 */
 		public static void start_spread_animation (Clutter.Actor actor, int duration,
-													 float max_scale)
+												   float max_scale)
 		{
 			var trans_name = "scale-x";
 
@@ -525,6 +525,7 @@ namespace Gala
 			});
 		}
 
+		// TODO: refactor code, use Transition instead of Actor
 		public static void run_clutter_callback (Clutter.Actor actor, string trans_name,
 												 PlainCallback? cb = null, double cb_progress = 1.0)
 		{

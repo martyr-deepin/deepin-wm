@@ -52,6 +52,13 @@ namespace Gala
 
 		Actor close_button;
 
+		// The DeepinRoundRectEffect works bad, so we drawing the outline to make it looks
+		// antialise, but the drawing color is different for normal and selected state, so we must
+		// update it manually.
+		Gdk.RGBA roundRectColorNormal;
+		Gdk.RGBA roundRectColorSelected;
+		DeepinRoundRectOutlineEffect roundRectOutlineEffect;
+
 		public DeepinWorkspaceThumbCloneCore (Workspace workspace)
 		{
 			Object (workspace: workspace);
@@ -79,10 +86,18 @@ namespace Gala
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
 			workspace_clone.set_pivot_point (0.5f, 0.5f);
+
+			// setup rounded rectangle effect
 			int radius = DeepinUtils.get_css_border_radius (
 				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			// TODO: round effect
-			// workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
+			roundRectColorNormal = DeepinUtils.get_css_background_color_gdk_rgba (
+				"deepin-window-manager");
+			roundRectColorSelected = DeepinUtils.get_css_background_color_gdk_rgba (
+				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+			roundRectOutlineEffect = new DeepinRoundRectOutlineEffect (radius,
+																	   roundRectColorNormal);
+			workspace_clone.add_effect (roundRectOutlineEffect);
+			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 
 			background = new DeepinFramedBackground (workspace.get_screen (), false);
 			background.button_press_event.connect (() => {
@@ -176,6 +191,14 @@ namespace Gala
 			thumb_shape.opacity = value ? 255 : 0;
 
 			thumb_shape.restore_easing_state ();
+
+			// update the outline fixing color for rounded rectangle effect
+			if (value) {
+				roundRectOutlineEffect.update_color (roundRectColorSelected);
+			} else {
+				roundRectOutlineEffect.update_color (roundRectColorNormal);
+			}
+			queue_redraw ();
 		}
 
 		void update_workspace_shadow ()
