@@ -51,3 +51,4 @@ debian/tmp/
 _*
 debian
 **/*~
+po/deepin-wm.pot
