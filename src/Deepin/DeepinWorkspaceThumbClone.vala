@@ -94,8 +94,9 @@ namespace Gala
 				"deepin-window-manager");
 			roundRectColorSelected = DeepinUtils.get_css_background_color_gdk_rgba (
 				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			roundRectOutlineEffect = new DeepinRoundRectOutlineEffect (radius,
-																	   roundRectColorNormal);
+			roundRectOutlineEffect =
+				new DeepinRoundRectOutlineEffect ((int)width, (int)height, radius,
+												  roundRectColorNormal);
 			workspace_clone.add_effect (roundRectOutlineEffect);
 			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 
