@@ -2,7 +2,7 @@
 m4_define([gala_released], [0])
 
 m4_define([gala_major_version], [0])
-m4_define([gala_minor_version], [2])
+m4_define([gala_minor_version], [3])
 m4_define([gala_micro_version], [0])
 m4_define([gala_nano_version], [0])
 
@@ -158,7 +158,7 @@ fi
 # 3.14
 PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.13], [have_mutter314=yes], [have_mutter314=no])
 if test "x$have_mutter314" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.14.0])
+    PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.14.4])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER314"
     MUTTER_API="3.14"
 fi
@@ -167,9 +167,17 @@ AM_CONDITIONAL([HAVE_MUTTER314], [test "x$have_mutter314" = "xyes"])
 # 3.16
 PKG_CHECK_MODULES(MUTTER316, [libdeepin-mutter >= 3.15], [have_mutter316=yes], [have_mutter316=no])
 if test "x$have_mutter316" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER316, [libdeepin-mutter >= 3.15.2])
+    PKG_CHECK_MODULES(MUTTER316, [libdeepin-mutter >= 3.16.2])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER316"
     MUTTER_API="3.16"
+fi
+
+# 3.18
+PKG_CHECK_MODULES(MUTTER318, [libmutter >= 3.17], [have_mutter318=yes], [have_mutter318=no])
+if test "x$have_mutter318" = "xyes" ; then
+    PKG_CHECK_MODULES(MUTTER318, [libmutter >= 3.17.91])
+    VALAFLAGS="$VALAFLAGS --define HAS_MUTTER318"
+    MUTTER_API="3.18"
 fi
 
 # -----------------------------------------------------------
