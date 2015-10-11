@@ -122,12 +122,12 @@ namespace Gala
 
 			drag_action =
 				new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
-			drag_action.drag_begin.connect (drag_begin);
+			drag_action.drag_begin.connect (on_drag_begin);
 			// TODO: remove
-			// drag_action.destination_crossed.connect (drag_destination_crossed);
-			drag_action.drag_end.connect (drag_end);
-			drag_action.drag_canceled.connect (drag_canceled);
-			drag_action.actor_clicked.connect (actor_clicked);
+			// drag_action.destination_crossed.connect (on_drag_destination_crossed);
+			drag_action.drag_end.connect (on_drag_end);
+			drag_action.drag_canceled.connect (on_drag_canceled);
+			drag_action.actor_clicked.connect (on_actor_clicked);
 			add_action (drag_action);
 
 			if (enable_close_button) {
@@ -617,7 +617,7 @@ namespace Gala
 			destroy ();
 		}
 
-		void actor_clicked (uint32 button)
+		void on_actor_clicked (uint32 button)
 		{
 			switch (button) {
 			case 1:
@@ -634,7 +634,7 @@ namespace Gala
 		 * freely, scale ourselves to a smaller scale and request that the position we just freed is
 		 * immediately filled by the WindowCloneContainer.
 		 */
-		Actor drag_begin (float click_x, float click_y)
+		Actor on_drag_begin (float click_x, float click_y)
 		{
 			float abs_x, abs_y;
 
@@ -659,6 +659,7 @@ namespace Gala
 			// TODO: dragging begin
 			set_pivot_point ((click_x - abs_x) / clone.width,
 							 (click_y - abs_y) / clone.height);
+
 			save_easing_state ();
 
 			set_easing_duration (200);
@@ -710,7 +711,7 @@ namespace Gala
 		 * slightly less opacity and add 16ourselves as temporary window to the group. When left, we
 		 * reverse those steps.
 		 */
-		void drag_destination_crossed (Actor destination, bool hovered)
+		void on_drag_destination_crossed (Actor destination, bool hovered)
 		{
 			DeepinWorkspaceThumbClone? workspace_thumb = destination as DeepinWorkspaceThumbClone;
 			WorkspaceInsertThumb? insert_thumb = destination as WorkspaceInsertThumb;
@@ -757,7 +758,7 @@ namespace Gala
 		 * After we found one we destroy ourselves so the dragged clone immediately disappears,
 		 * otherwise we cancel the drag and animate back to our old place.
 		 */
-		void drag_end (Actor destination)
+		void on_drag_end (Actor destination)
 		{
 			Meta.Workspace workspace = null;
 			var primary = window.get_screen ().get_primary_monitor ();
@@ -768,7 +769,7 @@ namespace Gala
 				workspace = ((DeepinWorkspaceFlowClone)destination.get_parent ()).workspace;
 			} else if (destination is WorkspaceInsertThumb) {
 				if (!Prefs.get_dynamic_workspaces ()) {
-					drag_canceled ();
+					on_drag_canceled ();
 					return;
 				}
 
@@ -786,7 +787,7 @@ namespace Gala
 				// if we don't actually change workspaces, the window-added/removed signals won't be
 				// emitted so we can just keep our window here
 				if (!will_move) {
-					drag_canceled ();
+					on_drag_canceled ();
 				} else {
 					unmanaged ();
 				}
@@ -798,7 +799,7 @@ namespace Gala
 					window.move_to_monitor (monitor);
 					unmanaged ();
 				} else {
-					drag_canceled ();
+					on_drag_canceled ();
 				}
 
 				return;
@@ -820,14 +821,14 @@ namespace Gala
 				unmanaged ();
 			} else {
 				// if we're dropped at the place where we came from interpret as cancel
-				drag_canceled ();
+				on_drag_canceled ();
 			}
 		}
 
 		/**
 		 * Animate back to our previous position with a bouncing animation.
 		 */
-		void drag_canceled ()
+		void on_drag_canceled ()
 		{
 			get_parent ().remove_child (this);
 			prev_parent.insert_child_at_index (this, prev_index);
@@ -870,7 +871,7 @@ namespace Gala
 
 			request_reposition ();
 
-			// pop 0 animation duration from drag_begin()
+			// pop 0 animation duration from on_drag_begin()
 			restore_easing_state ();
 
 			if (window_icon != null) {
