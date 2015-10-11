@@ -59,6 +59,14 @@
     color: rgba(255, 255, 255, 1.0);
 }
 
+.deepin-workspace-thumb-remove-tip {
+    background: rgba(0, 0, 0, 0.0);
+    color: rgba(251, 255, 0, 1.0);
+    border-radius: 4px;
+    font-weight: normal;
+    font-size: 20px;
+}
+
 .deepin-workspace-add-button {
     background: rgba(73, 73, 73, 1.0);
     color: rgba(128, 128, 128, 1.0);

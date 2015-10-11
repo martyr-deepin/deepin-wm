@@ -514,6 +514,62 @@ namespace Gala
 	}
 
 	/**
+	 * Provide help message when dragging to remove workspace.
+	 */
+	public class DeepinWorkspaceThumbRemoveTip : DeepinCssStaticActor
+	{
+		const double LINE_WIDTH = 3.0;
+
+		Gdk.RGBA color;
+		Text message;
+
+		public DeepinWorkspaceThumbRemoveTip ()
+		{
+			base ("deepin-workspace-thumb-remove-tip");
+		}
+
+		construct
+		{
+			color = DeepinUtils.get_css_color_gdk_rgba (style_class);
+
+			(content as Canvas).draw.connect (on_draw_content);
+
+			var name_font = DeepinUtils.get_css_font ("deepin-workspace-thumb-clone-name");
+
+			message = new Text ();
+			message.set_font_description (name_font);
+			message.color = DeepinUtils.gdkrgba2color (color);
+			message.text = ("向上拖拽删除"); // TODO: i18n
+			add_child (message);
+		}
+
+		bool on_draw_content (Cairo.Context cr, int width, int height)
+		{
+			// draw dash line
+			cr.move_to (0, height * 0.66);
+			cr.line_to (width, height * 0.66);
+
+			cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);
+			cr.set_line_width (LINE_WIDTH);
+			cr.set_dash ({12.0, 8.0}, 1);
+			cr.stroke ();
+
+			return false;
+		}
+
+		public override void allocate (ActorBox box, AllocationFlags flags)
+		{
+			base.allocate (box, flags);
+
+			// allocate workspace clone
+			var message_box = ActorBox ();
+			message_box.set_size (message.width, message.height);
+			message_box.set_origin ((box.get_width () - message_box.get_width ()) / 2, box.get_height () * 0.66f + 6);
+			message.allocate (message_box, flags);
+		}
+	}
+
+	/**
 	 * Workspace thumnail clone with background, normal windows and workspace name fileds.
 	 */
 	public class DeepinWorkspaceThumbClone : Actor
@@ -532,6 +588,8 @@ namespace Gala
 		public DeepinWindowThumbContainer window_container;
 		public DeepinWorkspaceThumbCloneCore thumb_clone;
 		public DeepinWorkspaceNameField workspace_name;
+
+		Actor remove_tip;
 
 		public DeepinWorkspaceThumbClone (Workspace workspace)
 		{
@@ -559,6 +617,10 @@ namespace Gala
 			// Ensure workspace name field lost focus to avoid invalid operations even though the
 			// workspace already not exists.
 			thumb_clone.closing.connect (remove_workspace);
+
+			// TODO:
+			remove_tip = new DeepinWorkspaceThumbRemoveTip ();
+			add_child (remove_tip);
 		}
 
 
@@ -614,6 +676,7 @@ namespace Gala
 			thumb_box.set_size (thumb_width, thumb_height);
 			thumb_box.set_origin (0, 0);
 			thumb_clone.allocate (thumb_box, flags);
+			remove_tip.allocate (thumb_box, flags);
 
 			// allocate workspace name field
 			var name_box = ActorBox ();
