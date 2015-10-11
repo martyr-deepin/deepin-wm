@@ -30,9 +30,16 @@ namespace Gala
 		const double PLUS_SIZE = 32.0;
 		const double PLUS_LINE_WIDTH = 2.0;
 
+		Gdk.RGBA color;
+
 		public DeepinWorkspaceAddButton ()
 		{
 			base ("deepin-workspace-add-button");
+		}
+
+		construct
+		{
+			color = DeepinUtils.get_css_color_gdk_rgba (style_class);
 
 			(content as Canvas).draw.connect (on_draw_content);
 		}
@@ -47,7 +54,7 @@ namespace Gala
 			cr.line_to (width / 2, height / 2 + PLUS_SIZE / 2);
 
 			cr.set_line_width (PLUS_LINE_WIDTH);
-			cr.set_source_rgba (0.5, 0.5, 0.5, 1.0);
+			cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);
 			cr.stroke_preserve ();
 
 			return false;
