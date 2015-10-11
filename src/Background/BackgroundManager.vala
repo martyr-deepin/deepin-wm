@@ -121,6 +121,8 @@ namespace Gala
 		{
 			var background = background_source.get_background (monitor_index);
 			var background_actor = new Meta.BackgroundActor (screen, monitor_index);
+			// TODO: test blur effect
+			// DeepinBlurEffect.setup (background_actor, 20.0f, 1);
 
 			background_actor.background = background.background;
 

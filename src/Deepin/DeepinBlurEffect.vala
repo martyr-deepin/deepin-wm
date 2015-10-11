@@ -80,7 +80,7 @@ void main()
 }
 """;
 
-	class DeepinBlurEffect : OffscreenEffect
+	public class DeepinBlurEffect : OffscreenEffect
 	{
 		public bool horizontal { get; construct; }
 		public int width { get; construct; }
@@ -112,30 +112,38 @@ void main()
 
 			int uniform_no;
 			uniform_no = program.get_uniform_location ("texture");
-			program.set_uniform_1i (uniform_no, 0);
+			CoglFixes.set_uniform_1i (program, uniform_no, 0);
 			uniform_no = program.get_uniform_location ("width");
-			program.set_uniform_1i (uniform_no, width);
+			CoglFixes.set_uniform_1i (program, uniform_no, width);
 			uniform_no = program.get_uniform_location ("height");
-			program.set_uniform_1i (uniform_no, height);
+			CoglFixes.set_uniform_1i (program, uniform_no, height);
 			uniform_no = program.get_uniform_location ("radius");
-			program.set_uniform_1f (uniform_no, radius);
+			CoglFixes.set_uniform_1f (program, uniform_no, radius);
 			uniform_no = program.get_uniform_location ("bloom");
-			program.set_uniform_1f (uniform_no, bloom);
+			CoglFixes.set_uniform_1f (program, uniform_no, bloom);
+		}
+
+		public static void setup (Actor actor, float radius, int repeat)
+		{
+			for (int i = 0; i < repeat; i++) {
+				actor.add_effect (new DeepinBlurEffect (true, (int)actor.width, (int)actor.height, radius, 1.0f));
+				actor.add_effect (new DeepinBlurEffect (false, (int)actor.width, (int)actor.height, radius, 1.0f));
+			}
 		}
 
 		public void update_size (int new_width, int new_height)
 		{
 			int uniform_no;
 			uniform_no = program.get_uniform_location ("width");
-			program.set_uniform_1i (uniform_no, new_width);
+			CoglFixes.set_uniform_1i (program, uniform_no, new_width);
 			uniform_no = program.get_uniform_location ("height");
-			program.set_uniform_1i (uniform_no, new_height);
+			CoglFixes.set_uniform_1i (program, uniform_no, new_height);
 		}
 
 		public override void paint_target ()
 		{
 			var material = get_target ();
-			Cogl.Material.set_user_program (material, program);
+			CoglFixes.set_user_program (material, program);
 			base.paint_target ();
 		}
 	}
