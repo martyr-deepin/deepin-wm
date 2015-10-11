@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Deepin, Inc.
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2014 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
