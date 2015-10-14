@@ -94,7 +94,10 @@ namespace Gala
 		public DeepinWorkspaceThumbContainer (Screen screen)
 		{
 			Object (screen: screen);
+		}
 
+		construct
+		{
 			plus_button = new DeepinWorkspaceAddButton ();
 			plus_button.reactive = true;
 			plus_button.set_pivot_point (0.5f, 0.5f);
@@ -104,6 +107,8 @@ namespace Gala
 			});
 
 			append_plus_button_if_need ();
+
+			actor_removed.connect (on_actor_removed);
 		}
 
 		public void append_new_workspace ()
@@ -151,6 +156,7 @@ namespace Gala
 				// after new workspace setup completed, append the plus button and activate the
 				// workspace
 				workspace_clone.workspace_name.setup_completed.connect ((complete) => {
+					enable_workspace_drag_action ();
 					append_plus_button_if_need ();
 					if (complete) {
 						DeepinUtils.switch_to_workspace (workspace_clone.workspace.get_screen (),
@@ -191,6 +197,33 @@ namespace Gala
 		void on_workspace_closing (DeepinWorkspaceThumbClone thumb_workspace)
 		{
 			workspace_closing (thumb_workspace.workspace);
+
+			// workspace is closing, disable the dragging actions
+			disable_workspace_drag_action ();
+		}
+
+		void on_actor_removed (Clutter.Actor actor)
+		{
+			// workspace removed and close animation finished, enable the dragging actions
+			enable_workspace_drag_action ();
+		}
+
+		void enable_workspace_drag_action ()
+		{
+			foreach (var child in get_children ()) {
+				if (child is DeepinWorkspaceThumbClone) {
+					(child as DeepinWorkspaceThumbClone).enable_drag_action ();
+				}
+			}
+		}
+
+		public void disable_workspace_drag_action ()
+		{
+			foreach (var child in get_children ()) {
+				if (child is DeepinWorkspaceThumbClone) {
+					(child as DeepinWorkspaceThumbClone).disable_drag_action ();
+				}
+			}
 		}
 
 		/**
@@ -198,8 +231,7 @@ namespace Gala
 		 */
 		void append_plus_button_if_need ()
 		{
-			if (Prefs.get_num_workspaces () < WindowManagerGala.MAX_WORKSPACE_NUM &&
-				!contains (plus_button)) {
+			if (could_append_plus_button ()) {
 				plus_button.opacity = 0;
 				add_child (plus_button);
 				place_child (plus_button, get_n_children () - 1, false);
@@ -207,6 +239,15 @@ namespace Gala
 
 				relayout ();
 			}
+		}
+
+		bool could_append_plus_button ()
+		{
+			if (Prefs.get_num_workspaces () < WindowManagerGala.MAX_WORKSPACE_NUM &&
+				!contains (plus_button)) {
+				return true;
+			}
+			return false;
 		}
 
 		// TODO: add animate argument
@@ -286,6 +327,11 @@ namespace Gala
 			child.height = child_box.get_height ();
 
 			if (animate) {
+				// workspace is relayout, disable the drag action
+				if (child is DeepinWorkspaceThumbClone) {
+					(child as DeepinWorkspaceThumbClone).disable_drag_action ();
+				}
+
 				var position = Point.alloc ();
 				position.x = child_box.get_x ();
 				position.y = child_box.get_y ();
@@ -294,6 +340,13 @@ namespace Gala
 				DeepinUtils.start_animation_group (child, "thumb-workspace-slot", LAYOUT_DURATION,
 												   DeepinUtils.clutter_set_mode_bezier_out_back,
 												   "position", &position_value);
+
+				// enable the drag action after workspace relayout when plus button will not be
+				// append later, which will queue relayout again
+				if (child is DeepinWorkspaceThumbClone && !could_append_plus_button ()) {
+					var thumb_clone = child as DeepinWorkspaceThumbClone;
+					DeepinUtils.run_clutter_callback (thumb_clone, "thumb-workspace-slot", thumb_clone.enable_drag_action);
+				}
 			} else {
 				child.x = child_box.get_x ();
 				child.y = child_box.get_y ();

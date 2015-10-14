@@ -48,7 +48,9 @@ namespace Gala
 
 		Actor workspace_shadow;
 		Actor workspace_clone;
-		Actor background;
+
+		// TODO: background
+		public Actor background;
 
 		Actor close_button;
 
@@ -66,8 +68,6 @@ namespace Gala
 
 		construct
 		{
-			reactive = true;
-
 			// workspace shadow effect, angle:90°, size:5, distance:1, opacity:30%
 			workspace_shadow = new Actor ();
 			workspace_shadow.add_effect_with_name (
@@ -133,10 +133,6 @@ namespace Gala
 			});
 
 			add_child (close_button);
-
-			var click = new ClickAction ();
-			click.clicked.connect (() => selected ());
-			add_action (click);
 		}
 
 		~DeepinWorkspaceThumbCloneCore ()
@@ -164,7 +160,7 @@ namespace Gala
 			return false;
 		}
 
-		void show_close_button (bool show)
+		public void show_close_button (bool show)
 		{
 			close_button.save_easing_state ();
 
@@ -244,10 +240,12 @@ namespace Gala
 			workspace_shadow.allocate (thumb_box, flags);
 			window_container.allocate (thumb_box, flags);
 
+			// TODO: background
 			// scale background
 			float scale =
 				box.get_width () != 0 ? box.get_width () / (float)monitor_geom.width : 0.5f;
 			background.set_scale (scale, scale);
+			// background.allocate (thumb_box, flags);
 
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (
@@ -518,6 +516,8 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceThumbRemoveTip : DeepinCssStaticActor
 	{
+		public const float POSITION_PERCENT = 0.66f;
+
 		const double LINE_WIDTH = 3.0;
 
 		Gdk.RGBA color;
@@ -539,15 +539,15 @@ namespace Gala
 			message = new Text ();
 			message.set_font_description (name_font);
 			message.color = DeepinUtils.gdkrgba2color (color);
-			message.text = ("向上拖拽删除"); // TODO: i18n
+			message.text = (_("Drag up to remove"));
 			add_child (message);
 		}
 
 		bool on_draw_content (Cairo.Context cr, int width, int height)
 		{
 			// draw dash line
-			cr.move_to (0, height * 0.66);
-			cr.line_to (width, height * 0.66);
+			cr.move_to (0, height * POSITION_PERCENT);
+			cr.line_to (width, height * POSITION_PERCENT);
 
 			cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);
 			cr.set_line_width (LINE_WIDTH);
@@ -564,7 +564,7 @@ namespace Gala
 			// allocate workspace clone
 			var message_box = ActorBox ();
 			message_box.set_size (message.width, message.height);
-			message_box.set_origin ((box.get_width () - message_box.get_width ()) / 2, box.get_height () * 0.66f + 6);
+			message_box.set_origin ((box.get_width () - message_box.get_width ()) / 2, box.get_height () * POSITION_PERCENT + 6);
 			message.allocate (message_box, flags);
 		}
 	}
@@ -579,6 +579,9 @@ namespace Gala
 
 		// TODO: ask for duration
 		const int FADE_IN_DURATION = 1300;
+		const int DRAG_BEGIN_DURATION = 400;
+		const int DRAG_MOVE_DURATION = 100;
+		const int DRAG_RESTORE_DURATION = 400;
 
 		public signal void selected ();
 		public signal void closing ();
@@ -591,6 +594,12 @@ namespace Gala
 
 		Actor remove_tip;
 
+		DragDropAction? drag_action = null;
+		float drag_prev_x = 0;
+		float drag_prev_y = 0;
+		int drag_prev_index = -1;
+		bool drag_to_remove = false;
+
 		public DeepinWorkspaceThumbClone (Workspace workspace)
 		{
 			Object (workspace: workspace);
@@ -598,11 +607,24 @@ namespace Gala
 
 		construct
 		{
+			remove_tip = new DeepinWorkspaceThumbRemoveTip ();
+			remove_tip.opacity = 0;
+			add_child (remove_tip);
+
 			thumb_clone = new DeepinWorkspaceThumbCloneCore (workspace);
 			thumb_clone.opacity = 0;
 			window_container = thumb_clone.window_container;
 
 			thumb_clone.selected.connect (() => selected ());
+
+			drag_action = new DragDropAction (DragDropActionType.SOURCE,
+											  "deepin-workspace-thumb-clone");
+			drag_action.allow_direction = DragDropActionDirection.UP;
+			drag_action.actor_clicked.connect (on_actor_clicked);
+			drag_action.drag_begin.connect (on_drag_begin);
+			drag_action.drag_motion.connect (on_drag_motion);
+			drag_action.drag_canceled.connect (on_drag_canceled);
+			thumb_clone.add_action (drag_action);
 
 			add_child (thumb_clone);
 
@@ -614,15 +636,8 @@ namespace Gala
 
 			add_child (workspace_name);
 
-			// Ensure workspace name field lost focus to avoid invalid operations even though the
-			// workspace already not exists.
 			thumb_clone.closing.connect (remove_workspace);
-
-			// TODO:
-			remove_tip = new DeepinWorkspaceThumbRemoveTip ();
-			add_child (remove_tip);
 		}
-
 
 		/*
 		 * Remove current workspace and moving all the windows to preview workspace.
@@ -634,8 +649,12 @@ namespace Gala
 				return;
 			}
 
+			// disable_drag_action ();
+
 			closing ();
 
+			// Ensure workspace name field lost focus to avoid invalid operations even though the
+			// workspace already not exists.
 			workspace_name.reset_key_focus ();
 
 			DeepinUtils.start_fade_out_animation (
@@ -655,9 +674,28 @@ namespace Gala
 		{
 			DeepinUtils.start_fade_in_back_animation (
 				thumb_clone, FADE_IN_DURATION,
-				() => DeepinUtils.start_fade_in_back_animation (workspace_name,
-																(int) (FADE_IN_DURATION * 0.4)),
+				() =>  {
+					DeepinUtils.start_fade_in_back_animation (workspace_name,
+															  (int) (FADE_IN_DURATION * 0.4));
+				},
 				0.6);
+		}
+
+		/**
+		 * Enable drag action, should be called after relayout.
+		 */
+		public void enable_drag_action ()
+		{
+			thumb_clone.reactive = true;
+		}
+
+		/**
+		 * Disable drag action, should be called before relayout, include new workspace adding and
+		 * removing.
+		 */
+		public void disable_drag_action ()
+		{
+			thumb_clone.reactive = false;
 		}
 
 		public override void allocate (ActorBox box, AllocationFlags flags)
@@ -669,7 +707,7 @@ namespace Gala
 			// calculate ratio for monitor width and height
 			float monitor_whr = (float)monitor_geom.height / monitor_geom.width;
 
-			// allocate workspace clone
+			// TODO allocate workspace clone
 			var thumb_box = ActorBox ();
 			float thumb_width = box.get_width ();
 			float thumb_height = thumb_width * monitor_whr;
@@ -685,6 +723,164 @@ namespace Gala
 			name_box.set_origin ((box.get_width () - name_box.get_width ()) / 2,
 								 thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
 			workspace_name.allocate (name_box, flags);
+		}
+
+		void on_actor_clicked (uint32 button)
+		{
+			switch (button) {
+			case 1:
+				selected ();
+				break;
+			}
+		}
+
+		Actor on_drag_begin (float click_x, float click_y)
+		{
+			Actor drag_actor = thumb_clone;
+
+			drag_to_remove = false;
+
+			float abs_x, abs_y;
+			float prev_width, prev_height;
+
+			// get required information before reparent
+			get_transformed_position (out abs_x, out abs_y);
+			drag_prev_x = abs_x;
+			drag_prev_y = abs_y;
+			drag_prev_index = get_children ().index (drag_actor);
+			prev_width = drag_actor.width;
+			prev_height = drag_actor.height;
+
+			if (!this.contains (drag_actor)) {
+				// return null to abort the drag
+				return null;
+			}
+
+			// reparent
+			DeepinUtils.clutter_actor_reparent (drag_actor, get_stage ());
+
+			drag_actor.set_size (prev_width, prev_height);
+			drag_actor.set_position (abs_x, abs_y);
+
+			remove_tip.opacity = 255;
+
+			workspace_name.reset_key_focus ();
+			DeepinUtils.start_fade_out_animation (
+				workspace_name, DRAG_BEGIN_DURATION, DeepinMultitaskingView.WORKSPACE_FADE_MODE);
+
+			return drag_actor;
+		}
+
+		void on_drag_motion (float delta_x, float delta_y)
+		{
+			Actor drag_actor = thumb_clone;
+
+			// hiding thumbnail after dragging crossed the remove tip
+			float tip_height = drag_actor.height *
+				(1 - DeepinWorkspaceThumbRemoveTip.POSITION_PERCENT);
+			float refer_height = drag_actor.height - tip_height;
+
+			// "delta_y < 0" means dragging up
+			if (delta_y < 0) {
+				delta_y = Math.fabsf (delta_y);
+				if (delta_y <= tip_height + 15) {
+					drag_to_remove = false;
+
+					drag_actor.save_easing_state ();
+					drag_actor.set_easing_duration (DRAG_MOVE_DURATION);
+					drag_actor.opacity = 255;
+					drag_actor.restore_easing_state ();
+
+					remove_tip.save_easing_state ();
+					remove_tip.set_easing_duration (DRAG_MOVE_DURATION);
+					remove_tip.opacity = 255;
+					remove_tip.restore_easing_state ();
+				} else {
+					drag_to_remove = true;
+
+					delta_y -= tip_height;
+					if (delta_y >= refer_height) {
+						delta_y = refer_height;
+					}
+
+					uint opacity = 255 - (uint)(delta_y / refer_height * 200);
+
+					drag_actor.save_easing_state ();
+					drag_actor.set_easing_duration (DRAG_MOVE_DURATION);
+					drag_actor.opacity = opacity;
+					drag_actor.restore_easing_state ();
+
+					remove_tip.save_easing_state ();
+					remove_tip.set_easing_duration (DRAG_MOVE_DURATION);
+					remove_tip.opacity = opacity;
+					remove_tip.restore_easing_state ();
+				}
+			}
+		}
+
+		/**
+		 * Remove current workpsace if drag crossed remove tipe or restore it.
+		 */
+		void on_drag_canceled ()
+		{
+			Actor drag_actor = thumb_clone;
+
+			if (drag_to_remove) {
+				// remove current workspace
+
+				closing ();
+
+				remove_tip.save_easing_state ();
+				remove_tip.set_easing_duration (DeepinMultitaskingView.WORKSPACE_FADE_DURATION);
+				remove_tip.opacity = 0;
+				remove_tip.restore_easing_state ();
+
+				drag_actor.save_easing_state ();
+				drag_actor.set_easing_duration (DeepinMultitaskingView.WORKSPACE_FADE_DURATION);
+				drag_actor.opacity = 0;
+				drag_actor.y -= drag_actor.height;
+				drag_actor.restore_easing_state ();
+
+				DeepinUtils.run_clutter_callback (drag_actor, "opacity", () => {
+					DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
+				});
+			} else {
+				// restore state
+
+				DeepinUtils.start_fade_in_animation (
+					workspace_name, DRAG_RESTORE_DURATION,
+					DeepinMultitaskingView.WORKSPACE_FADE_MODE);
+
+				remove_tip.save_easing_state ();
+				remove_tip.set_easing_duration (DRAG_RESTORE_DURATION);
+				remove_tip.opacity = 0;
+				remove_tip.restore_easing_state ();
+
+				(drag_actor as DeepinWorkspaceThumbCloneCore).show_close_button (false);
+
+				drag_actor.save_easing_state ();
+				drag_actor.set_easing_duration (DRAG_RESTORE_DURATION);
+				drag_actor.opacity = 255;
+				drag_actor.x = drag_prev_x;
+				drag_actor.y = drag_prev_y;
+				drag_actor.restore_easing_state ();
+
+				DeepinUtils.run_clutter_callback (drag_actor, "opacity", () => {
+					// use Idle to split the inner callback or will panic for could not site
+					// drag_actor correctly
+					Idle.add (() => {
+						do_drag_restore ();
+						return false;
+					});
+				});
+			}
+		}
+		void do_drag_restore ()
+		{
+			Actor drag_actor = thumb_clone;
+			DeepinUtils.clutter_actor_reparent (drag_actor, this);
+			this.set_child_at_index (drag_actor, drag_prev_index);
+			queue_relayout ();
 		}
 	}
 }
