@@ -17,7 +17,7 @@
  *  Boston, MA 02110-1301 USA.
  */
 
-namespace Granite.StyleClass {
+namespace Gala.Granite.StyleClass {
     public const string CATEGORY_EXPANDER = "category-expander";
     public const string COMPOSITED = "composited";
     public const string BADGE = "badge";

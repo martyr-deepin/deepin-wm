@@ -19,7 +19,7 @@
  *  Boston, MA 02110-1301 USA.
  */
 
-namespace Granite.Services {
+namespace Gala.Granite.Services {
     /**
      * Interface for executing and accessing properties of Contractor actions
      */

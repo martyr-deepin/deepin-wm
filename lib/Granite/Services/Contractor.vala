@@ -17,7 +17,7 @@
  *  Boston, MA 02110-1301 USA.
  */
 
-namespace Granite.Services {
+namespace Gala.Granite.Services {
     [DBus (name = "org.elementary.Contractor")]
     interface ContractorDBus : Object {
         public abstract GLib.HashTable<string,string>[] GetServicesByLocation (string strlocation, string? file_mime = "") throws IOError;

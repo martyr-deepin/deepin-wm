@@ -21,7 +21,7 @@
 using Cairo;
 using Posix;
 
-namespace Granite.Drawing {
+namespace Gala.Granite.Drawing {
 
     /**
      * A buffer containing an internal Cairo-usable surface and context, designed

@@ -11,3 +11,7 @@ cp -rvf "${granite_bzr_dir}"/lib/{style-classes.vala,Drawing,Services} .
 
 mkdir -p Widgets
 cp -vf "${granite_bzr_dir}"/lib/Widgets/Utils.vala ./Widgets/
+
+find . -iname '*.vala' | xargs sed -i -e 's/namespace Granite/namespace Gala.Granite/' \
+                               -e 's/using Granite\./using Gala.Granite./' \
+                               -e 's/enum Granite\./enum Gala.Granite./'

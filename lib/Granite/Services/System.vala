@@ -17,7 +17,7 @@
  *  Boston, MA 02110-1301 USA.
  */
 
-namespace Granite.Services {
+namespace Gala.Granite.Services {
 
     /**
      * Utility class for frequently-used system-related functions, such as opening files, launching

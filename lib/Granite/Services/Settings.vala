@@ -18,7 +18,7 @@
  *  Boston, MA 02110-1301 USA.
  */
 
-namespace Granite.Services {
+namespace Gala.Granite.Services {
 
     /**
      * This interface is used by objects that need to be serialized in a Settings.

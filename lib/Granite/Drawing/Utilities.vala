@@ -22,9 +22,9 @@ using Cairo;
 using Gdk;
 using Gtk;
 
-using Granite.Services;
+using Gala.Granite.Services;
 
-namespace Granite.Drawing {
+namespace Gala.Granite.Drawing {
 
     /**
      * A utility class for frequently-performed drawing operations.

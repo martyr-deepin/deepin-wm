@@ -74,12 +74,6 @@ gala_VALASOURCES = \
 	Widgets/WindowSwitcher.vala \
 	Widgets/WorkspaceClone.vala \
 	Widgets/WorkspaceInsertThumb.vala \
-	Granite/style-classes.vala \
-	Granite/Drawing/Color.vala \
-	Granite/Drawing/BufferSurface.vala \
-	Granite/Drawing/Utilities.vala \
-	Granite/Widgets/Utils.vala \
-	Granite/Services/Settings.vala \
 	$(NULL)
 
 gala_background = \

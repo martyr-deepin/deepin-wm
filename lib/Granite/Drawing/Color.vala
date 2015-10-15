@@ -19,9 +19,9 @@
 
 using Gdk;
 
-using Granite.Services;
+using Gala.Granite.Services;
 
-namespace Granite.Drawing {
+namespace Gala.Granite.Drawing {
 
     /**
      * A class containing an RGBA color and methods for more powerful color manipulation.
