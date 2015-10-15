@@ -32,6 +32,7 @@ gala_LDADD = \
 
 gala_VALASOURCES = \
 	DBus.vala \
+	DockThemeManager.vala \
 	DragDropAction.vala \
 	InternalUtils.vala \
 	Main.vala \
@@ -80,16 +81,6 @@ gala_VALASOURCES = \
 	Granite/Drawing/Utilities.vala \
 	Granite/Widgets/Utils.vala \
 	Granite/Services/Settings.vala \
-	Plank/DockPreferences.vala \
-	Plank/FixCode.vala \
-	Plank/Drawing/DrawingService.vala \
-	Plank/Drawing/Color.vala \
-	Plank/Drawing/DockTheme.vala \
-	Plank/Drawing/Theme.vala \
-	Plank/Drawing/DockSurface.vala \
-	Plank/Services/Logger.vala \
-	Plank/Services/Paths.vala \
-	Plank/Services/Preferences.vala \
 	$(NULL)
 
 gala_background = \
