@@ -52,6 +52,8 @@ libdeepin_wm_la_VALASOURCES = \
 	Utils.vala \
 	WindowIcon.vala \
 	WindowManager.vala \
+	../src/Plank/Drawing/DrawingService.vala \
+	../src/Plank/Drawing/Color.vala \
 	$(NULL)
 
 nodist_libdeepin_wm_la_SOURCES = \

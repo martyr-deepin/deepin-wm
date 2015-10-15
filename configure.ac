@@ -92,7 +92,6 @@ fi
 # -----------------------------------------------------------
 GTK_MIN_VERSION=3.4.0
 GLIB_MIN_VERSION=2.32.0
-PLANK_MIN_VERSION=0.3.0
 MUTTER_MIN_VERSION=3.8.4
 MUTTER_API="3.8"
 
@@ -109,7 +108,7 @@ GALA_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  libdeepin-mutter >= $MUTTER_MIN_VERSION \
                  gee-0.8 \
                  gnome-desktop-3.0 \
-                 plank >= $PLANK_MIN_VERSION"
+                 libwnck-3.0"
 
 GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gmodule-2.0 \
@@ -124,9 +123,9 @@ GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gnome-desktop-3.0 \
                       --pkg posix \
                       --pkg xfixes-4.0 \
-                      --pkg plank"
+                      --pkg libwnck-3.0"
 
-VALAFLAGS="--target-glib=2.32"
+VALAFLAGS="--target-glib=2.32 --define HAVE_GEE_0_8"
 VALAFLAGS_CORE="--thread"
 
 PKG_CHECK_MODULES(GALA_CORE, $GALA_CORE_PKGS)
