@@ -32,7 +32,6 @@ gala_LDADD = \
 
 gala_VALASOURCES = \
 	DBus.vala \
-	DockThemeManager.vala \
 	DragDropAction.vala \
 	InternalUtils.vala \
 	Main.vala \
