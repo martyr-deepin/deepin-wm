@@ -99,8 +99,13 @@ namespace Gala
 				foreach (var child in flow_container.get_children ()) {
 					var flow_workspace = child as DeepinWorkspaceFlowClone;
 					if (flow_workspace.workspace == workspace) {
+						animating = true;
 						DeepinUtils.start_fade_out_opacity_animation (
 							flow_workspace, WORKSPACE_FADE_DURATION, WORKSPACE_FADE_MODE);
+						Timeout.add (WORKSPACE_FADE_DURATION, () => {
+							animating = false;
+							return false;
+						});
 					}
 				}
 			});
@@ -393,9 +398,15 @@ namespace Gala
 			}
 			flow_container.add_child (flow_workspace);
 			do_place_flow_workspace (flow_workspace, index, false);
+
+			animating = true;
 			DeepinUtils.start_fade_in_opacity_animation (flow_workspace,
 														 WORKSPACE_FADE_DURATION,
 														 WORKSPACE_FADE_MODE);
+			Timeout.add (WORKSPACE_FADE_DURATION, () => {
+				animating = false;
+				return false;
+			});
 		}
 
 		// TODO: animation
@@ -506,7 +517,12 @@ namespace Gala
 			case Clutter.Key.plus:
 			case Clutter.Key.equal:
 			case Clutter.Key.KP_Add:
+				animating = true;
 				thumb_container.append_new_workspace ();
+				Timeout.add (WORKSPACE_FADE_DURATION, () => {
+					animating = false;
+					return false;
+				});
 				break;
 			case Clutter.Key.minus:
 			case Clutter.Key.KP_Subtract:
