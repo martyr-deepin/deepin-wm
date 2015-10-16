@@ -150,6 +150,10 @@ namespace Gala
 
 			// if workspace is added manually, set workspace name field editable
 			if (workspace_clone.workspace.index () == new_workspace_index_by_manual) {
+				// since workspace name field grab key focus, other actors could not catch mouse
+				// leave_event, so we hide close button manually
+				hide_workspace_close_button ();
+
 				workspace_clone.workspace_name.start_edit ();
 				new_workspace_index_by_manual = -1;
 
@@ -217,11 +221,20 @@ namespace Gala
 			}
 		}
 
-		public void disable_workspace_drag_action ()
+		void disable_workspace_drag_action ()
 		{
 			foreach (var child in get_children ()) {
 				if (child is DeepinWorkspaceThumbClone) {
 					(child as DeepinWorkspaceThumbClone).disable_drag_action ();
+				}
+			}
+		}
+
+		void hide_workspace_close_button ()
+		{
+			foreach (var child in get_children ()) {
+				if (child is DeepinWorkspaceThumbClone) {
+					(child as DeepinWorkspaceThumbClone).thumb_clone.show_close_button (false);
 				}
 			}
 		}
