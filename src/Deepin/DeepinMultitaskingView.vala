@@ -60,6 +60,7 @@ namespace Gala
 		Meta.Screen screen;
 		ModalProxy modal_proxy;
 		bool opened = false;
+		bool toggling = false;
 		bool animating = false;
 
 		bool is_smooth_scrolling = false;
@@ -152,7 +153,7 @@ namespace Gala
 
 					update_monitors ();
 
-					// FIXME: panic for workspace num changed
+					// FIXME: panic if workspace num changed by third party tools like "wmctrl -n 4"
 
 					return false;
 				});
@@ -285,6 +286,8 @@ namespace Gala
 		{
 			var active_index = screen.get_active_workspace ().index ();
 
+			int long_delay = 100;
+			int short_delay = 100;
 			foreach (var child in flow_container.get_children ()) {
 				var flow_workspace = child as DeepinWorkspaceFlowClone;
 				var index = flow_workspace.workspace.index ();
@@ -292,9 +295,9 @@ namespace Gala
 				int delay = 0;
 				if (direction == Meta.MotionDirection.LEFT) {
 					if (index < active_index) {
-						delay = 100;
+						delay = long_delay;
 					} else if (index == active_index) {
-						delay = 50;
+						delay = short_delay;
 					} else if (index > active_index) {
 						delay = 0;
 					}
@@ -302,9 +305,9 @@ namespace Gala
 					if (index < active_index) {
 						delay = 0;
 					} else if (index == active_index) {
-						delay = 50;
+						delay = short_delay;
 					} else if (index > active_index) {
-						delay = 100;
+						delay = long_delay;
 					}
 				}
 
@@ -314,6 +317,14 @@ namespace Gala
 			}
 
 			thumb_container.select_workspace (active_index, animate);
+
+			if (animate) {
+				animating = true;
+				Timeout.add (WORKSPACE_SWITCH_DURATION + long_delay, () => {
+					animating = false;
+					return false;
+				});
+			}
 
 			// TODO: thumb relayout
 			// thumb_container.relayout ();
@@ -441,6 +452,10 @@ namespace Gala
 		 */
 		public override bool key_press_event (Clutter.KeyEvent event)
 		{
+			if (toggling) {
+				// disable key event when playing toggle animation
+				return false;
+			}
 			switch (event.keyval) {
 			case Clutter.Key.Escape:
 				if (opened) {
@@ -606,10 +621,15 @@ namespace Gala
 		void toggle ()
 		{
 			if (animating) {
+				// ignore toggle request if workspac switching
 				return;
 			}
 
-			animating = true;
+			if (toggling) {
+				return;
+			}
+
+			toggling = true;
 
 			opened = !opened;
 			var opening = opened;
@@ -729,13 +749,13 @@ namespace Gala
 
 					wm.pop_modal (modal_proxy);
 
-					animating = false;
+					toggling = false;
 
 					return false;
 				});
 			} else {
 				Timeout.add (TOGGLE_DURATION, () => {
-					animating = false;
+					toggling = false;
 					return false;
 				});
 			}
