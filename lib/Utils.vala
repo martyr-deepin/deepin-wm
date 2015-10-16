@@ -133,13 +133,39 @@ namespace Gala
 			if (app != null && app.get_desktop_file () != null) {
 				var appinfo = new DesktopAppInfo.from_filename (app.get_desktop_file ());
 				if (appinfo != null) {
-					// TODO: icon issue
 					icon = Plank.Drawing.DrawingService.get_icon_from_gicon (appinfo.get_icon ());
 					icon_key = "%s::%i".printf (icon, size);
 					if (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null) {
 						image = Plank.Drawing.DrawingService.load_icon (icon, size, size);
 						not_cached = true;
 					}
+				}
+			}
+
+			// get icon for application that runs under terminal through wnck
+			if (app != null && image == null) {
+				Wnck.set_default_icon_size (size);
+				Wnck.Screen.get_default ().force_update ();
+				Array<uint32>? xids = app.get_xids ();
+				for (var i = 0; xids != null && i < xids.length && image == null; i++) {
+					unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
+					if (window == null) {
+						continue;
+					}
+
+					if (window.get_icon_is_fallback ()) {
+						image = null;
+						break;
+					}
+
+					icon = window.get_class_instance_name ();
+					icon_key = "%s::%i".printf (icon, size);
+					if (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null) {
+						image = window.get_icon ();
+						not_cached = true;
+					}
+
+					break;
 				}
 			}
 
