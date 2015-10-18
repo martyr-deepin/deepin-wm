@@ -35,7 +35,6 @@ namespace Gala
 		const AnimationMode CLOSE_MODE = AnimationMode.EASE_IN_QUAD;
 
 		const int ICON_SIZE = 64;
-		const int DRAGING_SIZE = 200;
 
 		/**
 		 * The window was activated by clicking or pressing enter. The MultitaskingView should
@@ -654,9 +653,12 @@ namespace Gala
 				shadow_effect.shadow_opacity = 0;
 			}
 
-			var scale = DRAGING_SIZE / clone.width;
+			float thumb_ws_width, thumb_ws_height;
+			DeepinWorkspaceThumbContainer.get_prefer_thumb_size(window.get_screen (),
+																out thumb_ws_width,
+																out thumb_ws_height);
+			var scale = thumb_ws_width * 0.7f / clone.width;
 
-			// TODO: dragging begin
 			set_pivot_point ((click_x - abs_x) / clone.width,
 							 (click_y - abs_y) / clone.height);
 
