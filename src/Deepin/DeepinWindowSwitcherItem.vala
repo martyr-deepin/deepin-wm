@@ -163,7 +163,7 @@ namespace Gala
 	 */
 	public class DeepinWindowSwitcherWindowItem : DeepinWindowSwitcherItem
 	{
-		const int ICON_PREFER_SIZE = 48;
+		const int ICON_SIZE = 48;
 
 		public Window window { get; construct; }
 
@@ -185,7 +185,7 @@ namespace Gala
 			window.workspace_changed.connect (on_workspace_changed);
 			window.notify["on-all-workspaces"].connect (on_all_workspaces_changed);
 
-			window_icon = new WindowIcon (window, ICON_PREFER_SIZE);
+			window_icon = new WindowIcon (window, ICON_SIZE);
 			window_icon.set_pivot_point (0.5f, 0.5f);
 
 			add_child (window_icon);
@@ -351,20 +351,22 @@ namespace Gala
 			float scale = box.get_width () / PREFER_WIDTH;
 
 			var icon_box = ActorBox ();
-			if (box.get_width () <= ICON_PREFER_SIZE * 2.5f) {
-				if (box.get_width () >= ICON_PREFER_SIZE) {
-					icon_box.set_size (ICON_PREFER_SIZE, ICON_PREFER_SIZE);
+			var icon_width = window_icon.width;
+			var icon_height = window_icon.width;
+			if (box.get_width () <= icon_width * 2.5f) {
+				if (box.get_width () >= icon_width) {
+					icon_box.set_size (icon_width, icon_height);
 				} else {
-					float icon_size = Math.fminf (box.get_width (), box.get_height ());
-					if (icon_size > SHAPE_PADDING * 2 * scale) {
-						icon_size -= SHAPE_PADDING * 2 * scale;
+					float fixed_icon_size = Math.fminf (box.get_width (), box.get_height ());
+					if (fixed_icon_size > SHAPE_PADDING * 2 * scale) {
+						fixed_icon_size -= SHAPE_PADDING * 2 * scale;
 					}
-					icon_box.set_size (icon_size, icon_size);
+					icon_box.set_size (fixed_icon_size, fixed_icon_size);
 				}
 				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
 									 (box.get_height () - icon_box.get_height ()) / 2);
 			} else {
-				icon_box.set_size (ICON_PREFER_SIZE, ICON_PREFER_SIZE);
+				icon_box.set_size (icon_width, icon_height);
 				icon_box.set_origin (
 					(box.get_width () - icon_box.get_width ()) / 2,
 					box.get_height () - icon_box.get_height () - icon_box.get_height () * 0.25f);
@@ -372,7 +374,7 @@ namespace Gala
 			window_icon.allocate (icon_box, flags);
 
 			// if actor's size is really small, just show icon only
-			if (box.get_width () <= ICON_PREFER_SIZE * 1.75f) {
+			if (box.get_width () <= icon_width * 1.75f) {
 				if (clone_container != null) {
 					// set clone visible to false manually to hide shadow effect
 					clone_container.visible = false;

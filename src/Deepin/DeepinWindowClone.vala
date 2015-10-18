@@ -34,7 +34,7 @@ namespace Gala
 		const int FADE_OUT_DURATION = 300;
 		const AnimationMode CLOSE_MODE = AnimationMode.EASE_IN_QUAD;
 
-		const int WINDOW_ICON_SIZE = 64;
+		const int ICON_SIZE = 64;
 		const int DRAGING_SIZE = 200;
 
 		/**
@@ -141,7 +141,7 @@ namespace Gala
 			}
 
 			if (enable_icon) {
-				window_icon = new WindowIcon (window, WINDOW_ICON_SIZE);
+				window_icon = new WindowIcon (window, ICON_SIZE);
 				window_icon.opacity = 0;
 				window_icon.set_pivot_point (0.5f, 0.5f);
 				add_child (window_icon);
@@ -480,7 +480,7 @@ namespace Gala
 
 			if (!dragging && window_icon != null) {
 				var icon_box = ActorBox ();
-				icon_box.set_size (WINDOW_ICON_SIZE, WINDOW_ICON_SIZE);
+				icon_box.set_size (window_icon.width, window_icon.height);
 				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
 									 box.get_height () - icon_box.get_height () * 0.75f);
 				window_icon.allocate (icon_box, flags);
@@ -880,7 +880,7 @@ namespace Gala
 				window_icon.set_easing_duration (250);
 				window_icon.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 				window_icon.set_position (
-					(slot.width - WINDOW_ICON_SIZE) / 2, slot.height - WINDOW_ICON_SIZE * 0.75f);
+					(slot.width - window_icon.width) / 2, slot.height - window_icon.height * 0.75f);
 
 				window_icon.restore_easing_state ();
 			}
