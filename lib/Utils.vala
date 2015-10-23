@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2012 Tom Beckmann, Rico Tzschichholz
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -141,6 +142,33 @@ namespace Gala
 				}
 			}
 
+			// get icon for application that runs under terminal through wnck
+			if (app != null && image == null) {
+				Wnck.set_default_icon_size (size);
+				Wnck.Screen.get_default ().force_update ();
+				Array<uint32>? xids = app.get_xids ();
+				for (var i = 0; xids != null && i < xids.length && image == null; i++) {
+					unowned Wnck.Window window = Wnck.Window.@get (xids.index (i));
+					if (window == null) {
+						continue;
+					}
+
+					if (window.get_icon_is_fallback ()) {
+						image = null;
+						break;
+					}
+
+					icon = window.get_class_instance_name ();
+					icon_key = "%s::%i".printf (icon, size);
+					if (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null) {
+						image = window.get_icon ();
+						not_cached = true;
+					}
+
+					break;
+				}
+			}
+
 			if (image == null) {
 				try {
 					unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
@@ -168,10 +196,70 @@ namespace Gala
 			if (size != image.width || size != image.height)
 				image = Plank.Drawing.DrawingService.ar_scale (image, size, size);
 
+			image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE, WindowIcon.SHADOW_DISTANCE);
+
 			if (not_cached)
 				icon_pixbuf_cache.set (icon_key, image);
 
 			return image;
+		}
+
+		/**
+		 * Add outline blur effect for Gdk.Pixbuf.
+		 *
+		 * @param image The target Gdk.Pixbuf
+		 * @param size The shadow size
+		 * @param distance Shadow offset in y-axis
+		 */
+		static Gdk.Pixbuf add_outline_blur_effect (Gdk.Pixbuf pixbuf, int size, int distance)
+		{
+			// TODO: draw blur effect through Gdk.Pixbuf directly to improve performance
+			var width = pixbuf.width;
+			var height = pixbuf.height;
+			var new_width = pixbuf.width + size * 2;
+			var new_height = pixbuf.height + size + distance;
+
+			// convert Gdk.Pixbuf to Cairo.Surface
+			var surface = Gdk.cairo_surface_create_from_pixbuf (pixbuf, 1, null);
+
+			// black colorize
+			var surface_black = new_cairo_image_surface (surface, width, height);
+			add_black_colorize_effect (surface_black);
+
+			// draw blur effect through BufferSurface
+			var buffer = new Granite.Drawing.BufferSurface.with_surface (new_width, new_height, surface);
+			buffer.context.set_source_surface (surface_black, size, distance);
+			buffer.context.paint ();
+
+			buffer.exponential_blur (size / 2);
+
+			buffer.context.set_source_surface (surface, size, 0);
+			buffer.context.paint ();
+
+			var new_pixbuf = Gdk.pixbuf_get_from_surface (buffer.surface, 0, 0, new_width, new_height);
+			return new_pixbuf;
+		}
+
+		static Cairo.ImageSurface new_cairo_image_surface (Cairo.Surface surface, int width,
+														   int height)
+		{
+			var image_surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
+			var cr = new Cairo.Context (image_surface);
+			cr.set_source_surface (surface, 0, 0);
+			cr.paint ();
+			return image_surface;
+		}
+
+		static void add_black_colorize_effect (Cairo.ImageSurface surface)
+		{
+			uint8 *data = surface.get_data ();
+			var length = surface.get_width () * surface.get_height ();
+			for (var i = 0; i < length; i++) {
+				data [0] = 0;
+				data [1] = 0;
+				data [2] = 0;
+				data += 4;
+			}
 		}
 
 		/**
@@ -311,14 +399,14 @@ namespace Gala
 			var pixbuf = get_close_button_pixbuf ();
 
 			texture.reactive = true;
-			texture.set_size (36, 36);
+			texture.set_size (31, 31);
 
 			if (pixbuf != null) {
 				try {
 					texture.set_from_pixbuf (pixbuf);
 				} catch (Error e) {}
 			} else {
-				// we'll just make this red so there's at least something as an 
+				// we'll just make this red so there's at least something as an
 				// indicator that loading failed. Should never happen and this
 				// works as good as some weird fallback-image-failed-to-load pixbuf
 				texture.background_color = { 255, 0, 0, 255 };

@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2012 Tom Beckmann, Rico Tzschichholz
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -213,7 +214,7 @@ namespace Gala
 		}
 
 		public static List<TilableWindow?> calculate_grid_placement (Meta.Rectangle area,
-			List<TilableWindow?> windows)
+			List<TilableWindow?> windows, bool closest = true)
 		{
 			uint window_count = windows.length ();
 			int columns = (int)Math.ceil (Math.sqrt (window_count));
@@ -226,56 +227,65 @@ namespace Gala
 			TilableWindow?[] taken_slots = {};
 			taken_slots.resize (rows * columns);
 
-			// precalculate all slot centers
-			Gdk.Point[] slot_centers = {};
-			slot_centers.resize (rows * columns);
-			for (int x = 0; x < columns; x++) {
-				for (int y = 0; y < rows; y++) {
-					slot_centers[x + y * columns] = {area.x + slot_width  * x + slot_width  / 2,
-					                                 area.y + slot_height * y + slot_height / 2};
-				}
-			}
+			if (closest) {
+				// Assign each window to the closest available slot.
 
-			// Assign each window to the closest available slot
-			var tmplist = windows.copy ();
-			while (tmplist.length () > 0) {
-				unowned List<TilableWindow?> link = tmplist.nth (0);
-				var window = link.data;
-				var rect = window.rect;
-
-				var slot_candidate = -1;
-				var slot_candidate_distance = int.MAX;
-				var pos = rect_center (rect);
-
-				// all slots
-				for (int i = 0; i < columns * rows; i++) {
-					if (i > window_count - 1)
-						break;
-
-					var dist = squared_distance (pos, slot_centers[i]);
-
-					if (dist < slot_candidate_distance) {
-						// window is interested in this slot
-						var occupier = taken_slots[i];
-						if (occupier == window)
-							continue;
-
-						if (occupier == null || dist < squared_distance (rect_center (occupier.rect), slot_centers[i])) {
-							// either nobody lives here, or we're better - takeover the slot if it's our best
-							slot_candidate = i;
-							slot_candidate_distance = dist;
-						}
+				// precalculate all slot centers
+				Gdk.Point[] slot_centers = {};
+				slot_centers.resize (rows * columns);
+				for (int x = 0; x < columns; x++) {
+					for (int y = 0; y < rows; y++) {
+						slot_centers[x + y * columns] = {area.x + slot_width  * x + slot_width  / 2,
+														 area.y + slot_height * y + slot_height / 2};
 					}
 				}
 
-				if (slot_candidate == -1)
-					continue;
+				var tmplist = windows.copy ();
+				while (tmplist.length () > 0) {
+					unowned List<TilableWindow?> link = tmplist.nth (0);
+					var window = link.data;
+					var rect = window.rect;
 
-				if (taken_slots[slot_candidate] != null)
-					tmplist.prepend (taken_slots[slot_candidate]);
+					var slot_candidate = -1;
+					var slot_candidate_distance = int.MAX;
+					var pos = rect_center (rect);
 
-				tmplist.remove_link (link);
-				taken_slots[slot_candidate] = window;
+					// all slots
+					for (int i = 0; i < columns * rows; i++) {
+						if (i > window_count - 1)
+							break;
+
+						var dist = squared_distance (pos, slot_centers[i]);
+
+						if (dist < slot_candidate_distance) {
+							// window is interested in this slot
+							var occupier = taken_slots[i];
+							if (occupier == window)
+								continue;
+
+							if (occupier == null || dist < squared_distance (rect_center (occupier.rect), slot_centers[i])) {
+								// either nobody lives here, or we're better - takeover the slot if it's our best
+								slot_candidate = i;
+								slot_candidate_distance = dist;
+							}
+						}
+					}
+
+					if (slot_candidate == -1)
+						continue;
+
+					if (taken_slots[slot_candidate] != null)
+						tmplist.prepend (taken_slots[slot_candidate]);
+
+					tmplist.remove_link (link);
+					taken_slots[slot_candidate] = window;
+				}
+			} else {
+				// Assign each window as the origin order.
+				for (int i = 0; i < windows.length (); i++) {
+					unowned List<TilableWindow?> link = windows.nth (i);
+					taken_slots[i] = link.data;
+				}
 			}
 
 			var result = new List<TilableWindow?> ();

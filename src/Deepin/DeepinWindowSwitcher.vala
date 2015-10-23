@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2014 Xu Fasheng, Deepin, Inc.
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -22,14 +22,19 @@ namespace Gala
 {
 	public class DeepinWindowSwitcher : Clutter.Actor
 	{
-		const int POPUP_DELAY_TIMEOUT = 150; // milliseconds, keep popup window hidden when clicked alt-tab quickly
-		const int MIN_DELTA = 100; // milliseconds, repeat key pressing minimum delta time after popup shown
+		// TODO: adjust doc, remove POPUP_ prefix
+		// milliseconds, keep popup window hidden when clicked alt-tab quickly
+		const int POPUP_DELAY_TIMEOUT = 150;
+
+		// milliseconds, repeat key pressing minimum delta
+		const int MIN_DELTA = 100;
+
+		// time after popup shown
 		const int POPUP_SCREEN_PADDING = 20;
+
 		const int POPUP_PADDING = 36;
 
 		public WindowManager wm { get; construct; }
-
-		Gtk.StyleContext? style_context = null;
 
 		DeepinWindowSwitcherItem? current_item = null;
 
@@ -52,21 +57,13 @@ namespace Gala
 
 		construct
 		{
-			style_context = DeepinUtils.new_css_style_context("deepin-window-switcher");
-
-			popup = new Actor ();
+			popup = new DeepinCssStaticActor ("deepin-window-switcher");
 			popup.opacity = 0;
 
 			var layout = new BoxLayout ();
 			layout.orientation = Orientation.HORIZONTAL;
 			popup.layout_manager = layout;
-
-			var popup_canvas = new Canvas ();
-			popup_canvas.draw.connect (on_draw_popup_background);
-
-			popup.content = popup_canvas;
-			popup.notify["allocation"].connect (() =>
-				popup_canvas.set_size ((int) popup.width, (int) popup.height));
+			popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
 
 			item_container = new Actor ();
 			item_container.margin_bottom = POPUP_PADDING;
@@ -74,6 +71,7 @@ namespace Gala
 			item_container.margin_right = POPUP_PADDING;
 			item_container.margin_top = POPUP_PADDING;
 			item_container.layout_manager = new DeepinWindowSwitcherLayout ();
+			relayout ();
 
 			item_container.actor_removed.connect (on_item_removed);
 			popup.add_child (item_container);
@@ -84,7 +82,7 @@ namespace Gala
 			add_child (window_clones);
 			add_child (popup);
 
-			wm.get_screen ().monitors_changed.connect (on_monitor_changed);
+			wm.get_screen ().monitors_changed.connect (relayout);
 
 			visible = false;
 		}
@@ -95,51 +93,15 @@ namespace Gala
 				Source.remove (popup_delay_timeout_id);
 			}
 
-			wm.get_screen ().monitors_changed.disconnect (on_monitor_changed);
+			wm.get_screen ().monitors_changed.disconnect (relayout);
 		}
 
-		/**
-		 * set the values which don't get set every time and need to
-		 * be updated when the monitor changes
-		 */
-		void on_monitor_changed ()
+		void relayout ()
 		{
-			place_popup ();
-		}
-
-		bool on_draw_popup_background (Cairo.Context cr, int width, int height)
-		{
-			// fix size
-			if (width <= 0 || height <= 0) {
-				width = 1;
-				height = 1;
-			}
-
-			// clear content
-			cr.set_operator (Cairo.Operator.CLEAR);
-			cr.paint ();
-			cr.set_operator (Cairo.Operator.OVER);
-
-			style_context.render_background (cr, 0, 0, width, height);
-			style_context.render_frame (cr, 0, 0, width, height);
-
-			return false;
-		}
-
-		void place_popup ()
-		{
-			var geometry = get_screen_geometry ();
-
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
 			var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
-			switcher_layout.max_width = geometry.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;;
-
-			popup.x = Math.ceilf (geometry.x + (geometry.width - popup.width) / 2.0f);
-			popup.y = Math.ceilf (geometry.y + (geometry.height - popup.height) / 2.0f);
-		}
-		Meta.Rectangle get_screen_geometry ()
-		{
-			var screen = wm.get_screen ();
-			return screen.get_monitor_geometry (screen.get_primary_monitor ());
+			switcher_layout.max_width =
+				monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;
 		}
 
 		void show_popup ()
@@ -152,8 +114,9 @@ namespace Gala
 			popup.opacity = 0;
 		}
 
-		bool on_clicked_item (Clutter.ButtonEvent event) {
-			unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem) event.source;
+		bool on_clicked_item (Clutter.ButtonEvent event)
+		{
+			unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem)event.source;
 
 			if (current_item != item) {
 				current_item = item;
@@ -184,15 +147,13 @@ namespace Gala
 			}
 
 			if (actor == current_item) {
-				current_item = (DeepinWindowSwitcherItem) current_item.get_next_sibling ();
+				current_item = (DeepinWindowSwitcherItem)current_item.get_next_sibling ();
 				if (current_item == null) {
-					current_item = (DeepinWindowSwitcherItem) item_container.get_first_child ();
+					current_item = (DeepinWindowSwitcherItem)item_container.get_first_child ();
 				}
 
 				dim_items ();
 			}
-
-			place_popup ();
 		}
 
 		public override bool key_release_event (Clutter.KeyEvent event)
@@ -209,8 +170,8 @@ namespace Gala
 			close (wm.get_screen ().get_display ().get_current_time ());
 		}
 
-		[CCode (instance_pos = -1)]
-		public void handle_switch_windows (Display display, Screen screen, Window? window,
+		[CCode (instance_pos = -1)] public void handle_switch_windows (
+			Display display, Screen screen, Window? window,
 #if HAS_MUTTER314
 			Clutter.KeyEvent event, KeyBinding binding)
 #else
@@ -234,8 +195,8 @@ namespace Gala
 			var binding_name = binding.get_name ();
 			var backward = binding_name.has_suffix ("-backward");
 
-			// FIXME for unknown reasons, switch-applications-backward won't be emitted, so we
-			//       test manually if shift is held down
+			// FIXME: for unknown reasons, switch-applications-backward won't be emitted, so we test
+			//        manually if shift is held down
 			if (binding_name == "switch-applications") {
 				backward = (get_current_modifiers () & ModifierType.SHIFT_MASK) != 0;
 			}
@@ -246,11 +207,11 @@ namespace Gala
 				return;
 			}
 
-			var window_type = TabList.NORMAL;
+			bool only_group_windows = false;
 			if (binding_name == "switch-group" || binding_name == "switch-group-backward") {
-				window_type = TabList.GROUP;
+				only_group_windows = true;
 			}
-			if (!collect_windows (workspace, window_type)) {
+			if (!collect_windows (workspace, only_group_windows)) {
 				return;
 			}
 
@@ -258,12 +219,11 @@ namespace Gala
 
 			current_item = next_item (workspace, backward);
 
-			place_popup ();
-
 			visible = true;
 			closing = false;
 			modal_proxy = wm.push_modal ();
-			modal_proxy.keybinding_filter = (binding) => {
+			modal_proxy.keybinding_filter = (binding) =>
+			{
 				// if it's not built-in, we can block it right away
 				if (!binding.is_builtin ()) {
 					return true;
@@ -272,9 +232,9 @@ namespace Gala
 				// otherwise we determine by name if it's meant for us
 				var name = binding.get_name ();
 
-				return !(name == "switch-applications" || name == "switch-applications-backward"
-						 || name == "switch-windows" || name == "switch-windows-backward"
-						 || name == "switch-group" || name == "switch-group-backward");
+				return !(name == "switch-applications" || name == "switch-applications-backward" ||
+						 name == "switch-windows" || name == "switch-windows-backward" ||
+						 name == "switch-group" || name == "switch-group-backward");
 			};
 
 			dim_items ();
@@ -284,13 +244,20 @@ namespace Gala
 				close (wm.get_screen ().get_display ().get_current_time ());
 			}
 
-			// We delay showing the popup so that fast Alt+Tab users aren't
-			// disturbed by the popup briefly flashing.
+			// We delay showing the popup so that fast Alt+Tab users aren't disturbed by the popup
+			// briefly flashing.
 			if (popup_delay_timeout_id != 0) {
 				Source.remove (popup_delay_timeout_id);
 			}
 			popup_delay_timeout_id = Timeout.add (POPUP_DELAY_TIMEOUT, () => {
 				if (visible && !closing) {
+					// add desktop item if need after popup shown
+					if (BehaviorSettings.get_default ().show_desktop_in_alt_tab) {
+						if (visible && !only_group_windows) {
+							add_desktop_item ();
+						}
+					}
+
 					show_clones ();
 					hide_windows (workspace);
 					dim_items ();
@@ -323,10 +290,11 @@ namespace Gala
 			last_switch_time = 0;
 
 			foreach (var actor in clone_sort_order) {
-				unowned SafeWindowClone clone = (SafeWindowClone) actor;
+				unowned SafeWindowClone clone = (SafeWindowClone)actor;
 
 				// current clone stays on top
-				if (clone.window == current_item.window) {
+				if (current_item is DeepinWindowSwitcherWindowItem &&
+					clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
 					continue;
 				}
 
@@ -346,7 +314,11 @@ namespace Gala
 			}
 
 			if (current_item != null) {
-				current_item.window.activate (time);
+				if (current_item is DeepinWindowSwitcherWindowItem) {
+					(current_item as DeepinWindowSwitcherWindowItem).window.activate (time);
+				} else {
+					DeepinUtils.show_desktop (wm.get_screen ().get_active_workspace ());
+				}
 				current_item = null;
 			}
 
@@ -367,21 +339,33 @@ namespace Gala
 		/**
 		 * Adds the suitable windows on the given workspace to the switcher
 		 *
-		 * @return whether the switcher should actually be started or if there are
-		 *         not enough windows
+		 * @return whether the switcher should actually be started or if there are not enough
+		 *         windows
 		 */
-		bool collect_windows (Workspace workspace, TabList type)
+		bool collect_windows (Workspace workspace, bool only_group_windows)
 		{
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
 
 #if HAS_MUTTER314
-			var windows = display.get_tab_list (type, workspace);
-			var current = display.get_tab_current (type, workspace);
+			var all_windows = display.get_tab_list (TabList.NORMAL, workspace);
+			var current = display.get_tab_current (TabList.NORMAL, workspace);
 #else
-			var windows = display.get_tab_list (type, screen, workspace);
-			var current = display.get_tab_current (type, screen, workspace);
+			var all_windows = display.get_tab_list (TabList.NORMAL, screen, workspace);
+			var current = display.get_tab_current (TabList.NORMAL, screen, workspace);
 #endif
+
+			GLib.List<weak Meta.Window> windows;
+			if (!only_group_windows) {
+				windows = all_windows.copy ();
+			} else {
+				windows = new GLib.List<weak Meta.Window> ();
+				foreach (var window in all_windows) {
+					if (window.wm_class == current.wm_class) {
+						windows.append (window);
+					}
+				}
+			}
 
 			if (windows.length () < 1) {
 				return false;
@@ -408,7 +392,7 @@ namespace Gala
 			clone_sort_order = window_clones.get_children ().copy ();
 
 			if (current_item == null) {
-				current_item = (DeepinWindowSwitcherItem) item_container.get_child_at_index (0);
+				current_item = (DeepinWindowSwitcherItem)item_container.get_child_at_index (0);
 			}
 
 			return true;
@@ -424,17 +408,26 @@ namespace Gala
 			var safe_clone = new SafeWindowClone (window, true);
 			safe_clone.x = actor.x;
 			safe_clone.y = actor.y;
-			safe_clone.opacity = 0; // keepin hidden before popup window shown
+			safe_clone.opacity = 0;  // keepin hidden before popup window shown
 
 			window_clones.add_child (safe_clone);
 
-			var item = new DeepinWindowSwitcherItem (window);
+			var item = new DeepinWindowSwitcherWindowItem (window);
 			item.reactive = true;
 			item.button_release_event.connect (on_clicked_item);
 
 			item_container.add_child (item);
 
 			return item;
+		}
+
+		void add_desktop_item ()
+		{
+			var item = new DeepinWindowSwitcherDesktopItem (wm.get_screen ());
+			item.reactive = true;
+			item.button_release_event.connect (on_clicked_item);
+
+			item_container.add_child (item);
 		}
 
 		DeepinWindowSwitcherItem next_item (Workspace workspace, bool backward)
@@ -452,46 +445,48 @@ namespace Gala
 				}
 			}
 
-			return (DeepinWindowSwitcherItem) actor;
+			return (DeepinWindowSwitcherItem)actor;
 		}
-
 
 		void dim_items ()
 		{
 			// show animation only when popup window shown
 			bool animate = (popup.visible && popup.opacity != 0) ? true : false;
 
-			var window_opacity = (int) Math.floor (AppearanceSettings.get_default ().alt_tab_window_opacity * 255);
+			var window_opacity =
+				(int)Math.floor (AppearanceSettings.get_default ().alt_tab_window_opacity * 255);
 
-			foreach (var actor in window_clones.get_children ()) {
-				unowned SafeWindowClone clone = (SafeWindowClone) actor;
+			foreach (var child in window_clones.get_children ()) {
+				var clone = child as SafeWindowClone;
 
-				if (animate) {
-					actor.save_easing_state ();
-					actor.set_easing_duration (250);
-					actor.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-				}
+				clone.save_easing_state ();
+				clone.set_easing_duration (animate ? 250 : 0);
+				clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 
-				if (clone.window == current_item.window) {
-					window_clones.set_child_above_sibling (actor, null);
-					actor.z_position = 0;
-					actor.opacity = 255;
+				if (current_item is DeepinWindowSwitcherWindowItem) {
+					if (clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
+						window_clones.set_child_above_sibling (clone, null);
+						clone.z_position = 0;
+						clone.opacity = 255;
+					} else {
+						clone.z_position = -200;
+						clone.opacity = window_opacity;
+					}
 				} else {
-					actor.z_position = -200;
-					actor.opacity = window_opacity;
+					// when desktop item selected, hide all clones
+					clone.z_position = -200;
+					clone.opacity = 0;
 				}
 
-				if (animate) {
-					actor.restore_easing_state ();
-				}
+				clone.restore_easing_state ();
 			}
 
-			foreach (var actor in item_container.get_children ()) {
-				unowned DeepinWindowSwitcherItem item = (DeepinWindowSwitcherItem) actor;
+			foreach (var child in item_container.get_children ()) {
+				var item = child as DeepinWindowSwitcherItem;
 				if (item == current_item) {
-					item.set_active (true, animate);
+					item.set_select (true, animate);
 				} else {
-					item.set_active (false, animate);
+					item.set_select (false, animate);
 				}
 			}
 		}
@@ -510,9 +505,8 @@ namespace Gala
 				var window = actor.get_meta_window ();
 				var type = window.window_type;
 
-				if (type != WindowType.DOCK
-					&& type != WindowType.DESKTOP
-					&& type != WindowType.NOTIFICATION) {
+				if (type != WindowType.DOCK && type != WindowType.DESKTOP &&
+					type != WindowType.NOTIFICATION) {
 					actor.hide ();
 				}
 			}
@@ -528,16 +522,15 @@ namespace Gala
 			foreach (var actor in window_actors) {
 				unowned Window window = actor.get_meta_window ();
 
-				if (window.get_workspace () == workspace
-					&& window.showing_on_its_workspace ()) {
+				if (window.get_workspace () == workspace && window.showing_on_its_workspace ()) {
 					actor.show ();
 				}
 			}
 		}
 
 		/**
-		 * copied from gnome-shell, finds the primary modifier in the mask and saves it
-		 * to our modifier_mask field
+		 * copied from gnome-shell, finds the primary modifier in the mask and saves it to our
+		 * modifier_mask field
 		 *
 		 * @param mask The modifier mask to extract the primary one from
 		 */
@@ -558,8 +551,8 @@ namespace Gala
 		{
 			Gdk.ModifierType modifiers;
 			double[] axes = {};
-			Gdk.Display.get_default ().get_device_manager ().get_client_pointer ()
-				.get_state (Gdk.get_default_root_window (), axes, out modifiers);
+			Gdk.Display.get_default ().get_device_manager ().get_client_pointer ().get_state (
+				Gdk.get_default_root_window (), axes, out modifiers);
 
 			return modifiers;
 		}

@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2014 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -37,12 +38,6 @@ namespace Gala
 			if (system_background == null) {
 				system_background = new Meta.Background (meta_screen);
 				system_background.set_color (DEFAULT_BACKGROUND_COLOR);
-
-#if HAS_MUTTER316
-				system_background.set_file (File.new_for_path (path), GDesktop.BackgroundStyle.WALLPAPER);
-#else
-				system_background.set_filename (path, GDesktop.BackgroundStyle.WALLPAPER);
-#endif
 			}
 
 			background = system_background;
@@ -70,4 +65,3 @@ namespace Gala
 		}
 	}
 }
-

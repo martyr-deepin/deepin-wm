@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2014 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -50,9 +51,11 @@ namespace Gala
 		Cogl.Material material;
 		string? current_key = null;
 
-		public ShadowEffect (int actor_width, int actor_height, int shadow_size, int shadow_spread)
+		public ShadowEffect (int actor_width, int actor_height, int shadow_size, int shadow_spread,
+							 uint8 shadow_opacity = 255)
 		{
-			Object (shadow_size: shadow_size, shadow_spread: shadow_spread);
+			Object (shadow_size: shadow_size, shadow_spread: shadow_spread,
+					shadow_opacity: shadow_opacity);
 
 			material = new Cogl.Material ();
 
@@ -91,7 +94,7 @@ namespace Gala
 			// fill a new texture for this size
 			var buffer = new Granite.Drawing.BufferSurface (width, height);
 			buffer.context.rectangle (shadow_size - shadow_spread, shadow_size - shadow_spread,
-				actor_width + shadow_spread * 2, actor_height + shadow_spread * 2);
+				actor_width + shadow_spread * 2, actor_height + shadow_spread);
 			buffer.context.set_source_rgba (0, 0, 0, 0.7);
 			buffer.context.fill ();
 
@@ -100,7 +103,7 @@ namespace Gala
 			var surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
 			var cr = new Cairo.Context (surface);
 
-			cr.set_source_surface (buffer.surface, 0, 0);
+			cr.set_source_surface (buffer.surface, 0, shadow_spread);
 			cr.paint ();
 
 			var texture = new Cogl.Texture.from_data (width, height, 0, Cogl.PixelFormat.BGRA_8888_PRE,
@@ -139,4 +142,3 @@ namespace Gala
 		}
 	}
 }
-

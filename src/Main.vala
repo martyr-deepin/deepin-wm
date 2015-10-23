@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2012 Tom Beckmann, Rico Tzschichholz
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -42,6 +43,8 @@ namespace Gala
 
 		Meta.set_wm_name ("Mutter(DeepinGala)");
 		Meta.Prefs.set_force_fullscreen (false);
+
+		DeepinUtils.init_debug_topics ();
 
 		/**
 		 * Prevent Meta.init () from causing gtk to load gail and at-bridge

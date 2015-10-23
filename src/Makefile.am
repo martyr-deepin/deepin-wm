@@ -32,7 +32,6 @@ gala_LDADD = \
 
 gala_VALASOURCES = \
 	DBus.vala \
-	DockThemeManager.vala \
 	DragDropAction.vala \
 	InternalUtils.vala \
 	Main.vala \
@@ -44,10 +43,24 @@ gala_VALASOURCES = \
 	WindowListener.vala \
 	WindowManager.vala \
 	WorkspaceManager.vala \
+	Deepin/DeepinBlurEffect.vala \
+	Deepin/DeepinCssActor.vala \
+	Deepin/DeepinCssStaticActor.vala \
+	Deepin/DeepinFramedBackground.vala \
+	Deepin/DeepinMultitaskingView.vala \
+	Deepin/DeepinRoundRectEffect.vala \
 	Deepin/DeepinUtils.vala \
+	Deepin/DeepinWindowClone.vala \
+	Deepin/DeepinWindowBaseContainer.vala \
+	Deepin/DeepinWindowFlowContainer.vala \
+	Deepin/DeepinWindowThumbContainer.vala \
 	Deepin/DeepinWindowSwitcher.vala \
-	Deepin/DeepinWindowSwitcherLayout.vala \
 	Deepin/DeepinWindowSwitcherItem.vala \
+	Deepin/DeepinWindowSwitcherLayout.vala \
+	Deepin/DeepinWorkspaceName.vala \
+	Deepin/DeepinWorkspaceFlowClone.vala \
+	Deepin/DeepinWorkspaceThumbClone.vala \
+	Deepin/DeepinWorkspaceThumbContainer.vala \
 	Widgets/IconGroup.vala \
 	Widgets/IconGroupContainer.vala \
 	Widgets/MonitorClone.vala \
@@ -61,12 +74,6 @@ gala_VALASOURCES = \
 	Widgets/WindowSwitcher.vala \
 	Widgets/WorkspaceClone.vala \
 	Widgets/WorkspaceInsertThumb.vala \
-	granite/style-classes.vala \
-	granite/Drawing/Color.vala \
-	granite/Drawing/BufferSurface.vala \
-	granite/Drawing/Utilities.vala \
-	granite/Widgets/Utils.vala \
-	granite/Services/Settings.vala \
 	$(NULL)
 
 gala_background = \

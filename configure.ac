@@ -2,7 +2,7 @@
 m4_define([gala_released], [0])
 
 m4_define([gala_major_version], [0])
-m4_define([gala_minor_version], [2])
+m4_define([gala_minor_version], [3])
 m4_define([gala_micro_version], [0])
 m4_define([gala_nano_version], [0])
 
@@ -43,7 +43,7 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_SRCDIR([configure.ac])
-AM_INIT_AUTOMAKE([1.11 tar-ustar dist-xz no-dist-gzip -Wno-portability subdir-objects])
+AM_INIT_AUTOMAKE([1.11 foreign tar-ustar dist-xz no-dist-gzip -Wno-portability subdir-objects])
 AM_MAINTAINER_MODE
 
 AC_PROG_CC
@@ -92,7 +92,6 @@ fi
 # -----------------------------------------------------------
 GTK_MIN_VERSION=3.4.0
 GLIB_MIN_VERSION=2.32.0
-PLANK_MIN_VERSION=0.3.0
 MUTTER_MIN_VERSION=3.8.4
 MUTTER_API="3.8"
 
@@ -109,7 +108,7 @@ GALA_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  libdeepin-mutter >= $MUTTER_MIN_VERSION \
                  gee-0.8 \
                  gnome-desktop-3.0 \
-                 plank >= $PLANK_MIN_VERSION"
+                 libwnck-3.0"
 
 GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gmodule-2.0 \
@@ -124,9 +123,9 @@ GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gnome-desktop-3.0 \
                       --pkg posix \
                       --pkg xfixes-4.0 \
-                      --pkg plank"
+                      --pkg libwnck-3.0"
 
-VALAFLAGS="--target-glib=2.32"
+VALAFLAGS="--target-glib=2.32 --define HAVE_GEE_0_8"
 VALAFLAGS_CORE="--thread"
 
 PKG_CHECK_MODULES(GALA_CORE, $GALA_CORE_PKGS)
@@ -158,7 +157,7 @@ fi
 # 3.14
 PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.13], [have_mutter314=yes], [have_mutter314=no])
 if test "x$have_mutter314" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.14.0])
+    PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.14.4])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER314"
     MUTTER_API="3.14"
 fi
@@ -167,9 +166,17 @@ AM_CONDITIONAL([HAVE_MUTTER314], [test "x$have_mutter314" = "xyes"])
 # 3.16
 PKG_CHECK_MODULES(MUTTER316, [libdeepin-mutter >= 3.15], [have_mutter316=yes], [have_mutter316=no])
 if test "x$have_mutter316" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER316, [libdeepin-mutter >= 3.15.2])
+    PKG_CHECK_MODULES(MUTTER316, [libdeepin-mutter >= 3.16.2])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER316"
     MUTTER_API="3.16"
+fi
+
+# 3.18
+PKG_CHECK_MODULES(MUTTER318, [libmutter >= 3.17], [have_mutter318=yes], [have_mutter318=no])
+if test "x$have_mutter318" = "xyes" ; then
+    PKG_CHECK_MODULES(MUTTER318, [libmutter >= 3.17.91])
+    VALAFLAGS="$VALAFLAGS --define HAS_MUTTER318"
+    MUTTER_API="3.18"
 fi
 
 # -----------------------------------------------------------
@@ -195,7 +202,7 @@ AC_ARG_ENABLE([debug],
               AS_HELP_STRING([--disable-debug],[compile without debug code]),
               [enable_debug=$enableval], [m4_if(gala_released, [1], [enable_debug=no], [enable_debug=yes])])
 if test "x$enable_debug" = "xyes" ; then
-    VALAFLAGS_CORE="$VALAFLAGS_CORE -g --save-temps"
+    VALAFLAGS_CORE="$VALAFLAGS_CORE -g"
 fi
 
 GALA_CORE_VALAFLAGS="$VALAFLAGS $VALAFLAGS_CORE $GALA_CORE_VALA_PKGS"

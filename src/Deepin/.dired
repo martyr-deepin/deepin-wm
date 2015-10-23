@@ -1,0 +1,4 @@
+Local Variables:
+dired-omit-mode: t
+dired-omit-extensions: (".o" "~" ".c")
+End:

@@ -1,19 +1,20 @@
-//  
+//
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2012 Tom Beckmann, Rico Tzschichholz
-// 
+//
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-// 
+//
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //  GNU General Public License for more details.
-// 
+//
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-// 
+//
 
 using Meta;
 using Clutter;
@@ -129,16 +130,18 @@ namespace Gala
 
 			foreach (var workspace in workspaces) {
 				foreach (var window in workspace.list_windows ()) {
-					if (window.window_type != WindowType.NORMAL && 
-						window.window_type != WindowType.DOCK && 
-						window.window_type != WindowType.DIALOG || 
+					if (window.window_type != WindowType.NORMAL &&
+						window.window_type != WindowType.DOCK &&
+						window.window_type != WindowType.DESKTOP &&
+						window.window_type != WindowType.DIALOG ||
 						window.is_attached_dialog ()) {
 						var actor = window.get_compositor_private () as WindowActor;
 						if (actor != null)
 							actor.hide ();
 						continue;
 					}
-					if (window.window_type == WindowType.DOCK)
+					if (window.window_type == WindowType.DOCK ||
+						window.window_type == WindowType.DESKTOP)
 						continue;
 
 					// skip windows that are on all workspace except we're currently

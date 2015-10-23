@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2013 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -23,6 +24,15 @@ namespace Gala
 	{
 		SOURCE = 0,
 		DESTINATION
+	}
+
+	public enum DragDropActionDirection
+	{
+		LEFT = 1,
+		RIGHT = 1 << 1,
+		UP = 1 << 2,
+		DOWN = 1 << 3,
+		ALL = LEFT + RIGHT + UP + DOWN
 	}
 
 	public class DragDropAction : Clutter.Action
@@ -51,6 +61,14 @@ namespace Gala
 		 * @param actor The actor on which the drag finished
 		 */
 		public signal void drag_end (Actor actor);
+
+		/**
+		 * A drag action is moving mouse
+		 *
+		 * @param delta_x is the dragging distance in x-axis
+		 * @param delta_y is the dragging distance in y-axis
+		 */
+		public signal void drag_motion (float delta_x, float delta_y);
 
 		/**
 		 * The destination has been crossed
@@ -82,7 +100,7 @@ namespace Gala
 
 		/**
 		 * The unique id given to this drag-drop-group
-		 */		 
+		 */
 		public string drag_id { get; construct; }
 
 		public Actor handle { get; private set; }
@@ -97,8 +115,16 @@ namespace Gala
 		 */
 		public bool allow_bubbling { get; set; default = true; }
 
+		/**
+		 * The axis type that allowed to follor mouse.
+		 */
+		public DragDropActionDirection allow_direction = DragDropActionDirection.ALL;
+
+
 		Actor? hovered = null;
 		bool clicked = false;
+		float orig_x;
+		float orig_y;
 		float last_x;
 		float last_y;
 
@@ -201,6 +227,12 @@ namespace Gala
 								return false;
 							}
 
+							// relayout target actor for that maybe reparent just now and could not
+							// get the correct position
+							handle.queue_relayout ();
+							orig_x = handle.x;
+							orig_y = handle.y;
+
 							handle.reactive = false;
 
 							clicked = false;
@@ -242,10 +274,37 @@ namespace Gala
 				case EventType.MOTION:
 					float x, y;
 					event.get_coords (out x, out y);
-					handle.x -= last_x - x;
-					handle.y -= last_y - y;
+
+					// limit dragging direction
+					if ((allow_direction & DragDropActionDirection.LEFT) ==
+						DragDropActionDirection.LEFT) {
+						if ((handle.x - (last_x - x)) <= orig_x) {
+							handle.x -= last_x - x;
+						}
+					}
+					if ((allow_direction & DragDropActionDirection.RIGHT) ==
+						DragDropActionDirection.RIGHT) {
+						if ((handle.x - (last_x - x)) >= orig_x) {
+							handle.x -= last_x - x;
+						}
+					}
+					if ((allow_direction & DragDropActionDirection.UP) ==
+						DragDropActionDirection.UP) {
+						if ((handle.y - (last_y - y)) <= orig_y) {
+							handle.y -= last_y - y;
+						}
+					}
+					if ((allow_direction & DragDropActionDirection.DOWN) ==
+						DragDropActionDirection.DOWN) {
+						if ((handle.y - (last_y - y)) >= orig_y) {
+							handle.y -= last_y - y;
+						}
+					}
+
 					last_x = x;
 					last_y = y;
+
+					drag_motion (handle.x - orig_x, handle.y - orig_y);
 
 					var stage = actor.get_stage ();
 					var actor = stage.get_actor_at_pos (PickMode.REACTIVE, (int) x, (int) y);

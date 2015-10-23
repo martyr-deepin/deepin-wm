@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2014 Tom Beckmann, Rico Tzschichholz
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -120,11 +121,20 @@ namespace Gala
 
 		void window_added (Workspace? workspace, Window window)
 		{
+			unowned Screen screen = workspace.get_screen ();
+
+			// fix window focus issue
+			foreach (var w in BehaviorSettings.get_default ().auto_focus_windows) {
+				if (w == window.wm_class && window.window_type == WindowType.NORMAL &&
+					window.showing_on_its_workspace ()) {
+					window.activate (screen.get_display ().get_current_time ());
+					break;
+				}
+			}
+
 			if (workspace == null || !Prefs.get_dynamic_workspaces ()
 				|| window.on_all_workspaces)
 				return;
-
-			unowned Screen screen = workspace.get_screen ();
 
 			if ((window.window_type == WindowType.NORMAL
 				|| window.window_type == WindowType.DIALOG
@@ -224,7 +234,7 @@ namespace Gala
 
 			workspace.window_added.disconnect (window_added);
 			workspace.window_removed.disconnect (window_removed);
-			
+
 			workspaces_marked_removed.add (workspace);
 
 			screen.remove_workspace (workspace, time);
@@ -270,4 +280,3 @@ namespace Gala
 		}
 	}
 }
-

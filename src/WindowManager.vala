@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2012-2014 Tom Beckmann, Rico Tzschichholz
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -21,6 +22,8 @@ namespace Gala
 {
 	public class WindowManagerGala : Meta.Plugin, WindowManager
 	{
+		public const int MAX_WORKSPACE_NUM = 7;
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -48,9 +51,11 @@ namespace Gala
 
 		Meta.PluginInfo info;
 
-		DeepinWindowSwitcher? deepin_winswitcher = null;
+		DeepinWindowSwitcher? winswitcher = null;
 		ActivatableComponent? workspace_view = null;
 		ActivatableComponent? window_overview = null;
+
+		DeepinWorkspaceName? workspace_name = null;
 
 		// used to detect which corner was used to trigger an action
 		Clutter.Actor? last_hotcorner;
@@ -84,6 +89,7 @@ namespace Gala
 
 		public override void start ()
 		{
+			DeepinUtils.fix_workspace_max_num (get_screen (), MAX_WORKSPACE_NUM);
 			Util.later_add (LaterType.BEFORE_REDRAW, show_stage);
 		}
 
@@ -132,11 +138,13 @@ namespace Gala
 #else
 			var system_background = new SystemBackground ();
 #endif
+			system_background.background.set_color (DeepinUtils.get_css_background_color ("deepin-window-manager"));
 			system_background.add_constraint (new Clutter.BindConstraint (stage,
 				Clutter.BindCoordinate.ALL, 0));
 			stage.insert_child_below (system_background, null);
 
 			ui_group = new Clutter.Actor ();
+
 			ui_group.reactive = true;
 			stage.add_child (ui_group);
 
@@ -218,20 +226,22 @@ namespace Gala
 
 			if (plugin_manager.workspace_view_provider == null
 				|| (workspace_view = (plugin_manager.get_plugin (plugin_manager.workspace_view_provider) as ActivatableComponent)) == null) {
-				workspace_view = new MultitaskingView (this);
+				workspace_view = new DeepinMultitaskingView (this);
 				ui_group.add_child ((Clutter.Actor) workspace_view);
+				(workspace_view as DeepinMultitaskingView).connect_key_focus_out_signal ();
 			}
 
 			if (plugin_manager.window_switcher_provider == null) {
-				deepin_winswitcher = new DeepinWindowSwitcher (this);
-				ui_group.add_child (deepin_winswitcher);
+				winswitcher = new DeepinWindowSwitcher (this);
+				winswitcher.add_constraint (new Clutter.BindConstraint (stage, Clutter.BindCoordinate.ALL, 0));
+				ui_group.add_child (winswitcher);
 
-				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-applications-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-group", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
-				KeyBinding.set_custom_handler ("switch-group-backward", (Meta.KeyHandlerFunc) deepin_winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-applications-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-windows-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-group", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
+				KeyBinding.set_custom_handler ("switch-group-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
 			}
 
 			if (plugin_manager.window_overview_provider == null
@@ -239,6 +249,10 @@ namespace Gala
 				window_overview = new WindowOverview (this);
 				ui_group.add_child ((Clutter.Actor) window_overview);
 			}
+
+			workspace_name = new DeepinWorkspaceName (get_screen ());
+			workspace_name.add_constraint (new Clutter.BindConstraint (stage, Clutter.BindCoordinate.ALL, 0));
+			ui_group.add_child (workspace_name);
 
 			display.add_keybinding ("expose-windows", keybinding_schema, 0, () => {
 				if (window_overview.is_opened ())
@@ -608,6 +622,9 @@ namespace Gala
 			var current = display.get_focus_window ();
 
 			switch (type) {
+				case ActionType.NONE:
+					// ignore none action
+					break;
 				case ActionType.SHOW_WORKSPACE_VIEW:
 					if (workspace_view == null)
 						break;
@@ -733,6 +750,14 @@ namespace Gala
 		 * effects
 		 */
 
+#if HAS_MUTTER318
+		public override void size_change (Meta.WindowActor actor, Meta.SizeChange which_change, Meta.Rectangle old_frame_rect, Meta.Rectangle old_buffer_rect)
+		{
+			//FIXME Animations need to be re-implemented using the given arguments
+			size_change_completed (actor);
+		}
+#endif
+
 		public override void minimize (WindowActor actor)
 		{
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
@@ -792,6 +817,7 @@ namespace Gala
 			}
 		}
 
+#if !HAS_MUTTER318
 		public override void maximize (WindowActor actor, int ex, int ey, int ew, int eh)
 		{
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
@@ -887,6 +913,7 @@ namespace Gala
 
 			maximize_completed (actor);
 		}
+#endif
 
 #if HAS_MUTTER314
 		public override void unminimize (WindowActor actor)
@@ -965,6 +992,23 @@ namespace Gala
 					actor.opacity = 0;
 					actor.animate (Clutter.AnimationMode.EASE_OUT_EXPO, duration,
 						scale_x:1.0f, scale_y:1.0f, opacity:255)
+						.completed.connect ( () => {
+
+						mapping.remove (actor);
+						map_completed (actor);
+					});
+					break;
+				case WindowType.SPLASHSCREEN:
+					var duration = animation_settings.open_duration;
+					if (duration == 0) {
+						map_completed (actor);
+						return;
+					}
+
+					mapping.add (actor);
+
+					actor.opacity = 0;
+					actor.animate (Clutter.AnimationMode.LINEAR, duration, opacity:255)
 						.completed.connect ( () => {
 
 						mapping.remove (actor);
@@ -1061,6 +1105,24 @@ namespace Gala
 						Utils.request_clean_icon_cache (get_all_xids ());
 					});
 					break;
+				case WindowType.SPLASHSCREEN:
+					var duration = animation_settings.close_duration;
+					if (duration == 0) {
+						destroy_completed (actor);
+						return;
+					}
+
+					destroying.add (actor);
+
+					actor.show ();
+					actor.animate (Clutter.AnimationMode.EASE_OUT_QUAD, duration, opacity:0)
+						.completed.connect ( () => {
+
+						destroying.remove (actor);
+						destroy_completed (actor);
+						Utils.request_clean_icon_cache (get_all_xids ());
+					});
+					break;
 				case WindowType.MODAL_DIALOG:
 				case WindowType.DIALOG:
 					destroying.add (actor);
@@ -1101,6 +1163,7 @@ namespace Gala
 			}
 		}
 
+#if !HAS_MUTTER318
 		public override void unmaximize (Meta.WindowActor actor, int ex, int ey, int ew, int eh)
 		{
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
@@ -1176,6 +1239,7 @@ namespace Gala
 
 			unmaximize_completed (actor);
 		}
+#endif
 
 		// Cancel attached animation of an actor and reset it
 		bool end_animation (ref Gee.HashSet<Meta.WindowActor> list, WindowActor actor)
@@ -1211,9 +1275,17 @@ namespace Gala
 			if (end_animation (ref minimizing, actor))
 				minimize_completed (actor);
 			if (end_animation (ref maximizing, actor))
+#if HAS_MUTTER318
+				size_change_completed (actor);
+#else
 				maximize_completed (actor);
+#endif
 			if (end_animation (ref unmaximizing, actor))
+#if HAS_MUTTER318
+				size_change_completed (actor);
+#else
 				unmaximize_completed (actor);
+#endif
 			if (end_animation (ref destroying, actor))
 				destroy_completed (actor);
 		}
@@ -1254,11 +1326,18 @@ namespace Gala
 			var out_group = new Clutter.Actor ();
 			windows = new List<WindowActor> ();
 			parents = new List<Clutter.Actor> ();
-			tmp_actors = new List<Clutter.Clone> ();
+			tmp_actors = new List<Clutter.Actor> ();
+
+			// Handle desktop windows specially instead appending theme to in_group and out_group to
+			// fix desktop always top issue when switching workspaces.
+			var desktop_in_group  = new Clutter.Actor ();
+			var desktop_out_group  = new Clutter.Actor ();
 
 			tmp_actors.prepend (main_container);
 			tmp_actors.prepend (in_group);
 			tmp_actors.prepend (out_group);
+			tmp_actors.prepend (desktop_in_group);
+			tmp_actors.prepend (desktop_out_group);
 			tmp_actors.prepend (static_windows);
 
 			window_group.add_child (main_container);
@@ -1280,8 +1359,10 @@ namespace Gala
 			// pack all containers
 			clutter_actor_reparent (wallpaper, main_container);
 			main_container.add_child (wallpaper_clone);
-			main_container.add_child (out_group);
+			main_container.add_child (desktop_in_group);
+			main_container.add_child (desktop_out_group);
 			main_container.add_child (in_group);
+			main_container.add_child (out_group);
 			main_container.add_child (static_windows);
 
 			// if we have a move action, pack that window to the static ones
@@ -1312,20 +1393,21 @@ namespace Gala
 					continue;
 
 				if (window.is_on_all_workspaces ()) {
-					// only collect docks here that need to be displayed on both workspaces
+					// collect docks and desktops here that need to be displayed on both workspaces
 					// all other windows will be collected below
 					if (window.window_type == WindowType.DOCK) {
 						docks.prepend (actor);
 					} else if (window.window_type == WindowType.DESKTOP) {
-						var clone = new SafeWindowClone (window);
-						clone.x = actor.x;
-						clone.y = actor.y;
-						in_group.insert_child_at_index (clone, 0);
-						tmp_actors.insert (clone, 0);
+						windows.prepend (actor);
+						parents.prepend (actor.get_parent ());
+						actor.set_translation (-clone_offset_x, -clone_offset_y, 0);
+						clutter_actor_reparent (actor, desktop_out_group);
 
-						windows.insert (actor, 0);
-						parents.insert (actor.get_parent (), 0);
-						clutter_actor_reparent (actor, out_group);
+						var clone = new SafeWindowClone (actor.get_meta_window ());
+						clone.x = actor.x - clone_offset_x;
+						clone.y = actor.y - clone_offset_y;
+						desktop_in_group.add_child (clone);
+						tmp_actors.prepend (clone);
 					} else {
 						// windows that are on all workspaces will be faded out and back in
 						windows.prepend (actor);
@@ -1397,13 +1479,17 @@ namespace Gala
 				x2 = -x2;
 
 			out_group.x = 0;
+			desktop_out_group.x = 0;
 			wallpaper.x = 0;
 			in_group.x = -x2;
+			desktop_in_group.x = -x2;
 			wallpaper_clone.x = -x2;
 
 			in_group.clip_to_allocation = out_group.clip_to_allocation = true;
 			in_group.width = out_group.width = move_primary_only ? monitor_geom.width : screen_width;
 			in_group.height = out_group.height = move_primary_only ? monitor_geom.height : screen_height;
+			desktop_in_group.width = desktop_out_group.width = in_group.width;
+			desktop_in_group.height = desktop_out_group.height = in_group.height;
 
 			var animation_mode = Clutter.AnimationMode.EASE_OUT_CUBIC;
 
@@ -1411,6 +1497,10 @@ namespace Gala
 			out_group.set_easing_duration (animation_duration);
 			in_group.set_easing_mode (animation_mode);
 			in_group.set_easing_duration (animation_duration);
+			desktop_out_group.set_easing_mode (animation_mode);
+			desktop_out_group.set_easing_duration (animation_duration);
+			desktop_in_group.set_easing_mode (animation_mode);
+			desktop_in_group.set_easing_duration (animation_duration);
 			wallpaper_clone.set_easing_mode (animation_mode);
 			wallpaper_clone.set_easing_duration (animation_duration);
 
@@ -1420,6 +1510,9 @@ namespace Gala
 
 			out_group.x = x2;
 			in_group.x = 0;
+
+			desktop_out_group.x = x2;
+			desktop_in_group.x = 0;
 
 			wallpaper.x = x2;
 			wallpaper_clone.x = 0;
@@ -1434,8 +1527,10 @@ namespace Gala
 
 		void end_switch_workspace ()
 		{
-			if (windows == null || parents == null)
+			if (windows == null || parents == null) {
+				// maybe reach here if switch workspace quickly
 				return;
+			}
 
 			var screen = get_screen ();
 			var active_workspace = screen.get_active_workspace ();
@@ -1507,6 +1602,10 @@ namespace Gala
 			moving = null;
 
 			switch_workspace_completed ();
+
+			if (!workspace_view.is_opened ()) {
+				workspace_name.show_popup ();
+			}
 		}
 
 		public override void kill_switch_workspace ()

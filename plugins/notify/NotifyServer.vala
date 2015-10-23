@@ -1,4 +1,5 @@
 //
+//  Copyright (C) 2015 Deepin Technology Co., Ltd.
 //  Copyright (C) 2014 Tom Beckmann
 //
 //  This program is free software: you can redistribute it and/or modify
@@ -19,6 +20,9 @@ using Meta;
 
 namespace Gala.Plugins.Notify
 {
+	const string X_CANONICAL_PRIVATE_SYNCHRONOUS = "x-canonical-private-synchronous";
+	const string X_CANONICAL_PRIVATE_ICON_ONLY = "x-canonical-private-icon-only";
+
 	public enum NotificationUrgency
 	{
 		LOW = 0,
@@ -47,6 +51,8 @@ namespace Gala.Plugins.Notify
 		const int DEFAULT_TMEOUT = 4000;
 		const string FALLBACK_ICON = "dialog-information";
 
+		static Gdk.RGBA? icon_fg_color = null;
+
 		[DBus (visible = false)]
 		public signal void show_notification (Notification notification);
 
@@ -60,6 +66,7 @@ namespace Gala.Plugins.Notify
 
 		DBus? bus_proxy = null;
 		unowned Canberra.Context? ca_context = null;
+		Gee.HashMap<string, Settings> app_settings_cache;
 
 		public NotifyServer (NotificationStack stack)
 		{
@@ -83,6 +90,8 @@ namespace Gala.Plugins.Notify
 			                         Canberra.PROP_APPLICATION_LANGUAGE, locale,
 			                         null);
 			ca_context.open ();
+
+			app_settings_cache = new Gee.HashMap<string, Settings> ();
 		}
 
 		public string [] get_capabilities ()
@@ -96,8 +105,8 @@ namespace Gala.Plugins.Notify
 				// before settings a default action, so we have to specify it here. Also, not displaying
 				// certain actions even though requested is allowed according to spec, so we should be fine
 				"actions",
-				"x-canonical-private-synchronous",
-				"x-canonical-private-icon-only"
+				X_CANONICAL_PRIVATE_SYNCHRONOUS,
+				X_CANONICAL_PRIVATE_ICON_ONLY
 			};
 		}
 
@@ -137,67 +146,45 @@ namespace Gala.Plugins.Notify
 		public new uint32 notify (string app_name, uint32 replaces_id, string app_icon, string summary,
 			string body, string[] actions, HashTable<string, Variant> hints, int32 expire_timeout, BusName sender)
 		{
-			Variant? variant;
+			unowned Variant? variant;
 
-			var id = replaces_id != 0 ? replaces_id : ++id_counter;
+			var id = (replaces_id != 0 ? replaces_id : ++id_counter);
 			var pixbuf = get_pixbuf (app_name, app_icon, hints);
-			var timeout = expire_timeout == uint32.MAX ? DEFAULT_TMEOUT : expire_timeout;
+			var timeout = (expire_timeout == uint32.MAX ? DEFAULT_TMEOUT : expire_timeout);
 
 			var urgency = NotificationUrgency.NORMAL;
 			if ((variant = hints.lookup ("urgency")) != null)
 				urgency = (NotificationUrgency) variant.get_byte ();
 
-			var icon_only = hints.contains ("x-canonical-private-icon-only");
-			var confirmation = hints.contains ("x-canonical-private-synchronous");
+			var icon_only = hints.contains (X_CANONICAL_PRIVATE_ICON_ONLY);
+			var confirmation = hints.contains (X_CANONICAL_PRIVATE_SYNCHRONOUS);
 			var progress = confirmation && hints.contains ("value");
 
-			unowned NotifySettings options = NotifySettings.get_default ();
+			unowned NotifySettings notify_settings = NotifySettings.get_default ();
 
 			// Default values for confirmations
 			var allow_bubble = true;
 			var allow_sound = true;
 
 			if (!confirmation) {
-				var app_found = false;
+				if (notify_settings.do_not_disturb) {
+					allow_bubble = allow_sound = false;
+				} else {
+					Settings? app_settings = app_settings_cache.get (app_name);
 
-				var param_bubbles = (options.default_bubbles ? "show" : "hide");
-				var param_sounds = (options.default_sounds ? "on" : "off");
-
-				for (int i = 0; i < options.apps.length; i++) {
-					var properties = options.apps[i].split (":");
-
-					// Don't crash! (If this entry is invalid search for another or create a new one)
-					if (properties.length == 2) {
-						if (properties[0] == app_name) {
-							var parameters = properties[1].split (",");
-
-							if (parameters.length == 2) {
-								param_bubbles = parameters[0];
-								param_sounds = parameters[1];
-
-								app_found = true;
-
-								break;
-							}
+					if (app_settings == null) {
+						var schema = SettingsSchemaSource.get_default ().lookup ("org.pantheon.desktop.gala.notifications.application", false);
+						if (schema != null) {
+							app_settings = new Settings.full (schema, null, "/org/pantheon/desktop/gala/notifications/applications/%s/".printf (app_name));
+							app_settings_cache.set (app_name, app_settings);
 						}
 					}
-				}
 
-				if (!app_found) {
-					// if no matching app was found, add the default values to the list
-					var apps_new = new string[options.apps.length + 1];
-
-					for (int i = 0; i < options.apps.length; i++) {
-						apps_new[i] = options.apps[i];
+					if (app_settings != null) {
+						allow_bubble = app_settings.get_boolean ("bubbles");
+						allow_sound = app_settings.get_boolean ("sounds");
 					}
-
-					apps_new[options.apps.length] = app_name + ":" + param_bubbles + "," + param_sounds;
-
-					options.apps = apps_new;
 				}
-
-				allow_bubble = (!options.do_not_disturb && param_bubbles == "show");
-				allow_sound = (allow_bubble && param_sounds == "on");
 			}
 
 #if 0 // enable to debug notifications
@@ -242,7 +229,7 @@ namespace Gala.Plugins.Notify
 
 					confirmation_notification.update (pixbuf,
 						progress_value,
-						hints.@get ("x-canonical-private-synchronous").get_string (),
+						hints.@get (X_CANONICAL_PRIVATE_SYNCHRONOUS).get_string (),
 						icon_only);
 
 					return id;
@@ -264,7 +251,7 @@ namespace Gala.Plugins.Notify
 				if (confirmation)
 					notification = new ConfirmationNotification (id, pixbuf, icon_only,
 						progress ? hints.@get ("value").get_int32 () : -1,
-						hints.@get ("x-canonical-private-synchronous").get_string ());
+						hints.@get (X_CANONICAL_PRIVATE_SYNCHRONOUS).get_string ());
 				else
 					notification = new NormalNotification (stack.screen, id, summary, body, pixbuf,
 						urgency, timeout, pid, actions);
@@ -283,6 +270,34 @@ namespace Gala.Plugins.Notify
 #endif
 
 			return id;
+		}
+
+		static Gdk.RGBA? get_icon_fg_color ()
+		{
+			if (icon_fg_color != null)
+				return icon_fg_color;
+
+			var default_css = new Gtk.CssProvider ();
+			try {
+				default_css.load_from_path (Config.PKGDATADIR + "/gala.css");
+			} catch (Error e) {
+				warning ("Loading default styles failed: %s", e.message);
+			}
+
+			var style_path = new Gtk.WidgetPath ();
+			style_path.append_type (typeof (Gtk.Window));
+			style_path.append_type (typeof (Gtk.EventBox));
+			style_path.iter_add_class (1, "gala-notification");
+			style_path.append_type (typeof (Gtk.Label));
+
+			var label_style_context = new Gtk.StyleContext ();
+			label_style_context.add_provider (default_css, Gtk.STYLE_PROVIDER_PRIORITY_FALLBACK);
+			label_style_context.set_path (style_path);
+			label_style_context.add_class ("label");
+			label_style_context.set_state (Gtk.StateFlags.NORMAL);
+			icon_fg_color = label_style_context.get_color (Gtk.StateFlags.NORMAL);
+
+			return icon_fg_color;
 		}
 
 		static Gdk.Pixbuf? get_pixbuf (string app_name, string app_icon, HashTable<string, Variant> hints)
@@ -331,10 +346,15 @@ namespace Gala.Plugins.Notify
 			} else if (app_icon != "") {
 
 				try {
-					var themed = new ThemedIcon.with_default_fallbacks (app_icon);
+					var themed = new ThemedIcon.with_default_fallbacks ("%s-symbolic".printf (app_icon));
 					var info = Gtk.IconTheme.get_default ().lookup_by_gicon (themed, size, 0);
-					if (info != null)
-						pixbuf = info.load_icon ();
+					if (info != null) {
+						pixbuf = info.load_symbolic (get_icon_fg_color ());
+
+						if (pixbuf.height != size)
+							pixbuf = pixbuf.scale_simple (size, size, Gdk.InterpType.HYPER);
+
+					}
 				} catch (Error e) { warning (e.message); }
 
 			}
@@ -342,7 +362,14 @@ namespace Gala.Plugins.Notify
 			if (pixbuf == null) {
 
 				try {
-					pixbuf = Gtk.IconTheme.get_default ().load_icon (app_name.down (), size, 0);
+					var themed = new ThemedIcon (app_name.down ());
+					var info = Gtk.IconTheme.get_default ().lookup_by_gicon (themed, size, 0);
+					if (info != null) {
+						pixbuf = info.load_symbolic (get_icon_fg_color ());
+
+						if (pixbuf.height != size)
+							pixbuf = pixbuf.scale_simple (size, size, Gdk.InterpType.HYPER);
+					}
 				} catch (Error e) {
 
 					try {
@@ -406,7 +433,7 @@ namespace Gala.Plugins.Notify
 			Variant? variant = null;
 
 			// Are we suppose to play a sound at all?
-			if ((variant = hints.lookup ("supress-sound")) != null
+			if ((variant = hints.lookup ("suppress-sound")) != null
 				&& variant.get_boolean ())
 				return;
 
@@ -417,7 +444,7 @@ namespace Gala.Plugins.Notify
 			bool play_sound = false;
 
 			// no sounds for confirmation bubbles
-			if ((variant = hints.lookup ("x-canonical-private-synchronous")) != null) {
+			if ((variant = hints.lookup (X_CANONICAL_PRIVATE_SYNCHRONOUS)) != null) {
 				var confirmation_type = variant.get_string ();
 
 				// the sound indicator is an exception here, it won't emit a sound at all, even though for
@@ -442,7 +469,7 @@ namespace Gala.Plugins.Notify
 			// pick a sound according to the category
 			if (!play_sound) {
 				variant = hints.lookup ("category");
-				string? sound_name = null;
+				unowned string? sound_name = null;
 
 				if (variant != null)
 					sound_name = category_to_sound (variant.get_string ());
@@ -459,9 +486,9 @@ namespace Gala.Plugins.Notify
 				ca_context.play_full (0, props);
 		}
 
-		static string? category_to_sound (string category)
+		static unowned string? category_to_sound (string category)
 		{
-			string? sound = null;
+			unowned string? sound = null;
 
 			switch (category) {
 				case "device.added":

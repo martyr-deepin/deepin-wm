@@ -24,6 +24,10 @@ namespace Gala
 	 */
 	public class WindowIcon : GtkClutter.Texture
 	{
+		// shadow effect, angle:90°, size:6, distance:2
+		public const int SHADOW_SIZE = 6;
+		public const int SHADOW_DISTANCE = 2; // offset in y-axis
+
 		static Bamf.Matcher matcher;
 
 		static construct
@@ -74,8 +78,8 @@ namespace Gala
 
 		construct
 		{
-			width = icon_size;
-			height = icon_size;
+			width = icon_size + SHADOW_SIZE * 2;;
+			height = icon_size + SHADOW_SIZE + SHADOW_DISTANCE;
 			xid = (uint32) window.get_xwindow ();
 
 			// new windows often reach mutter earlier than bamf, that's why
