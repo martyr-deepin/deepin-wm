@@ -172,9 +172,9 @@ if test "x$have_mutter316" = "xyes" ; then
 fi
 
 # 3.18
-PKG_CHECK_MODULES(MUTTER318, [libmutter >= 3.17], [have_mutter318=yes], [have_mutter318=no])
+PKG_CHECK_MODULES(MUTTER318, [libdeepin-mutter >= 3.17], [have_mutter318=yes], [have_mutter318=no])
 if test "x$have_mutter318" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER318, [libmutter >= 3.17.91])
+    PKG_CHECK_MODULES(MUTTER318, [libdeepin-mutter >= 3.17.91])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER318"
     MUTTER_API="3.18"
 fi
