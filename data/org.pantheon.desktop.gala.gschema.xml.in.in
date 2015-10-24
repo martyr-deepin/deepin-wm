@@ -45,7 +45,7 @@
 		<key type="s" name="hotcorner-custom-command">
 			<default>''</default>
 			<_summary>The command that will be executed for the hotcorner action 'custom-command' or multiple</_summary>
-			<_description>If you just put a single command, it will be used for every hotcorner assigned to 
+			<_description>If you just put a single command, it will be used for every hotcorner assigned to
 				'custom-command'. If you instead use the pattern
 				'hotcorner-topleft:command;;hotcorner-bottomright:command' the specific commands will be used
 				per hotcorner. Possible identifiers are 'hotcorner-[topleft; topright; bottomleft; bottomright]'
@@ -83,7 +83,7 @@
 			<_description>When launching the window-switcher, gala iterates over this list and attempts to find a window matching the names. If it does, it will hide this window and fade it back in, once the the switcher is closed.</_description>
 		</key>
 		<key type="as" name="auto-focus-windows">
-			<default><![CDATA[['nautilus', 'Nautilus', 'ddelauncher', 'DDELauncher']]]></default>
+			<default><![CDATA[['dde-launcher', 'DDE-Launcher']]]></default>
 			<_summary>Window class names that will be focused automatically when shown</_summary>
 			<_description>Some windows could not grab focus correctly when shown, just put their class names here to avoid such issue.</_description>
 		</key>
@@ -185,7 +185,7 @@
 	</schema>
 
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/animations/" id="com.deepin.wrap.pantheon.desktop.gala.animations" gettext-domain="@GETTEXT_PACKAGE@">
-	
+
 		<key type="b" name="enable-animations">
 			<default>true</default>
 			<_summary>Enable Animations</_summary>
@@ -217,7 +217,7 @@
 	</schema>
 
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/shadows/" id="com.deepin.wrap.pantheon.desktop.gala.shadows" gettext-domain="@GETTEXT_PACKAGE@">
-	
+
 		<key type="as" name="normal-focused">
 			<default>['20', '-1', '0', '15', '220']</default>
 			<_summary>Defines the shadow of normal focused windows</_summary>
@@ -244,7 +244,7 @@
 			<_description>See normal-focused</_description>
 		</key>
 	</schema>
-	
+
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/notifications/" id="com.deepin.wrap.pantheon.desktop.gala.notifications" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="b" name="do-not-disturb">
 			<default>false</default>
@@ -267,7 +267,7 @@
 			<_summary>Show missed notifications in notification center</_summary>
 		</key>
 	</schema>
-	
+
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/mask-corners/" id="com.deepin.wrap.pantheon.desktop.gala.mask-corners" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="b" name="enable">
 			<default>true</default>
