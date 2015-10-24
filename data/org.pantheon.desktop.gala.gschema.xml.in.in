@@ -250,10 +250,10 @@
 			<default>false</default>
 			<_summary>Disable all notifications</_summary>
 		</key>
-		<child name="applications" schema="org.pantheon.desktop.gala.notifications.application" />
+		<child name="applications" schema="com.deepin.wrap.pantheon.desktop.gala.notifications.application" />
 	</schema>
 
-	<schema id="org.pantheon.desktop.gala.notifications.application" gettext-domain="@GETTEXT_PACKAGE@">
+	<schema id="com.deepin.wrap.pantheon.desktop.gala.notifications.application" gettext-domain="@GETTEXT_PACKAGE@">
 		<key type="b" name="bubbles">
 			<default>true</default>
 			<_summary>Enable bubbles</_summary>

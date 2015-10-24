@@ -173,9 +173,9 @@ namespace Gala.Plugins.Notify
 					Settings? app_settings = app_settings_cache.get (app_name);
 
 					if (app_settings == null) {
-						var schema = SettingsSchemaSource.get_default ().lookup ("org.pantheon.desktop.gala.notifications.application", false);
+						var schema = SettingsSchemaSource.get_default ().lookup ("com.deepin.wrap.pantheon.desktop.gala.notifications.application", false);
 						if (schema != null) {
-							app_settings = new Settings.full (schema, null, "/org/pantheon/desktop/gala/notifications/applications/%s/".printf (app_name));
+							app_settings = new Settings.full (schema, null, "/com/deepin/wrap/pantheon/desktop/gala/notifications/applications/%s/".printf (app_name));
 							app_settings_cache.set (app_name, app_settings);
 						}
 					}
