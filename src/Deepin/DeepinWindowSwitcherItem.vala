@@ -352,7 +352,7 @@ namespace Gala
 
 			var icon_box = ActorBox ();
 			var icon_width = window_icon.width;
-			var icon_height = window_icon.width;
+			var icon_height = window_icon.height;
 			if (box.get_width () <= icon_width * 2.5f) {
 				if (box.get_width () >= icon_width) {
 					icon_box.set_size (icon_width, icon_height);

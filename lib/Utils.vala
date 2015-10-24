@@ -193,13 +193,14 @@ namespace Gala
 				}
 			}
 
-			if (size != image.width || size != image.height)
-				image = Plank.Drawing.DrawingService.ar_scale (image, size, size);
+			if (not_cached) {
+				if (size != image.width || size != image.height)
+					image = Plank.Drawing.DrawingService.ar_scale (image, size, size);
 
-			image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE, WindowIcon.SHADOW_DISTANCE);
+				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE, WindowIcon.SHADOW_DISTANCE);
 
-			if (not_cached)
 				icon_pixbuf_cache.set (icon_key, image);
+			}
 
 			return image;
 		}
@@ -213,7 +214,7 @@ namespace Gala
 		 */
 		static Gdk.Pixbuf add_outline_blur_effect (Gdk.Pixbuf pixbuf, int size, int distance)
 		{
-			// TODO: draw blur effect through Gdk.Pixbuf directly to improve performance
+			// TODO: draw blur effect for Gdk.Pixbuf directly to improve performance
 			var width = pixbuf.width;
 			var height = pixbuf.height;
 			var new_width = pixbuf.width + size * 2;
