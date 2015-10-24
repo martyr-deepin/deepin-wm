@@ -355,12 +355,25 @@ namespace Gala
 			var current = display.get_tab_current (TabList.NORMAL, screen, workspace);
 #endif
 
+			// FIXME: We must filter some windows that do not shown in current workspace manually,
+			//        this should be a bug of mutter.
+			// Reproduct:
+			// 1. open xfce4-terminal(0.6.3) in workspace 1
+			// 2. switch to the empty workspace 2, and open another two xfce4-terminal process
+			// 3. press alt-tab in workspace 1 and it will show three xfce4-terminal items
+			var fixed_all_windows = new GLib.List<weak Meta.Window> ();
+			foreach (var window in all_windows) {
+				if (window.get_workspace () == workspace) {
+					fixed_all_windows.append (window);
+				}
+			}
+
 			GLib.List<weak Meta.Window> windows;
 			if (!only_group_windows) {
-				windows = all_windows.copy ();
+				windows = fixed_all_windows.copy ();
 			} else {
 				windows = new GLib.List<weak Meta.Window> ();
-				foreach (var window in all_windows) {
+				foreach (var window in fixed_all_windows) {
 					if (window.wm_class == current.wm_class) {
 						windows.append (window);
 					}
