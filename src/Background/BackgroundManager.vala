@@ -87,7 +87,7 @@ namespace Gala
 			old_background_actor.add_transition ("fade-out", transition);
 		}
 
-		void update_background_actor ()
+		public void update_background_actor ()
 		{
 			if (new_background_actor != null) {
 				// Skip displaying existing background queued for load

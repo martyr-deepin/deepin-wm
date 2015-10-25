@@ -58,11 +58,8 @@ namespace Gala
 		 */
 		public DeepinWorkspaceThumbClone thumb_workspace { get; private set; }
 
-#if HAS_MUTTER314
-		BackgroundManager background;
-#else
-		Background background;
-#endif
+		Actor background;
+		float background_scale;
 		bool opened;
 
 		uint hover_activate_timeout = 0;
@@ -79,7 +76,7 @@ namespace Gala
 			var screen = workspace.get_screen ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-			background = new DeepinFramedBackground (workspace.get_screen ());
+			background = new DeepinFramedBackground (screen);
 			background.reactive = true;
 			background.button_press_event.connect (() => {
 				selected (true);
@@ -164,6 +161,9 @@ namespace Gala
 
 			var listener = WindowListener.get_default ();
 			listener.window_no_longer_on_all_workspaces.connect (add_window);
+
+			relayout ();
+			screen.monitors_changed.connect (relayout);
 		}
 
 		~DeepinWorkspaceFlowClone ()
@@ -179,6 +179,8 @@ namespace Gala
 
 			var listener = WindowListener.get_default ();
 			listener.window_no_longer_on_all_workspaces.disconnect (add_window);
+
+			screen.monitors_changed.disconnect (relayout);
 
 			background.destroy ();
 		}
@@ -206,7 +208,6 @@ namespace Gala
 
 			// start spread animation after window added by all containers
 			if (opened) {
-				stdout.printf ("start spread animation...\n"); // TODO: test
 				DeepinUtils.start_spread_animation (thumb_workspace.thumb_clone, 600, 1.05f);
 			}
 		}
@@ -230,6 +231,29 @@ namespace Gala
 			if (monitor == screen.get_primary_monitor ()) {
 				remove_window (window);
 			}
+		}
+
+		void relayout ()
+		{
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+
+			int top_offset =
+				(int)(monitor_geom.height * DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT);
+			int bottom_offset =
+				(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
+			float scale =
+				(float)(monitor_geom.height - top_offset - bottom_offset) / monitor_geom.height;
+			float pivot_y = top_offset / (monitor_geom.height - monitor_geom.height * scale);
+			background_scale = scale;
+
+			background.set_pivot_point (0.5f, pivot_y);
+
+			window_container.width = monitor_geom.width;
+			window_container.height = monitor_geom.height;
+			window_container.padding_top = top_offset;
+			window_container.padding_left = window_container.padding_right =
+				(int)(monitor_geom.width - monitor_geom.width * scale) / 2;
+			window_container.padding_bottom = bottom_offset;
 		}
 
 		/**
@@ -285,34 +309,17 @@ namespace Gala
 
 		public void scale_in (bool animate)
 		{
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-
-			int top_offset =
-				(int)(monitor_geom.height * DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT);
-			int bottom_offset =
-				(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
-			float scale =
-				(float)(monitor_geom.height - top_offset - bottom_offset) / monitor_geom.height;
-			float pivot_y = top_offset / (monitor_geom.height - monitor_geom.height * scale);
-
-			background.set_pivot_point (0.5f, pivot_y);
-
 			if (animate) {
 				var scale_value = GLib.Value (typeof (float));
-				scale_value.set_float (scale);
+				scale_value.set_float (background_scale);
 				DeepinUtils.start_animation_group (background, "open",
 												   DeepinMultitaskingView.TOGGLE_DURATION,
 												   DeepinUtils.clutter_set_mode_bezier_out_back,
 												   "scale-x", &scale_value,
 												   "scale-y", &scale_value);
 			} else {
-				background.set_scale (scale, scale);
+				background.set_scale (background_scale, background_scale);
 			}
-
-			window_container.padding_top = top_offset;
-			window_container.padding_left = window_container.padding_right =
-				(int)(monitor_geom.width - monitor_geom.width * scale) / 2;
-			window_container.padding_bottom = bottom_offset;
 		}
 
 		public void scale_out (bool animate)

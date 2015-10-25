@@ -55,6 +55,8 @@ namespace Gala
 		public bool enable_shadow { get; construct; }
 		public bool enable_border { get; construct; }
 
+		ShadowEffect shadow_effect;
+
 		public DeepinFramedBackground (
 			Screen screen, bool enable_shadow = true, bool enable_border = false)
 		{
@@ -74,11 +76,28 @@ namespace Gala
 				var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
 				// shadow effect, angle:90°, size:15, distance:5, opacity:50%
-				add_effect (new ShadowEffect (monitor_geom.width, monitor_geom.height, 30, 5, 128));
+				shadow_effect = new ShadowEffect (monitor_geom.width, monitor_geom.height, 30, 5, 128);
+				add_effect (shadow_effect);
 			}
 			if (enable_border) {
 				add_effect (new DeepinBorderEffect ());
 			}
+
+			screen.monitors_changed.connect (on_monitors_changed);
+		}
+
+		~DeepinFramedBackground ()
+		{
+			screen.monitors_changed.disconnect (on_monitors_changed);
+		}
+
+		void on_monitors_changed ()
+		{
+			if (shadow_effect != null) {
+				var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+				shadow_effect.update_size (monitor_geom.width, monitor_geom.height);
+			}
+			update_background_actor ();
 		}
 	}
 }

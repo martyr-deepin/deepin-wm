@@ -200,7 +200,7 @@ namespace Gala
 
 		void update_workspace_shadow ()
 		{
-			var shadow_effect = workspace_clone.get_effect ("shadow") as ShadowEffect;
+			var shadow_effect = workspace_shadow.get_effect ("shadow") as ShadowEffect;
 			if (shadow_effect != null) {
 				shadow_effect.update_size (
 					get_thumb_workspace_prefer_width (), get_thumb_workspace_prefer_heigth ());

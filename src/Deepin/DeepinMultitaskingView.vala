@@ -191,7 +191,7 @@ namespace Gala
 
 		void on_workspace_switched (int from, int to, Meta.MotionDirection direction)
 		{
-			relayout (opened, direction);
+			update_positions (opened, direction);
 		}
 
 		/**
@@ -226,6 +226,8 @@ namespace Gala
 
 			set_position (primary_geometry.x, primary_geometry.y);
 			set_size (primary_geometry.width, primary_geometry.height);
+
+			update_positions (false);
 		}
 
 		/**
@@ -287,7 +289,7 @@ namespace Gala
 		 * @param animate Whether to animate the movement or have all elements take their positions
 		 *                immediately.
 		 */
-		void relayout (bool animate, Meta.MotionDirection direction = Meta.MotionDirection.LEFT)
+		void update_positions (bool animate, Meta.MotionDirection direction = Meta.MotionDirection.LEFT)
 		{
 			var active_index = screen.get_active_workspace ().index ();
 
@@ -330,9 +332,6 @@ namespace Gala
 					return false;
 				});
 			}
-
-			// TODO: thumb relayout
-			// thumb_container.relayout ();
 		}
 
 		void place_flow_workspace (Actor child, int index, bool animate, int delay)
@@ -350,9 +349,6 @@ namespace Gala
 		void do_place_flow_workspace (Actor child, int index, bool animate)
 		{
 			ActorBox child_box = get_flow_workspace_layout_box (child, index);
-			// TODO: flow workspace size
-			// child.width = child_box.get_width ();
-			// child.height = child_box.get_height ();
 
 			child.save_easing_state ();
 
@@ -366,14 +362,15 @@ namespace Gala
 
 		ActorBox get_flow_workspace_layout_box (Actor child, int index)
 		{
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 			var active_index = screen.get_active_workspace ().index ();
 			var box = ActorBox ();
 
 			float child_x =
-				(index - active_index) * (child.width * (1 - FLOW_WORKSPACE_DISTANCE_PERCENT * 2));
+				(index - active_index) * (monitor_geom.width * (1 - FLOW_WORKSPACE_DISTANCE_PERCENT * 2));
 			float child_y = 0;
 
-			// box.set_size (child_width, child_height);
+			box.set_size (monitor_geom.width, monitor_geom.height);
 			box.set_origin (child_x, child_y);
 
 			return box;
@@ -390,7 +387,8 @@ namespace Gala
 			flow_workspace.selected.connect (activate_workspace);
 
 			flow_workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
-			thumb_container.add_workspace (flow_workspace.thumb_workspace, () => relayout (opened));
+			thumb_container.add_workspace (flow_workspace.thumb_workspace,
+										   () => update_positions (opened));
 
 			flow_workspace.opacity = 0;
 			if (opened) {
@@ -436,7 +434,7 @@ namespace Gala
 
 			flow_workspace.destroy ();
 
-			relayout (opened);
+			update_positions (opened);
 		}
 
 		/**
@@ -698,7 +696,7 @@ namespace Gala
 				thumb_container.close ();
 			}
 
-			relayout (false);
+			update_positions (false);
 
 			// TODO: adjust animation in multitaskingview, toggle thumb workspace container
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());

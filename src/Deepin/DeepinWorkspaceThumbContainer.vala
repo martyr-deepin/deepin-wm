@@ -109,6 +109,13 @@ namespace Gala
 			append_plus_button_if_need ();
 
 			actor_removed.connect (on_actor_removed);
+
+			screen.monitors_changed.connect (relayout);
+		}
+
+		~DeepinWorkspaceThumbContainer ()
+		{
+			screen.monitors_changed.disconnect (relayout);
 		}
 
 		public void append_new_workspace ()

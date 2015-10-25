@@ -63,6 +63,7 @@ namespace Gala
 			var layout = new BoxLayout ();
 			layout.orientation = Orientation.HORIZONTAL;
 			popup.layout_manager = layout;
+			// TODO: multi monitors
 			popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
 
 			item_container = new Actor ();
