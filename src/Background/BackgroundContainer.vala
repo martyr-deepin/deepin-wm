@@ -17,11 +17,13 @@
 
 namespace Gala
 {
-	public class BackgroundContainer : Meta.BackgroundGroup
+	public class BackgroundContainer : Object
 	{
 		public signal void changed ();
 
 		public Meta.Screen screen { get; construct; }
+
+		Gee.HashMap<string,BackgroundManager> backgrounds;
 
 		public BackgroundContainer (Meta.Screen screen)
 		{
@@ -30,8 +32,8 @@ namespace Gala
 
 		construct
 		{
+			backgrounds = new Gee.HashMap<string,BackgroundManager> ();
 			screen.monitors_changed.connect (update);
-
 			update ();
 		}
 
@@ -40,21 +42,53 @@ namespace Gala
 			screen.monitors_changed.disconnect (update);
 		}
 
+		public BackgroundManager? get_default_background ()
+		{
+			return get_background (0, 0);
+		}
+
+		public BackgroundManager? get_background (int monitor_index, int workspace_index)
+		{
+			string key = "%d:%d".printf (monitor_index, workspace_index);
+			if (backgrounds.has_key (key)) {
+				return backgrounds[key];
+			}
+			return null;
+		}
+
+		void insert_background (int monitor_index, int workspace_index, BackgroundManager background)
+		{
+			string key = "%d:%d".printf (monitor_index, workspace_index);
+			if (!backgrounds.has_key (key)) {
+				backgrounds[key] = background;
+			}
+		}
+
 		void update ()
 		{
-			var reference_child = (get_child_at_index (0) as BackgroundManager);
-			if (reference_child != null)
-				reference_child.changed.disconnect (background_changed);
+			for (var i = 0; i < screen.get_n_workspaces (); i ++) {
+				var reference_child = get_background (0, i);
+				if (reference_child != null) {
+					reference_child.changed.disconnect (background_changed);
+				}
+			}
 
-			destroy_all_children ();
+			foreach (var background in backgrounds.values) {
+				background.destroy ();
+			}
+			backgrounds.clear ();
 
+			var num = 0;
 			for (var i = 0; i < screen.get_n_monitors (); i++) {
-				var background = new BackgroundManager (screen, i);
+				for (var j = 0; j < screen.get_n_workspaces (); j++) {
+					var background = new BackgroundManager (screen, i, j);
 
-				add_child (background);
+					insert_background (i, j, background);
 
-				if (i == 0)
-					background.changed.connect (background_changed);
+					if (i == 0) {
+						background.changed.connect (background_changed);
+					}
+				}
 			}
 		}
 
@@ -64,5 +98,3 @@ namespace Gala
 		}
 	}
 }
-
-

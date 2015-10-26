@@ -47,7 +47,14 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public Meta.BackgroundGroup background_group { get; protected set; }
+		public BackgroundGroup background_group { get; protected set; }
+
+#if HAS_MUTTER314
+		/**
+		 * Container for the background actors forming the wallpaper for monitors and workspaces
+		 */
+		public BackgroundContainer background_container { get; protected set; }
+#endif
 
 		Meta.PluginInfo info;
 
@@ -153,7 +160,9 @@ namespace Gala
 			ui_group.add_child (window_group);
 
 #if HAS_MUTTER314
-			background_group = new BackgroundContainer (screen);
+			background_container = new BackgroundContainer (screen);
+			background_group = background_container.get_background (
+				0, screen.get_active_workspace_index ());
 #else
 			background_group = new BackgroundManager (screen);
 #endif
@@ -1346,15 +1355,29 @@ namespace Gala
 			// prepare wallpaper
 			Clutter.Actor wallpaper;
 			if (move_primary_only) {
+#if HAS_MUTTER314
+				wallpaper = background_container.get_background (primary, from);
+#else
 				wallpaper = background_group.get_child_at_index (primary);
+#endif
 				wallpaper.set_data<int> ("prev-x", (int) wallpaper.x);
-			} else
+			} else {
 				wallpaper = background_group;
+			}
 
 			windows.prepend (wallpaper);
 			parents.prepend (wallpaper.get_parent ());
 
+#if HAS_MUTTER314
+			var wallpaper_to = background_container.get_background (primary, to);
+
+			// insert background to somewhere, or the wallpaper_clone will draw nothing
+			window_group.insert_child_at_index (wallpaper_to, 0);
+
+			var wallpaper_clone = new Clutter.Clone (wallpaper_to);
+#else
 			var wallpaper_clone = new Clutter.Clone (wallpaper);
+#endif
 			tmp_actors.prepend (wallpaper_clone);
 
 			// pack all containers
@@ -1550,9 +1573,28 @@ namespace Gala
 					var background = (Background) actor;
 #endif
 
+					stdout.printf (" -> 1\n");// TODO:
 					background.get_parent ().remove_child (background);
 #if HAS_MUTTER314
-					background_group.insert_child_at_index (background, background.monitor_index);
+					stdout.printf (" -> 2\n");// TODO:
+					if (background_group.get_parent () != null) {
+						background_group.get_parent ().remove_child (background_group);
+					}
+					stdout.printf (" -> 3\n");// TODO:
+					background_group = background_container.get_background (background.monitor_index,
+																			active_workspace.index ());
+					stdout.printf (" -> 3.1, %d\n", (background_group as BackgroundManager).workspace_index);// TODO:
+					if (background_group.get_parent () != null) {
+						stdout.printf (" -> 3.2\n");// TODO:
+						clutter_actor_reparent (background_group, window_group);
+					} else {
+						stdout.printf (" -> 3.3\n");// TODO:
+						window_group.add_child (background_group);
+					}
+					stdout.printf (" -> 3.4\n");// TODO:
+					// window_group.add_child (background_group);
+					window_group.set_child_below_sibling (background_group, null);
+					stdout.printf (" -> 3.5\n");// TODO:
 #else
 					background_group.insert_child_at_index (background, background.monitor);
 #endif

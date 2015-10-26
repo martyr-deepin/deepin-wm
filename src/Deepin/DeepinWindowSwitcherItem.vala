@@ -110,7 +110,8 @@ namespace Gala
 
 		construct
 		{
-			background = new DeepinFramedBackground (screen, false, false);
+			background = new DeepinFramedBackground (screen, screen.get_active_workspace_index (),
+													 false, false);
 			add_child (background);
 		}
 

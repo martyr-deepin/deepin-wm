@@ -51,7 +51,8 @@ namespace Gala
 			reactive = true;
 
 #if HAS_MUTTER314
-			background = new BackgroundManager (screen, monitor, false);
+			// TODO: monitor background for multiple workspaces
+			background = new BackgroundManager (screen, monitor, 0, false);
 #else
 			background = new Background (screen, monitor, BackgroundSettings.get_default ().schema);
 #endif
@@ -134,4 +135,3 @@ namespace Gala
 		}
 	}
 }
-

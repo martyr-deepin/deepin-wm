@@ -23,59 +23,64 @@ namespace Gala
 
 		public Meta.Screen screen { get; construct; }
 		public Settings settings { get; construct; }
+		public Settings extra_settings { get; construct; }
 
 		internal int use_count { get; set; default = 0; }
 
-		Gee.HashMap<int,Background> backgrounds;
+		Gee.HashMap<string,Background> backgrounds;
 
-		public BackgroundSource (Meta.Screen screen, string settings_schema)
+		public BackgroundSource (Meta.Screen screen, string settings_schema,
+								 string extra_settings_schema)
 		{
-			Object (screen: screen, settings: new Settings (settings_schema));
+			Object (screen: screen, settings: new Settings (settings_schema),
+					extra_settings: new Settings (extra_settings_schema));
 		}
 
 		construct
 		{
-			backgrounds = new Gee.HashMap<int,Background> ();
+			backgrounds = new Gee.HashMap<string,Background> ();
 
 			screen.monitors_changed.connect (monitors_changed);
 
 			settings_hash_cache = get_current_settings_hash_cache ();
+			cache_extra_picture_uris = get_current_extra_picture_uris ();
 			settings.changed.connect (settings_changed);
+			extra_settings.changed.connect (settings_changed);
 		}
 
 		void monitors_changed ()
 		{
 			var n = screen.get_n_monitors ();
-			var i = 0;
+			var keys_to_remove = new List<string> ();
 
-			var keys_to_remove = new List<int> ();
-			foreach (var background in backgrounds.values) {
-				if (i++ < n) {
+			foreach (var key in backgrounds.keys) {
+				var background = backgrounds[key];
+				var indexes = key.split(":");
+				var monitor_index = indexes[0].to_int ();
+				var workspace_index = indexes[1].to_int ();
+				if (monitor_index < n) {
 					background.update_resolution ();
 					continue;
 				}
 
 				background.changed.disconnect (background_changed);
 				background.destroy ();
-				keys_to_remove.append (i);
+
+				keys_to_remove.append (key);
 			}
 
-			foreach (var key in keys_to_remove) {
+			foreach (var key in  keys_to_remove) {
 				backgrounds.unset (key);
 			}
 		}
 
-		public Background get_background (int monitor_index)
+		public Background get_background (int monitor_index, int workspace_index)
 		{
 			string? filename = null;
 
 			var style = settings.get_enum ("picture-options");
 			if (style != GDesktop.BackgroundStyle.NONE) {
-				var uri = settings.get_string ("picture-uri");
-				if (Uri.parse_scheme (uri) != null)
-					filename = File.new_for_uri (uri).get_path ();
-				else
-					filename = uri;
+				filename = get_picture_filename (monitor_index, workspace_index);
 			}
 
 			// Animated backgrounds are (potentially) per-monitor, since
@@ -85,27 +90,59 @@ namespace Gala
 			if (filename == null || !filename.has_suffix (".xml"))
 				monitor_index = 0;
 
-			if (!backgrounds.has_key (monitor_index)) {
-				var background = new Background (screen, monitor_index, filename, this, (GDesktop.BackgroundStyle) style);
+			string key = "%d:%d".printf (monitor_index, workspace_index);
+			if (!backgrounds.has_key (key)) {
+				var background = new Background (screen, monitor_index, workspace_index, filename,
+												 this, (GDesktop.BackgroundStyle) style);
 				background.changed.connect (background_changed);
-				backgrounds[monitor_index] = background;
+				backgrounds[key] = background;
 			}
 
-			return backgrounds[monitor_index];
+			return backgrounds[key];
+		}
+
+		string get_picture_filename (int monitor_index, int workspace_index)
+		{
+			string filename;
+			string default_uri = settings.get_string ("picture-uri");
+
+			// extra-uris is used for the background images since 2nd workspace
+			string[] extra_uris = extra_settings.get_strv ("extra-picture-uris");
+
+			string uri;
+			if (workspace_index == 0) {
+				uri = default_uri;
+			} else {
+				if (extra_uris.length >= workspace_index) {
+					uri = extra_uris[workspace_index - 1];
+					if (uri == "") {
+						uri = default_uri;
+					}
+				} else {
+					uri = default_uri;
+				}
+			}
+			if (Uri.parse_scheme (uri) != null) {
+				filename = File.new_for_uri (uri).get_path ();
+			} else {
+				filename = uri;
+			}
+			return filename;
 		}
 
 		void background_changed (Background background)
 		{
 			background.changed.disconnect (background_changed);
 			background.destroy ();
-			backgrounds.unset (background.monitor_index);
+			backgrounds.unset ("%d:%d".printf (background.monitor_index,
+											   background.workspace_index));
 		}
 
 		public void destroy ()
 		{
 			screen.monitors_changed.disconnect (monitors_changed);
 
-			foreach (var background in backgrounds) {
+			foreach (var background in backgrounds.values) {
 				background.changed.disconnect (background_changed);
 				background.destroy ();
 			}
@@ -127,10 +164,12 @@ namespace Gala
 		}
 
 		SettingsHashCache settings_hash_cache;
+		Variant cache_extra_picture_uris;
 
 		// list of keys that are actually relevant for us
 		const string[] options = { "color-shading-type", "picture-opacity",
-				"picture-options", "picture-uri", "primary-color", "secondary-color" };
+								   "picture-options", "picture-uri", "primary-color", "secondary-color",
+								   "extra-picture-uris"};
 
 		void settings_changed (string key)
 		{
@@ -138,12 +177,15 @@ namespace Gala
 				return;
 
 			var current = get_current_settings_hash_cache ();
+			var current_extra = get_current_extra_picture_uris ();
 
-			if (Memory.cmp (&settings_hash_cache, &current, sizeof (SettingsHashCache)) == 0) {
+			if (Memory.cmp (&settings_hash_cache, &current, sizeof (SettingsHashCache)) == 0 &&
+				cache_extra_picture_uris.equal (current_extra)) {
 				return;
 			}
 
 			Memory.copy (&settings_hash_cache, &current, sizeof (SettingsHashCache));
+			cache_extra_picture_uris = current_extra;
 
 			changed ();
 		}
@@ -156,8 +198,13 @@ namespace Gala
 				settings.get_value ("picture-options").hash (),
 				settings.get_value ("picture-uri").hash (),
 				settings.get_value ("primary-color").hash (),
-				settings.get_value ("secondary-color").hash ()
+				settings.get_value ("secondary-color").hash (),
 			};
+		}
+
+		Variant get_current_extra_picture_uris ()
+		{
+			return extra_settings.get_value ("extra-picture-uris");
 		}
 	}
 }

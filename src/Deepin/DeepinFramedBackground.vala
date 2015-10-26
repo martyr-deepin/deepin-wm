@@ -56,11 +56,13 @@ namespace Gala
 		public bool enable_border { get; construct; }
 
 		public DeepinFramedBackground (
-			Screen screen, bool enable_shadow = true, bool enable_border = false)
+			Screen screen, int workspace_index, bool enable_shadow = true,
+			bool enable_border = false)
 		{
 #if HAS_MUTTER314
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
-					monitor_index: screen.get_primary_monitor (), control_position: false);
+					monitor_index: screen.get_primary_monitor (), workspace_index: workspace_index,
+					control_position: false);
 #else
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
 					monitor: screen.get_primary_monitor (),
