@@ -48,6 +48,7 @@ namespace Gala
 			var n = screen.get_n_monitors ();
 			var i = 0;
 
+			var keys_to_remove = new List<int> ();
 			foreach (var background in backgrounds.values) {
 				if (i++ < n) {
 					background.update_resolution ();
@@ -56,8 +57,11 @@ namespace Gala
 
 				background.changed.disconnect (background_changed);
 				background.destroy ();
-				// TODO can we remove from a list while iterating?
-				backgrounds.unset (i);
+				keys_to_remove.append (i);
+			}
+
+			foreach (var key in keys_to_remove) {
+				backgrounds.unset (key);
 			}
 		}
 
@@ -157,4 +161,3 @@ namespace Gala
 		}
 	}
 }
-
