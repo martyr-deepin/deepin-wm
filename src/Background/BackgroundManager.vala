@@ -81,6 +81,10 @@ namespace Gala
 			transition.completed.connect (() => {
 				old_background_actor.destroy ();
 
+				// force to relayout here, or BackgroundManager will keep the old size even through
+				// monitor resolution changed
+				queue_relayout ();
+
 				changed ();
 			});
 
