@@ -125,15 +125,16 @@ namespace Gala
 			cache.monitor_file (filename);
 
 			file_watches[filename] = cache.file_changed.connect ((changed_file) => {
-				if (changed_file == filename) {
-					var image_cache = Meta.BackgroundImageCache.get_default ();
-#if HAS_MUTTER316
-					image_cache.purge (File.new_for_path (changed_file));
-#else
-					image_cache.purge (changed_file);
-#endif
-					changed ();
-				}
+				// FIXME: comment following code to avoid background draw issue when file modified
+// 				if (changed_file == filename) {
+// 					var image_cache = Meta.BackgroundImageCache.get_default ();
+// #if HAS_MUTTER316
+// 					image_cache.purge (File.new_for_path (changed_file));
+// #else
+// 					image_cache.purge (changed_file);
+// #endif
+// 					changed ();
+// 				}
 			});
 		}
 
@@ -287,4 +288,3 @@ namespace Gala
 		}
 	}
 }
-
