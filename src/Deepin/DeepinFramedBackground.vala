@@ -97,7 +97,9 @@ namespace Gala
 				var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 				shadow_effect.update_size (monitor_geom.width, monitor_geom.height);
 			}
+#if HAS_MUTTER314
 			update_background_actor ();
+#endif
 		}
 	}
 }
