@@ -226,8 +226,6 @@ namespace Gala
 
 			set_position (primary_geometry.x, primary_geometry.y);
 			set_size (primary_geometry.width, primary_geometry.height);
-
-			update_positions (false);
 		}
 
 		/**
