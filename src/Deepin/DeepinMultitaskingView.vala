@@ -526,7 +526,12 @@ namespace Gala
 				var thumb_workspace = thumb_container.get_child_at_index (i);
 				(thumb_workspace as DeepinWorkspaceThumbClone).remove_workspace ();
 				break;
-			// TODO: F2(rename), Ctrl-?(show help dialog), etc
+			case Clutter.Key.F2:
+				var i = screen.get_active_workspace_index ();
+				var thumb_workspace = thumb_container.get_child_at_index (i);
+				(thumb_workspace as DeepinWorkspaceThumbClone).workspace_name.start_edit ();
+				break;
+			// TODO: ?(show help dialog), etc
 			case Clutter.Key.Return:
 			case Clutter.Key.KP_Enter:
 				if (get_active_workspace_clone ().window_container.has_selected_window ()) {
