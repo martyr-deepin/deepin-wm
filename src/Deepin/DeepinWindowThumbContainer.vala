@@ -79,7 +79,6 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		// TODO: new layout style in thumbnail workspace
 		public override ActorBox get_layout_box_for_window (DeepinWindowClone window_clone)
 		{
 			float thumb_width, thumb_height;

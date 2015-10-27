@@ -122,8 +122,6 @@ namespace Gala
 			drag_action =
 				new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
 			drag_action.drag_begin.connect (on_drag_begin);
-			// TODO: remove
-			// drag_action.destination_crossed.connect (on_drag_destination_crossed);
 			drag_action.drag_end.connect (on_drag_end);
 			drag_action.drag_canceled.connect (on_drag_canceled);
 			drag_action.actor_clicked.connect (on_actor_clicked);
@@ -196,11 +194,6 @@ namespace Gala
 
 				return;
 			}
-
-			// TODO: hide actor for window-overview mode
-			// if (thumbnail_mode) {
-			// 	actor.hide ();
-			// }
 
 			clone = new Clone (actor.get_texture ());
 			add_child (clone);
@@ -409,7 +402,6 @@ namespace Gala
 													   "position", &position_value,
 													   "size", &size_value);
 				} else {
-					// TODO:
 					DeepinUtils.start_animation_group (this, "window-slot",
 													   LAYOUT_DURATION,
 													   DeepinUtils.clutter_set_mode_ease_out_quad,
@@ -674,17 +666,6 @@ namespace Gala
 
 			restore_easing_state ();
 
-			// TODO:
-			// clone.set_pivot_point ((click_x - abs_x) / clone.width,
-			// 					   (click_y - abs_y) / clone.height);
-			// clone.save_easing_state ();
-			// clone.set_easing_duration (200);
-			// clone.set_easing_mode (AnimationMode.EASE_IN_CUBIC);
-			// clone.set_scale (scale, scale);
-			// clone.set_position (click_x - abs_x - clone.width / 2,
-			// 					click_y - abs_y - clone.height / 2);
-			// clone.restore_easing_state ();
-
 			request_reposition ();
 
 			save_easing_state ();
@@ -835,7 +816,6 @@ namespace Gala
 			get_parent ().remove_child (this);
 			prev_parent.insert_child_at_index (this, prev_index);
 
-			// TODO: drag cancel
 			save_easing_state ();
 
 			set_easing_duration (250);
@@ -845,14 +825,6 @@ namespace Gala
 			rotation_angle_z = 0.0;
 
 			restore_easing_state ();
-			// clone.save_easing_state ();
-
-			// clone.set_easing_duration (250);
-			// clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-			// clone.set_scale (1, 1);
-			// clone.opacity = 255;
-
-			// clone.restore_easing_state ();
 
 			Clutter.Callback finished = () => {
 				var shadow_effect = get_effect ("shadow") as ShadowEffect;

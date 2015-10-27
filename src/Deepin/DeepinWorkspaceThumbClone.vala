@@ -49,7 +49,6 @@ namespace Gala
 		Actor workspace_shadow;
 		Actor workspace_clone;
 
-		// TODO: background
 		public Actor background;
 
 		Actor close_button;
@@ -105,7 +104,6 @@ namespace Gala
 				selected ();
 				return true;
 			});
-			// TODO: background size
 			workspace_clone.add_child (background);
 
 			window_container = new DeepinWindowThumbContainer (workspace);
@@ -117,7 +115,6 @@ namespace Gala
 			});
 			workspace_clone.add_child (window_container);
 
-			// TODO:
 			add_child (workspace_clone);
 
 			// close button
@@ -184,7 +181,7 @@ namespace Gala
 			thumb_shape.save_easing_state ();
 
 			thumb_shape.set_easing_duration (duration);
-			thumb_shape.set_easing_mode (DeepinWorkspaceNameField.SELECT_MODE);// TODO:
+			thumb_shape.set_easing_mode (DeepinWorkspaceNameField.SELECT_MODE);
 			thumb_shape.opacity = value ? 255 : 0;
 
 			thumb_shape.restore_easing_state ();
@@ -240,12 +237,10 @@ namespace Gala
 			workspace_shadow.allocate (thumb_box, flags);
 			window_container.allocate (thumb_box, flags);
 
-			// TODO: background
 			// scale background
 			float scale =
 				box.get_width () != 0 ? box.get_width () / (float)monitor_geom.width : 0.5f;
 			background.set_scale (scale, scale);
-			// background.allocate (thumb_box, flags);
 
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (
@@ -577,7 +572,6 @@ namespace Gala
 		// distance between thumbnail workspace clone and workspace name field
 		public const int WORKSPACE_NAME_DISTANCE = 16;
 
-		// TODO: ask for duration
 		const int FADE_IN_DURATION = 1300;
 		const int DRAG_BEGIN_DURATION = 400;
 		const int DRAG_MOVE_DURATION = 100;
@@ -630,9 +624,6 @@ namespace Gala
 
 			workspace_name = new DeepinWorkspaceNameField (workspace);
 			workspace_name.opacity = 0;
-
-			// TODO: select current workspace if workspace name is clicked
-			// workspace_name.selected.connect (() => selected ());
 
 			add_child (workspace_name);
 
@@ -707,7 +698,7 @@ namespace Gala
 			// calculate ratio for monitor width and height
 			float monitor_whr = (float)monitor_geom.height / monitor_geom.width;
 
-			// TODO allocate workspace clone
+			// allocate workspace clone
 			var thumb_box = ActorBox ();
 			float thumb_width = box.get_width ();
 			float thumb_height = thumb_width * monitor_whr;

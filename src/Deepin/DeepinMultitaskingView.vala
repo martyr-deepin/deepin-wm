@@ -28,8 +28,6 @@ namespace Gala
 	 */
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
-		// TODO: ask for animation, multitaskingview toggle
-		// public const int TOGGLE_DURATION = 250;
 		public const int TOGGLE_DURATION = 800;
 		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUAD;
 		public const int WORKSPACE_SWITCH_DURATION = 500;
@@ -49,7 +47,6 @@ namespace Gala
 		 */
 		public const float FLOW_WORKSPACE_TOP_OFFSET_PERCENT = 0.24f;
 
-		// TODO: layout, use container for flow workspaces
 		/**
 		 * The percent value between distance of flow workspaces and its width.
 		 */
@@ -85,15 +82,12 @@ namespace Gala
 			opened = false;
 			screen = wm.get_screen ();
 
-			// TODO: ask for workspace switch duration
+			// TODO: does need keep workspace switching duration same with normal mode?
 			// WORKSPACE_SWITCH_DURATION = AnimationSettings.get_default ().workspace_switch_duration;
 
 			flow_container = new Actor ();
 
 			thumb_container = new DeepinWorkspaceThumbContainer (screen);
-			// TODO: layout binding
-			// thumb_container.add_constraint (new AlignConstraint (this, AlignAxis.X_AXIS, 0.5f));
-			// thumb_container.add_constraint (new BindConstraint (flow_container, BindCoordinate.X, 0));
 
 			thumb_container.workspace_closing.connect ((workspace) => {
 				foreach (var child in flow_container.get_children ()) {
@@ -213,7 +207,6 @@ namespace Gala
 					}
 
 					var monitor_clone = new MonitorClone (screen, monitor);
-					// TODO: monitors
 					monitor_clone.window_selected.connect (activate_window);
 					monitor_clone.visible = opened;
 
@@ -405,7 +398,6 @@ namespace Gala
 			});
 		}
 
-		// TODO: animation
 		void remove_workspace (int index)
 		{
 			DeepinWorkspaceFlowClone? flow_workspace = null;
@@ -701,7 +693,6 @@ namespace Gala
 
 			update_positions (false);
 
-			// TODO: adjust animation in multitaskingview, toggle thumb workspace container
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
 			var thumb_y_value = GLib.Value (typeof (float));
 			if (opening) {

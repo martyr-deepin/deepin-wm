@@ -83,10 +83,8 @@ namespace Gala
 				return false;
 			});
 
-			// TODO: disconnect signals
 			thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
 			thumb_workspace.selected.connect (() => {
-				// TODO: refactor code
 				if (workspace != screen.get_active_workspace ()) {
 					selected (false);
 				}
@@ -96,7 +94,6 @@ namespace Gala
 			window_container.window_activated.connect ((w) => window_activated (w));
 			window_container.window_selected.connect (
 				(w) => thumb_workspace.window_container.select_window (w, false));
-			// TODO: scale size
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
 			screen.restacked.connect (window_container.restack_windows);
@@ -112,7 +109,6 @@ namespace Gala
 				window_container.sync_add_window ((a as DeepinWindowClone).window));
 			thumb_workspace.window_container.actor_removed.connect ((a) =>
 				window_container.sync_remove_window ((a as DeepinWindowClone).window));
-			// TODO: window activate issue
 			window_container.actor_added.connect ((a) =>
 				thumb_workspace.window_container.sync_add_window ((a as DeepinWindowClone).window));
 			window_container.actor_removed.connect ((a) =>
@@ -274,16 +270,6 @@ namespace Gala
 				scale_in (true);
 			}
 
-			// TODO: select default window
-			// Window selected_window = null;
-			// var tab_list = display.get_tab_list (TabList.NORMAL, workspace);
-			// foreach (var w in tab_list) {
-			// 	if (w.showing_on_its_workspace ()) {
-			// 		selected_window = w;
-			// 		break;
-			// 	}
-			// }
-			// window_container.open (selected_window);
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
 			window_container.open (

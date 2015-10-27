@@ -22,7 +22,6 @@ namespace Gala
 {
 	public class DeepinWindowSwitcher : Clutter.Actor
 	{
-		// TODO: adjust doc, remove POPUP_ prefix
 		// milliseconds, keep popup window hidden when clicked alt-tab quickly
 		const int POPUP_DELAY_TIMEOUT = 150;
 

@@ -184,7 +184,7 @@ namespace Gala
 		 */
 		public static void show_desktop (Meta.Workspace workspace)
 		{
-			// TODO: this is a temporary solution, should send _NET_SHOWING_DESKTOP instead, but
+			// FIXME: this is a temporary solution, should send _NET_SHOWING_DESKTOP instead, but
 			// mutter could not dispatch it correctly for issue
 
 			var screen = workspace.get_screen ();
@@ -502,7 +502,6 @@ namespace Gala
 			});
 		}
 
-		// TODO: refactor code, use Transition instead of Actor
 		public static void run_clutter_callback (Clutter.Actor actor, string trans_name,
 												 PlainCallback? cb = null, double cb_progress = 1.0)
 		{

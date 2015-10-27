@@ -27,7 +27,6 @@ namespace Gala
 	 */
 	public class DeepinWindowFlowContainer : DeepinWindowBaseContainer
 	{
-		// TODO: int -> float
 		public int padding_top { get; set; default = 12; }
 		public int padding_left { get; set; default = 12; }
 		public int padding_right { get; set; default = 12; }
@@ -136,7 +135,6 @@ namespace Gala
 				return (int)(seq_b - seq_a);
 			});
 
-			// TODO: ActorBox, int -> float
 			Meta.Rectangle area = { padding_left, padding_top,
 									(int)width - padding_left - padding_right,
 									(int)height - padding_top - padding_bottom };

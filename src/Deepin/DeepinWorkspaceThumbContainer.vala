@@ -73,7 +73,6 @@ namespace Gala
 		 */
 		public const float WORKSPACE_WIDTH_PERCENT = 0.12f;
 
-		// TODO: duration
 		const int PLUS_FADE_IN_DURATION = 700;
 
 		public signal void workspace_closing (Workspace workspace);
@@ -82,7 +81,6 @@ namespace Gala
 		 */
 		const float SPACING_PERCENT = 0.02f;
 
-		// TODO: use workspace switching duration?
 		const int LAYOUT_DURATION = 800;
 
 		public Screen screen { get; construct; }
@@ -270,7 +268,6 @@ namespace Gala
 			return false;
 		}
 
-		// TODO: add animate argument
 		public void relayout ()
 		{
 			var i = 0;

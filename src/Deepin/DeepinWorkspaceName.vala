@@ -23,7 +23,6 @@ namespace Gala
 	/**
 	 * Show workspace name after workspace switched.
 	 */
-	// TODO: rename to DeepinWorkspaceNamePopup
 	public class DeepinWorkspaceName : Clutter.Actor
 	{
 		const int FADE_DURATION = 200;
