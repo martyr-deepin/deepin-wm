@@ -491,6 +491,14 @@ namespace Gala
 			case Clutter.Key.@9:
 				DeepinUtils.switch_to_workspace (screen, 8);
 				break;
+			case Clutter.Key.Home:
+			case Clutter.Key.KP_Home:
+				DeepinUtils.switch_to_workspace (screen, 0);
+				break;
+			case Clutter.Key.End:
+			case Clutter.Key.KP_End:
+				DeepinUtils.switch_to_workspace (screen, Prefs.get_num_workspaces () - 1);
+				break;
 			case Clutter.Key.Tab:
 			case Clutter.Key.ISO_Left_Tab:
 				bool backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
@@ -523,7 +531,6 @@ namespace Gala
 				var thumb_workspace = thumb_container.get_child_at_index (i);
 				(thumb_workspace as DeepinWorkspaceThumbClone).workspace_name.start_edit ();
 				break;
-			// TODO: ?(show help dialog), etc
 			case Clutter.Key.Return:
 			case Clutter.Key.KP_Enter:
 				if (get_active_workspace_clone ().window_container.has_selected_window ()) {
