@@ -27,7 +27,7 @@ namespace Gala
 	public class DeepinWindowThumbContainer : DeepinWindowBaseContainer
 	{
 		const int WINDOW_OPACITY_SELECTED = 255;
-		const int WINDOW_OPACITY_UNSELECTED = 150;
+		const int WINDOW_OPACITY_UNSELECTED = 200;
 
 		public DeepinWindowThumbContainer (Workspace workspace)
 		{
@@ -110,6 +110,23 @@ namespace Gala
 			DeepinUtils.scale_actor_box_in_center (ref box, 0.9f);
 
 			return box;
+		}
+
+
+		/**
+		 * Adjust window clone's opacity when opened.
+		 */
+		public virtual void open (Window? focus_window = null)
+		{
+			base.open ();
+
+			foreach (var child in get_children ()) {
+				if ((child as DeepinWindowClone).window == focus_window) {
+					child.opacity = WINDOW_OPACITY_SELECTED;
+				} else {
+					child.opacity = WINDOW_OPACITY_UNSELECTED;
+				}
+			}
 		}
 	}
 }

@@ -361,6 +361,8 @@ namespace Gala
 			opened = true;
 
 			restack_windows (workspace.get_screen ());
+
+			selected_window = null;
 		}
 
 		/**
