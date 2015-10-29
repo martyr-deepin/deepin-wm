@@ -197,7 +197,9 @@ namespace Gala
 				if (size != image.width || size != image.height)
 					image = Plank.Drawing.DrawingService.ar_scale (image, size, size);
 
-				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE, WindowIcon.SHADOW_DISTANCE);
+				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE,
+												 WindowIcon.SHADOW_DISTANCE,
+												 WindowIcon.SHADOW_OPACITY);
 
 				icon_pixbuf_cache.set (icon_key, image);
 			}
@@ -211,8 +213,9 @@ namespace Gala
 		 * @param image The target Gdk.Pixbuf
 		 * @param size The shadow size
 		 * @param distance Shadow offset in y-axis
+		 * @param opacity The shadow opacity
 		 */
-		static Gdk.Pixbuf add_outline_blur_effect (Gdk.Pixbuf pixbuf, int size, int distance)
+		static Gdk.Pixbuf add_outline_blur_effect (Gdk.Pixbuf pixbuf, int size, int distance, uint8 opacity)
 		{
 			// TODO: draw blur effect for Gdk.Pixbuf directly to improve performance
 			var width = pixbuf.width;
@@ -225,7 +228,7 @@ namespace Gala
 
 			// black colorize
 			var surface_black = new_cairo_image_surface (surface, width, height);
-			add_black_colorize_effect (surface_black);
+			add_black_colorize_effect (surface_black, opacity);
 
 			// draw blur effect through BufferSurface
 			var buffer = new Granite.Drawing.BufferSurface.with_surface (new_width, new_height, surface);
@@ -251,14 +254,15 @@ namespace Gala
 			return image_surface;
 		}
 
-		static void add_black_colorize_effect (Cairo.ImageSurface surface)
+		static void add_black_colorize_effect (Cairo.ImageSurface surface, uint8 opacity)
 		{
 			uint8 *data = surface.get_data ();
 			var length = surface.get_width () * surface.get_height ();
 			for (var i = 0; i < length; i++) {
-				data [0] = 0;
-				data [1] = 0;
-				data [2] = 0;
+				data[0] = 0;
+				data[1] = 0;
+				data[2] = 0;
+				data[3] = data[3] * opacity / 255;
 				data += 4;
 			}
 		}
