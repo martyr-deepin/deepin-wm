@@ -32,10 +32,8 @@ namespace Gala
 		public int padding_right { get; set; default = 12; }
 		public int padding_bottom { get; set; default = 12; }
 
-		bool opened;
-
 		/**
-		 * Own all window positions to find next or preview window in position.
+		 * Own all window positions to find next or preview window.
 		 */
 		List<InternalUtils.TilableWindow?> window_positions;
 
@@ -44,17 +42,12 @@ namespace Gala
 			Object (workspace: workspace);
 		}
 
-		construct
-		{
-			opened = false;
-			selected_window = null;
-		}
-
 		/**
 		 * {@inheritDoc}
 		 */
 		public override void on_actor_added (Actor new_actor)
 		{
+			// apply new child only when calculating positions success
 			if (update_window_positions ()) {
 				base.on_actor_added (new_actor);
 			}
@@ -110,6 +103,58 @@ namespace Gala
 			return {};
 		}
 
+		/**
+		 * When opened the WindowClones will animate to a clone layout
+		 */
+		public override void open (Window? focus_window = null)
+		{
+			base.open (focus_window);
+
+			select_clone (get_clone_for_window (focus_window), false);
+
+			foreach (var window in get_children ()) {
+				var window_clone = window as DeepinWindowClone;
+
+				window_clone.save_easing_state ();
+
+				window_clone.set_easing_duration (300);
+				window_clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+				window_clone.opacity = 255;
+
+				window_clone.restore_easing_state ();
+
+				window_clone.transition_to_original_state (false);
+			}
+
+			relayout ();
+		}
+
+		/**
+		 * Calls the transition_to_original_state() function on each child to make them take their
+		 * original locations again.
+		 */
+		public override void close ()
+		{
+			base.close ();
+
+			foreach (var window in get_children ()) {
+				var window_clone = window as DeepinWindowClone;
+				window_clone.set_select (false);
+				if ((workspace.get_screen ().get_active_workspace () == workspace) &&
+					window_clone.window.showing_on_its_workspace ()) {
+					window_clone.transition_to_original_state (true);
+				} else {
+					DeepinUtils.start_fade_out_opacity_animation (
+						window_clone, 300, AnimationMode.EASE_OUT_QUAD);
+				}
+			}
+		}
+
+		/**
+		 * Calculate window positions for re-layout later.
+		 *
+		 * @return true if succes
+		 */
 		bool update_window_positions ()
 		{
 			var windows = new List <InternalUtils.TilableWindow?> ();
@@ -298,61 +343,6 @@ namespace Gala
 			var selected_clone = get_selected_clone ();
 			if (selected_clone != null) {
 				selected_clone.activated ();
-			}
-		}
-
-		/**
-		 * When opened the WindowClones are animated to a clone layout
-		 */
-		public void open (Window? focus_window = null)
-		{
-			if (opened) {
-				return;
-			}
-
-			opened = true;
-
-			select_clone (get_clone_for_window (focus_window), false);
-
-			foreach (var window in get_children ()) {
-				var window_clone = window as DeepinWindowClone;
-
-				window_clone.save_easing_state ();
-
-				window_clone.set_easing_duration (300);
-				window_clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-				window_clone.opacity = 255;
-
-				window_clone.restore_easing_state ();
-
-				window_clone.transition_to_original_state (false);
-			}
-
-			relayout ();
-		}
-
-		/**
-		 * Calls the transition_to_original_state() function on each child to make them take their
-		 * original locations again.
-		 */
-		public void close ()
-		{
-			if (!opened) {
-				return;
-			}
-
-			opened = false;
-
-			foreach (var window in get_children ()) {
-				var window_clone = window as DeepinWindowClone;
-				window_clone.set_select (false);
-				if ((workspace.get_screen ().get_active_workspace () == workspace) &&
-					window_clone.window.showing_on_its_workspace ()) {
-					window_clone.transition_to_original_state (true);
-				} else {
-					DeepinUtils.start_fade_out_opacity_animation (
-						window_clone, 300, AnimationMode.EASE_OUT_QUAD);
-				}
 			}
 		}
 	}

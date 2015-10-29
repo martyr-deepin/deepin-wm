@@ -272,8 +272,10 @@ namespace Gala
 
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
-			window_container.open (
-				screen.get_active_workspace () == workspace ? display.get_focus_window () : null);
+			var focus_window = screen.get_active_workspace () == workspace ?
+				display.get_focus_window () : null;
+			window_container.open (focus_window);
+			thumb_workspace.window_container.open (focus_window);
 		}
 
 		/**
@@ -291,6 +293,7 @@ namespace Gala
 			scale_out (true);
 
 			window_container.close ();
+			thumb_workspace.window_container.close ();
 		}
 
 		public void scale_in (bool animate)

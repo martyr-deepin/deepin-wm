@@ -38,7 +38,12 @@ namespace Gala
 		 * The window that is currently selected via keyboard shortcuts. It is not necessarily the
 		 * same as the active window.
 		 */
-		internal Window? selected_window;
+		internal Window? selected_window = null;
+
+		/**
+		 * Mark if multitasking view opend.
+		 */
+		internal bool opened = false;
 
 		/**
 		 * Recalculate the positions of the windows and animate them to the resulting spots.
@@ -166,12 +171,12 @@ namespace Gala
 				return null;
 			}
 
-			unowned Meta.Display display = window.get_display ();
+			var display = window.get_display ();
 			var children = get_children ();
 
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
+			var windows = new GLib.SList<unowned Meta.Window> ();
+			foreach (var child in children) {
+				var window_clone = child as DeepinWindowClone;
 				windows.prepend (window_clone.window);
 			}
 			windows.prepend (window);
@@ -191,31 +196,9 @@ namespace Gala
 				}
 			});
 
-			var added = false;
-			unowned Meta.Window? target = null;
-			foreach (unowned Meta.Window w in windows_ordered) {
-				if (w != window) {
-					target = w;
-					continue;
-				}
-				break;
-			}
-
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
-				if (target == window_clone.window) {
-					insert_child_above (new_window, window_clone);
-					added = true;
-					window_added (window);
-					break;
-				}
-			}
-
-			// top most or no other children
-			if (!added) {
-				add_child (new_window);
-				window_added (window);
-			}
+			int index = windows_ordered.index (window);
+			insert_child_at_index (new_window, index);
+			window_added (window);
 
 			if (selected_window == window) {
 				do_select_clone (new_window, true, false);
@@ -280,20 +263,20 @@ namespace Gala
 			});
 		}
 
-		ulong transitions_completed_id = 0;
+		ulong sync_transitions_completed_id = 0;
 
 		/**
 		 * Add child for that the related window container added one.
 		 */
 		public void sync_add_window (Window window)
 		{
-			// remove closing signals and transitions if exists
 			foreach (var child in get_children ()) {
 				var window_clone = child as DeepinWindowClone;
 				if (window_clone.window == window) {
-					if (transitions_completed_id != 0) {
-						SignalHandler.disconnect (child, transitions_completed_id);
-						transitions_completed_id = 0;
+					// cancel closing animation if exists and start fade-in animation
+					if (sync_transitions_completed_id != 0) {
+						SignalHandler.disconnect (child, sync_transitions_completed_id);
+						sync_transitions_completed_id = 0;
 					}
 					window_clone.remove_all_transitions ();
 					window_clone.start_fade_in_animation ();
@@ -313,8 +296,8 @@ namespace Gala
 			foreach (var child in get_children ()) {
 				if ((child as DeepinWindowClone).window == window) {
 					(child as DeepinWindowClone).start_fade_out_animation ();
-					transitions_completed_id = child.transitions_completed.connect (() => {
-						transitions_completed_id = 0;
+					sync_transitions_completed_id = child.transitions_completed.connect (() => {
+						sync_transitions_completed_id = 0;
 						remove_window (window);
 					});
 					break;
@@ -342,29 +325,54 @@ namespace Gala
 		 */
 		public virtual void restack_windows (Screen screen)
 		{
-			unowned Meta.Display display = screen.get_display ();
+			var display = screen.get_display ();
 			var children = get_children ();
 
-			GLib.SList<unowned Meta.Window> windows = new GLib.SList<unowned Meta.Window> ();
-			foreach (unowned Actor child in children) {
-				unowned DeepinWindowClone clone = (DeepinWindowClone)child;
-				windows.prepend (clone.window);
+			var windows = new GLib.SList<unowned Meta.Window> ();
+			foreach (var child in children) {
+				var window_clone = child as DeepinWindowClone;
+				windows.prepend (window_clone.window);
 			}
 
 			var windows_ordered = display.sort_windows_by_stacking (windows);
-			windows_ordered.reverse ();
 
-			foreach (unowned Meta.Window window in windows_ordered) {
-				var i = 0;
-				foreach (unowned Actor child in children) {
-					if (((DeepinWindowClone)child).window == window) {
+			int i = 0;
+			foreach (var window in windows_ordered) {
+				foreach (var child in children) {
+					if ((child as DeepinWindowClone).window == window) {
 						set_child_at_index (child, i);
 						children.remove (child);
-						i++;
 						break;
 					}
 				}
+				i++;
 			}
+		}
+
+		/**
+		 * Multitasking view opened.
+		 */
+		public virtual void open (Window? focus_window = null)
+		{
+			if (opened) {
+				return;
+			}
+
+			opened = true;
+
+			restack_windows (workspace.get_screen ());
+		}
+
+		/**
+		 * Multitasking view closed.
+		 */
+		public virtual void close ()
+		{
+			if (!opened) {
+				return;
+			}
+
+			opened = false;
 		}
 	}
 }
