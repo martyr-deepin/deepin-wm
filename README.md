@@ -12,12 +12,12 @@ other changes.
 
 ## Dependencies
 
-### Build Dependencies
+### Build dependencies
 
 - valac (>= 0.22.0)
 - gsettings-desktop-schemas (>= 3.15.92)
 
-### Runtime Dependencies
+### Runtime dependencies
 
 - clutter-1.0 (>= 1.9.16)
 - clutter-gtk-1.0
@@ -91,7 +91,7 @@ Any usage issues can ask for help via
 
 We encourage you to report issues and contribute changes
 
-* [Contirubtion guide for users](http://wiki.deepin.org/index.php?title=Contribution_Guidelines_for_Users)
+* [Contribution guide for users](http://wiki.deepin.org/index.php?title=Contribution_Guidelines_for_Users)
 * [Contribution guide for developers](http://wiki.deepin.org/index.php?title=Contribution_Guidelines_for_Developers).
 
 ## License
