@@ -21,33 +21,39 @@ namespace Gala
 	public class BackgroundManager : Meta.BackgroundGroup
 	{
 		const string BACKGROUND_SCHEMA = "com.deepin.wrap.gnome.desktop.background";
+		const string EXTRA_BACKGROUND_SCHEMA = "com.deepin.dde.appearance";
 		const int FADE_ANIMATION_TIME = 1000;
 
 		public signal void changed ();
 
 		public Meta.Screen screen { get; construct; }
 		public int monitor_index { get; construct; }
+		public int workspace_index { get; construct; }
 		public bool control_position { get; construct; }
 
 		BackgroundSource background_source;
 		Meta.BackgroundActor background_actor;
 		Meta.BackgroundActor? new_background_actor = null;
 
-		public BackgroundManager (Meta.Screen screen, int monitor_index, bool control_position = true)
+		public BackgroundManager (Meta.Screen screen, int monitor_index, int workspace_index,
+								  bool control_position = true)
 		{
-			Object (screen: screen, monitor_index: monitor_index, control_position: control_position);
+			Object (screen: screen, monitor_index: monitor_index, workspace_index: workspace_index,
+					control_position: control_position);
 		}
 
 		construct
 		{
-			background_source = BackgroundCache.get_default ().get_background_source (screen, BACKGROUND_SCHEMA);
+			background_source = BackgroundCache.get_default ().get_background_source (
+				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
 
 			background_actor = create_background_actor ();
 		}
 
 		public override void destroy ()
 		{
-			BackgroundCache.get_default ().release_background_source (BACKGROUND_SCHEMA);
+			BackgroundCache.get_default ().release_background_source (BACKGROUND_SCHEMA,
+																	  EXTRA_BACKGROUND_SCHEMA);
 			background_source = null;
 
 			if (new_background_actor != null) {
@@ -123,7 +129,7 @@ namespace Gala
 
 		Meta.BackgroundActor create_background_actor ()
 		{
-			var background = background_source.get_background (monitor_index);
+			var background = background_source.get_background (monitor_index, workspace_index);
 			var background_actor = new Meta.BackgroundActor (screen, monitor_index);
 			// TODO: test blur effect
 			// DeepinBlurEffect.setup (background_actor, 20.0f, 1);

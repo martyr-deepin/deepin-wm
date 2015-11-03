@@ -91,25 +91,29 @@ namespace Gala
 			return animation;
 		}
 
-		public BackgroundSource get_background_source (Meta.Screen screen, string settings_schema)
+		public BackgroundSource get_background_source (Meta.Screen screen, string settings_schema,
+													   string extra_settings_schema)
 		{
-			var background_source = background_sources[settings_schema];
+			string key = settings_schema + extra_settings_schema;
+			var background_source = background_sources[key];
 			if (background_source == null) {
-				background_source = new BackgroundSource (screen, settings_schema);
+				background_source = new BackgroundSource (screen, settings_schema,
+														  extra_settings_schema);
 				background_source.use_count = 1;
-				background_sources[settings_schema] = background_source;
+				background_sources[key] = background_source;
 			} else
 				background_source.use_count++;
 
 			return background_source;
 		}
 
-		public void release_background_source (string settings_schema)
+		public void release_background_source (string settings_schema, string extra_settings_schema)
 		{
-			if (background_sources.has_key (settings_schema)) {
-				var source = background_sources[settings_schema];
+			string key = settings_schema + extra_settings_schema;
+			if (background_sources.has_key (key)) {
+				var source = background_sources[key];
 				if (--source.use_count == 0) {
-					background_sources.unset (settings_schema);
+					background_sources.unset (key);
 					source.destroy ();
 				}
 			}

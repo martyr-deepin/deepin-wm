@@ -46,7 +46,8 @@ namespace Gala
 		{
 			if (wm.background_group != null)
 #if HAS_MUTTER314
-				(wm.background_group as BackgroundContainer).changed.connect (() => background_changed ());
+				(wm as WindowManagerGala).background_container.changed.connect (
+					() => background_changed ());
 #else
 				(wm.background_group as BackgroundManager).changed.connect (() => background_changed ());
 #endif

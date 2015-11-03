@@ -99,7 +99,8 @@ namespace Gala
 			workspace_clone.add_effect (roundRectOutlineEffect);
 			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 
-			background = new DeepinFramedBackground (workspace.get_screen (), false);
+			background = new DeepinFramedBackground (workspace.get_screen (),
+													 workspace.index (), false);
 			background.button_press_event.connect (() => {
 				selected ();
 				return true;

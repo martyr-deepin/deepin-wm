@@ -27,6 +27,7 @@ namespace Gala
 
 		public Meta.Screen screen { get; construct; }
 		public int monitor_index { get; construct; }
+		public int workspace_index { get; construct; }
 		public BackgroundSource background_source { get; construct; }
 		public bool is_loaded { get; private set; default = false; }
 		public GDesktop.BackgroundStyle style { get; construct; }
@@ -38,11 +39,13 @@ namespace Gala
 		Cancellable cancellable;
 		uint update_animation_timeout_id = 0;
 
-		public Background (Meta.Screen screen, int monitor_index, string? filename,
-				BackgroundSource background_source, GDesktop.BackgroundStyle style)
+		public Background (Meta.Screen screen, int monitor_index, int workspace_index,
+						   string? filename, BackgroundSource background_source,
+						   GDesktop.BackgroundStyle style)
 		{
 			Object (screen: screen,
 					monitor_index: monitor_index,
+					workspace_index: workspace_index,
 					background_source: background_source,
 					style: style,
 					filename: filename);
