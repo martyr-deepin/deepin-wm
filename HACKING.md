@@ -26,6 +26,13 @@ make
 gdb src/.libs/gala
 ```
 
+## Debug with mutter as backend
+```
+sed -i 's/libdeepin-mutter/libmutter/g' configure.ac
+make
+src/.libs/gala --replace
+```
+
 ## Collect gdb backtrace messages
 ```
 gdb -batch -ex "bt" deepin-wm /var/debug/deepin-wm.core
