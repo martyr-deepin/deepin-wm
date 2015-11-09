@@ -23,6 +23,7 @@ lib_LTLIBRARIES = libdeepin-wm.la
 
 libdeepin_wm_la_CFLAGS = \
 	$(GALA_CORE_CFLAGS) \
+	-DWNCK_I_KNOW_THIS_IS_UNSTABLE \
 	-include config.h \
 	-w \
 	$(NULL)
