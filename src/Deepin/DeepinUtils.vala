@@ -175,7 +175,7 @@ namespace Gala
 				return;
 			}
 
-			uint32 timestamp = screen.get_display ().get_current_time ();
+			uint32 timestamp = screen.get_display ().get_current_time_roundtrip ();
 			workspace.activate (timestamp);
 		}
 

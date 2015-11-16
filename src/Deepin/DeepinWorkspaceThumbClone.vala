@@ -348,9 +348,6 @@ namespace Gala
 
 			workspace_name_text.button_press_event.connect (on_name_button_press_event);
 			workspace_name_text.activate.connect (() => {
-				// Send setup_completed(true) signal if user coplete editing.
-				notify_setup_completed_if_need (true);
-
 				finish_edit ();
 			});
 			workspace_name_text.key_focus_in.connect (() => {
@@ -359,15 +356,12 @@ namespace Gala
 				}
 			});
 			workspace_name_text.key_focus_out.connect (() => {
-				// Send setup_completed(false) signal if user cancel editing. This callback will
-				// executed when name field lost focus, so this request will be ignored if user
-				// complete editing for that setup_completed(true) already been sent.
-				notify_setup_completed_if_need (false);
-
 				set_workspace_name ();
 				if (workspace_name_text.text.length == 0) {
 					workspace_name_text.visible = false;
 				}
+
+				notify_setup_completed_if_need (first_setup);
 			});
 
 			get_workspace_name ();

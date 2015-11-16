@@ -173,7 +173,7 @@ namespace Gala
 			/**
 			 * We generally assume that when the key-focus-out signal is emitted a different
 			 * component was opened, so we close in that case. And we should listen property changed
-			 * for "key-forcus" in stage instead of overriding key_focus_out, or could not get the
+			 * for "key-focus" in stage instead of overriding key_focus_out, or could not get the
 			 * right key focus actor.
 			 */
 			get_stage ().notify["key-focus"].connect (() => {
