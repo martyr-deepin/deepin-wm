@@ -161,13 +161,24 @@ namespace Gala
 
 #if HAS_MUTTER314
 			background_container = new BackgroundContainer (screen);
+            background_container.structure_changed.connect (() => {
+                Meta.verbose ("%s: structure_changed \n", Log.METHOD);
+
+                if (background_group != null) {
+                    window_group.remove_child (background_group);
+                    background_group.destroy ();
+                }
+                background_group = background_container.get_background (
+                    0, screen.get_active_workspace_index ());
+                window_group.insert_child_below (background_group, null);
+            });
+
 			background_group = background_container.get_background (
 				0, screen.get_active_workspace_index ());
 #else
 			background_group = new BackgroundManager (screen);
 #endif
-			window_group.add_child (background_group);
-			window_group.set_child_below_sibling (background_group, null);
+			window_group.insert_child_below (background_group, null);
 
 			top_window_group = Compositor.get_top_window_group_for_screen (screen);
 			stage.remove_child (top_window_group);

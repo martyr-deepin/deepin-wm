@@ -8,6 +8,7 @@ gala_VALAFLAGS = \
 	--vapidir $(VAPIDIR) \
 	$(VAPIDIR)/config.vapi \
 	$(VAPIDIR)/cogl-fixes.vapi \
+	$(VAPIDIR)/libdeepin-mutter-fixes.vapi \
 	$(NULL)
 
 galadir = $(bindir)

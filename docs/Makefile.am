@@ -54,6 +54,7 @@ valadoc_flags_gala = \
 	--driver "`$(VALAC) --version`" \
 	--pkg config \
 	--pkg cogl-fixes \
+	--pkg libdeepin-mutter-fixes \
 	--vapidir=$(top_builddir)/lib \
 	--vapidir=$(top_srcdir)/vapi \
 	$(NULL)

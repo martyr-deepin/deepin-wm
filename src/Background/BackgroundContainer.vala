@@ -20,6 +20,7 @@ namespace Gala
 	public class BackgroundContainer : Object
 	{
 		public signal void changed ();
+		public signal void structure_changed ();
 
 		public Meta.Screen screen { get; construct; }
 
@@ -49,7 +50,7 @@ namespace Gala
 
 		public BackgroundManager? get_background (int monitor_index, int workspace_index)
 		{
-			string key = "%d:%d".printf (monitor_index, workspace_index);
+			string key = @"$monitor_index:$workspace_index";
 			if (backgrounds.has_key (key)) {
 				return backgrounds[key];
 			}
@@ -58,7 +59,7 @@ namespace Gala
 
 		void insert_background (int monitor_index, int workspace_index, BackgroundManager background)
 		{
-			string key = "%d:%d".printf (monitor_index, workspace_index);
+			string key = @"$monitor_index:$workspace_index";
 			if (!backgrounds.has_key (key)) {
 				backgrounds[key] = background;
 			}
@@ -90,10 +91,13 @@ namespace Gala
 					}
 				}
 			}
+
+            structure_changed ();
 		}
 
 		void background_changed ()
 		{
+            Meta.verbose ("%s\n", Log.METHOD);
 			changed ();
 		}
 	}

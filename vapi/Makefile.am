@@ -6,6 +6,7 @@ VAPIS = \
 	gnome-desktop-3.0.vapi \
 	libdeepin-mutter.vapi \
 	xfixes-4.0.vapi \
+	libdeepin-mutter-fixes.vapi \
 	$(NULL)
 
 DEPS = \
