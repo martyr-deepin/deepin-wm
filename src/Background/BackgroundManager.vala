@@ -147,15 +147,15 @@ namespace Gala
 			}
 
 			ulong changed_handler = 0;
-			changed_handler = background.changed.connect (() => {
-				SignalHandler.disconnect (background, changed_handler);
+			changed_handler = background_source.changed.connect (() => {
+				SignalHandler.disconnect (background_source, changed_handler);
 				changed_handler = 0;
 				update_background_actor ();
 			});
 
 			background_actor.destroy.connect (() => {
 				if (changed_handler != 0) {
-					SignalHandler.disconnect (background, changed_handler);
+					SignalHandler.disconnect (background_source, changed_handler);
 					changed_handler = 0;
 				}
 

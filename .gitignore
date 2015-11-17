@@ -52,3 +52,5 @@ _*
 debian
 **/*~
 po/deepin-wm.pot
+.*.swp
+*.swp

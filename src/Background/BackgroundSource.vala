@@ -63,7 +63,6 @@ namespace Gala
 					continue;
 				}
 
-				background.changed.disconnect (background_changed);
 				background.destroy ();
 
 				keys_to_remove.append (key);
@@ -87,14 +86,15 @@ namespace Gala
 			// they can have variants that depend on the aspect ratio and
 			// size of the monitor; for other backgrounds we can use the
 			// same background object for all monitors.
-			if (filename == null || !filename.has_suffix (".xml"))
+			//if (filename == null || !filename.has_suffix (".xml"))
+			if (filename == null)
 				monitor_index = 0;
 
 			string key = "%d:%d".printf (monitor_index, workspace_index);
+            Meta.verbose ("%s: key = %s\n", Log.METHOD, key);
 			if (!backgrounds.has_key (key)) {
 				var background = new Background (screen, monitor_index, workspace_index, filename,
 												 this, (GDesktop.BackgroundStyle) style);
-				background.changed.connect (background_changed);
 				backgrounds[key] = background;
 			}
 
@@ -130,12 +130,17 @@ namespace Gala
 			return filename;
 		}
 
-		void background_changed (Background background)
+		void background_changed ()
 		{
-			background.changed.disconnect (background_changed);
-			background.destroy ();
-			backgrounds.unset ("%d:%d".printf (background.monitor_index,
-											   background.workspace_index));
+            Meta.verbose ("BackgroundSource::%s\n", Log.METHOD);
+
+			foreach (var key in backgrounds.keys) {
+				var background = backgrounds[key];
+                background.destroy ();
+            }
+            backgrounds.clear ();
+
+			changed ();
 		}
 
 		public void destroy ()
@@ -143,7 +148,6 @@ namespace Gala
 			screen.monitors_changed.disconnect (monitors_changed);
 
 			foreach (var background in backgrounds.values) {
-				background.changed.disconnect (background_changed);
 				background.destroy ();
 			}
 		}
@@ -187,7 +191,8 @@ namespace Gala
 			Memory.copy (&settings_hash_cache, &current, sizeof (SettingsHashCache));
 			cache_extra_picture_uris = current_extra;
 
-			changed ();
+
+            background_changed ();
 		}
 
 		SettingsHashCache get_current_settings_hash_cache ()

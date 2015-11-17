@@ -54,6 +54,11 @@ namespace Gala
 		 * Container for the background actors forming the wallpaper for monitors and workspaces
 		 */
 		public BackgroundContainer background_container { get; protected set; }
+
+        /**
+          * backgrounds for monitors of the active workspace 
+          */
+        Gee.HashMap<int, BackgroundGroup> backgrounds;
 #endif
 
 		Meta.PluginInfo info;
@@ -161,24 +166,12 @@ namespace Gala
 
 #if HAS_MUTTER314
 			background_container = new BackgroundContainer (screen);
-            background_container.structure_changed.connect (() => {
-                Meta.verbose ("%s: structure_changed \n", Log.METHOD);
-
-                if (background_group != null) {
-                    window_group.remove_child (background_group);
-                    background_group.destroy ();
-                }
-                background_group = background_container.get_background (
-                    0, screen.get_active_workspace_index ());
-                window_group.insert_child_below (background_group, null);
-            });
-
-			background_group = background_container.get_background (
-				0, screen.get_active_workspace_index ());
+            configure_backgrounds ();
+            background_container.structure_changed.connect (configure_backgrounds);
 #else
 			background_group = new BackgroundManager (screen);
-#endif
 			window_group.insert_child_below (background_group, null);
+#endif
 
 			top_window_group = Compositor.get_top_window_group_for_screen (screen);
 			stage.remove_child (top_window_group);
@@ -311,6 +304,33 @@ namespace Gala
 
 			return false;
 		}
+
+#if HAS_MUTTER314
+        void configure_backgrounds ()
+        {
+            Meta.verbose ("%s\n", Log.METHOD);
+
+            if (backgrounds == null) {
+                backgrounds = new Gee.HashMap<int, BackgroundGroup> ();
+            }
+
+            background_group = null;
+            foreach (var key in backgrounds.keys) {
+                window_group.remove_child (backgrounds[key]);
+                backgrounds[key].destroy ();
+            }
+            backgrounds.clear ();
+
+			var screen = get_screen ();
+            for (var i = 0; i < screen.get_n_monitors (); i++) {
+                backgrounds[i] = background_container.get_background (
+                        i, screen.get_active_workspace_index ());
+
+                window_group.insert_child_below (backgrounds[i], null);
+            }
+            background_group = backgrounds[0];
+        }
+#endif
 
 		void configure_hotcorners ()
 		{
@@ -1584,28 +1604,20 @@ namespace Gala
 					var background = (Background) actor;
 #endif
 
-					stdout.printf (" -> 1\n");// TODO:
 					background.get_parent ().remove_child (background);
 #if HAS_MUTTER314
-					stdout.printf (" -> 2\n");// TODO:
 					if (background_group.get_parent () != null) {
 						background_group.get_parent ().remove_child (background_group);
 					}
-					stdout.printf (" -> 3\n");// TODO:
 					background_group = background_container.get_background (background.monitor_index,
 																			active_workspace.index ());
-					stdout.printf (" -> 3.1, %d\n", (background_group as BackgroundManager).workspace_index);// TODO:
 					if (background_group.get_parent () != null) {
-						stdout.printf (" -> 3.2\n");// TODO:
 						clutter_actor_reparent (background_group, window_group);
 					} else {
-						stdout.printf (" -> 3.3\n");// TODO:
 						window_group.add_child (background_group);
 					}
-					stdout.printf (" -> 3.4\n");// TODO:
 					// window_group.add_child (background_group);
 					window_group.set_child_below_sibling (background_group, null);
-					stdout.printf (" -> 3.5\n");// TODO:
 #else
 					background_group.insert_child_at_index (background, background.monitor);
 #endif

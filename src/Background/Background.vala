@@ -22,13 +22,12 @@ namespace Gala
 		const double ANIMATION_OPACITY_STEP_INCREMENT = 4.0;
 		const double ANIMATION_MIN_WAKEUP_INTERVAL = 1.0;
 
-		public signal void changed ();
 		public signal void loaded ();
 
 		public Meta.Screen screen { get; construct; }
 		public int monitor_index { get; construct; }
 		public int workspace_index { get; construct; }
-		public BackgroundSource background_source { get; construct; }
+		public weak BackgroundSource background_source { get; construct; }
 		public bool is_loaded { get; private set; default = false; }
 		public GDesktop.BackgroundStyle style { get; construct; }
 		public string? filename { get; construct; }
@@ -59,23 +58,25 @@ namespace Gala
 			file_watches = new Gee.HashMap<string,ulong> ();
 			cancellable = new Cancellable ();
 
-			background_source.changed.connect (settings_changed);
-
 			load ();
 		}
 
 		public void destroy ()
 		{
+            Meta.verbose ("%s\n", Log.METHOD);
+
 			cancellable.cancel ();
 			remove_animation_timeout ();
 
 			var cache = BackgroundCache.get_default ();
 
-			foreach (var watch in file_watches.values) {
-				SignalHandler.disconnect (cache, watch);
+			foreach (var entry in file_watches.entries) {
+                if (SignalHandler.is_connected (cache, entry.value))
+                    SignalHandler.disconnect (cache, entry.value);
+                else 
+                    Meta.verbose ("%s: handler 0x%d for %s disappeared\n", 
+                            Log.METHOD, entry.value, entry.key);
 			}
-
-			background_source.settings.changed.disconnect (settings_changed);
 		}
 
 		public void update_resolution ()
@@ -136,7 +137,6 @@ namespace Gala
 // #else
 // 					image_cache.purge (changed_file);
 // #endif
-// 					changed ();
 // 				}
 			});
 		}
@@ -283,11 +283,6 @@ namespace Gala
 				set_loaded ();
 			else
 				load_file (filename);
-		}
-
-		void settings_changed ()
-		{
-			changed ();
 		}
 	}
 }
