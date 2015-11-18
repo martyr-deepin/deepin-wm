@@ -28,6 +28,7 @@ namespace Gala
 
 	public enum DragDropActionDirection
 	{
+		NONE = 0,
 		LEFT = 1,
 		RIGHT = 1 << 1,
 		UP = 1 << 2,
@@ -215,6 +216,10 @@ namespace Gala
 			if (!dragging) {
 				switch (event.get_type ()) {
 					case EventType.MOTION:
+						if (allow_direction == DragDropActionDirection.NONE) {
+							return false;
+						}
+
 						float x, y;
 						event.get_coords (out x, out y);
 
@@ -222,8 +227,8 @@ namespace Gala
 						if (Math.fabsf (last_x - x) > drag_threshold || Math.fabsf (last_y - y) > drag_threshold) {
 							handle = drag_begin (x, y);
 							if (handle == null) {
+								// No handle has been returned by the started signal, aborting drag.
 								actor.get_stage ().captured_event.disconnect (follow_move);
-								critical ("No handle has been returned by the started signal, aborting drag.");
 								return false;
 							}
 

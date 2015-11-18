@@ -602,6 +602,7 @@ namespace Gala
 
 			thumb_clone = new DeepinWorkspaceThumbCloneCore (workspace);
 			thumb_clone.opacity = 0;
+			thumb_clone.reactive = true;
 			window_container = thumb_clone.window_container;
 
 			thumb_clone.selected.connect (() => selected ());
@@ -634,8 +635,6 @@ namespace Gala
 				// there is only one workspace, just ignore
 				return;
 			}
-
-			// disable_drag_action ();
 
 			closing ();
 
@@ -672,7 +671,7 @@ namespace Gala
 		 */
 		public void enable_drag_action ()
 		{
-			thumb_clone.reactive = true;
+			drag_action.allow_direction = DragDropActionDirection.UP;
 		}
 
 		/**
@@ -681,7 +680,7 @@ namespace Gala
 		 */
 		public void disable_drag_action ()
 		{
-			thumb_clone.reactive = false;
+			drag_action.allow_direction = DragDropActionDirection.NONE;
 		}
 
 		public override void allocate (ActorBox box, AllocationFlags flags)
