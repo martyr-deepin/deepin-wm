@@ -51,9 +51,6 @@ namespace Gala
 
 			changed_handler = background_source.changed.connect (() => {
                 create_background_actor ();
-                //new_background_actor.vignette_sharpness = background_actor.vignette_sharpness;
-                //new_background_actor.brightness = background_actor.brightness;
-                //new_background_actor.visible = background_actor.visible;
 			});
 
             actors = new Gee.ArrayList<Meta.BackgroundActor> ();
@@ -75,94 +72,103 @@ namespace Gala
 			base.destroy ();
 		}
 
-		void create_background_actor ()
-		{
-            Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
+        void on_background_actor_loaded (Meta.BackgroundActor background_actor)
+        {
+            insert_child_below (background_actor, null);
+            actors.add (background_actor);
+            Meta.verbose ("%s: add %s\n", Log.METHOD, background_actor.name);
 
-			var background = background_source.get_background (monitor_index, workspace_index);
-			var background_actor = new Meta.BackgroundActor (screen, monitor_index);
-            background_actor.name = @"bg$serial";
-            serial++;
+            while (actors.size > 2) {
+                Meta.verbose ("remove_child %s\n", actors[0].name);
+                var actor = actors[0];
+                actor.visible = false;
+                actor.opacity = 0;
 
-			// TODO: test blur effect
-			// DeepinBlurEffect.setup (background_actor, 20.0f, 1);
+                actors.remove_at (0);
+                actor.remove_all_transitions ();
+                remove_child (actor);
 
-			background_actor.background = background.background;
+                actor.destroy ();
+            }
 
-			var monitor = screen.get_monitor_geometry (monitor_index);
-			background_actor.set_size (monitor.width, monitor.height);
+            if (actors.size > 1) {
+                var actor = actors[actors.size - 2];
 
-			if (control_position) {
-				background_actor.set_position (monitor.x, monitor.y);
-			}
+                actor.opacity = 255;
+                actor.save_easing_state ();
+                actor.set_easing_duration (FADE_ANIMATION_TIME);
+                actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
+                actor.opacity = 0;
+                actor.restore_easing_state ();
 
-            ulong loaded_handler = 0;
-            loaded_handler = background.loaded.connect (() => {
-                SignalHandler.disconnect (background, loaded_handler);
-                loaded_handler = 0;
-
-                insert_child_below (background_actor, null);
-                actors.add (background_actor);
-                Meta.verbose ("%s: add %s\n", Log.METHOD, background_actor.name);
-
-                while (actors.size > 2) {
-                    Meta.verbose ("remove_child %s\n", actors[0].name);
-                    var actor = actors[0];
-                    actor.visible = false;
-                    actor.opacity = 0;
-
-                    actors.remove_at (0);
-                    actor.remove_all_transitions ();
-                    remove_child (actor);
-
-                    actor.destroy ();
-                }
-
-                if (actors.size > 1) {
-                    var actor = actors[actors.size - 2];
-
-                    actor.opacity = 255;
-                    actor.save_easing_state ();
-                    actor.set_easing_duration (FADE_ANIMATION_TIME);
-                    actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
-                    actor.opacity = 0;
-                    actor.restore_easing_state ();
-
-                    actor.transition_stopped.connect( (name, is_finished) => {
+                actor.transition_stopped.connect( (name, is_finished) => {
                         Meta.verbose ("swapping from %s, completed = %d\n",
                                 actor.name, is_finished);
                         if (is_finished) {
-                            //queue_relayout ();
-                            Meta.verbose ("leftout actors\n");
-                            var children = get_children ();
-                            children.foreach ((c) => {
+                        //queue_relayout ();
+                        Meta.verbose ("leftout actors\n");
+                        var children = get_children ();
+                        children.foreach ((c) => {
                                 Meta.verbose ("actor %s\n", c.name);
-                            });
+                                });
 
-                            actor.visible = false;
-                            assert (actor.opacity == 0);
+                        actor.visible = false;
+                        assert (actor.opacity == 0);
 
-                            actors.remove (actor);
-                            remove_child (actor);
+                        actors.remove (actor);
+                        remove_child (actor);
 
-                            Idle.add( () => { actor.destroy (); return false; });
+                        Idle.add( () => { actor.destroy (); return false; });
 
-                            changed ();
+                        changed ();
 
                         } else {
                             actor.opacity = 0;
                         }
-                    });
+                });
 
-                } 
-                
-            });
+            }
+        }
+
+        void create_background_actor ()
+        {
+            Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
+
+            var background = background_source.get_background (monitor_index, workspace_index);
+            var background_actor = new Meta.BackgroundActor (screen, monitor_index);
+            background_actor.name = @"bg$serial";
+            serial++;
+
+            // TODO: test blur effect
+            // DeepinBlurEffect.setup (background_actor, 20.0f, 1);
+
+            background_actor.background = background.background;
+
+            var monitor = screen.get_monitor_geometry (monitor_index);
+            background_actor.set_size (monitor.width, monitor.height);
+
+            if (control_position) {
+                background_actor.set_position (monitor.x, monitor.y);
+            }
+
+            ulong loaded_handler = 0;
+
+            if (background.is_loaded) {
+                on_background_actor_loaded (background_actor);
+            } else {
+                loaded_handler = background.loaded.connect (() => {
+                    SignalHandler.disconnect (background, loaded_handler);
+                    loaded_handler = 0;
+
+                    on_background_actor_loaded (background_actor);
+                });
+            }
 
             background_actor.destroy.connect (() => {
                 Meta.verbose ("%s: destroy %s\n", Log.METHOD, background_actor.name);
                 if (loaded_handler != 0) 
-                    SignalHandler.disconnect (background, loaded_handler);
+                SignalHandler.disconnect (background, loaded_handler);
             });
-		}
+        }
 	}
 }

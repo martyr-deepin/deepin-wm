@@ -95,6 +95,7 @@ namespace Gala
 		{
 #if HAS_MUTTER314
 			//update_background_actor ();
+            queue_relayout ();
 #endif
 			var shadow_effect = get_effect ("shadow");
 			if (shadow_effect != null) {
