@@ -105,19 +105,8 @@ namespace Gala
             var max_width = monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;
             switcher_layout.max_width = max_width;
 
-            clear_constraints ();
-
-            if (wm.get_screen().get_n_monitors() > 1) {
-                this.x = monitor_geom.x + (monitor_geom.width - this.width) / 2;
-                this.add_constraint (new Clutter.BindConstraint (
-                            get_parent (), Clutter.BindCoordinate.POSITION, 0));
-
-            } else {
-                this.x = monitor_geom.x;
-                this.add_constraint (new Clutter.BindConstraint (
-                            get_parent (), Clutter.BindCoordinate.ALL, 0));
-            }
-
+            set_position (monitor_geom.x, monitor_geom.y);
+            set_size (monitor_geom.width, monitor_geom.height);
         }
 
 		void show_popup ()
