@@ -264,7 +264,6 @@ namespace Gala
 			}
 
 			workspace_name = new DeepinWorkspaceName (get_screen ());
-			workspace_name.add_constraint (new Clutter.BindConstraint (stage, Clutter.BindCoordinate.ALL, 0));
 			ui_group.add_child (workspace_name);
 
 			display.add_keybinding ("expose-windows", keybinding_schema, 0, () => {

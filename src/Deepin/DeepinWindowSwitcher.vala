@@ -62,7 +62,6 @@ namespace Gala
 			var layout = new BoxLayout ();
 			layout.orientation = Orientation.HORIZONTAL;
 			popup.layout_manager = layout;
-			// TODO: multi monitors
 
 			var screen = wm.get_screen ();
             popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
@@ -84,7 +83,6 @@ namespace Gala
 			add_child (popup);
 
 			wm.get_screen ().monitors_changed.connect (relayout);
-			//relayout ();
 
 			visible = false;
 		}

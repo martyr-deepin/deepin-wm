@@ -57,7 +57,7 @@ namespace Gala
             create_background_actor ();
 		}
 
-		public override void destroy ()
+		~BackgroundManager ()
 		{
             SignalHandler.disconnect (background_source, changed_handler);
             changed_handler = 0;
@@ -68,8 +68,6 @@ namespace Gala
 
             actors.clear ();
             actors = null;
-
-			base.destroy ();
 		}
 
         void on_background_actor_loaded (Meta.BackgroundActor background_actor)

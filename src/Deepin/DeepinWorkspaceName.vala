@@ -71,6 +71,7 @@ namespace Gala
 			add_child (popup);
 
 			update_workspace_name ();
+			screen.monitors_changed.connect (configure_workspace_name);
 
 			visible = false;
 		}
@@ -82,9 +83,22 @@ namespace Gala
 			}
 		}
 
+        void configure_workspace_name ()
+        {
+            var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+			var stage = Compositor.get_stage_for_screen (screen) as Clutter.Stage;
+            this.width = monitor_geom.width;
+            this.height = monitor_geom.height;
+
+            clear_constraints ();
+            this.add_constraint (new Clutter.BindConstraint (
+                        stage, Clutter.BindCoordinate.POSITION, 0));
+        }
+
 		public void show_popup ()
 		{
 			update_workspace_name ();
+            configure_workspace_name ();
 
 			// reset timer and trasition
 			if (popup_timeout_id != 0) {
