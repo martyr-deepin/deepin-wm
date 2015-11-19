@@ -92,9 +92,8 @@ namespace Gala
 			if (is_loaded)
 				return;
 
-			is_loaded = true;
-
 			Idle.add (() => {
+                is_loaded = true;
 				loaded ();
 				return false;
 			});

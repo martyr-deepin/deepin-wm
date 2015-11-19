@@ -94,7 +94,7 @@ namespace Gala
 		void on_monitors_changed ()
 		{
 #if HAS_MUTTER314
-			update_background_actor ();
+			//update_background_actor ();
 #endif
 			var shadow_effect = get_effect ("shadow");
 			if (shadow_effect != null) {

@@ -31,9 +31,11 @@ namespace Gala
 		public int workspace_index { get; construct; }
 		public bool control_position { get; construct; }
 
+        Gee.ArrayList<Meta.BackgroundActor>? actors;
+
 		BackgroundSource background_source;
-		Meta.BackgroundActor background_actor;
-		Meta.BackgroundActor? new_background_actor = null;
+        ulong changed_handler = 0;
+        ulong serial = 0;
 
 		public BackgroundManager (Meta.Screen screen, int monitor_index, int workspace_index,
 								  bool control_position = true)
@@ -47,126 +49,120 @@ namespace Gala
 			background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
 
-			background_actor = create_background_actor ();
+			changed_handler = background_source.changed.connect (() => {
+                create_background_actor ();
+                //new_background_actor.vignette_sharpness = background_actor.vignette_sharpness;
+                //new_background_actor.brightness = background_actor.brightness;
+                //new_background_actor.visible = background_actor.visible;
+			});
+
+            actors = new Gee.ArrayList<Meta.BackgroundActor> ();
+            create_background_actor ();
 		}
 
 		public override void destroy ()
 		{
-			BackgroundCache.get_default ().release_background_source (BACKGROUND_SCHEMA,
-																	  EXTRA_BACKGROUND_SCHEMA);
+            SignalHandler.disconnect (background_source, changed_handler);
+            changed_handler = 0;
+
+			BackgroundCache.get_default ().release_background_source (
+                    BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
 			background_source = null;
 
-			if (new_background_actor != null) {
-				new_background_actor.destroy ();
-				new_background_actor = null;
-			}
-
-			if (background_actor != null) {
-				background_actor.destroy ();
-				background_actor = null;
-			}
+            actors.clear ();
+            actors = null;
 
 			base.destroy ();
 		}
 
-		void swap_background_actor ()
+		void create_background_actor ()
 		{
-			var old_background_actor = background_actor;
-			background_actor = new_background_actor;
-			new_background_actor = null;
+            Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
 
-			if (old_background_actor == null)
-				return;
-
-			var transition = new Clutter.PropertyTransition ("opacity");
-			transition.set_from_value (255);
-			transition.set_to_value (0);
-			transition.duration = FADE_ANIMATION_TIME;
-			transition.progress_mode = Clutter.AnimationMode.EASE_OUT_QUAD;
-			transition.remove_on_complete = true;
-			transition.completed.connect (() => {
-				old_background_actor.destroy ();
-
-				// force to relayout here, or BackgroundManager will keep the old size even through
-				// monitor resolution changed
-				queue_relayout ();
-
-				changed ();
-			});
-
-			old_background_actor.add_transition ("fade-out", transition);
-		}
-
-		public void update_background_actor ()
-		{
-			if (new_background_actor != null) {
-				// Skip displaying existing background queued for load
-				new_background_actor.destroy ();
-				new_background_actor = null;
-			}
-
-			new_background_actor = create_background_actor ();
-			new_background_actor.vignette_sharpness = background_actor.vignette_sharpness;
-			new_background_actor.brightness = background_actor.brightness;
-			new_background_actor.visible = background_actor.visible;
-
-			var background = new_background_actor.background.get_data<Background> ("delegate");
-
-			if (background.is_loaded) {
-				swap_background_actor ();
-				return;
-			}
-
-			ulong handler = 0;
-			handler = background.loaded.connect (() => {
-				SignalHandler.disconnect (background, handler);
-				background.set_data<ulong> ("background-loaded-handler", 0);
-
-				swap_background_actor ();
-			});
-			background.set_data<ulong> ("background-loaded-handler", handler);
-		}
-
-		Meta.BackgroundActor create_background_actor ()
-		{
 			var background = background_source.get_background (monitor_index, workspace_index);
 			var background_actor = new Meta.BackgroundActor (screen, monitor_index);
+            background_actor.name = @"bg$serial";
+            serial++;
+
 			// TODO: test blur effect
 			// DeepinBlurEffect.setup (background_actor, 20.0f, 1);
 
 			background_actor.background = background.background;
 
-			insert_child_below (background_actor, null);
-
 			var monitor = screen.get_monitor_geometry (monitor_index);
-
 			background_actor.set_size (monitor.width, monitor.height);
 
 			if (control_position) {
 				background_actor.set_position (monitor.x, monitor.y);
 			}
 
-			ulong changed_handler = 0;
-			changed_handler = background_source.changed.connect (() => {
-				SignalHandler.disconnect (background_source, changed_handler);
-				changed_handler = 0;
-				update_background_actor ();
-			});
+            ulong loaded_handler = 0;
+            loaded_handler = background.loaded.connect (() => {
+                SignalHandler.disconnect (background, loaded_handler);
+                loaded_handler = 0;
 
-			background_actor.destroy.connect (() => {
-				if (changed_handler != 0) {
-					SignalHandler.disconnect (background_source, changed_handler);
-					changed_handler = 0;
-				}
+                insert_child_below (background_actor, null);
+                actors.add (background_actor);
+                Meta.verbose ("%s: add %s\n", Log.METHOD, background_actor.name);
 
-				var loaded_handler = background.get_data<ulong> ("background-loaded-handler");
-				if (loaded_handler != 0) {
-					SignalHandler.disconnect (background, loaded_handler);
-					background.set_data<ulong> ("background-loaded-handler", 0);
-				}
-			});
+                while (actors.size > 2) {
+                    Meta.verbose ("remove_child %s\n", actors[0].name);
+                    var actor = actors[0];
+                    actor.visible = false;
+                    actor.opacity = 0;
 
-			return background_actor;
+                    actors.remove_at (0);
+                    actor.remove_all_transitions ();
+                    remove_child (actor);
+
+                    actor.destroy ();
+                }
+
+                if (actors.size > 1) {
+                    var actor = actors[actors.size - 2];
+
+                    actor.opacity = 255;
+                    actor.save_easing_state ();
+                    actor.set_easing_duration (FADE_ANIMATION_TIME);
+                    actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
+                    actor.opacity = 0;
+                    actor.restore_easing_state ();
+
+                    actor.transition_stopped.connect( (name, is_finished) => {
+                        Meta.verbose ("swapping from %s, completed = %d\n",
+                                actor.name, is_finished);
+                        if (is_finished) {
+                            //queue_relayout ();
+                            Meta.verbose ("leftout actors\n");
+                            var children = get_children ();
+                            children.foreach ((c) => {
+                                Meta.verbose ("actor %s\n", c.name);
+                            });
+
+                            actor.visible = false;
+                            assert (actor.opacity == 0);
+
+                            actors.remove (actor);
+                            remove_child (actor);
+
+                            Idle.add( () => { actor.destroy (); return false; });
+
+                            changed ();
+
+                        } else {
+                            actor.opacity = 0;
+                        }
+                    });
+
+                } 
+                
+            });
+
+            background_actor.destroy.connect (() => {
+                Meta.verbose ("%s: destroy %s\n", Log.METHOD, background_actor.name);
+                if (loaded_handler != 0) 
+                    SignalHandler.disconnect (background, loaded_handler);
+            });
 		}
 	}
 }
