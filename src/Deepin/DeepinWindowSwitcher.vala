@@ -63,7 +63,9 @@ namespace Gala
 			layout.orientation = Orientation.HORIZONTAL;
 			popup.layout_manager = layout;
 			// TODO: multi monitors
-			popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
+
+			var screen = wm.get_screen ();
+            popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
 
 			item_container = new Actor ();
 			item_container.margin_bottom = POPUP_PADDING;
@@ -71,7 +73,6 @@ namespace Gala
 			item_container.margin_right = POPUP_PADDING;
 			item_container.margin_top = POPUP_PADDING;
 			item_container.layout_manager = new DeepinWindowSwitcherLayout ();
-			relayout ();
 
 			item_container.actor_removed.connect (on_item_removed);
 			popup.add_child (item_container);
@@ -83,6 +84,7 @@ namespace Gala
 			add_child (popup);
 
 			wm.get_screen ().monitors_changed.connect (relayout);
+			//relayout ();
 
 			visible = false;
 		}
@@ -96,13 +98,29 @@ namespace Gala
 			wm.get_screen ().monitors_changed.disconnect (relayout);
 		}
 
-		void relayout ()
-		{
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
-			var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
-			switcher_layout.max_width =
-				monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;
-		}
+		public void relayout ()
+        {
+            Meta.verbose ("#%d monitors\n", wm.get_screen().get_n_monitors());
+
+            var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
+            var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
+            var max_width = monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;
+            switcher_layout.max_width = max_width;
+
+            clear_constraints ();
+
+            if (wm.get_screen().get_n_monitors() > 1) {
+                this.x = monitor_geom.x + (monitor_geom.width - this.width) / 2;
+                this.add_constraint (new Clutter.BindConstraint (
+                            get_parent (), Clutter.BindCoordinate.POSITION, 0));
+
+            } else {
+                this.x = monitor_geom.x;
+                this.add_constraint (new Clutter.BindConstraint (
+                            get_parent (), Clutter.BindCoordinate.ALL, 0));
+            }
+
+        }
 
 		void show_popup ()
 		{

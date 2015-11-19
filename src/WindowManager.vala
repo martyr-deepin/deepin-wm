@@ -246,9 +246,8 @@ namespace Gala
 
 			if (plugin_manager.window_switcher_provider == null) {
 				winswitcher = new DeepinWindowSwitcher (this);
-				// TODO: multi monitors
-				winswitcher.add_constraint (new Clutter.BindConstraint (stage, Clutter.BindCoordinate.ALL, 0));
 				ui_group.add_child (winswitcher);
+                winswitcher.relayout ();
 
 				KeyBinding.set_custom_handler ("switch-applications", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
 				KeyBinding.set_custom_handler ("switch-applications-backward", (Meta.KeyHandlerFunc) winswitcher.handle_switch_windows);
