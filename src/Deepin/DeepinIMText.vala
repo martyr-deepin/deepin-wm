@@ -67,7 +67,8 @@ namespace Gala
                     im_clone.destroy ();
                     im_clone = null;
                 }
-                SignalHandler.disconnect (target, handler);
+
+                if (handler > 0) SignalHandler.disconnect (target, handler);
             });
 
             actor.show.connect (() => {
