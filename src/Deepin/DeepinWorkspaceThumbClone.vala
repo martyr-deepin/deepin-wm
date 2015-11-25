@@ -301,7 +301,7 @@ namespace Gala
 
 		Actor workspace_name;
 		Text workspace_name_num;
-		Text workspace_name_text;
+		DeepinIMText  workspace_name_text;
 
 		// selected shape for workspace name field
 		DeepinCssActor name_shape;
@@ -320,7 +320,7 @@ namespace Gala
 			name_shape.reactive = true;
 			name_shape.set_pivot_point (0.5f, 0.5f);
 
-			name_shape.button_press_event.connect (on_name_button_press_event);
+            name_shape.button_press_event.connect (on_name_button_press_event);
 
 			add_child (name_shape);
 
@@ -333,7 +333,7 @@ namespace Gala
 			workspace_name_num = new Text ();
 			workspace_name_num.set_font_description (name_font);
 
-			workspace_name_text = new Text ();
+			workspace_name_text = new DeepinIMText (workspace.get_screen ());
 			workspace_name_text.reactive = true;
 			workspace_name_text.activatable = true;
 			workspace_name_text.cursor_size = 1;
@@ -346,9 +346,9 @@ namespace Gala
 			workspace_name_text.selected_text_color =
 				DeepinUtils.get_css_color ("deepin-text-selection");
 
-			workspace_name_text.button_press_event.connect (on_name_button_press_event);
+            workspace_name_text.button_press_event.connect (on_name_button_press_event);
 			workspace_name_text.activate.connect (() => {
-				finish_edit ();
+                finish_edit ();
 			});
 			workspace_name_text.key_focus_in.connect (() => {
 				if (workspace_name_text.text.length == 0) {
@@ -377,6 +377,7 @@ namespace Gala
 
 		bool on_name_button_press_event ()
 		{
+            Meta.verbose ("%s\n", Log.METHOD);
 			if (workspace_name_text.editable && workspace_name_text.has_key_focus ()) {
 				return false;
 			}
@@ -403,8 +404,8 @@ namespace Gala
 
 		public void start_edit ()
 		{
-			workspace_name_text.grab_key_focus ();
 			workspace_name_text.editable = true;
+			workspace_name_text.grab_key_focus ();
 		}
 
 		public void finish_edit ()

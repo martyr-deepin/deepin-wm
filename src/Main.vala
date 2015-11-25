@@ -52,6 +52,9 @@ namespace Gala
 		 */
 		GLib.Environment.set_variable ("NO_GAIL", "1", true);
 		GLib.Environment.set_variable ("NO_AT_BRIDGE", "1", true);
+        /* hack: this make DeepinIMText works great */
+		GLib.Environment.set_variable ("DBUS_ENABLE_SYNC_MODE", "1", true);
+		GLib.Environment.set_variable ("FCITX_ENABLE_SYNC_MODE", "1", true);
 		Meta.init ();
 		GLib.Environment.unset_variable ("NO_GAIL");
 		GLib.Environment.unset_variable ("NO_AT_BRIDGE");

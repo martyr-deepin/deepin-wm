@@ -62,6 +62,7 @@ gala_VALASOURCES = \
 	Deepin/DeepinWorkspaceFlowClone.vala \
 	Deepin/DeepinWorkspaceThumbClone.vala \
 	Deepin/DeepinWorkspaceThumbContainer.vala \
+	Deepin/DeepinIMText.vala \
 	Widgets/IconGroup.vala \
 	Widgets/IconGroupContainer.vala \
 	Widgets/MonitorClone.vala \

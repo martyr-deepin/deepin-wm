@@ -86,7 +86,6 @@ namespace Gala
         void configure_workspace_name ()
         {
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
-			var stage = Compositor.get_stage_for_screen (screen) as Clutter.Stage;
 
             set_position (monitor_geom.x, monitor_geom.y);
             set_size (monitor_geom.width, monitor_geom.height);
