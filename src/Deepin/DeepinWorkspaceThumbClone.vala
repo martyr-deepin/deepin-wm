@@ -135,6 +135,7 @@ namespace Gala
 
 		~DeepinWorkspaceThumbCloneCore ()
 		{
+
 			workspace.get_screen ().monitors_changed.disconnect (update_workspace_shadow);
 			background.destroy ();
 		}
@@ -301,17 +302,35 @@ namespace Gala
 
 		Actor workspace_name;
 		Text workspace_name_num;
-		DeepinIMText  workspace_name_text;
+		DeepinIMText?  workspace_name_text;
 
 		// selected shape for workspace name field
 		DeepinCssActor name_shape;
 
 		bool first_setup = true;
+        uint event_filter_id = 0;
 
 		public DeepinWorkspaceNameField (Workspace workspace)
 		{
 			Object (workspace: workspace);
 		}
+        
+        bool event_filter(Clutter.Event ev) {
+            Meta.verbose ("event_filter\n");
+            if (workspace_name_text == null 
+                    || !workspace_name_text.has_key_focus ()) 
+                return false;
+
+            if (ev.get_type () == Clutter.EventType.BUTTON_PRESS) {
+                if (ev.get_device ().get_pointer_actor () !=
+                        workspace_name_text) {
+                    Meta.verbose ("event_filter: click outside\n");
+                    workspace_name_text.activate ();
+                }
+            }
+
+            return false;
+        }
 
 		construct
 		{
@@ -346,9 +365,14 @@ namespace Gala
 			workspace_name_text.selected_text_color =
 				DeepinUtils.get_css_color ("deepin-text-selection");
 
+            bool is_completed = false;
+
+
             workspace_name_text.button_press_event.connect (on_name_button_press_event);
+
 			workspace_name_text.activate.connect (() => {
                 finish_edit ();
+                is_completed = true;
 			});
 			workspace_name_text.key_focus_in.connect (() => {
 				if (workspace_name_text.text.length == 0) {
@@ -356,12 +380,12 @@ namespace Gala
 				}
 			});
 			workspace_name_text.key_focus_out.connect (() => {
-				set_workspace_name ();
+                set_workspace_name ();
 				if (workspace_name_text.text.length == 0) {
 					workspace_name_text.visible = false;
 				}
 
-				notify_setup_completed_if_need (first_setup);
+				notify_setup_completed_if_need (is_completed);
 			});
 
 			get_workspace_name ();
@@ -403,13 +427,19 @@ namespace Gala
 		}
 
 		public void start_edit ()
-		{
-			workspace_name_text.editable = true;
-			workspace_name_text.grab_key_focus ();
-		}
+        {
+            workspace_name_text.editable = true;
+            workspace_name_text.grab_key_focus ();
+
+            event_filter_id = (uint) get_stage ().captured_event.connect (event_filter);
+        }
 
 		public void finish_edit ()
 		{
+            if (event_filter_id > 0) {
+                SignalHandler.disconnect (get_stage (), event_filter_id);
+            }
+
 			reset_key_focus ();
 			workspace_name_text.editable = false;
 		}
