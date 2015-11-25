@@ -106,13 +106,6 @@ namespace Gala
 			}
 		}
 
-		public static void reset_all_workspace_names ()
-		{
-			for (var i = 0; i < Meta.Prefs.get_num_workspaces (); i++) {
-				Meta.Prefs.change_workspace_name (i, "");
-			}
-		}
-
 		/**
 		 * Overide Meta.Prefs.get_workspace_name () to ignore the default
 		 * workspace name in format "Workspace %d".
@@ -157,12 +150,12 @@ namespace Gala
 				return;
 			}
 
-			// do not store old workspace name in gsettings
-			DeepinUtils.reset_all_workspace_names ();
-
 			if (workspace == null) {
 				workspace = screen.get_active_workspace ();
 			}
+
+            Meta.Prefs.change_workspace_name (
+                    Meta.Prefs.get_num_workspaces () - 1, "");
 
 			uint32 timestamp = screen.get_display ().get_current_time ();
 			screen.remove_workspace (workspace, timestamp);
