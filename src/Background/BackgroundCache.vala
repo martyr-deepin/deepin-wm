@@ -50,6 +50,7 @@ namespace Gala
 
 		public void monitor_file (string filename)
 		{
+            Meta.verbose ("%s: filename = [%s]\n", Log.METHOD, filename);
 			if (file_monitors.has_key (filename))
 				return;
 

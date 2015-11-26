@@ -34,9 +34,9 @@ namespace Gala
 		public Meta.Background background { get; private set; }
 
 		Animation? animation = null;
-		Gee.HashMap<string,ulong> file_watches;
 		Cancellable cancellable;
 		uint update_animation_timeout_id = 0;
+        ulong handler = 0;
 
 		public Background (Meta.Screen screen, int monitor_index, int workspace_index,
 						   string? filename, BackgroundSource background_source,
@@ -55,8 +55,11 @@ namespace Gala
 			background = new Meta.Background (screen);
 			background.set_data<Background> ("delegate", this);
 
-			file_watches = new Gee.HashMap<string,ulong> ();
 			cancellable = new Cancellable ();
+
+            handler = background.changed.connect (() => {
+                set_loaded ();
+            });
 
 			load ();
 		}
@@ -68,15 +71,8 @@ namespace Gala
 			cancellable.cancel ();
 			remove_animation_timeout ();
 
-			var cache = BackgroundCache.get_default ();
-
-			foreach (var entry in file_watches.entries) {
-                if (SignalHandler.is_connected (cache, entry.value))
-                    SignalHandler.disconnect (cache, entry.value);
-                else 
-                    Meta.verbose ("%s: handler 0x%d for %s disappeared\n", 
-                            Log.METHOD, entry.value, entry.key);
-			}
+            SignalHandler.disconnect (background, handler);
+            handler = 0;
 		}
 
 		public void update_resolution ()
@@ -120,24 +116,8 @@ namespace Gala
 
 		void watch_file (string filename)
 		{
-			if (file_watches.has_key (filename))
-				return;
-
 			var cache = BackgroundCache.get_default ();
-
 			cache.monitor_file (filename);
-
-			file_watches[filename] = cache.file_changed.connect ((changed_file) => {
-				// FIXME: comment following code to avoid background draw issue when file modified
-// 				if (changed_file == filename) {
-// 					var image_cache = Meta.BackgroundImageCache.get_default ();
-// #if HAS_MUTTER316
-// 					image_cache.purge (File.new_for_path (changed_file));
-// #else
-// 					image_cache.purge (changed_file);
-// #endif
-// 				}
-			});
 		}
 
 		void remove_animation_timeout ()
@@ -241,30 +221,23 @@ namespace Gala
 		}
 
 		void load_image (string filename)
-		{
-#if HAS_MUTTER316
-			background.set_file (File.new_for_path (filename), style);
-#else
-			background.set_filename (filename, style);
-#endif
-			watch_file (filename);
+        {
+            var cache = Meta.BackgroundImageCache.get_default ();
 
-			var cache = Meta.BackgroundImageCache.get_default ();
 #if HAS_MUTTER316
-			var image = cache.load (File.new_for_path (filename));
+            background.set_file (File.new_for_path (filename), style);
+            var image = cache.load (File.new_for_path (filename));
 #else
-			var image = cache.load (filename);
+            background.set_filename (filename, style);
+            var image = cache.load (filename);
 #endif
-			if (image.is_loaded ())
-				set_loaded();
-			else {
-				ulong handler = 0;
-				handler = image.loaded.connect (() => {
-					set_loaded ();
-					SignalHandler.disconnect (image, handler);
-				});
-			}
-		}
+
+            if (image.is_loaded ()) {
+                set_loaded ();
+            }
+
+            watch_file (filename);
+        }
 
 		void load_file (string filename)
 		{
