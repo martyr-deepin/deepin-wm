@@ -32,6 +32,7 @@ namespace Gala
         Meta.Window? target;
         Clutter.Clone? im_clone;
         bool has_preedit_str;
+        uint fcitx_watch_id = 0;
 
         public Meta.Screen screen { get; construct; }
 
@@ -59,6 +60,13 @@ namespace Gala
             if (im_clone != null) return false;
 
             var actor = target.get_compositor_private () as WindowActor; 
+            if (actor == null) {
+                Meta.verbose ("target found, but actor is null\n");
+                target = null;
+                return false;
+            }
+            assert (actor != null);
+
             im_clone = new Clutter.Clone (actor);
 
             ulong handler = 0;
@@ -155,18 +163,73 @@ namespace Gala
 			var display = screen.get_display ();
             display.window_created.connect (on_window_created);
 
-            imctx = new Gtk.IMMulticontext ();
-            imctx.commit.connect(on_ctx_commit);
+            create_context ();
+            scan_impanel ();
 
-            imctx.retrieve_surrounding.connect (on_retrieve_surrounding);
-            imctx.delete_surrounding.connect (on_delete_surrounding);
-            imctx.preedit_changed.connect (on_preedit_changed);
+            fcitx_watch_id = GLib.Bus.watch_name (BusType.SESSION, "org.fcitx.Fcitx",
+                    0, im_appeared, im_vanished);
+        }
+
+        void im_appeared (GLib.DBusConnection connection, string name, string name_owner)
+        {
+            Meta.verbose ("%s: name = %s, owner = %s\n", Log.METHOD, name, name_owner);
+
+            if (imctx == null) {
+                create_context ();
+            }
+
+            if (target == null) {
+                scan_impanel ();
+            }
+        }
+
+        void im_vanished (GLib.DBusConnection connection, string name)
+        {
+            Meta.verbose ("%s\n", Log.METHOD);
+            if (imctx != null) {
+                destroy_context ();
+            }
+        }
+
+        void scan_impanel ()
+        {
+            if (target != null) return;
+
+            unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
+
+            foreach (var actor in actors) {
+                var window = actor.get_meta_window ();
+                on_window_created (window);
+            }
+        }
+
+        void destroy_context () {
+            Meta.verbose ("%s\n", Log.METHOD);
+            if (imctx != null) {
+                imctx.set_client_window (null);
+                imctx = null;
+            }
+        }
+
+        void create_context () {
+            Meta.verbose ("%s\n", Log.METHOD);
+            if (imctx == null) {
+                imctx = new Gtk.IMMulticontext ();
+                imctx.commit.connect(on_ctx_commit);
+
+                imctx.retrieve_surrounding.connect (on_retrieve_surrounding);
+                imctx.delete_surrounding.connect (on_delete_surrounding);
+                imctx.preedit_changed.connect (on_preedit_changed);
+
+                imctx.set_client_window (event_window);
+            }
 		}
 
 		~DeepinIMText ()
 		{
 			var display = screen.get_display ();
             display.window_created.disconnect (on_window_created);
+            GLib.Bus.unwatch_name (fcitx_watch_id);
 		}
 
         uint is_modifier (uint keyval)
@@ -234,13 +297,13 @@ namespace Gala
                 var kev = event.key;
 
                 var gdkev = to_gdk_event (kev);
-                if (imctx.filter_keypress (gdkev.key)) {
+                if (imctx != null && imctx.filter_keypress (gdkev.key)) {
                     return true;
                 }
 
                 if (type == Clutter.EventType.KEY_PRESS && 
                         kev.keyval == Clutter.Key.Return) {
-                    imctx.reset ();
+                    if (imctx != null) imctx.reset ();
                 }
             }
             return false;
@@ -248,15 +311,26 @@ namespace Gala
 
         public override bool button_press_event (Clutter.ButtonEvent event)
         {
-            Meta.verbose ("imtext: %s\n", Log.METHOD);
-            imctx.reset ();
+            scan_impanel ();
+
+            if (imctx != null) {
+                var imm = imctx as Gtk.IMMulticontext;
+
+                Meta.verbose ("%s, ctxid = %s\n", Log.METHOD,
+                        imm.get_context_id ());
+
+                if (imm.get_context_id () == null) {
+                    imm.set_context_id ("fcitx");
+                }
+                imctx.reset ();
+            }
             return base.button_press_event (event);
         }
 
 		public override void key_focus_in ()
 		{
             Meta.verbose ("imtext: %s\n", Log.METHOD);
-            if (editable) {
+            if (editable && imctx != null) {
                 imctx.focus_in ();
             }
             base.key_focus_in ();
@@ -265,8 +339,8 @@ namespace Gala
 		public override void key_focus_out ()
 		{
             Meta.verbose ("imtext: %s\n", Log.METHOD);
-            if (editable) {
-                if (im_clone != null) im_clone.hide ();
+            if (editable && im_clone != null) {
+                im_clone.hide ();
                 imctx.focus_out ();
             }
             base.key_focus_out ();
@@ -294,7 +368,6 @@ namespace Gala
                 var attributes_mask = WindowAttributesType.X |
                     WindowAttributesType.Y;
                 event_window = new Gdk.Window (null, attrs, attributes_mask);
-                imctx.set_client_window (event_window);
             }
 		}
 
@@ -302,7 +375,7 @@ namespace Gala
 		{
             if (event_window != null) {
                 imctx.reset ();
-                imctx.set_client_window (null);
+                destroy_context ();
                 event_window.destroy ();
                 event_window = null;
             }
