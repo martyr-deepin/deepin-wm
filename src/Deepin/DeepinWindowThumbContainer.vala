@@ -68,6 +68,13 @@ namespace Gala
 		 */
 		public override void relayout (bool selecting = false)
 		{
+
+            var screen = workspace.get_screen ();
+            if (screen.get_n_monitors () == 0) {
+                /* this happens during the changing of monitors */
+                return;
+            }
+
 			foreach (var child in get_children ()) {
 				var window_clone = child as DeepinWindowClone;
 				var box = get_layout_box_for_window (window_clone);
