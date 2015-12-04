@@ -265,8 +265,11 @@ namespace Gala
             }
         }
 
-        Gdk.Event to_gdk_event (Clutter.KeyEvent ev)
+        Gdk.Event? to_gdk_event (Clutter.KeyEvent ev)
         {
+            if (event_window == null)
+                return null;
+
             var gdkev = new Gdk.Event (
                     ev.type == Clutter.EventType.KEY_PRESS? 
                     Gdk.EventType.KEY_PRESS : Gdk.EventType.KEY_RELEASE);
@@ -297,7 +300,7 @@ namespace Gala
                 var kev = event.key;
 
                 var gdkev = to_gdk_event (kev);
-                if (imctx != null && imctx.filter_keypress (gdkev.key)) {
+                if (imctx != null && gdkev != null && imctx.filter_keypress (gdkev.key)) {
                     return true;
                 }
 
