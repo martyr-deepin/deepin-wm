@@ -60,6 +60,18 @@ namespace Gala
 			wm.perform_action (type);
 		}
 
+        public void toggle_debug ()
+        {
+            var val = !Meta.Util.is_debugging ();
+            if (val) {
+                GLib.Environment.set_variable ("MUTTER_USE_LOGFILE", "1", true);
+            } else {
+                GLib.Environment.unset_variable ("MUTTER_USE_LOGFILE");
+            }
+            Meta.set_debugging (val);
+            Meta.set_verbose (val);
+        }
+
 		const double SATURATION_WEIGHT = 1.5;
 		const double WEIGHT_THRESHOLD = 1.0;
 

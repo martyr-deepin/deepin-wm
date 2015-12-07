@@ -5,4 +5,11 @@ namespace Meta {
 
     [CCode (cheader_filename = "meta/main.h", cname = "meta_topic_real")]
     public static void topic (Meta.DebugTopic topic, string format, ...);
+
+#if HAS_MUTTER314
+        [CCode (cheader_filename = "meta/main.h", cname = "meta_set_debugging")]
+        public static void set_debugging (bool setting);
+        [CCode (cheader_filename = "meta/main.h", cname = "meta_set_verbose")]
+        public static void set_verbose (bool setting);
+#endif
 }
