@@ -1,5 +1,6 @@
 src/WindowManager.vala
 src/Widgets/WindowMenu.vala
+src/Deepin/DeepinWorkspaceThumbClone.vala
 lib/Granite/Widgets/Utils.c
 data/gala-multitaskingview.desktop.in
 data/org.pantheon.desktop.gala.gschema.xml.in.in

@@ -6,26 +6,30 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: noise\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2015-09-22 16:32+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2015-12-07 13:25+0800\n"
 "PO-Revision-Date: 2015-05-06 06:44+0000\n"
 "Last-Translator: colindemian <dengmengpc@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <zh_CN@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2015-09-23 06:25+0000\n"
 "X-Generator: Launchpad (build 17749)\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Language: zh_CN\n"
+"X-Source-Language: C\n"
 
-#: ../src/WindowManager.vala:1549
+#: ../src/WindowManager.vala:1701
 msgid "Does the display look OK?"
 msgstr "当前显示是否正常？"
 
-#: ../src/WindowManager.vala:1552
+#: ../src/WindowManager.vala:1704
 msgid "Keep This Configuration"
 msgstr "保留当前设定"
 
-#: ../src/WindowManager.vala:1553
+#: ../src/WindowManager.vala:1705
 msgid "Restore Previous Configuration"
 msgstr "恢复之前的设置"
 
@@ -69,6 +73,59 @@ msgstr "还原"
 msgid "Maximize"
 msgstr "最大化"
 
+#: ../src/Deepin/DeepinWorkspaceThumbClone.vala:563
+msgid "Drag upward to remove"
+msgstr "向上拖拽删除"
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:77
+msgid "%l:%M:%S %p"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:80
+msgid "%l:%M %p"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:85
+msgid "%H:%M:%S"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:88
+msgid "%H:%M"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:102
+msgid "%a %b %e %Y"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:105
+msgid "%b %e %Y"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:108
+msgid "%Y"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:111
+msgid "%b %e"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:114
+msgid "%a %Y"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:117
+#, c-format
+msgid "%a"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:120
+msgid "%a %b %e"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:123
+msgid "%b"
+msgstr ""
+
 #: ../data/gala-multitaskingview.desktop.in.h:1
 msgid "Multitasking View"
 msgstr "多任务视图"
@@ -110,11 +167,11 @@ msgstr ""
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:8
 msgid ""
 "If you just put a single command, it will be used for every hotcorner "
-"assigned to 'custom-command'. If you instead use the pattern 'hotcorner-"
-"topleft:command;;hotcorner-bottomright:command' the specific commands will "
-"be used per hotcorner. Possible identifiers are 'hotcorner-[topleft; "
-"topright; bottomleft; bottomright]' followed by a ':' and then the command. "
-"';;' is used as delimiter between command defintions."
+"assigned to 'custom-command'. If you instead use the pattern "
+"'hotcorner-topleft:command;;hotcorner-bottomright:command' the specific "
+"commands will be used per hotcorner. Possible identifiers are "
+"'hotcorner-[topleft; topright; bottomleft; bottomright]' followed by a ':' "
+"and then the command. ';;' is used as delimiter between command defintions."
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:9
@@ -133,8 +190,7 @@ msgid "Panel main menu action"
 msgstr "面板主菜单行为"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:12
-msgid ""
-"Sets the command to run when the panel-main-menu keybinding is pressed"
+msgid "Sets the command to run when the panel-main-menu keybinding is pressed"
 msgstr "设定当 panel-main-menu 组合键按下时要运行的命令"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:13
@@ -159,182 +215,201 @@ msgid ""
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:17
+msgid "Window class names that will be focused automatically when shown"
+msgstr ""
+
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:18
+msgid ""
+"Some windows could not grab focus correctly when shown, just put their class "
+"names here to avoid such issue."
+msgstr ""
+
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:19
+msgid "Enable show-desktop item in Alt-Tab popup window"
+msgstr ""
+
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:20
+msgid ""
+"The show-desktop item will be put at end of the window list. show-desktop "
+"action of window manager will be performed if selected."
+msgstr ""
+
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:21
 msgid "Shortcut to move to first workspace"
 msgstr "移至首个工作区的快捷键"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:18
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:22
 msgid "Shortcut to move to last workspace"
 msgstr "移至末尾工作区的快捷键"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:19
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:23
 msgid "Shortcut to move the current window to first workspace"
 msgstr "将当前窗口移至首个工作区的快捷键"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:20
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:24
 msgid "Shortcut to move the current window to last workspace"
 msgstr "将当前窗口移至末尾工作区的快捷键"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:21
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:25
 msgid "Zoom in"
 msgstr "放大"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:22
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:26
 msgid "Zoom out"
 msgstr "缩小"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:23
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:27
 msgid "Shortcut to open the window overview"
 msgstr "窗口概览的快捷键"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:24
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:28
 msgid "Shortcut to open the window overview for all windows"
 msgstr "所有窗口概览的快捷键"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:25
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:29
 msgid "Cycle to the next workspace to the right or to back to the first"
 msgstr "循环至下一工作区或回到首个工作区"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:26
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:30
 msgid "Cycle to next keyboard layout"
 msgstr "循环至下一个键盘布局"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:27
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:31
 msgid "Cycle to previous keyboard layout"
 msgstr "循环至上一个键盘布局"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:28
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:32
 msgid "Attach modal dialogs"
 msgstr "依附模态对话框"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:29
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:33
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
 msgstr "当为 true 时，模态对话框会依附在父窗口的标题栏出现，并随父窗口移动，而不使用单独的标题栏。"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:30
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:34
 msgid "Arrangement of buttons on the titlebar"
 msgstr "标题栏按钮布局"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:31
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:35
 msgid ""
 "Arrangement of buttons on the titlebar. The value should be a string, such "
 "as \"menu:minimize,maximize,spacer,close\"; the colon separates the left "
-"corner of the window from the right corner, and the button names are comma-"
-"separated. Duplicate buttons are not allowed. Unknown button names are "
+"corner of the window from the right corner, and the button names are "
+"comma-separated. Duplicate buttons are not allowed. Unknown button names are "
 "silently ignored so that buttons can be added in future metacity versions "
 "without breaking older versions. A special spacer tag can be used to insert "
 "some space between two adjacent buttons."
 msgstr ""
-"标题栏中按钮的排列方式。值应该为字符串，如“menu:minimize,maximize,spacer,close”；冒号分隔窗口的左上角和右上角，按钮名"
-"以逗号分隔。按钮不允许重复。未知的按钮名将直接忽略，以便将来的 metacity 版本增加按钮时不会破坏旧版本。可以使用特别的 spacer "
-"标签在相邻按钮间增加一些空间。"
+"标题栏中按钮的排列方式。值应该为字符串，如“menu:minimize,maximize,spacer,close”；冒号分隔窗口的左上角和右上角，按钮名以逗号分隔。按钮不允许重复。未知的按钮名将直接忽略，以便将来的 "
+"metacity 版本增加按钮时不会破坏旧版本。可以使用特别的 spacer 标签在相邻按钮间增加一些空间。"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:32
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:36
 msgid "Make parent windows that spawn a modal attached dialog being dimmed"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:33
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:37
 msgid ""
 "The opacity of the windows located in the background in the alt-tab-switcher."
 msgstr "Alt+Tab 切换时窗口的透明图"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:34
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:38
 msgid "Background-image used in the workspace-switcher"
 msgstr "工作区切换器使用的背景图片"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:35
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:39
 msgid "Enable Animations"
 msgstr "启用动画"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:36
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:40
 msgid ""
 "Whether animations should be displayed. Note: This is a global key, it "
 "changes the behaviour of the window manager, the panel etc."
 msgstr "是否显示动画。注意：这是一个全局键，它会更改窗口管理器、面板等的行为。"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:37
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:41
 msgid "Duration of the snap animation as used by maximize/unmaximize"
 msgstr "最大化/最小化所使用的弹出动画时长"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:38
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:42
 msgid "Duration of the close animation"
 msgstr "关闭动画时长"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:39
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:43
 msgid "Duration of the minimize animation"
 msgstr "最小化动画时长"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:40
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:44
 msgid "Duration of the workspace switch animation"
 msgstr "工作区切换动画时长"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:41
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:45
 msgid "Duration of the menu mapping animation"
 msgstr "菜单地图动画时长"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:42
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:46
 msgid "Defines the shadow of normal focused windows"
 msgstr "设置普通焦点窗口阴影"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:43
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:47
 msgid ""
 "The first value is the radius of the blur of the shadow, the second one the "
-"top fade (which is usually just -1), the third and fourth the x- and y-"
-"offset and the last the opacity. So [blur-radius, top-fade, x-offset, y-"
-"offset, opacity]"
+"top fade (which is usually just -1), the third and fourth the x- and "
+"y-offset and the last the opacity. So [blur-radius, top-fade, x-offset, "
+"y-offset, opacity]"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:44
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:48
 msgid "Defines the shadow of a normal unfocused window"
 msgstr "定义普通非焦点窗口的阴影"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:45
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:49
 msgid "See normal-focused"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:46
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:50
 msgid "Defines the shadow of a menu"
 msgstr "定义菜单的阴影"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:47
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:51
 msgid "Defines the shadow of a focused dialog"
 msgstr "定义焦点对话框的阴影"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:48
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:52
 msgid "Defines the shadow of an unfocused dialog"
 msgstr "定义非焦点对话框的阴影"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:49
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:53
 msgid "Disable all notifications"
 msgstr "禁用所有通知"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:50
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:54
 msgid "Enable bubbles"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:51
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:55
 msgid "Enable sounds"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:52
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:56
 msgid "Show missed notifications in notification center"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:53
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:57
 msgid "Enable rounded corner mask"
 msgstr "启用圆角模框"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:54
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:58
 msgid "Corner radius"
 msgstr "圆角半径"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:55
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:59
 msgid "Disable corner mask on fullscreen"
 msgstr "全屏时禁用圆角模框"
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:56
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:60
 msgid "Only show corner masks on primary monitor"
 msgstr "只在主显示器显示圆角模框"
 

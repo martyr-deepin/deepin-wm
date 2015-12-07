@@ -7,26 +7,26 @@ msgid ""
 msgstr ""
 "Project-Id-Version: beat-box\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-09-22 16:32+0000\n"
+"POT-Creation-Date: 2015-12-07 13:25+0800\n"
 "PO-Revision-Date: 2014-04-17 10:37+0000\n"
 "Last-Translator: Minh Danh <r00t3rvn@gmail.com>\n"
 "Language-Team: Vietnamese <vi@li.org>\n"
+"Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2015-09-23 06:25+0000\n"
 "X-Generator: Launchpad (build 17749)\n"
-"Language: vi\n"
 
-#: ../src/WindowManager.vala:1549
+#: ../src/WindowManager.vala:1701
 msgid "Does the display look OK?"
 msgstr ""
 
-#: ../src/WindowManager.vala:1552
+#: ../src/WindowManager.vala:1704
 msgid "Keep This Configuration"
 msgstr ""
 
-#: ../src/WindowManager.vala:1553
+#: ../src/WindowManager.vala:1705
 msgid "Restore Previous Configuration"
 msgstr ""
 
@@ -68,6 +68,59 @@ msgstr ""
 
 #: ../src/Widgets/WindowMenu.vala:133
 msgid "Maximize"
+msgstr ""
+
+#: ../src/Deepin/DeepinWorkspaceThumbClone.vala:563
+msgid "Drag upward to remove"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:77
+msgid "%l:%M:%S %p"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:80
+msgid "%l:%M %p"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:85
+msgid "%H:%M:%S"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:88
+msgid "%H:%M"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:102
+msgid "%a %b %e %Y"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:105
+msgid "%b %e %Y"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:108
+msgid "%Y"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:111
+msgid "%b %e"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:114
+msgid "%a %Y"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:117
+#, c-format
+msgid "%a"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:120
+msgid "%a %b %e"
+msgstr ""
+
+#: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:123
+msgid "%b"
 msgstr ""
 
 #: ../data/gala-multitaskingview.desktop.in.h:1
@@ -134,8 +187,7 @@ msgid "Panel main menu action"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:12
-msgid ""
-"Sets the command to run when the panel-main-menu keybinding is pressed"
+msgid "Sets the command to run when the panel-main-menu keybinding is pressed"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:13
@@ -160,65 +212,85 @@ msgid ""
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:17
-msgid "Shortcut to move to first workspace"
+msgid "Window class names that will be focused automatically when shown"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:18
-msgid "Shortcut to move to last workspace"
+msgid ""
+"Some windows could not grab focus correctly when shown, just put their class "
+"names here to avoid such issue."
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:19
-msgid "Shortcut to move the current window to first workspace"
+msgid "Enable show-desktop item in Alt-Tab popup window"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:20
-msgid "Shortcut to move the current window to last workspace"
+msgid ""
+"The show-desktop item will be put at end of the window list. show-desktop "
+"action of window manager will be performed if selected."
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:21
-msgid "Zoom in"
+msgid "Shortcut to move to first workspace"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:22
-msgid "Zoom out"
+msgid "Shortcut to move to last workspace"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:23
-msgid "Shortcut to open the window overview"
+msgid "Shortcut to move the current window to first workspace"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:24
-msgid "Shortcut to open the window overview for all windows"
+msgid "Shortcut to move the current window to last workspace"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:25
-msgid "Cycle to the next workspace to the right or to back to the first"
+msgid "Zoom in"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:26
-msgid "Cycle to next keyboard layout"
+msgid "Zoom out"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:27
-msgid "Cycle to previous keyboard layout"
+msgid "Shortcut to open the window overview"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:28
-msgid "Attach modal dialogs"
+msgid "Shortcut to open the window overview for all windows"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:29
+msgid "Cycle to the next workspace to the right or to back to the first"
+msgstr ""
+
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:30
+msgid "Cycle to next keyboard layout"
+msgstr ""
+
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:31
+msgid "Cycle to previous keyboard layout"
+msgstr ""
+
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:32
+msgid "Attach modal dialogs"
+msgstr ""
+
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:33
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:30
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:34
 msgid "Arrangement of buttons on the titlebar"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:31
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:35
 msgid ""
 "Arrangement of buttons on the titlebar. The value should be a string, such "
 "as \"menu:minimize,maximize,spacer,close\"; the colon separates the left "
@@ -229,54 +301,54 @@ msgid ""
 "some space between two adjacent buttons."
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:32
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:36
 msgid "Make parent windows that spawn a modal attached dialog being dimmed"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:33
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:37
 msgid ""
 "The opacity of the windows located in the background in the alt-tab-switcher."
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:34
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:38
 msgid "Background-image used in the workspace-switcher"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:35
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:39
 msgid "Enable Animations"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:36
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:40
 msgid ""
 "Whether animations should be displayed. Note: This is a global key, it "
 "changes the behaviour of the window manager, the panel etc."
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:37
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:41
 msgid "Duration of the snap animation as used by maximize/unmaximize"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:38
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:42
 msgid "Duration of the close animation"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:39
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:43
 msgid "Duration of the minimize animation"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:40
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:44
 msgid "Duration of the workspace switch animation"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:41
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:45
 msgid "Duration of the menu mapping animation"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:42
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:46
 msgid "Defines the shadow of normal focused windows"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:43
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:47
 msgid ""
 "The first value is the radius of the blur of the shadow, the second one the "
 "top fade (which is usually just -1), the third and fourth the x- and y-"
@@ -284,54 +356,54 @@ msgid ""
 "offset, opacity]"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:44
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:48
 msgid "Defines the shadow of a normal unfocused window"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:45
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:49
 msgid "See normal-focused"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:46
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:50
 msgid "Defines the shadow of a menu"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:47
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:51
 msgid "Defines the shadow of a focused dialog"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:48
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:52
 msgid "Defines the shadow of an unfocused dialog"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:49
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:53
 msgid "Disable all notifications"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:50
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:54
 msgid "Enable bubbles"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:51
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:55
 msgid "Enable sounds"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:52
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:56
 msgid "Show missed notifications in notification center"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:53
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:57
 msgid "Enable rounded corner mask"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:54
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:58
 msgid "Corner radius"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:55
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:59
 msgid "Disable corner mask on fullscreen"
 msgstr ""
 
-#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:56
+#: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:60
 msgid "Only show corner masks on primary monitor"
 msgstr ""

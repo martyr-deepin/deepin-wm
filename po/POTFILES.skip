@@ -2,3 +2,4 @@ data/org.pantheon.desktop.gala.gschema.xml.in
 src/WindowManager.c
 src/Widgets/WindowMenu.c
 src/Deepin/DeepinWorkspaceThumbClone.c
+granite/Widgets/Utils.c

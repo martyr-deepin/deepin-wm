@@ -560,7 +560,7 @@ namespace Gala
 			message = new Text ();
 			message.set_font_description (name_font);
 			message.color = DeepinUtils.gdkrgba2color (color);
-			message.text = (_("Drag up to remove"));
+			message.text = (_("Drag upward to remove"));
 			add_child (message);
 		}
 
