@@ -20,6 +20,12 @@ using Meta;
 
 namespace Gala
 {
+    [DBus (name="com.deepin.daemon.SoundEffect")]
+    interface SoundEffect : Object 
+    {
+        public abstract void PlaySystemSound(string name) throws IOError;
+    }
+
 	public class WindowManagerGala : Meta.Plugin, WindowManager
 	{
 		public const int MAX_WORKSPACE_NUM = 7;
@@ -63,6 +69,7 @@ namespace Gala
 
 		Meta.PluginInfo info;
 
+        SoundEffect? sound_effect = null;
 		DeepinWindowSwitcher? winswitcher = null;
 		ActivatableComponent? workspace_view = null;
 		ActivatableComponent? window_overview = null;
@@ -289,6 +296,20 @@ namespace Gala
 			});
 
 			update_input_area ();
+
+            display.window_demands_attention.connect ((window) => {
+                Meta.verbose ("window_demands_attention\n");
+                try {
+                    if (sound_effect == null) {
+                        sound_effect = Bus.get_proxy_sync (BusType.SESSION,
+                                "com.deepin.daemon.SoundEffect", "/com/deepin/daemon/SoundEffect");
+                    }
+                    sound_effect.PlaySystemSound ("unable-operate");
+
+                } catch (IOError e) {
+                    Meta.verbose ("%s\n", e.message);
+                }
+            });
 
 			stage.show ();
 
