@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: noise\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-07 13:25+0800\n"
+"POT-Creation-Date: 2015-12-09 16:33+0800\n"
 "PO-Revision-Date: 2015-05-06 06:44+0000\n"
 "Last-Translator: colindemian <dengmengpc@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <zh_CN@li.org>\n"
@@ -21,15 +21,15 @@ msgstr ""
 "X-Language: zh_CN\n"
 "X-Source-Language: C\n"
 
-#: ../src/WindowManager.vala:1701
+#: ../src/WindowManager.vala:1724
 msgid "Does the display look OK?"
 msgstr "当前显示是否正常？"
 
-#: ../src/WindowManager.vala:1704
+#: ../src/WindowManager.vala:1727
 msgid "Keep This Configuration"
 msgstr "保留当前设定"
 
-#: ../src/WindowManager.vala:1705
+#: ../src/WindowManager.vala:1728
 msgid "Restore Previous Configuration"
 msgstr "恢复之前的设置"
 
@@ -74,7 +74,7 @@ msgid "Maximize"
 msgstr "最大化"
 
 #: ../src/Deepin/DeepinWorkspaceThumbClone.vala:563
-msgid "Drag upward to remove"
+msgid "Drag upwards to remove"
 msgstr "向上拖拽删除"
 
 #: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:77
