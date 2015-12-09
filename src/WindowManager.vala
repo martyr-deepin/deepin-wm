@@ -233,9 +233,11 @@ namespace Gala
 			InternalUtils.reload_shadow ();
 			ShadowSettings.get_default ().notify.connect (InternalUtils.reload_shadow);
 
+#if 0
 			/*hot corner, getting enum values from GraniteServicesSettings did not work, so we use GSettings directly*/
-			configure_hotcorners ();
-			screen.monitors_changed.connect (configure_hotcorners);
+            configure_hotcorners ();
+            screen.monitors_changed.connect (configure_hotcorners);
+#endif
 
 			BehaviorSettings.get_default ().schema.changed.connect ((key) => update_input_area ());
 
