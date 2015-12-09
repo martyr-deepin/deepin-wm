@@ -25,11 +25,11 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceName : Clutter.Actor
 	{
-		const int FADE_DURATION = 200;
+		const int FADE_DURATION = 500;
 		const AnimationMode FADE_MODE = AnimationMode.EASE_OUT_CUBIC;
 
 		const int POPUP_TIMEOUT = 200;
-		const int POPUP_PADDING = 14;
+		const int POPUP_PADDING = 16;
 		const int POPUP_MAX_WIDTH = 300;
 
 		public Screen screen { get; construct; }
@@ -149,7 +149,7 @@ namespace Gala
 			if (name.length > 0) {
 				workspace_name.text = "%d  %s".printf (active_index + 1, name);
 			} else {
-				workspace_name.text = "%d".printf (active_index + 1);
+				workspace_name.text = "%d-%s".printf (active_index + 1, _("workspace"));
 			}
 		}
 	}

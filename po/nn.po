@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: beat-box\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-07 13:25+0800\n"
+"POT-Creation-Date: 2015-12-09 18:23+0800\n"
 "PO-Revision-Date: 2014-10-20 20:56+0000\n"
 "Last-Translator: Martin Myrvold <Unknown>\n"
 "Language-Team: Norwegian Nynorsk <nn@li.org>\n"
@@ -18,15 +18,15 @@ msgstr ""
 "X-Launchpad-Export-Date: 2015-09-23 06:25+0000\n"
 "X-Generator: Launchpad (build 17749)\n"
 
-#: ../src/WindowManager.vala:1701
+#: ../src/WindowManager.vala:1724
 msgid "Does the display look OK?"
 msgstr "Ser skjermen grei ut?"
 
-#: ../src/WindowManager.vala:1704
+#: ../src/WindowManager.vala:1727
 msgid "Keep This Configuration"
 msgstr "Behald denne konfigurasjonen"
 
-#: ../src/WindowManager.vala:1705
+#: ../src/WindowManager.vala:1728
 msgid "Restore Previous Configuration"
 msgstr "Gjenopprett forrige konfigurasjon"
 
@@ -71,7 +71,11 @@ msgid "Maximize"
 msgstr ""
 
 #: ../src/Deepin/DeepinWorkspaceThumbClone.vala:563
-msgid "Drag upward to remove"
+msgid "Drag upwards to remove"
+msgstr ""
+
+#: ../src/Deepin/DeepinWorkspaceName.vala:152
+msgid "workspace"
 msgstr ""
 
 #: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:77
