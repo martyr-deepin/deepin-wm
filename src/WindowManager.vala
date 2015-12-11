@@ -299,8 +299,8 @@ namespace Gala
 
 			update_input_area ();
 
-            display.window_demands_attention.connect ((window) => {
-                Meta.verbose ("window_demands_attention\n");
+            display.unable_to_operate.connect ((window) => {
+                Meta.verbose ("unable_to_operate, sound alert\n");
                 try {
                     if (sound_effect == null) {
                         sound_effect = Bus.get_proxy_sync (BusType.SESSION,

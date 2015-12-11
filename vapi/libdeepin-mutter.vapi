@@ -584,6 +584,7 @@ namespace Meta {
 		public signal void window_created (Meta.Window object);
 		public signal void window_demands_attention (Meta.Window object);
 		public signal void window_marked_urgent (Meta.Window object);
+		public signal void unable_to_operate (Meta.Window object);
 	}
 	[CCode (cheader_filename = "meta/common.h")]
 	[Compact]
