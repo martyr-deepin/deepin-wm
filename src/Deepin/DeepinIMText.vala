@@ -28,10 +28,10 @@ namespace Gala
 	public class DeepinIMText: Clutter.Text
 	{
         Gtk.IMContext imctx;
-        Gdk.Window? event_window;
-        Meta.Window? target;
-        Clutter.Clone? im_clone;
-        bool has_preedit_str;
+        Gdk.Window? event_window = null;
+        Meta.Window? target = null;
+        Clutter.Clone? im_clone = null;
+        bool has_preedit_str = false;
         uint fcitx_watch_id = 0;
 
         public Meta.Screen screen { get; construct; }
@@ -44,14 +44,18 @@ namespace Gala
         void on_window_created (Meta.Window window)
         {
             Meta.verbose ("%s\n", Log.METHOD);
-            if (im_clone != null) return;
 
             if (window.wm_class != null && 
                     window.wm_class.index_of ("qimpanel") >= 0) {
                 Meta.verbose ("%s: find qimpanel\n", Log.METHOD);
-                target = window;
-               
-                Idle.add (on_idle_raise_impanel);
+                if (im_clone == null || target != window) {
+                    if (im_clone != null) {
+                        im_clone.destroy ();
+                        im_clone = null;
+                    }
+                    target = window;
+                    Idle.add (on_idle_raise_impanel);
+                }
             } 
         }
 
@@ -206,6 +210,11 @@ namespace Gala
         void destroy_context () {
             Meta.verbose ("%s\n", Log.METHOD);
             if (imctx != null) {
+                imctx.commit.disconnect(on_ctx_commit);
+                imctx.retrieve_surrounding.disconnect (on_retrieve_surrounding);
+                imctx.delete_surrounding.disconnect (on_delete_surrounding);
+                imctx.preedit_changed.disconnect (on_preedit_changed);
+
                 imctx.set_client_window (null);
                 imctx = null;
             }
@@ -221,7 +230,8 @@ namespace Gala
                 imctx.delete_surrounding.connect (on_delete_surrounding);
                 imctx.preedit_changed.connect (on_preedit_changed);
 
-                imctx.set_client_window (event_window);
+                if (event_window != null)
+                    imctx.set_client_window (event_window);
             }
 		}
 
@@ -371,6 +381,8 @@ namespace Gala
                 var attributes_mask = WindowAttributesType.X |
                     WindowAttributesType.Y;
                 event_window = new Gdk.Window (null, attrs, attributes_mask);
+                if (imctx != null)
+                    imctx.set_client_window (event_window);
             }
 		}
 
