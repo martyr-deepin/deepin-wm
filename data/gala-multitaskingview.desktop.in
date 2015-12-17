@@ -7,3 +7,4 @@ Icon=deepin-multitasking-view
 Terminal=false
 Categories=GNOME;GTK;System;
 Exec=dbus-send --session --dest=com.deepin.wm --print-reply /com/deepin/wm com.deepin.wm.PerformAction int32:1
+OnlyShowIn=Deepin;
