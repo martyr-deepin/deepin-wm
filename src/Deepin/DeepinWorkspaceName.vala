@@ -147,7 +147,7 @@ namespace Gala
 
 			var name = DeepinUtils.get_workspace_name (active_index);
 			if (name.length > 0) {
-				workspace_name.text = "%d  %s".printf (active_index + 1, name);
+				workspace_name.text = "%d %s".printf (active_index + 1, name);
 			} else {
 				workspace_name.text = "%d-%s".printf (active_index + 1, _("workspace"));
 			}
