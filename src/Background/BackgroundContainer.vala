@@ -35,6 +35,8 @@ namespace Gala
 		{
 			backgrounds = new Gee.HashMap<string,BackgroundManager> ();
 			screen.monitors_changed.connect (update);
+			screen.workspace_added.connect (update);
+			screen.workspace_removed.connect (update);
 			update ();
 		}
 
