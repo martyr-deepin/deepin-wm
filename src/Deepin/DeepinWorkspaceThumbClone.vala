@@ -752,6 +752,11 @@ namespace Gala
 
 		Actor on_drag_begin (float click_x, float click_y)
 		{
+			if (Prefs.get_num_workspaces () <= 1) {
+				// there is only one workspace, just ignore
+				return null;
+			}
+
 			Actor drag_actor = thumb_clone;
 
 			drag_to_remove = false;
