@@ -63,9 +63,14 @@ namespace Gala
         public void toggle_debug ()
         {
             var val = !Meta.Util.is_debugging ();
+
             if (val) {
+                GLib.Environment.set_variable ("MUTTER_DEBUG", "1", true);
+                GLib.Environment.set_variable ("MUTTER_VERBOSE", "1", true);
                 GLib.Environment.set_variable ("MUTTER_USE_LOGFILE", "1", true);
             } else {
+                GLib.Environment.unset_variable ("MUTTER_DEBUG");
+                GLib.Environment.unset_variable ("MUTTER_VERBOSE");
                 GLib.Environment.unset_variable ("MUTTER_USE_LOGFILE");
             }
             Meta.set_debugging (val);
