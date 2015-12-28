@@ -28,6 +28,7 @@ namespace Gala
 		internal int use_count { get; set; default = 0; }
 
 		Gee.HashMap<string,Background> backgrounds;
+        string fallback_background_name = "/usr/share/backgrounds/default_background.jpg";
 
 		public BackgroundSource (Meta.Screen screen, string settings_schema,
 								 string extra_settings_schema)
@@ -127,6 +128,11 @@ namespace Gala
 			} else {
 				filename = uri;
 			}
+
+            if (filename == null) {
+                return fallback_background_name;
+            }
+
 			return filename;
 		}
 
