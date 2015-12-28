@@ -104,7 +104,7 @@ namespace Gala
 
 		string get_picture_filename (int monitor_index, int workspace_index)
 		{
-			string filename;
+			string filename = null;
 			string default_uri = settings.get_string ("picture-uri");
 
 			// extra-uris is used for the background images since 2nd workspace
@@ -123,8 +123,12 @@ namespace Gala
 					uri = default_uri;
 				}
 			}
+
 			if (Uri.parse_scheme (uri) != null) {
-				filename = File.new_for_uri (uri).get_path ();
+				var file = File.new_for_uri (uri);
+                if (file.query_exists ()) {
+                    filename = file.get_path ();
+                }
 			} else {
 				filename = uri;
 			}
