@@ -126,6 +126,10 @@ namespace Gala
 		bool clicked = false;
 		float orig_x;
 		float orig_y;
+        /** 
+         * original offset of handle to cursor drag point
+         */
+        Point offset;
 		float last_x;
 		float last_y;
 
@@ -235,8 +239,11 @@ namespace Gala
 							// relayout target actor for that maybe reparent just now and could not
 							// get the correct position
 							handle.queue_relayout ();
-							orig_x = handle.x;
-							orig_y = handle.y;
+                            orig_x = handle.x;
+                            orig_y = handle.y;
+                            offset = Point.zero ();
+                            offset.x = x - orig_x;
+                            offset.y = y - orig_y;
 
 							handle.reactive = false;
 
@@ -276,6 +283,7 @@ namespace Gala
 						cancel ();
 					}
 					return true;
+
 				case EventType.MOTION:
 					float x, y;
 					event.get_coords (out x, out y);
@@ -283,31 +291,28 @@ namespace Gala
 					// limit dragging direction
 					if ((allow_direction & DragDropActionDirection.LEFT) ==
 						DragDropActionDirection.LEFT) {
-						if ((handle.x - (last_x - x)) <= orig_x) {
-							handle.x -= last_x - x;
+						if ((x - offset.x) <= orig_x) {
+                            handle.x = x - offset.x;
 						}
 					}
 					if ((allow_direction & DragDropActionDirection.RIGHT) ==
 						DragDropActionDirection.RIGHT) {
-						if ((handle.x - (last_x - x)) >= orig_x) {
-							handle.x -= last_x - x;
+						if ((x - offset.x) >= orig_x) {
+                            handle.x = x - offset.x;
 						}
 					}
 					if ((allow_direction & DragDropActionDirection.UP) ==
 						DragDropActionDirection.UP) {
-						if ((handle.y - (last_y - y)) <= orig_y) {
-							handle.y -= last_y - y;
+						if ((y - offset.y) <= orig_y) {
+                            handle.y = y - offset.y;
 						}
 					}
 					if ((allow_direction & DragDropActionDirection.DOWN) ==
 						DragDropActionDirection.DOWN) {
-						if ((handle.y - (last_y - y)) >= orig_y) {
-							handle.y -= last_y - y;
+						if ((y - offset.y) >= orig_y) {
+                            handle.y = y - offset.y;
 						}
 					}
-
-					last_x = x;
-					last_y = y;
 
 					drag_motion (handle.x - orig_x, handle.y - orig_y);
 
