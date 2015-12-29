@@ -128,7 +128,7 @@ namespace Gala
             }
         }
 
-        void create_background_actor ()
+        protected void create_background_actor ()
         {
             Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
 
