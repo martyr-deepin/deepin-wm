@@ -115,9 +115,7 @@ namespace Gala
 
 			window.unmanaged.connect (unmanaged);
 			window.notify["on-all-workspaces"].connect (on_all_workspaces_changed);
-#if HAS_MUTTER312
 			window.position_changed.connect (() => request_reposition ());
-#endif
 
 			drag_action =
 				new DragDropAction (DragDropActionType.SOURCE, "deepin-multitaskingview-window");
@@ -161,14 +159,7 @@ namespace Gala
 			}
 
 			if (enable_shadow) {
-#if HAS_MUTTER312
 				window.size_changed.disconnect (update_shadow_size);
-#else
-				var actor = window.get_compositor_private () as WindowActor;
-				if (actor != null) {
-					actor.size_changed.disconnect (update_shadow_size);
-				}
-#endif
 			}
 		}
 
@@ -209,19 +200,11 @@ namespace Gala
 			transition_to_original_state (false);
 
 			if (enable_shadow) {
-#if HAS_MUTTER312
 				var outer_rect = window.get_frame_rect ();
-#else
-				var outer_rect = window.get_outer_rect ();
-#endif
 				// shadow effect, angle:90°, size:8, distance:5, opacity:35%
 				add_effect_with_name (
 					"shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5, 204));
-#if HAS_MUTTER312
 				window.size_changed.connect (update_shadow_size);
-#else
-				actor.size_changed.connect (update_shadow_size);
-#endif
 			}
 
 			// If we were waiting the view was most probably already opened when our window finally
@@ -249,11 +232,7 @@ namespace Gala
 			}
 
 			shadow_update_timeout = Timeout.add (500, () => {
-#if HAS_MUTTER312
 				var rect = window.get_frame_rect ();
-#else
-				var rect = window.get_outer_rect ();
-#endif
 				var shadow_effect = get_effect ("shadow") as ShadowEffect;
 				if (shadow_effect != null) {
 					shadow_effect.update_size (rect.width, rect.height);
@@ -309,11 +288,7 @@ namespace Gala
 		 */
 		public void transition_to_original_state (bool animate)
 		{
-#if HAS_MUTTER312
 			var outer_rect = window.get_frame_rect ();
-#else
-			var outer_rect = window.get_outer_rect ();
-#endif
 
 			float offset_x = 0, offset_y = 0;
 
@@ -484,11 +459,7 @@ namespace Gala
 #else
 				var input_rect = window.get_input_rect ();
 #endif
-#if HAS_MUTTER312
 				var outer_rect = window.get_frame_rect ();
-#else
-				var outer_rect = window.get_outer_rect ();
-#endif
 				var scale_factor = (float)width / outer_rect.width;
 
 				var shadow_effect = get_effect ("shadow") as ShadowEffect;

@@ -204,14 +204,7 @@ namespace Gala
 				Source.remove (shadow_update_timeout_id);
 			}
 
-#if HAS_MUTTER312
 			window.size_changed.disconnect (on_window_size_changed);
-#else
-			var actor = window.get_compositor_private () as WindowActor;
-			if (actor != null) {
-				actor.size_changed.disconnect (on_window_size_changed);
-			}
-#endif
 		}
 
 		/**
@@ -281,20 +274,12 @@ namespace Gala
 
 			set_child_above_sibling (window_icon, clone_container);
 
-#if HAS_MUTTER312
 			window.size_changed.connect (on_window_size_changed);
-#else
-			actor.size_changed.connect (on_window_size_changed);
-#endif
 		}
 
 		Meta.Rectangle get_window_outer_rect ()
 		{
-#if HAS_MUTTER312
 			var outer_rect = window.get_frame_rect ();
-#else
-			var outer_rect = window.get_outer_rect ();
-#endif
 			return outer_rect;
 		}
 

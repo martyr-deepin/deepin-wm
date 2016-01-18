@@ -96,11 +96,7 @@ namespace Gala
 			float scale = thumb_width != 0 ? thumb_width / (float)monitor_geom.width : 0.5f;
 
 			Meta.Rectangle rect;
-#if HAS_MUTTER312
 			rect = window_clone.window.get_frame_rect ();
-#else
-			rect = window_clone.window.get_outer_rect ();
-#endif
 
 			var box = DeepinUtils.new_actor_box_for_rect (rect);
 

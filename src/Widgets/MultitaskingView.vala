@@ -497,6 +497,9 @@ namespace Gala
 					workspace.close ();
 			}
 
+			float clone_offset_x, clone_offset_y;
+			dock_clones.get_transformed_position (out clone_offset_x, out clone_offset_y);
+
 			if (opening) {
 				unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
 
@@ -504,13 +507,34 @@ namespace Gala
 					const int MAX_OFFSET = 100;
 
 					var window = actor.get_meta_window ();
+					var monitor = window.get_monitor ();
 
 					if (window.window_type != WindowType.DOCK)
 						continue;
 
+					if (screen.get_monitor_in_fullscreen (monitor))
+						continue;
+
+					var monitor_geom = screen.get_monitor_geometry (monitor);
+
+					var window_geom = window.get_frame_rect ();
+					var top = monitor_geom.y + MAX_OFFSET > window_geom.y;
+					var bottom = monitor_geom.y + monitor_geom.height - MAX_OFFSET > window_geom.y;
+
+					if (!top && !bottom)
+						continue;
+
 					var clone = new SafeWindowClone (window, true);
+					clone.set_position (actor.x - clone_offset_x, actor.y - clone_offset_y);
+					clone.set_easing_duration (ANIMATION_DURATION);
+					clone.set_easing_mode (ANIMATION_MODE);
 					clone.opacity = 0;
 					dock_clones.add_child (clone);
+
+					if (top)
+						clone.y = actor.y - actor.height - clone_offset_y;
+					else if (bottom)
+						clone.y = actor.y + actor.height - clone_offset_y;
 				}
 			} else {
 				foreach (var child in dock_clones.get_children ()) {
@@ -519,6 +543,7 @@ namespace Gala
 					dock.set_easing_duration (ANIMATION_DURATION);
 					dock.set_easing_mode (ANIMATION_MODE);
 					dock.opacity = 255;
+					dock.y = dock.source.y - clone_offset_y;
 				}
 			}
 

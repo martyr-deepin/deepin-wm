@@ -75,7 +75,7 @@ AC_SUBST([API_VERSION])
 # -----------------------------------------------------------
 # Vala
 # -----------------------------------------------------------
-VALA_MIN_VERSION=0.22.0
+VALA_MIN_VERSION=0.28.0
 
 AM_PROG_VALAC([$VALA_MIN_VERSION])
 if test "x$VALAC" = "x"; then
@@ -92,8 +92,10 @@ fi
 # -----------------------------------------------------------
 GTK_MIN_VERSION=3.4.0
 GLIB_MIN_VERSION=2.32.0
-MUTTER_MIN_VERSION=3.8.4
-MUTTER_API="3.8"
+PLANK_MIN_VERSION=0.3.0
+CLUTTER_MIN_VERSION=1.12.0
+MUTTER_MIN_VERSION=3.14.4
+MUTTER_API="3.14"
 
 GALA_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  glib-2.0 >= $GLIB_MIN_VERSION \
@@ -103,7 +105,7 @@ GALA_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  gtk+-3.0 >= $GTK_MIN_VERSION \
                  gdk-x11-3.0 >= $GTK_MIN_VERSION \
                  libbamf3 \
-                 clutter-1.0 \
+                 clutter-1.0 >= $CLUTTER_MIN_VERSION \
                  clutter-gtk-1.0 \
                  libdeepin-mutter >= $MUTTER_MIN_VERSION \
                  gee-0.8 \
@@ -138,22 +140,6 @@ AC_SUBST([PLUGIN_LDFLAGS])
 # Optional Dependencies
 # -----------------------------------------------------------
 
-# 3.10
-PKG_CHECK_MODULES(MUTTER310, [libdeepin-mutter >= 3.9], [have_mutter310=yes], [have_mutter310=no])
-if test "x$have_mutter310" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER310, [libdeepin-mutter >= 3.10.4])
-    VALAFLAGS="$VALAFLAGS --define HAS_MUTTER310"
-    MUTTER_API="3.10"
-fi
-
-# 3.12
-PKG_CHECK_MODULES(MUTTER312, [libdeepin-mutter >= 3.11], [have_mutter312=yes], [have_mutter312=no])
-if test "x$have_mutter312" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER312, [libdeepin-mutter >= 3.12.2])
-    VALAFLAGS="$VALAFLAGS --define HAS_MUTTER312"
-    MUTTER_API="3.12"
-fi
-
 # 3.14
 PKG_CHECK_MODULES(MUTTER314, [libdeepin-mutter >= 3.13], [have_mutter314=yes], [have_mutter314=no])
 if test "x$have_mutter314" = "xyes" ; then
@@ -161,7 +147,6 @@ if test "x$have_mutter314" = "xyes" ; then
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER314"
     MUTTER_API="3.14"
 fi
-AM_CONDITIONAL([HAVE_MUTTER314], [test "x$have_mutter314" = "xyes"])
 
 # 3.16
 PKG_CHECK_MODULES(MUTTER316, [libdeepin-mutter >= 3.15], [have_mutter316=yes], [have_mutter316=no])
@@ -174,9 +159,34 @@ fi
 # 3.18
 PKG_CHECK_MODULES(MUTTER318, [libdeepin-mutter >= 3.17], [have_mutter318=yes], [have_mutter318=no])
 if test "x$have_mutter318" = "xyes" ; then
-    PKG_CHECK_MODULES(MUTTER318, [libdeepin-mutter >= 3.17.91])
+    PKG_CHECK_MODULES(MUTTER318, [libdeepin-mutter >= 3.18.1])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER318"
     MUTTER_API="3.18"
+fi
+
+# 3.20
+PKG_CHECK_MODULES(MUTTER320, [libdeepin-mutter >= 3.19], [have_mutter320=yes], [have_mutter320=no])
+if test "x$have_mutter320" = "xyes" ; then
+    PKG_CHECK_MODULES(MUTTER320, [libdeepin-mutter >= 3.19.1])
+    VALAFLAGS="$VALAFLAGS --define HAS_MUTTER320"
+    MUTTER_API="3.20"
+fi
+
+# Check for newer Plank
+PLANK_PKGS="plank >= 0.10.9"
+PKG_CHECK_MODULES(PLANK_0_11, $PLANK_PKGS, [enable_plank_0_11=yes], [enable_plank_0_11=no])
+if test "x$enable_plank_0_11" = "xyes" ; then
+    VALAFLAGS="$VALAFLAGS --define HAVE_PLANK_0_11"
+fi
+
+# Check for Gnome Settings Daemon 3.10
+PKG_CHECK_MODULES(GSD310, [gnome-settings-daemon >= 3.9.5], [have_gsd310=yes], [have_gsd310=no])
+if test "x$have_gsd310" = "xyes" ; then
+    VALAFLAGS="$VALAFLAGS --define HAS_GSD310"
+fi
+PKG_CHECK_MODULES(GSD316, [gnome-settings-daemon >= 3.15.2], [have_gsd316=yes], [have_gsd316=no])
+if test "x$have_gsd316" = "xyes" ; then
+    VALAFLAGS="$VALAFLAGS --define HAS_GSD316"
 fi
 
 # -----------------------------------------------------------

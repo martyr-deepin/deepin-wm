@@ -34,8 +34,13 @@ namespace Gala
 
 		WindowActor? dock_window;
 		Actor dock;
+#if HAVE_PLANK_0_11
+		Plank.Surface? dock_surface;
+		Plank.DockTheme dock_theme;
+#else
 		Plank.Drawing.DockSurface? dock_surface;
 		Plank.Drawing.DockTheme dock_theme;
+#endif
 		Plank.DockPreferences dock_settings;
 		float dock_y_offset;
 		float dock_height_offset;
@@ -58,12 +63,20 @@ namespace Gala
 		construct
 		{
 			// pull drawing methods from libplank
+#if HAVE_PLANK_0_11
+			dock_settings = new Plank.DockPreferences ("dock1");
+#else
 			var settings_file = Environment.get_user_config_dir () + "/plank/dock1/settings";
 			dock_settings = new Plank.DockPreferences.with_filename (settings_file);
+#endif
 			dock_settings.notify.connect (update_dock);
 			dock_settings.notify["Theme"].connect (load_dock_theme);
 
+#if HAVE_PLANK_0_11
+			var launcher_folder = Plank.Paths.AppConfigFolder.get_child ("dock1").get_child ("launchers");
+#else
 			var launcher_folder = Plank.Services.Paths.AppConfigFolder.get_child ("dock1").get_child ("launchers");
+#endif
 
 			if (launcher_folder.query_exists ()) {
 				try {
@@ -112,7 +125,11 @@ namespace Gala
 			if (dock_theme != null)
 				dock_theme.notify.disconnect (update_dock);
 
+#if HAVE_PLANK_0_11
+			dock_theme = new Plank.DockTheme (dock_settings.Theme);
+#else
 			dock_theme = new Plank.Drawing.DockTheme (dock_settings.Theme);
+#endif
 			dock_theme.load ("dock");
 			dock_theme.notify.connect (update_dock);
 
@@ -148,8 +165,6 @@ namespace Gala
 			dock_height_offset = top_offset + bottom_offset;
 
 			var height = icon_size + (top_offset > 0 ? top_offset : 0) + bottom_offset;
-
-			dock.anchor_gravity = horizontal ? Gravity.NORTH : Gravity.WEST;
 
 			if (horizontal) {
 				dock.height = height;
@@ -204,7 +219,11 @@ namespace Gala
 			}
 
 			if (dock_surface == null || dock_surface.Width != width || dock_surface.Height != height) {
+#if HAVE_PLANK_0_11
+				var dummy_surface = new Plank.Surface.with_cairo_surface (1, 1, cr.get_target ());
+#else
 				var dummy_surface = new Plank.Drawing.DockSurface.with_surface (1, 1, cr.get_target ());
+#endif
 
 				dock_surface = dock_theme.create_background (width, height, position, dummy_surface);
 			}
@@ -247,10 +266,12 @@ namespace Gala
 
 			if (dock_settings.is_horizontal_dock ()) {
 				dock.width = dock_width;
+				dock.translation_x = Math.ceilf (-dock_width / 2.0f);
 				dock.get_first_child ().margin_left = items_offset;
 				dock.get_last_child ().margin_right = items_offset;
 			} else {
 				dock.height = dock_width;
+				dock.translation_y = Math.ceilf (-dock_width / 2.0f);
 				dock.get_first_child ().margin_top = items_offset;
 				dock.get_last_child ().margin_bottom = items_offset;
 			}
@@ -268,9 +289,11 @@ namespace Gala
 			if (dock_settings.is_horizontal_dock ()) {
 				dock.layout_manager.get_preferred_width (dock, dock.height, null, out dest_width);
 				dock.width = dest_width;
+				dock.translation_x = Math.ceilf (-dest_width / 2.0f);
 			} else {
 				dock.layout_manager.get_preferred_height (dock, dock.width, null, out dest_width);
 				dock.height = dest_width;
+				dock.translation_y = Math.ceilf (-dest_width / 2.0f);
 			}
 
 			dock.restore_easing_state ();
@@ -332,11 +355,7 @@ namespace Gala
 
 		[CCode (instance_pos = -1)]
 		public void handle_switch_windows (Display display, Screen screen, Window? window,
-#if HAS_MUTTER314
 			Clutter.KeyEvent event, KeyBinding binding)
-#else
-			X.Event event, KeyBinding binding)
-#endif
 		{
 			var now = get_monotonic_time () / 1000;
 			if (now - last_switch < MIN_DELTA)
@@ -477,10 +496,13 @@ namespace Gala
 			dock.set_easing_duration (250);
 			dock.set_easing_mode (AnimationMode.EASE_OUT_CUBIC);
 
-			if (dock_settings.is_horizontal_dock ())
+			if (dock_settings.is_horizontal_dock ()) {
 				dock.width = dest_width;
-			else
+				dock.translation_x = Math.ceilf (-dest_width / 2.0f);
+			} else {
 				dock.height = dest_width;
+				dock.translation_y = Math.ceilf (-dest_width / 2.0f);
+			}
 
 			dock.opacity = 0;
 			dock.restore_easing_state ();
@@ -569,13 +591,8 @@ namespace Gala
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
 
-#if HAS_MUTTER314
 			var windows = display.get_tab_list (TabList.NORMAL, workspace);
 			var current = display.get_tab_current (TabList.NORMAL, workspace);
-#else
-			var windows = display.get_tab_list (TabList.NORMAL, screen, workspace);
-			var current = display.get_tab_current (TabList.NORMAL, screen, workspace);
-#endif
 
 			if (windows.length () < 1)
 				return false;

@@ -25,6 +25,7 @@ namespace Gala.Plugins.Zoom
 
 		uint mouse_poll_timer = 0;
 		float current_zoom = 1.0f;
+		ulong wins_handler_id = 0UL;
 
 		public override void initialize (Gala.WindowManager wm)
 		{
@@ -53,22 +54,14 @@ namespace Gala.Plugins.Zoom
 
 		[CCode (instance_pos = -1)]
 		void zoom_in (Meta.Display display, Meta.Screen screen,
-#if HAS_MUTTER314
 			Meta.Window? window, Clutter.KeyEvent event, Meta.KeyBinding binding)
-#else
-			Meta.Window? window, X.Event event, Meta.KeyBinding binding)
-#endif
 		{
 			zoom (true);
 		}
 
 		[CCode (instance_pos = -1)]
 		void zoom_out (Meta.Display display, Meta.Screen screen,
-#if HAS_MUTTER314
 			Meta.Window? window, Clutter.KeyEvent event, Meta.KeyBinding binding)
-#else
-			Meta.Window? window, X.Event event, Meta.KeyBinding binding)
-#endif
 		{
 			zoom (false);
 		}
@@ -89,16 +82,20 @@ namespace Gala.Plugins.Zoom
 				float mx, my;
 				var client_pointer = Gdk.Display.get_default ().get_device_manager ().get_client_pointer ();
 				client_pointer.get_position (null, out mx, out my);
-				wins.scale_center_x = mx;
-				wins.scale_center_y = my;
+				wins.set_pivot_point (mx / wins.width, my / wins.height);
 
 				mouse_poll_timer = Timeout.add (MOUSE_POLL_TIME, () => {
 					client_pointer.get_position (null, out mx, out my);
-					if (wins.scale_center_x == mx && wins.scale_center_y == my)
+					var new_pivot = Clutter.Point.alloc ();
+					new_pivot.init (mx / wins.width, my / wins.height);
+					if (wins.pivot_point.equals (new_pivot))
 						return true;
 
-					wins.animate (Clutter.AnimationMode.LINEAR, MOUSE_POLL_TIME, scale_center_x : mx, scale_center_y : my);
-
+					wins.save_easing_state ();
+					wins.set_easing_mode (Clutter.AnimationMode.LINEAR);
+					wins.set_easing_duration (MOUSE_POLL_TIME);
+					wins.pivot_point = new_pivot;
+					wins.restore_easing_state ();
 					return true;
 				});
 			}
@@ -112,15 +109,25 @@ namespace Gala.Plugins.Zoom
 					Source.remove (mouse_poll_timer);
 				mouse_poll_timer = 0;
 
-				wins.animate (Clutter.AnimationMode.EASE_OUT_CUBIC, 300, scale_x : 1.0f, scale_y : 1.0f).completed.connect (() => {
-					wins.scale_center_x = 0.0f;
-					wins.scale_center_y = 0.0f;
+				wins.save_easing_state ();
+				wins.set_easing_mode (Clutter.AnimationMode.EASE_OUT_CUBIC);
+				wins.set_easing_duration (300);
+				wins.set_scale (1.0f, 1.0f);
+				wins.restore_easing_state ();
+
+				wins_handler_id = wins.transitions_completed.connect (() => {
+					wins.disconnect (wins_handler_id);
+					wins.set_pivot_point (0.0f, 0.0f);
 				});
 
 				return;
 			}
 
-			wins.animate (Clutter.AnimationMode.EASE_OUT_CUBIC, 300, scale_x : current_zoom, scale_y : current_zoom);
+			wins.save_easing_state ();
+			wins.set_easing_mode (Clutter.AnimationMode.EASE_OUT_CUBIC);
+			wins.set_easing_duration (300);
+			wins.set_scale (current_zoom, current_zoom);
+			wins.restore_easing_state ();
 		}
 	}
 }
