@@ -745,7 +745,7 @@ namespace Gala
 
 					window_menu.current_window = window;
 					window_menu.show_all ();
-					window_menu.popup (null, null, (menu, ref menu_x, ref menu_y, out push_in) => {
+					window_menu.popup (null, null, (window_menu, ref menu_x, ref menu_y, out push_in) => {
 						menu_x = x;
 						menu_y = y;
 					}, Gdk.BUTTON_SECONDARY, time);
