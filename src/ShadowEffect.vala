@@ -121,8 +121,10 @@ namespace Gala
 			if (shadow == null)
 				return;
 
-			if (--shadow.users == 0)
+			if (--shadow.users == 0) {
 				shadow_cache.unset (key);
+                shadow.unref ();
+            }
 		}
 
 		public override void paint (EffectPaintFlags flags)

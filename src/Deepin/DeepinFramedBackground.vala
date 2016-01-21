@@ -89,6 +89,7 @@ namespace Gala
 		~DeepinFramedBackground ()
 		{
 			screen.monitors_changed.disconnect (on_monitors_changed);
+            clear_effects ();
 		}
 
 		void on_monitors_changed ()
