@@ -214,6 +214,36 @@ namespace Gala
 			return true;
 		}
 
+        bool drag_allowed (Event event)
+        {
+            float x, y;
+            event.get_coords (out x, out y);
+
+            var drag_threshold = Clutter.Settings.get_default ().dnd_drag_threshold;
+
+            if ((allow_direction & DragDropActionDirection.LEFT) == DragDropActionDirection.LEFT
+                    && (last_x - x > drag_threshold)) {
+                return true;
+            }
+
+            if ((allow_direction & DragDropActionDirection.RIGHT) == DragDropActionDirection.RIGHT
+                    && (x - last_x > drag_threshold)) {
+                return true;
+            }
+
+            if ((allow_direction & DragDropActionDirection.UP)  == DragDropActionDirection.UP
+                    && (last_y - y > drag_threshold)) {
+                return true;
+            }
+
+            if ((allow_direction & DragDropActionDirection.DOWN) == DragDropActionDirection.DOWN
+                    && (y - last_y > drag_threshold)) {
+                return true;
+            }
+
+            return false;
+        }
+
 		bool follow_move (Event event)
 		{
 			// still determining if we actually want to start a drag action
@@ -227,8 +257,7 @@ namespace Gala
 						float x, y;
 						event.get_coords (out x, out y);
 
-						var drag_threshold = Clutter.Settings.get_default ().dnd_drag_threshold;
-						if (Math.fabsf (last_x - x) > drag_threshold || Math.fabsf (last_y - y) > drag_threshold) {
+						if (drag_allowed (event)) {
 							handle = drag_begin (x, y);
 							if (handle == null) {
 								// No handle has been returned by the started signal, aborting drag.
@@ -314,7 +343,8 @@ namespace Gala
 						}
 					}
 
-					drag_motion (handle.x - orig_x, handle.y - orig_y);
+                    if (handle.x != orig_x || handle.y != orig_y)
+                        drag_motion (handle.x - orig_x, handle.y - orig_y);
 
 					var stage = actor.get_stage ();
 					var actor = stage.get_actor_at_pos (PickMode.REACTIVE, (int) x, (int) y);
