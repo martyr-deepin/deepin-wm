@@ -444,6 +444,9 @@ namespace Gala
 		void handle_switch_to_workspace (Meta.Display display, Meta.Screen screen, Meta.Window? window,
 			Clutter.KeyEvent event, Meta.KeyBinding binding)
 		{
+			if (workspace_view.is_toggling())
+				return;
+
 			var direction = (binding.get_name () == "switch-to-workspace-left" ? MotionDirection.LEFT : MotionDirection.RIGHT);
 			switch_to_next_workspace (direction);
 		}
