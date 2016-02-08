@@ -608,6 +608,14 @@ namespace Gala
 		}
 
 		/**
+		 *
+		 */
+		public bool is_toggling ()
+		{
+			return toggling;
+		}
+
+		/**
 		 * {@inheritDoc}
 		 */
 		public void open (HashTable<string, Variant>? hints = null)
