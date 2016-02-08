@@ -71,7 +71,7 @@ namespace Gala
 
         SoundEffect? sound_effect = null;
 		DeepinWindowSwitcher? winswitcher = null;
-		ActivatableComponent? workspace_view = null;
+		DeepinMultitaskingView? workspace_view = null;
 		ActivatableComponent? window_overview = null;
 
 		DeepinWorkspaceName? workspace_name = null;
@@ -236,7 +236,7 @@ namespace Gala
 			plugin_manager.regions_changed.connect (update_input_area);
 
 			if (plugin_manager.workspace_view_provider == null
-				|| (workspace_view = (plugin_manager.get_plugin (plugin_manager.workspace_view_provider) as ActivatableComponent)) == null) {
+				|| (workspace_view = (plugin_manager.get_plugin (plugin_manager.workspace_view_provider) as DeepinMultitaskingView)) == null) {
 				workspace_view = new DeepinMultitaskingView (this);
 				ui_group.add_child ((Clutter.Actor) workspace_view);
 				(workspace_view as DeepinMultitaskingView).connect_key_focus_out_signal ();
