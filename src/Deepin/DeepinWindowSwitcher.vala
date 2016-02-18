@@ -64,7 +64,6 @@ namespace Gala
 			popup.layout_manager = layout;
 
 			var screen = wm.get_screen ();
-            popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
 
 			item_container = new Actor ();
 			item_container.margin_bottom = POPUP_PADDING;
@@ -98,15 +97,14 @@ namespace Gala
 
 		public void relayout ()
         {
-            Meta.verbose ("#%d monitors\n", wm.get_screen().get_n_monitors());
-
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
-            var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
-            var max_width = monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;
-            switcher_layout.max_width = max_width;
 
             set_position (monitor_geom.x, monitor_geom.y);
             set_size (monitor_geom.width, monitor_geom.height);
+
+            var switcher_layout = item_container.layout_manager as DeepinWindowSwitcherLayout;
+            var max_width = monitor_geom.width - POPUP_SCREEN_PADDING * 2 - POPUP_PADDING * 2;
+            switcher_layout.max_width = max_width;
         }
 
 		void show_popup ()
@@ -219,6 +217,10 @@ namespace Gala
 			if (!collect_windows (workspace, only_group_windows)) {
 				return;
 			}
+
+            var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
+            popup.x = (monitor_geom.width - popup.width) / 2;
+            popup.y = (monitor_geom.height - popup.height) / 2;
 
 			set_primary_modifier (binding.get_mask ());
 
@@ -424,8 +426,10 @@ namespace Gala
 			}
 
 			var safe_clone = new SafeWindowClone (window, true);
-			safe_clone.x = actor.x;
-			safe_clone.y = actor.y;
+			safe_clone.x = actor.x - this.x;
+			safe_clone.y = actor.y - this.y;
+			//safe_clone.x = actor.x >= this.x ? actor.x - this.x : actor.x;
+			//safe_clone.y = actor.y >= this.y ? actor.y - this.y : actor.y;
 			safe_clone.opacity = 0;  // keepin hidden before popup window shown
 
 			window_clones.add_child (safe_clone);
