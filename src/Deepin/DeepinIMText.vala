@@ -43,11 +43,19 @@ namespace Gala
 
         void on_window_created (Meta.Window window)
         {
-            Meta.verbose ("%s\n", Log.METHOD);
-
-            if (window.wm_class != null && 
+            if (window.is_override_redirect () && 
+                    window.wm_class != null && 
                     window.wm_class.index_of ("qimpanel") >= 0) {
-                Meta.verbose ("%s: find qimpanel\n", Log.METHOD);
+                var outer_rect = window.get_frame_rect ();
+                if (outer_rect.x < 0 && outer_rect.y < 0) {
+                    return;
+                }
+
+                if (outer_rect.width <= 32 && outer_rect.height <= 32) {
+                    return;
+                }
+
+                Meta.verbose ("%s: find qimpanel wid 0x%x\n", Log.METHOD, window.get_xwindow ());
                 if (im_clone == null || target != window) {
                     if (im_clone != null) {
                         im_clone.destroy ();
