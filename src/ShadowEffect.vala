@@ -123,7 +123,7 @@ namespace Gala
 
 			if (--shadow.users == 0) {
 				shadow_cache.unset (key);
-                shadow.unref ();
+                //shadow.unref ();
             }
 		}
 
