@@ -109,6 +109,10 @@ namespace Gala
 
 		void show_popup ()
 		{
+            var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
+            popup.set_position ((monitor_geom.width - popup.width) / 2,
+                    (monitor_geom.height - popup.height) / 2);
+
 			popup.opacity = 255;
 		}
 
@@ -217,10 +221,6 @@ namespace Gala
 			if (!collect_windows (workspace, only_group_windows)) {
 				return;
 			}
-
-            var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
-            popup.x = (monitor_geom.width - popup.width) / 2;
-            popup.y = (monitor_geom.height - popup.height) / 2;
 
 			set_primary_modifier (binding.get_mask ());
 
