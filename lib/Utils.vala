@@ -139,7 +139,8 @@ namespace Gala
 					icon = Plank.Drawing.DrawingService.get_icon_from_gicon (appinfo.get_icon ());
 #endif
 					icon_key = "%s::%i".printf (icon, size);
-					if (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null) {
+					if (icon != null &&
+                        (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null)) {
 #if HAVE_PLANK_0_11
 						image = Plank.DrawingService.load_icon (icon, size, size);
 #else
@@ -167,6 +168,10 @@ namespace Gala
 					}
 
 					icon = window.get_class_instance_name ();
+                    if (icon == null) {
+                        continue;
+                    }
+
 					icon_key = "%s::%i".printf (icon, size);
 					if (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null) {
 						image = window.get_icon ();
