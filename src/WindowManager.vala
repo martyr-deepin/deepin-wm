@@ -817,8 +817,8 @@ namespace Gala
 
 				float scale_x  = (float)icon.width  / actor.width;
 				float scale_y  = (float)icon.height / actor.height;
-				float anchor_x = (float)(actor.x - icon.x) * actor.width  / (icon.width  - actor.width);
-				float anchor_y = (float)(actor.y - icon.y) * actor.height / (icon.height - actor.height);
+				float anchor_x = (float)(actor.x - icon.x) / (icon.width  - actor.width);
+				float anchor_y = (float)(actor.y - icon.y) / (icon.height - actor.height);
 				actor.set_pivot_point (anchor_x, anchor_y);
 
 				actor.save_easing_state ();
