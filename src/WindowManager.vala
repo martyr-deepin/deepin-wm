@@ -26,6 +26,13 @@ namespace Gala
         public abstract void PlaySystemSound(string name) throws IOError;
     }
 
+    class ScreenTilePreview
+    {
+        public Clutter.Actor   actor;
+        public Clutter.Color   color;
+        public Meta.Rectangle  tile_rect;
+    }
+
 	public class WindowManagerGala : Meta.Plugin, WindowManager
 	{
 		public const int MAX_WORKSPACE_NUM = 7;
@@ -73,6 +80,7 @@ namespace Gala
 		DeepinWindowSwitcher? winswitcher = null;
 		DeepinMultitaskingView? workspace_view = null;
 		ActivatableComponent? window_overview = null;
+        ScreenTilePreview? tile_preview = null;
 
 		DeepinWorkspaceName? workspace_name = null;
 
@@ -1753,6 +1761,64 @@ namespace Gala
 		{
 			end_switch_workspace ();
 		}
+
+        private ScreenTilePreview get_screen_tile_preview ()
+        {
+            if (tile_preview == null) {
+                tile_preview = new ScreenTilePreview ();
+
+                tile_preview.color = {0x1a, 0xb4, 0xe8, 255};
+                tile_preview.actor = new Clutter.Actor ();
+                tile_preview.actor.set_background_color (tile_preview.color);
+                tile_preview.actor.set_opacity (100);
+
+                window_group.add_child (tile_preview.actor);
+            }
+
+            return tile_preview;
+        }
+
+        public override void show_tile_preview (Meta.Window window,
+                Meta.Rectangle tile_rect, int tile_monitor_number)
+        {
+            ScreenTilePreview preview = get_screen_tile_preview ();
+            Clutter.Actor actor = preview.actor;
+            Clutter.Actor window_actor;
+
+            if (actor.is_visible ()
+                    && preview.tile_rect.x == tile_rect.x
+                    && preview.tile_rect.y == tile_rect.y
+                    && preview.tile_rect.width == tile_rect.width
+                    && preview.tile_rect.height == tile_rect.height)
+                return; /* nothing to do */
+
+            window_actor = window.get_compositor_private () as Clutter.Actor;
+            window_group.set_child_below_sibling (actor, window_actor);
+            actor.position = window_actor.position;
+            actor.size = window_actor.size;
+
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.snap_duration;
+
+            actor.show ();
+            actor.save_easing_state ();
+            actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
+            actor.set_easing_duration (duration);
+            actor.set_position (tile_rect.x, tile_rect.y);
+            actor.set_size (tile_rect.width, tile_rect.height);
+
+            actor.restore_easing_state ();
+
+            preview.tile_rect = tile_rect;
+        }
+
+        public override void hide_tile_preview ()
+        {
+            ScreenTilePreview preview = get_screen_tile_preview ();
+
+            preview.actor.remove_all_transitions ();
+            preview.actor.hide ();
+        }
 
 		public override bool keybinding_filter (Meta.KeyBinding binding)
 		{
