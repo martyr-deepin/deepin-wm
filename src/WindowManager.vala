@@ -99,6 +99,11 @@ namespace Gala
 		Gee.HashSet<Meta.WindowActor> destroying = new Gee.HashSet<Meta.WindowActor> ();
 		Gee.HashSet<Meta.WindowActor> unminimizing = new Gee.HashSet<Meta.WindowActor> ();
 
+        Clutter.Actor hiding_group = null;
+        // Windows that showing after request hiding windows
+        Gee.ArrayList<Clutter.Actor> background_clones = new Gee.ArrayList<Clutter.Actor> ();
+        bool hiding_windows = false;
+
 		public WindowManagerGala ()
 		{
 			info = Meta.PluginInfo () {name = "Gala", version = Config.VERSION, author = "Gala Developers",
@@ -347,6 +352,10 @@ namespace Gala
                 window_group.insert_child_below (backgrounds[i], null);
             }
             background_group = backgrounds[0];
+
+            if (hiding_windows) {
+                update_background_clones ();
+            }
         }
 #endif
 
@@ -742,6 +751,81 @@ namespace Gala
 					break;
 			}
 		}
+
+        private void on_window_created (Meta.Window window)
+        {
+            var actor = window.get_compositor_private () as WindowActor;
+
+            stdout.printf ("on_window_created: %s\n", window.get_description ());
+            var clone = new Clutter.Clone (actor);
+            clone.position = actor.position;
+            clone.reactive = true;
+            hiding_group.insert_child_above (clone, null);
+
+            actor.show.connect (()=> {
+                clone.show ();
+            });
+
+            actor.hide.connect (() => {
+                clone.hide ();
+            });
+
+			window.unmanaged.connect (() => {
+                stdout.printf ("destroy %s\n", window.get_description ());
+                clone.destroy ();
+            });
+        }
+
+        void update_background_clones ()
+        {
+            foreach (var actor in background_clones) {
+                actor.destroy ();
+            }
+            background_clones.clear ();
+
+            foreach (var key in backgrounds.keys) {
+                Clutter.Actor clone = new Clutter.Clone (backgrounds[key]);
+                clone.position = backgrounds[key].position;
+                clone.reactive = true;
+                hiding_group.insert_child_below (clone, null);
+                background_clones.add (clone);
+            }
+        }
+
+        //FIXME: need to disable wm operations, since nothing is visible...
+        public void request_hide_windows ()
+        {
+            if (hiding_windows) {
+                warning ("already in hiding windows state");
+                return;
+            }
+
+            hiding_group = new Clutter.Actor ();
+            hiding_group.reactive = true;
+
+			var display = get_screen ().get_display ();
+            display.window_created.connect (on_window_created);
+
+            ui_group.insert_child_above (hiding_group, null);
+            window_group.hide ();
+            top_window_group.hide ();
+
+            update_background_clones ();
+            hiding_windows = true;
+        }
+
+        public void cancel_hide_windows ()
+        {
+			var display = get_screen ().get_display ();
+            display.window_created.disconnect (on_window_created);
+
+            hiding_group.destroy ();
+            background_clones.clear ();
+
+            window_group.show ();
+            top_window_group.show ();
+            hiding_windows = false;
+        }
 
 		WindowMenu? window_menu = null;
 

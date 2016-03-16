@@ -77,6 +77,16 @@ namespace Gala
             Meta.set_verbose (val);
         }
 
+        public void request_hide_windows ()
+        {
+            (wm as WindowManagerGala).request_hide_windows ();
+        }
+
+        public void cancel_hide_windows ()
+        {
+            (wm as WindowManagerGala).cancel_hide_windows ();
+        }
+
 		const double SATURATION_WEIGHT = 1.5;
 		const double WEIGHT_THRESHOLD = 1.0;
 
