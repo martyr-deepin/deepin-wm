@@ -721,6 +721,7 @@ namespace Meta {
 		public void make_fullscreen ();
 		public void maximize (Meta.MaximizeFlags directions);
 		public void minimize ();
+        public void set_showing (bool val);
 		public void move_frame (bool user_op, int root_x_nw, int root_y_nw);
 		public void move_resize_frame (bool user_op, int root_x_nw, int root_y_nw, int w, int h);
 		public void move_to_monitor (int monitor);

@@ -185,6 +185,9 @@ namespace Gala
 			X.Event event, KeyBinding binding)
 #endif
 		{
+            if ((wm as WindowManagerGala).hiding_windows) 
+                return;
+
 			var now = get_monotonic_time () / 1000;
 			if (now - last_switch_time < MIN_DELTA) {
 				return;
