@@ -42,7 +42,7 @@ namespace Gala
 		Meta.Plugin.manager_set_plugin_type (new WindowManagerGala ().get_type ());
 
 		Meta.set_wm_name ("Mutter(DeepinGala)");
-		Meta.Prefs.set_force_fullscreen (false);
+		Meta.Prefs.set_force_fullscreen (true);
 
 		DeepinUtils.init_debug_topics ();
 
