@@ -115,15 +115,8 @@ namespace Gala
 			foreach (var window in get_children ()) {
 				var window_clone = window as DeepinWindowClone;
 
-				window_clone.save_easing_state ();
-
-				window_clone.set_easing_duration (300);
-				window_clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-				window_clone.opacity = 255;
-
-				window_clone.restore_easing_state ();
-
 				window_clone.transition_to_original_state (false);
+				window_clone.opacity = 255;
 			}
 
 			relayout ();

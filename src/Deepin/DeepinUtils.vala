@@ -444,11 +444,8 @@ namespace Gala
 		{
 			var trans_name = "opacity";
 
-			actor.save_easing_state ();
-
-			actor.set_easing_duration (0);
 			actor.opacity = 255;
-
+			actor.save_easing_state ();
 			actor.set_easing_duration (duration);
 			actor.set_easing_mode (mode);
 			actor.opacity = 0;
@@ -590,6 +587,11 @@ namespace Gala
 			c2.x = x2;
 			c2.y = y2;
 			timeline.set_cubic_bezier_progress (c1, c2);
+		}
+
+		public static void clutter_set_mode_ease_out_quint (Clutter.Timeline timeline)
+		{
+			timeline.set_progress_mode (Clutter.AnimationMode.EASE_OUT_QUINT);
 		}
 
 		public static void clutter_set_mode_ease_out_quad (Clutter.Timeline timeline)

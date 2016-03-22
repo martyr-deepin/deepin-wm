@@ -310,19 +310,15 @@ namespace Gala
 				var size_value = GLib.Value (typeof (Size));
 				size_value.set_boxed (size);
 
+                unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 				DeepinUtils.start_animation_group (this, "window-slot",
-												   DeepinMultitaskingView.TOGGLE_DURATION,
-												   DeepinUtils.clutter_set_mode_bezier_out_back,
+                                                   animation_settings.multitasking_toggle_duration,
+												   DeepinUtils.clutter_set_mode_ease_out_quint,
 												   "position", &position_value,
 												   "size", &size_value);
 			} else {
-				save_easing_state ();
-				set_easing_duration (0);
-
 				set_position (outer_rect.x - offset_x, outer_rect.y - offset_y);
 				set_size (outer_rect.width, outer_rect.height);
-
-				restore_easing_state ();
 			}
 
 			if (window_icon != null) {
@@ -370,10 +366,11 @@ namespace Gala
 				var size_value = GLib.Value (typeof (Size));
 				size_value.set_boxed (size);
 
+                unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 				if (!selecting) {
 					DeepinUtils.start_animation_group (this, "window-slot",
-													   DeepinMultitaskingView.TOGGLE_DURATION,
-													   DeepinUtils.clutter_set_mode_bezier_out_back,
+                                                       animation_settings.multitasking_toggle_duration,
+													   DeepinUtils.clutter_set_mode_ease_out_quint,
 													   "position", &position_value,
 													   "size", &size_value);
 				} else {

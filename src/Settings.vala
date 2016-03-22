@@ -140,6 +140,7 @@ namespace Gala
 		public int minimize_duration { get; set; }
 		public int workspace_switch_duration { get; set; }
 		public int menu_duration { get; set; }
+		public int multitasking_toggle_duration { get; set; }
 
 		static AnimationSettings? instance = null;
 

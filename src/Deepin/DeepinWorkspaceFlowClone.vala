@@ -298,12 +298,13 @@ namespace Gala
 
 		public void scale_in (bool animate)
 		{
+            unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 			if (animate) {
 				var scale_value = GLib.Value (typeof (float));
 				scale_value.set_float (background_scale);
 				DeepinUtils.start_animation_group (background, "open",
-												   DeepinMultitaskingView.TOGGLE_DURATION,
-												   DeepinUtils.clutter_set_mode_bezier_out_back,
+                                                   animation_settings.multitasking_toggle_duration,
+												   DeepinUtils.clutter_set_mode_ease_out_quint,
 												   "scale-x", &scale_value,
 												   "scale-y", &scale_value);
 			} else {
@@ -313,12 +314,13 @@ namespace Gala
 
 		public void scale_out (bool animate)
 		{
+            unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 			if (animate) {
 				var scale_value = GLib.Value (typeof (float));
 				scale_value.set_float (1.0f);
 				DeepinUtils.start_animation_group (background, "close",
-												   DeepinMultitaskingView.TOGGLE_DURATION,
-												   DeepinUtils.clutter_set_mode_bezier_out_back_small,
+                                                   animation_settings.multitasking_toggle_duration,
+												   DeepinUtils.clutter_set_mode_ease_out_quint,
 												   "scale-x", &scale_value, "scale-y", &scale_value);
 			} else {
 				background.set_scale (1.0f, 1.0f);

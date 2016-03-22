@@ -28,8 +28,7 @@ namespace Gala
 	 */
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
-		public const int TOGGLE_DURATION = 800;
-		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUAD;
+		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUINT;
 		public const int WORKSPACE_SWITCH_DURATION = 500;
 		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUAD;
 		public const int WORKSPACE_FADE_DURATION = 400;
@@ -59,6 +58,7 @@ namespace Gala
 		bool opened = false;
 		bool toggling = false;
 		bool animating = false;
+		int toggle_duration = 450;
 
 		bool is_smooth_scrolling = false;
 
@@ -78,6 +78,9 @@ namespace Gala
 			visible = false;
 			reactive = true;
 			clip_to_allocation = true;
+
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			toggle_duration = animation_settings.multitasking_toggle_duration;
 
 			opened = false;
 			screen = wm.get_screen ();
@@ -717,8 +720,8 @@ namespace Gala
 			} else {
 				thumb_y_value.set_float (-(monitor_geom.height * HORIZONTAL_OFFSET_PERCENT));
 			}
-			DeepinUtils.start_animation_group (thumb_container, "toggle", TOGGLE_DURATION,
-											   DeepinUtils.clutter_set_mode_bezier_out_back,
+			DeepinUtils.start_animation_group (thumb_container, "toggle", toggle_duration,
+											   DeepinUtils.clutter_set_mode_ease_out_quint,
 											   "y", &thumb_y_value);
 
 			foreach (var child in flow_container.get_children ()) {
@@ -752,14 +755,14 @@ namespace Gala
 				foreach (var child in dock_clones.get_children ()) {
 					var dock = (Clone)child;
 
-					dock.set_easing_duration (TOGGLE_DURATION);
+					dock.set_easing_duration (toggle_duration);
 					dock.set_easing_mode (TOGGLE_MODE);
 					dock.opacity = 255;
 				}
 			}
 
 			if (!opening) {
-				Timeout.add (TOGGLE_DURATION, () => {
+				Timeout.add (toggle_duration, () => {
 					foreach (var container in window_containers_monitors) {
 						container.visible = false;
 					}
@@ -779,7 +782,7 @@ namespace Gala
 					return false;
 				});
 			} else {
-				Timeout.add (TOGGLE_DURATION, () => {
+				Timeout.add (toggle_duration, () => {
 					toggling = false;
 					return false;
 				});
