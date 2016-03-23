@@ -279,7 +279,7 @@ namespace Gala
 		public const int SELECT_DURATION = 500;
 		public const AnimationMode SELECT_MODE = AnimationMode.LINEAR;
 
-		public const int WORKSPACE_NAME_WIDTH = 70;
+		public const int WORKSPACE_NAME_WIDTH = 70; // considered as minimal width
 		public const int WORKSPACE_NAME_HEIGHT = 24;
 
 		const int WORKSPACE_NAME_MAX_LENGTH = 32;
@@ -467,8 +467,8 @@ namespace Gala
 			name_shape.select = value;
 
 			if (value) {
-				name_shape.scale_x = 1.1;
-				name_shape.scale_y = 1.1;
+				name_shape.scale_x = 1.033;
+				name_shape.scale_y = 1.033;
 			} else {
 				name_shape.scale_x = 1.0;
 				name_shape.scale_y = 1.0;
@@ -514,7 +514,7 @@ namespace Gala
 
 			var name_box = ActorBox ();
 			name_box.set_size (
-				Math.fminf (workspace_name.width, WORKSPACE_NAME_WIDTH - NAME_SHAPE_PADDING * 2),
+				Math.fminf (workspace_name.width, box.get_width () - NAME_SHAPE_PADDING * 2),
 				WORKSPACE_NAME_HEIGHT);
 			name_box.set_origin (
 				(box.get_width () - name_box.get_width ()) / 2,
@@ -734,7 +734,10 @@ namespace Gala
 
 			// allocate workspace name field
 			var name_box = ActorBox ();
-			name_box.set_size (DeepinWorkspaceNameField.WORKSPACE_NAME_WIDTH,
+            float name_width = Math.fmaxf(DeepinWorkspaceNameField.WORKSPACE_NAME_WIDTH, 
+                    workspace_name.width);
+            name_width = Math.fminf (thumb_width, name_width);
+			name_box.set_size (name_width,
 							   DeepinWorkspaceNameField.WORKSPACE_NAME_HEIGHT);
 			name_box.set_origin ((box.get_width () - name_box.get_width ()) / 2,
 								 thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
