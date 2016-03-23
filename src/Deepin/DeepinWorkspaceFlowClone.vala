@@ -148,8 +148,7 @@ namespace Gala
 			// add existing windows
 			var windows = workspace.list_windows ();
 			foreach (var window in windows) {
-				if (window.window_type == WindowType.NORMAL && !window.on_all_workspaces &&
-					window.get_monitor () == screen.get_primary_monitor ()) {
+				if (window.window_type == WindowType.NORMAL && !window.on_all_workspaces) {
 					window_container.add_window (window);
 					thumb_workspace.window_container.add_window (window);
 				}
@@ -188,8 +187,7 @@ namespace Gala
 		void add_window (Window window)
 		{
 			if (window.window_type != WindowType.NORMAL || window.get_workspace () != workspace ||
-				window.on_all_workspaces ||
-				window.get_monitor () != window.get_screen ().get_primary_monitor ()) {
+				window.on_all_workspaces) {
 				return;
 			}
 

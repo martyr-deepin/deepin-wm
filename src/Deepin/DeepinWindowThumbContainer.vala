@@ -83,6 +83,20 @@ namespace Gala
 			}
 		}
 
+        /* move window into target monitor and then translate it into 
+         * logical monitor which is positioned at (0,0)
+          */
+        void shove_into_primary(Meta.Rectangle geom, ref Meta.Rectangle rect)
+        {
+            if (rect.x >= geom.x + geom.width) rect.x -= geom.x + geom.width;
+            else if (rect.x < geom.x) rect.x += geom.x;
+            if (rect.y >= geom.y + geom.width) rect.y -= geom.y + geom.height;
+            else if (rect.y < geom.y) rect.y += geom.y;
+
+            if (rect.x >= geom.x) rect.x -= geom.x;
+            if (rect.y >= geom.y) rect.y -= geom.y;
+        }
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -97,6 +111,7 @@ namespace Gala
 
 			Meta.Rectangle rect;
 			rect = window_clone.window.get_frame_rect ();
+            shove_into_primary(monitor_geom, ref rect);
 
 			var box = DeepinUtils.new_actor_box_for_rect (rect);
 
