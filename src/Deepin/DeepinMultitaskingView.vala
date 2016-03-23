@@ -29,10 +29,10 @@ namespace Gala
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
 		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUINT;
-		public const int WORKSPACE_SWITCH_DURATION = 500;
-		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUAD;
+		public const int WORKSPACE_SWITCH_DURATION = 400;
+		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUINT;
 		public const int WORKSPACE_FADE_DURATION = 400;
-		public const AnimationMode WORKSPACE_FADE_MODE = AnimationMode.EASE_OUT_QUAD;
+		public const AnimationMode WORKSPACE_FADE_MODE = AnimationMode.EASE_OUT_QUINT;
 
 		const int SMOOTH_SCROLL_DELAY = 500;
 

@@ -307,7 +307,7 @@ namespace Gala
 		 */
 		public static string start_fade_in_animation (
 			Clutter.Actor actor, int duration,
-			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUAD,
+			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUINT,
 			PlainCallback? cb = null, double cb_progress = 1.0)
 		{
 			var trans_name = "scale-x";
@@ -340,7 +340,7 @@ namespace Gala
 		 */
 		public static string start_fade_in_opacity_animation (
 			Clutter.Actor actor, int duration,
-			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUAD,
+			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUINT,
 			PlainCallback? cb = null, double cb_progress = 1.0)
 		{
 			var trans_name = "opacity";
@@ -383,7 +383,7 @@ namespace Gala
 			actor.opacity = 12;
 
 			actor.set_easing_duration (duration);
-			actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
+			actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUINT);
 			actor.opacity = 255;
 
 			actor.restore_easing_state ();
@@ -406,7 +406,7 @@ namespace Gala
 		 */
 		public static string start_fade_out_animation (
 			Clutter.Actor actor, int duration,
-			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUAD,
+			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUINT,
 			PlainCallback? cb = null, double cb_progress = 1.0)
 		{
 			var trans_name = "scale-x";
@@ -439,7 +439,7 @@ namespace Gala
 		 */
 		public static string start_fade_out_opacity_animation (
 			Clutter.Actor actor, int duration,
-			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUAD,
+			Clutter.AnimationMode mode = Clutter.AnimationMode.EASE_OUT_QUINT,
 			PlainCallback? cb = null, double cb_progress = 1.0)
 		{
 			var trans_name = "opacity";

@@ -112,10 +112,13 @@ namespace Gala
 
 			select_clone (get_clone_for_window (focus_window), false);
 
+			var screen = workspace.get_screen ();
 			foreach (var window in get_children ()) {
 				var window_clone = window as DeepinWindowClone;
 
-				window_clone.transition_to_original_state (false);
+                if (screen.get_active_workspace () == workspace) 
+                    window_clone.transition_to_original_state (false);
+
 				window_clone.opacity = 255;
 			}
 
