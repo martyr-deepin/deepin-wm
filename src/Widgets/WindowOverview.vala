@@ -132,9 +132,7 @@ namespace Gala
 				foreach (var window in workspace.list_windows ()) {
 					if (window.window_type != WindowType.NORMAL &&
 						window.window_type != WindowType.DOCK &&
-						window.window_type != WindowType.DESKTOP &&
-						window.window_type != WindowType.DIALOG ||
-						window.is_attached_dialog ()) {
+						window.window_type != WindowType.DESKTOP) {
 						var actor = window.get_compositor_private () as WindowActor;
 						if (actor != null)
 							actor.hide ();

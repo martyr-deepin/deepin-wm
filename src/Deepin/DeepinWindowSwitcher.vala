@@ -431,8 +431,6 @@ namespace Gala
 			var safe_clone = new SafeWindowClone (window, true);
 			safe_clone.x = actor.x - this.x;
 			safe_clone.y = actor.y - this.y;
-			//safe_clone.x = actor.x >= this.x ? actor.x - this.x : actor.x;
-			//safe_clone.y = actor.y >= this.y ? actor.y - this.y : actor.y;
 			safe_clone.opacity = 0;  // keepin hidden before popup window shown
 
 			window_clones.add_child (safe_clone);
