@@ -116,8 +116,16 @@ namespace Gala
 			foreach (var window in get_children ()) {
 				var window_clone = window as DeepinWindowClone;
 
-                if (screen.get_active_workspace () == workspace) 
+                if (screen.get_active_workspace () == workspace) {
                     window_clone.transition_to_original_state (false);
+                    var shadow_effect = window_clone.get_effect ("shadow") as ShadowEffect;
+                    if (shadow_effect != null) {
+                        shadow_effect.shadow_opacity = DeepinWindowClone.SHADOW_OPACITY;
+                    }
+                } else {
+                    window_clone.x = this.width / 2;
+                    window_clone.y = this.height / 2;
+                }
 
 				window_clone.opacity = 255;
 			}
@@ -139,6 +147,11 @@ namespace Gala
 				if ((workspace.get_screen ().get_active_workspace () == workspace) &&
 					window_clone.window.showing_on_its_workspace ()) {
 					window_clone.transition_to_original_state (true);
+                    var shadow_effect = window_clone.get_effect ("shadow") as ShadowEffect;
+                    if (shadow_effect != null) {
+                        shadow_effect.shadow_opacity = 0;
+                    }
+
 				} else {
 					DeepinUtils.start_fade_out_opacity_animation (
 						window_clone, 300, AnimationMode.EASE_OUT_QUAD);

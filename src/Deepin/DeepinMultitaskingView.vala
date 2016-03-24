@@ -718,8 +718,9 @@ namespace Gala
 			if (opening) {
 				thumb_y_value.set_float ((monitor_geom.height * HORIZONTAL_OFFSET_PERCENT));
 			} else {
-				thumb_y_value.set_float (-(monitor_geom.height * HORIZONTAL_OFFSET_PERCENT));
+                thumb_y_value.set_float (-(monitor_geom.height * FLOW_WORKSPACE_TOP_OFFSET_PERCENT));
 			}
+
 			DeepinUtils.start_animation_group (thumb_container, "toggle", toggle_duration,
 											   DeepinUtils.clutter_set_mode_ease_out_quint,
 											   "y", &thumb_y_value);
