@@ -314,12 +314,31 @@ namespace Gala
 		{
             unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 			if (animate) {
+                var screen = workspace.get_screen ();
+                var active_index = screen.get_active_workspace ().index ();
+                var index = workspace.index ();
+
 				var scale_value = GLib.Value (typeof (float));
 				scale_value.set_float (1.0f);
-				DeepinUtils.start_animation_group (background, "close",
-                                                   animation_settings.multitasking_toggle_duration,
+
+                float orig_x = background.x;
+				var x_value = GLib.Value (typeof (float));
+				float offset = background.width * (DeepinMultitaskingView.FLOW_WORKSPACE_DISTANCE_PERCENT * 2);
+                x_value.set_float (orig_x + (index - active_index) * offset);
+
+                var duration = screen.get_active_workspace () == workspace ?
+                    animation_settings.multitasking_toggle_duration : 
+                    animation_settings.multitasking_toggle_duration * 7 / 10; 
+
+				var ag = DeepinUtils.start_animation_group (background, "close", 
+                                                   duration,
 												   DeepinUtils.clutter_set_mode_ease_out_quint,
-												   "scale-x", &scale_value, "scale-y", &scale_value);
+												   "scale-x", &scale_value, "scale-y", &scale_value,
+                                                   "x", &x_value);
+                ag.stopped.connect ((is_finished) => {
+                    background.x = orig_x;
+                });
+
 			} else {
 				background.set_scale (1.0f, 1.0f);
 			}
