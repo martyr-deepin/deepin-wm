@@ -23,11 +23,13 @@ namespace Gala
 {
 	/**
 	 * The central class for the DeepinMultitaskingView which takes care of preparing the wm,
-	 * opening the components and holds containers for the icon groups, the WorkspaceClones and the
-	 * MonitorClones.
+	 * opening the components and holds containers for the icon groups, the WorkspaceClones 
 	 */
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
+		const string BACKGROUND_SCHEMA = "com.deepin.wrap.gnome.desktop.background";
+		const string EXTRA_BACKGROUND_SCHEMA = "com.deepin.dde.appearance";
+
 		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUINT;
 		public const int WORKSPACE_SWITCH_DURATION = 400;
 		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUINT;
@@ -62,7 +64,8 @@ namespace Gala
 
 		bool is_smooth_scrolling = false;
 
-		List<MonitorClone> window_containers_monitors;
+        Meta.BlurredBackgroundActor background_actor;
+        BackgroundSource background_source;
 
 		Actor dock_clones;
 		Actor flow_container;
@@ -84,6 +87,19 @@ namespace Gala
 
 			opened = false;
 			screen = wm.get_screen ();
+
+            //TODO: handle workspace change signal
+            background_source = BackgroundCache.get_default ().get_background_source (
+				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
+			var active_index = screen.get_active_workspace ().index ();
+            var background = background_source.get_background (screen.get_primary_monitor (), active_index);
+            background_actor = new Meta.BlurredBackgroundActor (screen, screen.get_primary_monitor ());
+            background_actor.background = background.background;
+            background_actor.set_radius (19);
+
+            var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
+            background_actor.set_size (monitor.width, monitor.height);
+
 
 			// TODO: does need keep workspace switching duration same with normal mode?
 			// WORKSPACE_SWITCH_DURATION = AnimationSettings.get_default ().workspace_switch_duration;
@@ -109,6 +125,7 @@ namespace Gala
 
 			dock_clones = new Actor ();
 
+            add_child (background_actor);
 			add_child (thumb_container);
 			add_child (flow_container);
 			add_child (dock_clones);
@@ -120,17 +137,9 @@ namespace Gala
 			screen.workspace_added.connect (add_workspace);
 			screen.workspace_removed.connect (remove_workspace);
 			screen.workspace_switched.connect_after (on_workspace_switched);
-
-			window_containers_monitors = new List<MonitorClone> ();
-			update_monitors ();
-			screen.monitors_changed.connect (update_monitors);
+            screen.monitors_changed.connect (on_monitors_changed);
 
 			Prefs.add_listener ((pref) => {
-				if (pref == Preference.WORKSPACES_ONLY_ON_PRIMARY) {
-					update_monitors ();
-					return;
-				}
-
 				if (Prefs.get_dynamic_workspaces () ||
 					(pref != Preference.DYNAMIC_WORKSPACES && pref != Preference.NUM_WORKSPACES)) {
 					return;
@@ -153,8 +162,6 @@ namespace Gala
 						}
 					}
 
-					update_monitors ();
-
 					// FIXME: panic if workspace num changed by third party tools like "wmctrl -n 4"
 
 					return false;
@@ -164,8 +171,7 @@ namespace Gala
 
 		~DeepinMultitaskingView ()
 		{
-			screen.monitors_changed.disconnect (update_monitors);
-
+            screen.monitors_changed.disconnect (on_monitors_changed);
 			screen.workspace_added.disconnect (add_workspace);
 			screen.workspace_removed.disconnect (remove_workspace);
 			screen.workspace_switched.disconnect (on_workspace_switched);
@@ -186,44 +192,27 @@ namespace Gala
 			});
 		}
 
-		void on_workspace_switched (int from, int to, Meta.MotionDirection direction)
-		{
-			update_positions (opened, direction);
-		}
+        void on_monitors_changed ()
+        {
+            var primary = screen.get_primary_monitor ();
+            var primary_geometry = screen.get_monitor_geometry (primary);
 
-		/**
-		 * Places the primary container for the WorkspaceClones and the MonitorClones at the right
-		 * positions
-		 */
-		void update_monitors ()
-		{
-			foreach (var monitor_clone in window_containers_monitors) {
-				monitor_clone.destroy ();
-			}
-
-			var primary = screen.get_primary_monitor ();
-
-			if (InternalUtils.workspaces_only_on_primary ()) {
-				for (var monitor = 0; monitor < screen.get_n_monitors (); monitor++) {
-					if (monitor == primary) {
-						continue;
-					}
-
-					var monitor_clone = new MonitorClone (screen, monitor);
-					monitor_clone.window_selected.connect (activate_window);
-					monitor_clone.visible = opened;
-
-					window_containers_monitors.append (monitor_clone);
-					wm.ui_group.add_child (monitor_clone);
-				}
-			}
-
-			var primary_geometry = screen.get_monitor_geometry (primary);
-
-			set_position (primary_geometry.x, primary_geometry.y);
-			set_size (primary_geometry.width, primary_geometry.height);
+            set_position (primary_geometry.x, primary_geometry.y);
+            set_size (primary_geometry.width, primary_geometry.height);
 
             update_positions (true);
+
+        }
+
+		void on_workspace_switched (int from, int to, Meta.MotionDirection direction)
+		{
+            var background = background_source.get_background (0, to);
+            background_actor.background = background.background;
+            //background_actor.set_radius (19);
+
+            var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
+            background_actor.set_size (monitor.width, monitor.height);
+			update_positions (opened, direction);
 		}
 
 		/**
@@ -663,15 +652,6 @@ namespace Gala
 			opened = !opened;
 			var opening = opened;
 
-			foreach (var container in window_containers_monitors) {
-				if (opening) {
-					container.visible = true;
-					container.open ();
-				} else {
-					container.close ();
-				}
-			}
-
 			if (opening) {
 				modal_proxy = wm.push_modal ();
 				modal_proxy.keybinding_filter = keybinding_filter;
@@ -764,10 +744,6 @@ namespace Gala
 
 			if (!opening) {
 				Timeout.add (toggle_duration, () => {
-					foreach (var container in window_containers_monitors) {
-						container.visible = false;
-					}
-
 					hide ();
 
 					wm.background_group.show ();

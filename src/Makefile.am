@@ -72,7 +72,6 @@ gala_VALASOURCES = \
 	Background/BackgroundContainer.vala \
 	Background/BackgroundManager.vala \
 	Background/BackgroundSource.vala \
-	Background/SystemBackground.vala \
 	Widgets/IconGroup.vala \
 	Widgets/IconGroupContainer.vala \
 	Widgets/MonitorClone.vala \

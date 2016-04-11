@@ -225,6 +225,8 @@ namespace Gala
 				return;
 			}
 
+            (wm as WindowManagerGala).toggle_background_blur (true);
+
 			set_primary_modifier (binding.get_mask ());
 
 			current_item = next_item (workspace, backward);
@@ -295,6 +297,8 @@ namespace Gala
 			if (closing) {
 				return;
 			}
+
+            (wm as WindowManagerGala).toggle_background_blur (false);
 
 			closing = true;
 			last_switch_time = 0;

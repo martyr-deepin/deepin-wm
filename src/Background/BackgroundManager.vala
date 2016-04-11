@@ -31,11 +31,12 @@ namespace Gala
 		public int workspace_index { get; construct; }
 		public bool control_position { get; construct; }
 
-        Gee.ArrayList<Meta.BackgroundActor>? actors;
+        Gee.ArrayList<Meta.BlurredBackgroundActor>? actors;
 
 		BackgroundSource background_source;
         ulong changed_handler = 0;
         ulong serial = 0;
+		int radius = 0;
 
 		public BackgroundManager (Meta.Screen screen, int monitor_index, int workspace_index,
 								  bool control_position = true)
@@ -53,7 +54,7 @@ namespace Gala
                 create_background_actor ();
 			});
 
-            actors = new Gee.ArrayList<Meta.BackgroundActor> ();
+            actors = new Gee.ArrayList<Meta.BlurredBackgroundActor> ();
             create_background_actor ();
 		}
 
@@ -70,7 +71,16 @@ namespace Gala
             actors = null;
 		}
 
-        void on_background_actor_loaded (Meta.BackgroundActor background_actor)
+        public void set_radius (int radius)
+        {
+            this.radius = radius;
+            if (actors.size > 0) {
+                var actor = actors[actors.size - 1];
+                actor.set_radius (radius);
+            }
+        }
+
+        void on_background_actor_loaded (Meta.BlurredBackgroundActor background_actor)
         {
             insert_child_below (background_actor, null);
             actors.add (background_actor);
@@ -122,12 +132,9 @@ namespace Gala
             Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
 
             var background = background_source.get_background (monitor_index, workspace_index);
-            var background_actor = new Meta.BackgroundActor (screen, monitor_index);
+            var background_actor = new Meta.BlurredBackgroundActor (screen, monitor_index);
             background_actor.name = @"bg$serial";
             serial++;
-
-            // TODO: test blur effect
-            // DeepinBlurEffect.setup (background_actor, 20.0f, 1);
 
             var monitor = screen.get_monitor_geometry (monitor_index);
             background_actor.set_size (monitor.width, monitor.height);

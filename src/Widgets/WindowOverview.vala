@@ -179,6 +179,7 @@ namespace Gala
 			if (n_windows == 0)
 				return;
 
+            (wm as WindowManagerGala).toggle_background_blur (true);
 			ready = false;
 
 			foreach (var workspace in workspaces) {
@@ -305,6 +306,8 @@ namespace Gala
 		{
 			if (!visible || !ready)
 				return;
+
+            (wm as WindowManagerGala).toggle_background_blur (false);
 
 			foreach (var workspace in workspaces) {
 				workspace.window_added.disconnect (add_window);

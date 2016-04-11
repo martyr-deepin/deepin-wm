@@ -164,8 +164,8 @@ namespace Gala
 			 * +-- top window group
 		     */
 
-			var system_background = new SystemBackground (screen);
-			system_background.background.set_color (DeepinUtils.get_css_background_color ("deepin-window-manager"));
+			var system_background = new Clutter.Actor();
+			system_background.set_background_color (DeepinUtils.get_css_background_color ("deepin-window-manager"));
 			system_background.add_constraint (new Clutter.BindConstraint (stage,
 				Clutter.BindCoordinate.ALL, 0));
 			stage.insert_child_below (system_background, null);
@@ -334,6 +334,19 @@ namespace Gala
 
 			return false;
 		}
+
+        // blur active workspace backgrounds
+        public void toggle_background_blur (bool on)
+        {
+            var screen = get_screen ();
+
+            for (var i = 0; i < screen.get_n_monitors (); i++) {
+                backgrounds[i] = background_container.get_background (
+                        i, screen.get_active_workspace_index ());
+
+                (backgrounds[i] as BackgroundManager).set_radius (on ? 19:0);
+            }
+        }
 
 #if HAS_MUTTER314
         void configure_backgrounds ()

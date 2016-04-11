@@ -7,9 +7,31 @@ namespace Meta {
     public static void topic (Meta.DebugTopic topic, string format, ...);
 
 #if HAS_MUTTER314
-        [CCode (cheader_filename = "meta/main.h", cname = "meta_set_debugging")]
-        public static void set_debugging (bool setting);
-        [CCode (cheader_filename = "meta/main.h", cname = "meta_set_verbose")]
-        public static void set_verbose (bool setting);
+    [CCode (cheader_filename = "meta/main.h", cname = "meta_set_debugging")]
+    public static void set_debugging (bool setting);
+    [CCode (cheader_filename = "meta/main.h", cname = "meta_set_verbose")]
+    public static void set_verbose (bool setting);
 #endif
+
+    [CCode (cheader_filename = "meta/meta-blur-effect.h", type_id = "meta_blur_effect_get_type ()")]
+    public class BlurEffect : Clutter.OffscreenEffect {
+        [CCode (has_construct_function = false, type = "ClutterEffect*")]
+            public BlurEffect (int radius);
+    }
+
+	[CCode (cheader_filename = "meta/meta-blurred-background-actor.h", type_id = "meta_blurred_background_actor_get_type ()")]
+	public class BlurredBackgroundActor : Clutter.Actor, Atk.Implementor, Clutter.Animatable, Clutter.Container, Clutter.Scriptable {
+		[CCode (has_construct_function = false, type = "ClutterActor*")]
+		public BlurredBackgroundActor (Meta.Screen screen, int monitor);
+		public void set_background (Meta.Background background);
+		public void set_radius (int radius);
+		[NoAccessorMethod]
+		public Meta.Background background { owned get; set; }
+		[NoAccessorMethod]
+		public int radius { get; set; }
+		[NoAccessorMethod]
+		public Meta.Screen meta_screen { owned get; construct; }
+		[NoAccessorMethod]
+		public int monitor { get; construct; }
+	}
 }
