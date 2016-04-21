@@ -102,11 +102,14 @@ namespace Gala
 		 */
 		public override ActorBox get_layout_box_for_window (DeepinWindowClone window_clone)
 		{
+            Meta.Screen screen;
 			float thumb_width, thumb_height;
-			DeepinWorkspaceThumbContainer.get_prefer_thumb_size (workspace.get_screen (),
+
+            screen = workspace.get_screen ();
+			DeepinWorkspaceThumbContainer.get_prefer_thumb_size (screen,
 																 out thumb_width, out thumb_height);
 
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 			float scale = thumb_width != 0 ? thumb_width / (float)monitor_geom.width : 0.5f;
 
 			Meta.Rectangle rect;
@@ -118,7 +121,16 @@ namespace Gala
 			// make window rectangle center of monitor to avoid affect by _NET_WM_STRUT_PARTIAL
 			// which set by dock window
 			if (!window_clone.window.is_fullscreen ()) {
-				Meta.Rectangle work_area = window_clone.window.get_work_area_current_monitor ();
+				Meta.Rectangle work_area;
+                // window's monitor could larger than available monitors, this happens during
+                // monitors-changed handler: every window are updating their monitor infos and emit 
+                // window-left-monitor signals. each window-left-monitor is triggering relayout
+                // before all of the windows will have finished their monitor infos.
+				 if (window_clone.window.get_monitor () >= screen.get_n_monitors ()) {
+                     work_area = window_clone.window.get_work_area_for_monitor (screen.get_primary_monitor ());
+                 } else {
+                     work_area = window_clone.window.get_work_area_current_monitor ();
+                 }
 				float offset_x = (float)(monitor_geom.width - work_area.width) / 2;
 				float offset_y = (float)(monitor_geom.height - work_area.height) / 2;
 				DeepinUtils.offset_actor_box (ref box, offset_x, offset_y);
