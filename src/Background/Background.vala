@@ -57,8 +57,9 @@ namespace Gala
 
 			cancellable = new Cancellable ();
 
+            int load_count = 0;
             handler = background.changed.connect (() => {
-                set_loaded ();
+                if (++load_count > 1) set_loaded ();
             });
 
 			load ();
@@ -85,11 +86,12 @@ namespace Gala
 
 		void set_loaded ()
 		{
+            Meta.verbose ("%s\n", Log.METHOD);
 			if (is_loaded)
 				return;
 
-			Idle.add (() => {
-                is_loaded = true;
+            is_loaded = true;
+            Idle.add (() => {
 				loaded ();
 				return false;
 			});

@@ -79,52 +79,41 @@ namespace Gala
             while (actors.size > 2) {
                 Meta.verbose ("remove_child %s\n", actors[0].name);
                 var actor = actors[0];
-                actor.visible = false;
-                actor.opacity = 0;
 
                 actors.remove_at (0);
                 actor.remove_all_transitions ();
                 remove_child (actor);
 
+                actor.background = null;
                 actor.destroy ();
             }
 
             if (actors.size > 1) {
                 var actor = actors[actors.size - 2];
 
-                actor.opacity = 255;
-                actor.save_easing_state ();
-                actor.set_easing_duration (FADE_ANIMATION_TIME);
-                actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
-                actor.opacity = 0;
-                actor.restore_easing_state ();
+                if (Config.DEEPIN_ARCH.has_prefix("mips")) {
+                    Timeout.add (50, () => {actor.visible = false; return false; });
+                    changed ();
 
-                actor.transition_stopped.connect( (name, is_finished) => {
-                        Meta.verbose ("swapping from %s, completed = %d\n",
+                } else {
+                    actor.opacity = 255;
+                    actor.save_easing_state ();
+                    actor.set_easing_duration (FADE_ANIMATION_TIME);
+                    actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
+                    actor.opacity = 0;
+                    actor.restore_easing_state ();
+
+                    actor.transition_stopped.connect ((name, is_finished) => {
+                        Meta.verbose ("swapping from %s, completed = %d, leftout actors: \n",
                                 actor.name, is_finished);
-                        if (is_finished) {
-                        //queue_relayout ();
-                        Meta.verbose ("leftout actors\n");
                         var children = get_children ();
                         children.foreach ((c) => {
-                                Meta.verbose ("actor %s\n", c.name);
-                                });
-
+                            Meta.verbose ("\tactor %s\n", c.name);
+                        });
                         actor.visible = false;
-                        assert (actor.opacity == 0);
-
-                        actors.remove (actor);
-                        remove_child (actor);
-
-                        Idle.add( () => { actor.destroy (); return false; });
-
                         changed ();
-
-                        } else {
-                            actor.opacity = 0;
-                        }
-                });
-
+                    });
+                }
             }
         }
 
@@ -140,17 +129,15 @@ namespace Gala
             // TODO: test blur effect
             // DeepinBlurEffect.setup (background_actor, 20.0f, 1);
 
-            background_actor.background = background.background;
-
             var monitor = screen.get_monitor_geometry (monitor_index);
             background_actor.set_size (monitor.width, monitor.height);
 
             if (control_position) {
                 background_actor.set_position (monitor.x, monitor.y);
             }
+            background_actor.background = background.background;
 
             ulong loaded_handler = 0;
-
             if (background.is_loaded) {
                 on_background_actor_loaded (background_actor);
             } else {

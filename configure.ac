@@ -34,6 +34,9 @@ AC_INIT([deepin-wm], gala_version,
 AC_DEFINE(RELEASE_NAME, "Window Manager.", Codename of this release)
 AC_DEFINE(VERSION_INFO, m4_if(gala_released, [1], "Release", "Development"), Version info for package)
 
+mach_value=`uname -m`
+AC_DEFINE_UNQUOTED(DEEPIN_ARCH, ["$mach_value"], [Architecture of current running platform])
+
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_PREREQ([2.65])
@@ -249,7 +252,6 @@ AM_CONDITIONAL([HAVE_VALADOC], [test "x$have_valadoc" = "xyes"])
 if test "x$enable_docs" = "xyes" -a "x$have_valadoc" != "xyes"; then
     AC_MSG_ERROR([Doc building requested but valadoc not installed.])
 fi
-
 
 # -----------------------------------------------------------
 # Gettext
