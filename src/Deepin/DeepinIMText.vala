@@ -314,10 +314,11 @@ namespace Gala
                 return false;
 
             if (this.editable) {
-                Meta.verbose ("%s\n", Log.METHOD);
                 var kev = event.key;
 
                 var gdkev = to_gdk_event (kev);
+                if (gdkev == null) return false;
+
                 if (imctx != null && gdkev != null && imctx.filter_keypress (gdkev.key)) {
                     return true;
                 }
