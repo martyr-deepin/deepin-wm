@@ -804,7 +804,7 @@ namespace Gala
             hiding_windows = false;
         }
 
-		WindowMenu? window_menu = null;
+		DeepinWindowMenu? window_menu = null;
 
 		public override void show_window_menu (Meta.Window window, Meta.WindowMenuType menu, int x, int y)
 		{
@@ -814,17 +814,10 @@ namespace Gala
 				case WindowMenuType.WM:
                     Timeout.add(150, () => {
                         if (window_menu == null)
-                            window_menu = new WindowMenu ();
+                            window_menu = new DeepinWindowMenu ();
 
                         window_menu.current_window = window;
-                        window_menu.show_all ();
-
-                        var screen = get_screen ();
-                        var display = screen.get_display ();
-                        window_menu.popup (null, null, (window_menu, ref menu_x, ref menu_y, out push_in) => {
-                            menu_x = x;
-                            menu_y = y;
-                        }, Gdk.BUTTON_SECONDARY, display.get_current_time ());
+                        window_menu.Menu(x, y);
 
                         return false;
                     });

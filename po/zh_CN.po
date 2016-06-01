@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: noise\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-12-09 18:23+0800\n"
+"POT-Creation-Date: 2016-06-02 10:26+0800\n"
 "PO-Revision-Date: 2015-05-06 06:44+0000\n"
 "Last-Translator: colindemian <dengmengpc@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <zh_CN@li.org>\n"
@@ -21,55 +21,55 @@ msgstr ""
 "X-Language: zh_CN\n"
 "X-Source-Language: C\n"
 
-#: ../src/WindowManager.vala:1724
+#: ../src/WindowManager.vala:1892
 msgid "Does the display look OK?"
 msgstr "当前显示是否正常？"
 
-#: ../src/WindowManager.vala:1727
+#: ../src/WindowManager.vala:1895
 msgid "Keep This Configuration"
 msgstr "保留当前设定"
 
-#: ../src/WindowManager.vala:1728
+#: ../src/WindowManager.vala:1896
 msgid "Restore Previous Configuration"
 msgstr "恢复之前的设置"
 
-#: ../src/Widgets/WindowMenu.vala:58
+#: ../src/Widgets/WindowMenu.vala:56
 msgid "Minimize"
 msgstr "最小化"
 
-#: ../src/Widgets/WindowMenu.vala:73
+#: ../src/Widgets/WindowMenu.vala:71
 msgid "Move"
 msgstr "移动"
 
-#: ../src/Widgets/WindowMenu.vala:80
+#: ../src/Widgets/WindowMenu.vala:78
 msgid "Resize"
 msgstr "更改大小"
 
-#: ../src/Widgets/WindowMenu.vala:87
+#: ../src/Widgets/WindowMenu.vala:85
 msgid "Always on Top"
 msgstr "总在最前"
 
-#: ../src/Widgets/WindowMenu.vala:96
+#: ../src/Widgets/WindowMenu.vala:94
 msgid "Always on Visible Workspace"
 msgstr "总在可见工作区"
 
-#: ../src/Widgets/WindowMenu.vala:105
+#: ../src/Widgets/WindowMenu.vala:103
 msgid "Move to Workspace Left"
 msgstr "移至左边的工作区"
 
-#: ../src/Widgets/WindowMenu.vala:113
+#: ../src/Widgets/WindowMenu.vala:111
 msgid "Move to Workspace Right"
 msgstr "移至右边的工作区"
 
-#: ../src/Widgets/WindowMenu.vala:121
+#: ../src/Widgets/WindowMenu.vala:119
 msgid "Close"
 msgstr "关闭"
 
-#: ../src/Widgets/WindowMenu.vala:133
+#: ../src/Widgets/WindowMenu.vala:131
 msgid "Unmaximize"
 msgstr "还原"
 
-#: ../src/Widgets/WindowMenu.vala:133
+#: ../src/Widgets/WindowMenu.vala:131
 msgid "Maximize"
 msgstr "最大化"
 
@@ -80,6 +80,46 @@ msgstr "向上拖拽删除"
 #: ../src/Deepin/DeepinWorkspaceName.vala:152
 msgid "workspace"
 msgstr "工作区"
+
+#: ../src/Deepin/DeepinMenu.vala:88
+msgid "_Minimize"
+msgstr "最小化(_M)"
+
+#: ../src/Deepin/DeepinMenu.vala:92
+msgid "Mov_e"
+msgstr "移动(_E)"
+
+#: ../src/Deepin/DeepinMenu.vala:94
+msgid "_Resize"
+msgstr "更改大小(_R)"
+
+#: ../src/Deepin/DeepinMenu.vala:96
+msgid "Always on _Top"
+msgstr "总在最前(_T)"
+
+#: ../src/Deepin/DeepinMenu.vala:98
+msgid "Always _on Visible Workspace"
+msgstr "总在可见工作区(_O)"
+
+#: ../src/Deepin/DeepinMenu.vala:100
+msgid "Move to Workspace _Left"
+msgstr "移至左边的工作区(_L)"
+
+#: ../src/Deepin/DeepinMenu.vala:102
+msgid "Move to Workspace _Right"
+msgstr "移至右边的工作区(_R)"
+
+#: ../src/Deepin/DeepinMenu.vala:104
+msgid "_Close"
+msgstr "关闭(_C)"
+
+#: ../src/Deepin/DeepinMenu.vala:276
+msgid "_Unmaximize"
+msgstr "还原(_U)"
+
+#: ../src/Deepin/DeepinMenu.vala:276
+msgid "M_aximize"
+msgstr "最大化(_A)"
 
 #: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:77
 msgid "%l:%M:%S %p"
@@ -171,11 +211,11 @@ msgstr ""
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:8
 msgid ""
 "If you just put a single command, it will be used for every hotcorner "
-"assigned to 'custom-command'. If you instead use the pattern 'hotcorner-"
-"topleft:command;;hotcorner-bottomright:command' the specific commands will "
-"be used per hotcorner. Possible identifiers are 'hotcorner-[topleft; "
-"topright; bottomleft; bottomright]' followed by a ':' and then the command. "
-"';;' is used as delimiter between command defintions."
+"assigned to 'custom-command'. If you instead use the pattern "
+"'hotcorner-topleft:command;;hotcorner-bottomright:command' the specific "
+"commands will be used per hotcorner. Possible identifiers are "
+"'hotcorner-[topleft; topright; bottomleft; bottomright]' followed by a ':' "
+"and then the command. ';;' is used as delimiter between command defintions."
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:9
@@ -291,9 +331,7 @@ msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
-msgstr ""
-"当为 true 时，模态对话框会依附在父窗口的标题栏出现，并随父窗口移动，而不使用"
-"单独的标题栏。"
+msgstr "当为 true 时，模态对话框会依附在父窗口的标题栏出现，并随父窗口移动，而不使用单独的标题栏。"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:34
 msgid "Arrangement of buttons on the titlebar"
@@ -303,16 +341,14 @@ msgstr "标题栏按钮布局"
 msgid ""
 "Arrangement of buttons on the titlebar. The value should be a string, such "
 "as \"menu:minimize,maximize,spacer,close\"; the colon separates the left "
-"corner of the window from the right corner, and the button names are comma-"
-"separated. Duplicate buttons are not allowed. Unknown button names are "
+"corner of the window from the right corner, and the button names are "
+"comma-separated. Duplicate buttons are not allowed. Unknown button names are "
 "silently ignored so that buttons can be added in future metacity versions "
 "without breaking older versions. A special spacer tag can be used to insert "
 "some space between two adjacent buttons."
 msgstr ""
-"标题栏中按钮的排列方式。值应该为字符串，如“menu:minimize,maximize,spacer,"
-"close”；冒号分隔窗口的左上角和右上角，按钮名以逗号分隔。按钮不允许重复。未知"
-"的按钮名将直接忽略，以便将来的 metacity 版本增加按钮时不会破坏旧版本。可以使"
-"用特别的 spacer 标签在相邻按钮间增加一些空间。"
+"标题栏中按钮的排列方式。值应该为字符串，如“menu:minimize,maximize,spacer,close”；冒号分隔窗口的左上角和右上角，按钮名以逗号分隔。按钮不允许重复。未知的按钮名将直接忽略，以便将来的 "
+"metacity 版本增加按钮时不会破坏旧版本。可以使用特别的 spacer 标签在相邻按钮间增加一些空间。"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:36
 msgid "Make parent windows that spawn a modal attached dialog being dimmed"
@@ -364,9 +400,9 @@ msgstr "设置普通焦点窗口阴影"
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:47
 msgid ""
 "The first value is the radius of the blur of the shadow, the second one the "
-"top fade (which is usually just -1), the third and fourth the x- and y-"
-"offset and the last the opacity. So [blur-radius, top-fade, x-offset, y-"
-"offset, opacity]"
+"top fade (which is usually just -1), the third and fourth the x- and "
+"y-offset and the last the opacity. So [blur-radius, top-fade, x-offset, "
+"y-offset, opacity]"
 msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:48

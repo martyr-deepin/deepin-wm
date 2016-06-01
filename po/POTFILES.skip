@@ -3,4 +3,5 @@ src/WindowManager.c
 src/Widgets/WindowMenu.c
 src/Deepin/DeepinWorkspaceThumbClone.c
 src/Deepin/DeepinWorkspaceName.c
+src/Deepin/DeepinMenu.c
 granite/Widgets/Utils.c
