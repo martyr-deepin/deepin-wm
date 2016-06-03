@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: noise\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-02 10:26+0800\n"
+"POT-Creation-Date: 2016-06-03 10:02+0800\n"
 "PO-Revision-Date: 2015-05-06 06:44+0000\n"
 "Last-Translator: colindemian <dengmengpc@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <zh_CN@li.org>\n"
@@ -82,12 +82,12 @@ msgid "workspace"
 msgstr "工作区"
 
 #: ../src/Deepin/DeepinMenu.vala:88
-msgid "_Minimize"
-msgstr "最小化(_M)"
+msgid "Mi_nimize"
+msgstr "最小化(_N)"
 
 #: ../src/Deepin/DeepinMenu.vala:92
-msgid "Mov_e"
-msgstr "移动(_E)"
+msgid "_Move"
+msgstr "移动(_M)"
 
 #: ../src/Deepin/DeepinMenu.vala:94
 msgid "_Resize"
@@ -98,28 +98,28 @@ msgid "Always on _Top"
 msgstr "总在最前(_T)"
 
 #: ../src/Deepin/DeepinMenu.vala:98
-msgid "Always _on Visible Workspace"
-msgstr "总在可见工作区(_O)"
+msgid "_Always on Visible Workspace"
+msgstr "总在可见工作区(_A)"
 
 #: ../src/Deepin/DeepinMenu.vala:100
 msgid "Move to Workspace _Left"
 msgstr "移至左边的工作区(_L)"
 
 #: ../src/Deepin/DeepinMenu.vala:102
-msgid "Move to Workspace _Right"
-msgstr "移至右边的工作区(_R)"
+msgid "Move to Workspace R_ight"
+msgstr "移至右边的工作区(I)"
 
 #: ../src/Deepin/DeepinMenu.vala:104
 msgid "_Close"
 msgstr "关闭(_C)"
 
-#: ../src/Deepin/DeepinMenu.vala:276
-msgid "_Unmaximize"
-msgstr "还原(_U)"
+#: ../src/Deepin/DeepinMenu.vala:282
+msgid "Unma_ximize"
+msgstr "还原(_X)"
 
-#: ../src/Deepin/DeepinMenu.vala:276
-msgid "M_aximize"
-msgstr "最大化(_A)"
+#: ../src/Deepin/DeepinMenu.vala:282
+msgid "Ma_ximize"
+msgstr "最大化(_X)"
 
 #: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:77
 msgid "%l:%M:%S %p"
@@ -456,6 +456,24 @@ msgstr "全屏时禁用圆角模框"
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:60
 msgid "Only show corner masks on primary monitor"
 msgstr "只在主显示器显示圆角模框"
+
+#~ msgid "_Minimize"
+#~ msgstr "最小化(_M)"
+
+#~ msgid "Mov_e"
+#~ msgstr "移动(_E)"
+
+#~ msgid "Always _on Visible Workspace"
+#~ msgstr "总在可见工作区(_O)"
+
+#~ msgid "Move to Workspace _Right"
+#~ msgstr "移至右边的工作区(_R)"
+
+#~ msgid "_Unmaximize"
+#~ msgstr "还原(_U)"
+
+#~ msgid "M_aximize"
+#~ msgstr "最大化(_A)"
 
 #~ msgid "Cancel"
 #~ msgstr "取消"

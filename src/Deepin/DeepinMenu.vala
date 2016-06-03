@@ -85,30 +85,34 @@ namespace Gala
         construct
         {
             menu_content = new List<MenuItem>();
-            minimize = new MenuItem("minimize", _("_Minimize"));
+            minimize = new MenuItem("minimize", _("Mi_nimize"));
             menu_content.append(minimize);
             maximize = new MenuItem("maximize", "");
             menu_content.append(maximize);
-            move = new MenuItem("move", _("Mov_e"));
+            move = new MenuItem("move", _("_Move"));
             menu_content.append(move);
             resize = new MenuItem("resize", _("_Resize"));
             menu_content.append(resize);
             always_on_top = new CheckMenuItem("always_on_top", _("Always on _Top"));
             menu_content.append(always_on_top);
-            on_visible_workspace = new CheckMenuItem("on_visible_workspace", _("Always _on Visible Workspace"));
+            on_visible_workspace = new CheckMenuItem("on_visible_workspace", _("_Always on Visible Workspace"));
             menu_content.append(on_visible_workspace);
             move_left = new MenuItem("move_left", _("Move to Workspace _Left"));
             menu_content.append(move_left);
-            move_right = new MenuItem("move_right", _("Move to Workspace _Right"));
+            move_right = new MenuItem("move_right", _("Move to Workspace R_ight"));
             menu_content.append(move_right);
             close = new MenuItem("close", _("_Close"));
             menu_content.append(close);
-
-            //menu.destroy.connect(handle_menu_destroy);
         }
 
 		public void Menu(int menu_x, int menu_y) 
         {
+            if (current_window.window_type == WindowType.DESKTOP ||
+                    current_window.window_type == WindowType.DOCK ||
+                    current_window.window_type == WindowType.SPLASHSCREEN) {
+                return;
+            }
+
 			try {
 			    MenuManagerInterface manager = Bus.get_proxy_sync(BusType.SESSION,
                         "com.deepin.menu", "/com/deepin/menu");
@@ -270,10 +274,12 @@ namespace Gala
 
 		void update_window ()
 		{
+            var screen = current_window.get_screen ();
+
 			minimize.visible = current_window.can_minimize ();
 
 			maximize.visible = current_window.can_maximize ();
-			maximize.text = current_window.get_maximized () > 0 ? _("_Unmaximize") : _("M_aximize");
+			maximize.text = current_window.get_maximized () > 0 ? _("Unma_ximize") : _("Ma_ximize");
 
 			move.visible = current_window.allows_move ();
 
@@ -283,9 +289,11 @@ namespace Gala
 
 			on_visible_workspace.checked = current_window.on_all_workspaces;
 
-			move_right.visible = !current_window.on_all_workspaces;
+			move_right.visible = !current_window.on_all_workspaces && 
+                screen.get_active_workspace_index () < screen.get_n_workspaces () - 1;
 
-			move_left.visible = !current_window.on_all_workspaces;
+			move_left.visible = !current_window.on_all_workspaces && 
+                screen.get_active_workspace_index ()  > 0;
 
 			close.visible = current_window.can_close ();
 		}
