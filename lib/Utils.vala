@@ -244,7 +244,7 @@ namespace Gala
 			var surface = Gdk.cairo_surface_create_from_pixbuf (pixbuf, 1, null);
 
 			// black colorize
-			var surface_black = new_cairo_image_surface (surface, width, height);
+			var surface_black = new_cairo_image_surface (surface, width, height + distance, 0, distance);
 			add_black_colorize_effect (surface_black, opacity);
 
 			// draw blur effect through BufferSurface
@@ -252,7 +252,7 @@ namespace Gala
 			buffer.context.set_source_surface (surface_black, size, distance);
 			buffer.context.paint ();
 
-			buffer.exponential_blur (size / 2);
+            buffer.exponential_blur (size / 2);
 
 			buffer.context.set_source_surface (surface, size, 0);
 			buffer.context.paint ();
@@ -262,11 +262,11 @@ namespace Gala
 		}
 
 		static Cairo.ImageSurface new_cairo_image_surface (Cairo.Surface surface, int width,
-														   int height)
+														   int height, int xoff, int yoff)
 		{
 			var image_surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
 			var cr = new Cairo.Context (image_surface);
-			cr.set_source_surface (surface, 0, 0);
+			cr.set_source_surface (surface, xoff, yoff);
 			cr.paint ();
 			return image_surface;
 		}
@@ -279,7 +279,7 @@ namespace Gala
 				data[0] = 0;
 				data[1] = 0;
 				data[2] = 0;
-				data[3] = data[3] * opacity / 255;
+				data[3] = data[3] != 0 ? opacity : 0;
 				data += 4;
 			}
 		}
