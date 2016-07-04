@@ -804,6 +804,27 @@ namespace Gala
             hiding_windows = false;
         }
 
+        public void present_windows (uint32[] xids)
+        {
+            Meta.verbose ("%s\n", Log.METHOD);
+            if (hiding_windows) return;
+
+            if (window_overview.is_opened ())
+                window_overview.close ();
+            else {
+                var hints = new HashTable<string, Variant> (str_hash, str_equal);
+
+                VariantBuilder builder = new VariantBuilder (new VariantType ("au") );
+                foreach (var xid in xids) {
+                    builder.add ("u", xid);
+                }
+                var list = builder.end ();
+
+                hints.@set ("present-windows", list);
+                window_overview.open (hints);
+            }
+        }
+
 		DeepinWindowMenu? window_menu = null;
 
 		public override void show_window_menu (Meta.Window window, Meta.WindowMenuType menu, int x, int y)

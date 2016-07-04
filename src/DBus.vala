@@ -77,6 +77,11 @@ namespace Gala
             Meta.set_verbose (val);
         }
 
+        public void present_windows (uint32[] xids)
+        {
+            (wm as WindowManagerGala).present_windows (xids);
+        }
+
         public void request_hide_windows ()
         {
             (wm as WindowManagerGala).request_hide_windows ();

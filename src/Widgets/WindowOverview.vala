@@ -117,6 +117,20 @@ namespace Gala
 
 			var all_windows = hints != null && "all-windows" in hints;
 
+            var present_window_xids = new Gee.HashSet<uint32>();
+            if (hints != null && "present-windows" in hints) {
+                var list = hints.@get ("present-windows");
+                VariantIter vi = list.iterator ();
+
+                uint32 xid = 0;
+                while (vi.next ("u", &xid)) {
+                    present_window_xids.add (xid);
+                    Meta.verbose ("present xid 0x%x\n", xid);
+                }
+
+                all_windows = true; // get xids from collection of all windows
+            }
+
 			var used_windows = new SList<Window> ();
 
 			workspaces = new List<Workspace> ();
@@ -127,6 +141,7 @@ namespace Gala
 			} else {
 				workspaces.append (screen.get_active_workspace ());
 			}
+
 
 			foreach (var workspace in workspaces) {
 				foreach (var window in workspace.list_windows ()) {
@@ -147,7 +162,16 @@ namespace Gala
 					if (window.is_on_all_workspaces () && window.get_workspace () != workspace)
 						continue;
 
-					used_windows.append (window);
+                    if (present_window_xids.size > 0) {
+                        if ((uint32)window.get_xwindow () in present_window_xids) {
+                            used_windows.append (window);
+                        } else {
+                            var actor = window.get_compositor_private () as WindowActor;
+                            if (actor != null) actor.hide ();
+                        }
+                    } else {
+                        used_windows.append (window);
+                    }
 				}
 			}
 
