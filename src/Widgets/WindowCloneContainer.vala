@@ -198,11 +198,17 @@ namespace Gala
 				return (int) (seq_b - seq_a);
 			});
 
+            Meta.Rectangle work_area = {0, 0, (int)width, (int)height};
+            if (get_n_children () > 0) {
+				var window = (WindowClone) get_child_at_index (0);
+                work_area = window.window.get_work_area_current_monitor ();
+            }
+
 			Meta.Rectangle area = {
-				padding_left,
-				padding_top,
-				(int)width - padding_left - padding_right,
-				(int)height - padding_top - padding_bottom
+				padding_left + work_area.x,
+				padding_top + work_area.y,
+				work_area.width - padding_left - padding_right,
+				work_area.height - padding_top - padding_bottom
 			};
 
 			var window_positions = InternalUtils.calculate_grid_placement (area, windows);

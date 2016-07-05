@@ -34,7 +34,7 @@ namespace Gala
 	{
 		const int BORDER = 10;
 		const int TOP_GAP = 30;
-		const int BOTTOM_GAP = 100;
+		const int BOTTOM_GAP = 30;
 
 		public WindowManager wm { get; construct; }
 
