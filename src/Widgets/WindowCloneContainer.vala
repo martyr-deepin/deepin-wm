@@ -205,8 +205,8 @@ namespace Gala
             }
 
 			Meta.Rectangle area = {
-				padding_left + work_area.x,
-				padding_top + work_area.y,
+				padding_left + work_area.x - (int)x,
+				padding_top + work_area.y - (int)y,
 				work_area.width - padding_left - padding_right,
 				work_area.height - padding_top - padding_bottom
 			};
