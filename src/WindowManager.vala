@@ -950,12 +950,18 @@ namespace Gala
 			}
 		}
 
-#if !HAS_MUTTER318
+#if HAS_MUTTER318
+		inline void maximize_completed (WindowActor actor)
+		{
+		}
+		
+		void maximize (WindowActor actor, int ex, int ey, int ew, int eh)
+#else
 		public override void maximize (WindowActor actor, int ex, int ey, int ew, int eh)
+#endif
 		{
             do_maximize_effect (actor, ex, ey, ew, eh);
 		}
-#endif
 
 		private void do_maximize_effect (WindowActor actor, int ex, int ey, int ew, int eh)
 		{
@@ -1382,6 +1388,7 @@ namespace Gala
 				return;
 			}
 
+
 			var window = actor.get_meta_window ();
 
 			if (window.window_type == WindowType.NORMAL) {
@@ -1416,13 +1423,13 @@ namespace Gala
 
 				ui_group.add_child (old_actor);
 
-				var scale_x = (float) (ew - offset_width) / old_rect.width;
-				var scale_y = (float) (eh - offset_height) / old_rect.height;
+				var scale_x = (float) ew / old_rect.width;
+				var scale_y = (float) eh / old_rect.height;
 
 				old_actor.save_easing_state ();
 				old_actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
 				old_actor.set_easing_duration (duration);
-				old_actor.set_position (ex - offset_x, ey - offset_y);
+				old_actor.set_position (ex, ey);
 				old_actor.set_scale (scale_x, scale_y);
 				old_actor.opacity = 0U;
 				old_actor.restore_easing_state ();
@@ -1441,8 +1448,9 @@ namespace Gala
                 size_change_completed (actor);
 #endif
 				actor.set_pivot_point (0.0f, 0.0f);
-				actor.set_position (ex, ey);
-				actor.set_translation (-ex + offset_x * (1.0f / scale_x) + maximized_x, -ey + offset_y * (1.0f / scale_y) + maximized_y, 0.0f);
+                //NOTE: this sets wrong position, It seems insane
+                //actor.set_position (ex, ey);
+				actor.set_translation (-ex + offset_x * (1.0f / scale_x - 1.0f) + maximized_x, -ey + offset_y * (1.0f / scale_y - 1.0f) + maximized_y, 0.0f);
 				actor.set_scale (1.0f / scale_x, 1.0f / scale_y);
 
 				actor.save_easing_state ();
