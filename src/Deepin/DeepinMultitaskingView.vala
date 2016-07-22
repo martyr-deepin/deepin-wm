@@ -66,6 +66,7 @@ namespace Gala
 
         Meta.BlurredBackgroundActor background_actor;
         BackgroundSource background_source;
+		uint changed_handler = -1;
 
 		Actor dock_clones;
 		Actor flow_container;
@@ -91,14 +92,11 @@ namespace Gala
             //TODO: handle workspace change signal
             background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
-			var active_index = screen.get_active_workspace ().index ();
-            var background = background_source.get_background (screen.get_primary_monitor (), active_index);
+			background_source.changed.connect (() => {
+                update_background_actor ();
+			});
             background_actor = new Meta.BlurredBackgroundActor (screen, screen.get_primary_monitor ());
-            background_actor.background = background.background;
-            background_actor.set_radius (19);
-
-            var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
-            background_actor.set_size (monitor.width, monitor.height);
+            update_background_actor ();
 
 
 			// TODO: does need keep workspace switching duration same with normal mode?
@@ -171,6 +169,7 @@ namespace Gala
 
 		~DeepinMultitaskingView ()
 		{
+			background_source.changed.disconnect (update_background_actor);
             screen.monitors_changed.disconnect (on_monitors_changed);
 			screen.workspace_added.disconnect (add_workspace);
 			screen.workspace_removed.disconnect (remove_workspace);
@@ -192,6 +191,17 @@ namespace Gala
 			});
 		}
 
+        void update_background_actor ()
+        {
+            var active_index = screen.get_active_workspace ().index ();
+            var background = background_source.get_background (screen.get_primary_monitor (), active_index);
+            background_actor.background = background.background;
+            background_actor.set_radius (19);
+
+            var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
+            background_actor.set_size (monitor.width, monitor.height);
+        }
+
         void on_monitors_changed ()
         {
             var primary = screen.get_primary_monitor ();
@@ -199,6 +209,8 @@ namespace Gala
 
             set_position (primary_geometry.x, primary_geometry.y);
             set_size (primary_geometry.width, primary_geometry.height);
+
+            background_actor.set_size (primary_geometry.width, primary_geometry.height);
 
             update_positions (true);
 
@@ -208,7 +220,6 @@ namespace Gala
 		{
             var background = background_source.get_background (0, to);
             background_actor.background = background.background;
-            //background_actor.set_radius (19);
 
             var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
             background_actor.set_size (monitor.width, monitor.height);
