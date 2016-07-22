@@ -183,7 +183,7 @@ namespace Gala
 			thumb_shape.save_easing_state ();
 
 			thumb_shape.set_easing_duration (duration);
-			thumb_shape.set_easing_mode (DeepinWorkspaceNameField.SELECT_MODE);
+			thumb_shape.set_easing_mode (AnimationMode.LINEAR);
 			thumb_shape.opacity = value ? 255 : 0;
 
 			thumb_shape.restore_easing_state ();
@@ -271,266 +271,6 @@ namespace Gala
 		}
 	}
 
-	/**
-	 * Workspace name field which used to show and edit workspace names.
-	 */
-	public class DeepinWorkspaceNameField : Actor
-	{
-		public const int SELECT_DURATION = 500;
-		public const AnimationMode SELECT_MODE = AnimationMode.LINEAR;
-
-		public const int WORKSPACE_NAME_WIDTH = 70; // considered as minimal width
-		public const int WORKSPACE_NAME_HEIGHT = 24;
-
-		const int WORKSPACE_NAME_MAX_LENGTH = 32;
-
-		const int NAME_SHAPE_PADDING = 4;
-
-		// layout spacing for workspace name field
-		const int WORKSPACE_NAME_SPACING = 5;
-
-		public signal void selected ();
-
-		/**
-		 * Send setup_completed signal only when finish edit new added workpsace name.
-		 */
-		public signal void setup_completed (bool complete);
-
-		public Workspace workspace { get; construct; }
-
-		public Actor? fallback_key_focus = null;
-
-		Actor workspace_name;
-		Text workspace_name_num;
-		DeepinIMText?  workspace_name_text;
-
-		// selected shape for workspace name field
-		DeepinCssActor name_shape;
-
-		bool first_setup = true;
-        uint event_filter_id = 0;
-
-		public DeepinWorkspaceNameField (Workspace workspace)
-		{
-			Object (workspace: workspace);
-		}
-        
-        bool event_filter(Clutter.Event ev) {
-            Meta.verbose ("event_filter\n");
-            if (workspace_name_text == null 
-                    || !workspace_name_text.has_key_focus ()) 
-                return false;
-
-            if (ev.get_type () == Clutter.EventType.BUTTON_PRESS) {
-                if (ev.get_device ().get_pointer_actor () !=
-                        workspace_name_text) {
-                    Meta.verbose ("event_filter: click outside\n");
-                    workspace_name_text.activate ();
-                }
-            }
-
-            return false;
-        }
-
-		construct
-		{
-			// selected shape for workspace name field
-			name_shape = new DeepinCssActor ("deepin-workspace-thumb-clone-name");
-			name_shape.reactive = true;
-			name_shape.set_pivot_point (0.5f, 0.5f);
-
-            name_shape.button_press_event.connect (on_name_button_press_event);
-
-			add_child (name_shape);
-
-			// workspace name field
-			workspace_name = new Actor ();
-			workspace_name.layout_manager = new BoxLayout ();
-
-			var name_font = DeepinUtils.get_css_font ("deepin-workspace-thumb-clone-name");
-
-			workspace_name_num = new Text ();
-			workspace_name_num.set_font_description (name_font);
-
-			workspace_name_text = new DeepinIMText (workspace.get_screen ());
-			workspace_name_text.reactive = true;
-			workspace_name_text.activatable = true;
-			workspace_name_text.cursor_size = 1;
-			workspace_name_text.ellipsize = Pango.EllipsizeMode.END;
-			workspace_name_text.max_length = WORKSPACE_NAME_MAX_LENGTH;
-			workspace_name_text.single_line_mode = true;
-			workspace_name_text.set_font_description (name_font);
-			workspace_name_text.selection_color =
-				DeepinUtils.get_css_background_color ("deepin-text-selection");
-			workspace_name_text.selected_text_color =
-				DeepinUtils.get_css_color ("deepin-text-selection");
-
-            bool is_completed = false;
-
-
-            workspace_name_text.button_press_event.connect (on_name_button_press_event);
-
-			workspace_name_text.activate.connect (() => {
-                finish_edit ();
-                is_completed = true;
-			});
-			workspace_name_text.key_focus_in.connect (() => {
-				if (workspace_name_text.text.length == 0) {
-					workspace_name_text.visible = true;
-				}
-			});
-			workspace_name_text.key_focus_out.connect (() => {
-                set_workspace_name ();
-				if (workspace_name_text.text.length == 0) {
-					workspace_name_text.visible = false;
-				}
-
-				notify_setup_completed_if_need (is_completed);
-			});
-
-			get_workspace_name ();
-			if (workspace_name_text.text.length == 0) {
-				workspace_name_text.visible = false;
-			}
-
-			workspace_name.add_child (workspace_name_num);
-			workspace_name.add_child (workspace_name_text);
-
-			add_child (workspace_name);
-		}
-
-		bool on_name_button_press_event ()
-		{
-            Meta.verbose ("%s\n", Log.METHOD);
-			if (workspace_name_text.editable && workspace_name_text.has_key_focus ()) {
-				return false;
-			}
-
-			start_edit ();
-
-			selected ();
-
-			// Return false to let event continue to be passed, so the cursor will be put in the
-			// position of the mouse.
-			return false;
-		}
-
-		/**
-		 * Notify setup_completed signal if workspace name is set for new workspace.
-		 */
-		void notify_setup_completed_if_need (bool complete)
-		{
-			if (first_setup) {
-				first_setup = false;
-				setup_completed (complete);
-			}
-		}
-
-		public void start_edit ()
-        {
-            workspace_name_text.editable = true;
-            workspace_name_text.grab_key_focus ();
-
-            event_filter_id = (uint) get_stage ().captured_event.connect (event_filter);
-        }
-
-		public void finish_edit ()
-		{
-            if (event_filter_id > 0) {
-                SignalHandler.disconnect (get_stage (), event_filter_id);
-            }
-
-			reset_key_focus ();
-			workspace_name_text.editable = false;
-		}
-
-		public void set_workspace_name ()
-		{
-			Prefs.change_workspace_name (workspace.index (), workspace_name_text.text);
-		}
-
-		public void get_workspace_name ()
-		{
-			workspace_name_num.text = "%d".printf (workspace.index () + 1);
-			workspace_name_text.text = DeepinUtils.get_workspace_name (workspace.index ());
-		}
-
-		public void set_select (bool value, bool animate = true)
-		{
-			int duration = animate ? DeepinMultitaskingView.WORKSPACE_SWITCH_DURATION : 0;
-
-			// selected shape for workspace name field
-			name_shape.save_easing_state ();
-
-			name_shape.set_easing_duration (duration);
-			name_shape.set_easing_mode (SELECT_MODE);
-			name_shape.select = value;
-
-			if (value) {
-				name_shape.scale_x = 1.033;
-				name_shape.scale_y = 1.033;
-			} else {
-				name_shape.scale_x = 1.0;
-				name_shape.scale_y = 1.0;
-			}
-
-			name_shape.restore_easing_state ();
-
-			// font color for workspace name field
-			workspace_name_num.save_easing_state ();
-			workspace_name_text.save_easing_state ();
-
-			workspace_name_num.set_easing_duration (duration);
-			workspace_name_text.set_easing_duration (duration);
-
-			workspace_name_num.set_easing_mode (SELECT_MODE);
-			workspace_name_text.set_easing_mode (SELECT_MODE);
-
-			var text_color = DeepinUtils.get_css_color ("deepin-workspace-thumb-clone-name",
-				value ? Gtk.StateFlags.SELECTED : Gtk.StateFlags.NORMAL);
-			workspace_name_num.color = text_color;
-			workspace_name_text.color = text_color;
-
-			workspace_name_num.restore_easing_state ();
-			workspace_name_text.restore_easing_state ();
-		}
-
-		public void reset_key_focus ()
-		{
-			get_stage ().set_key_focus (fallback_key_focus);
-		}
-
-		public override void allocate (ActorBox box, AllocationFlags flags)
-		{
-			base.allocate (box, flags);
-
-			var name_shape_box = ActorBox ();
-			name_shape_box.set_size (box.get_width (), box.get_height ());
-			name_shape_box.set_origin (0, 0);
-			name_shape.allocate (name_shape_box, flags);
-
-			// place Text actors with offset to make it looks in the middle
-			int text_y_offset = 1;
-
-			var name_box = ActorBox ();
-			name_box.set_size (
-				Math.fminf (workspace_name.width, box.get_width () - NAME_SHAPE_PADDING * 2),
-				WORKSPACE_NAME_HEIGHT);
-			name_box.set_origin (
-				(box.get_width () - name_box.get_width ()) / 2,
-				text_y_offset + name_shape_box.y1 +
-					(name_shape_box.get_height () - name_box.get_height ()) / 2);
-			workspace_name.allocate (name_box, flags);
-
-			// update layout for workspace name field
-			var name_layout = workspace_name.layout_manager as BoxLayout;
-			if (workspace_name_text.text.length > 0 || workspace_name_text.editable) {
-				name_layout.spacing = WORKSPACE_NAME_SPACING;
-			} else {
-				name_layout.spacing = 0;
-			}
-		}
-	}
 
 	/**
 	 * Provide help message when dragging to remove workspace.
@@ -610,7 +350,6 @@ namespace Gala
 
 		public DeepinWindowThumbContainer window_container;
 		public DeepinWorkspaceThumbCloneCore thumb_clone;
-		public DeepinWorkspaceNameField workspace_name;
 
 		Actor remove_tip;
 
@@ -649,11 +388,6 @@ namespace Gala
 
 			add_child (thumb_clone);
 
-			workspace_name = new DeepinWorkspaceNameField (workspace);
-			workspace_name.opacity = 0;
-
-			add_child (workspace_name);
-
 			thumb_clone.closing.connect (remove_workspace);
 		}
 
@@ -669,10 +403,6 @@ namespace Gala
 
 			closing ();
 
-			// Ensure workspace name field lost focus to avoid invalid operations even though the
-			// workspace already not exists.
-			workspace_name.reset_key_focus ();
-
 			DeepinUtils.start_fade_out_animation (
 				this,
 				DeepinMultitaskingView.WORKSPACE_FADE_DURATION,
@@ -683,18 +413,11 @@ namespace Gala
 		public void set_select (bool value, bool animate = true)
 		{
 			thumb_clone.set_select (value, animate);
-			workspace_name.set_select (value, animate);
 		}
 
 		public void start_fade_in_animation ()
 		{
-			DeepinUtils.start_fade_in_back_animation (
-				thumb_clone, FADE_IN_DURATION,
-				() =>  {
-					DeepinUtils.start_fade_in_back_animation (workspace_name,
-															  (int) (FADE_IN_DURATION * 0.4));
-				},
-				0.6);
+			DeepinUtils.start_fade_in_back_animation (thumb_clone, FADE_IN_DURATION);
 		}
 
 		/**
@@ -731,17 +454,6 @@ namespace Gala
 			thumb_box.set_origin (0, 0);
 			thumb_clone.allocate (thumb_box, flags);
 			remove_tip.allocate (thumb_box, flags);
-
-			// allocate workspace name field
-			var name_box = ActorBox ();
-            float name_width = Math.fmaxf(DeepinWorkspaceNameField.WORKSPACE_NAME_WIDTH, 
-                    workspace_name.width);
-            name_width = Math.fminf (thumb_width, name_width);
-			name_box.set_size (name_width,
-							   DeepinWorkspaceNameField.WORKSPACE_NAME_HEIGHT);
-			name_box.set_origin ((box.get_width () - name_box.get_width ()) / 2,
-								 thumb_box.y2 + WORKSPACE_NAME_DISTANCE);
-			workspace_name.allocate (name_box, flags);
 		}
 
 		void on_actor_clicked (uint32 button)
@@ -787,10 +499,6 @@ namespace Gala
 			drag_actor.set_position (abs_x, abs_y);
 
 			remove_tip.opacity = 255;
-
-			workspace_name.reset_key_focus ();
-			DeepinUtils.start_fade_out_animation (
-				workspace_name, DRAG_BEGIN_DURATION, DeepinMultitaskingView.WORKSPACE_FADE_MODE);
 
 			return drag_actor;
 		}
@@ -870,11 +578,6 @@ namespace Gala
 				});
 			} else {
 				// restore state
-
-				DeepinUtils.start_fade_in_animation (
-					workspace_name, DRAG_RESTORE_DURATION,
-					DeepinMultitaskingView.WORKSPACE_FADE_MODE);
-
 				remove_tip.save_easing_state ();
 				remove_tip.set_easing_duration (DRAG_RESTORE_DURATION);
 				remove_tip.opacity = 0;

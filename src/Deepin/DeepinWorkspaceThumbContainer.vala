@@ -136,11 +136,6 @@ namespace Gala
 		public void close ()
 		{
 			append_plus_button_if_need ();
-			foreach (var child in get_children ()) {
-				if (child is DeepinWorkspaceThumbClone) {
-					(child as DeepinWorkspaceThumbClone).workspace_name.finish_edit ();
-				}
-			}
 		}
 
 		public void add_workspace (DeepinWorkspaceThumbClone workspace_clone,
@@ -159,24 +154,17 @@ namespace Gala
 				// leave_event, so we hide close button manually
 				hide_workspace_close_button ();
 
-				workspace_clone.workspace_name.start_edit ();
 				new_workspace_index_by_manual = -1;
 
-				// after new workspace setup completed, append the plus button and activate the
-				// workspace
-				workspace_clone.workspace_name.setup_completed.connect ((complete) => {
-					enable_workspace_drag_action ();
-					append_plus_button_if_need ();
-					if (complete) {
-						DeepinUtils.switch_to_workspace (workspace_clone.workspace.get_screen (),
-														 workspace_clone.workspace.index ());
-						if (cb != null) {
-							cb ();
-						}
-					} else {
-						select_workspace (screen.get_active_workspace_index (), true);
-					}
-				});
+                enable_workspace_drag_action ();
+                append_plus_button_if_need ();
+                DeepinUtils.switch_to_workspace (workspace_clone.workspace.get_screen (),
+                        workspace_clone.workspace.index ());
+                if (cb != null) {
+                    cb ();
+                }
+                // or else
+                //select_workspace (screen.get_active_workspace_index (), true);
 			}
 
 			workspace_clone.closing.connect (on_workspace_closing);
@@ -191,14 +179,6 @@ namespace Gala
 			remove_child (workspace_clone);
 
 			append_plus_button_if_need ();
-
-			// Prevent other workspaces original name to be reset, so set them to gsettings again
-			// here.
-			foreach (var child in get_children ()) {
-				if (child is DeepinWorkspaceThumbClone) {
-					(child as DeepinWorkspaceThumbClone).workspace_name.set_workspace_name ();
-				}
-			}
 
 			relayout ();
 		}
@@ -274,10 +254,6 @@ namespace Gala
 			foreach (var child in get_children ()) {
 				place_child (child, i);
 				i++;
-
-				if (child is DeepinWorkspaceThumbClone) {
-					(child as DeepinWorkspaceThumbClone).workspace_name.get_workspace_name ();
-				}
 			}
 		}
 
@@ -318,12 +294,6 @@ namespace Gala
 
 			get_prefer_thumb_size (screen, out child_width, out child_height);
 			child_x = (child_width + child_spacing) * index;
-
-			// for DeepinWorkspaceThumbClone, will plus workspace name field's height
-			if (is_thumb_clone) {
-				child_height += DeepinWorkspaceThumbClone.WORKSPACE_NAME_DISTANCE +
-								DeepinWorkspaceNameField.WORKSPACE_NAME_HEIGHT;
-			}
 
 			// place child center of monitor
 			float container_width = child_width * get_n_children () + child_spacing * (get_n_children () - 1);

@@ -382,7 +382,6 @@ namespace Gala
 			flow_workspace.window_activated.connect (activate_window);
 			flow_workspace.selected.connect (activate_workspace);
 
-			flow_workspace.thumb_workspace.workspace_name.fallback_key_focus = this;
 			thumb_container.add_workspace (flow_workspace.thumb_workspace,
 										   () => update_positions (opened));
 
@@ -530,11 +529,6 @@ namespace Gala
 				var i = screen.get_active_workspace_index ();
 				var thumb_workspace = thumb_container.get_child_at_index (i);
 				(thumb_workspace as DeepinWorkspaceThumbClone).remove_workspace ();
-				break;
-			case Clutter.Key.F2:
-				var i = screen.get_active_workspace_index ();
-				var thumb_workspace = thumb_container.get_child_at_index (i);
-				(thumb_workspace as DeepinWorkspaceThumbClone).workspace_name.start_edit ();
 				break;
 			case Clutter.Key.Return:
 			case Clutter.Key.KP_Enter:

@@ -84,8 +84,6 @@ namespace Gala
 		ActivatableComponent? window_overview = null;
         ScreenTilePreview? tile_preview = null;
 
-		DeepinWorkspaceName? workspace_name = null;
-
 		// used to detect which corner was used to trigger an action
 		Clutter.Actor? last_hotcorner;
 		ScreenSaver? screensaver;
@@ -274,9 +272,6 @@ namespace Gala
 				window_overview = new WindowOverview (this);
 				ui_group.add_child ((Clutter.Actor) window_overview);
 			}
-
-			workspace_name = new DeepinWorkspaceName (get_screen ());
-			ui_group.add_child (workspace_name);
 
 			display.add_keybinding ("expose-windows", keybinding_schema, 0, () => {
                 if (hiding_windows) return;
@@ -1853,9 +1848,7 @@ namespace Gala
 
 			switch_workspace_completed ();
 
-			if (!workspace_view.is_opened ()) {
-				workspace_name.show_popup ();
-			}
+            //TODO: add workspace switch overlay
 		}
 
 		public override void kill_switch_workspace ()
