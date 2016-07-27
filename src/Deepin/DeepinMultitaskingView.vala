@@ -136,6 +136,7 @@ namespace Gala
 			screen.workspace_removed.connect (remove_workspace);
 			screen.workspace_switched.connect_after (on_workspace_switched);
             screen.monitors_changed.connect (on_monitors_changed);
+            on_monitors_changed ();
 
 			Prefs.add_listener ((pref) => {
 				if (Prefs.get_dynamic_workspaces () ||
