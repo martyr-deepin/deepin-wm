@@ -58,12 +58,6 @@ namespace Gala
 		public Clutter.Actor top_window_group { get; protected set; }
 
 		/**
-		 * {@inheritDoc}
-		 */
-		public BackgroundGroup background_group { get; protected set; }
-
-#if HAS_MUTTER314
-		/**
 		 * Container for the background actors forming the wallpaper for monitors and workspaces
 		 */
 		public BackgroundContainer background_container { get; protected set; }
@@ -74,7 +68,6 @@ namespace Gala
           * backgrounds for monitors of the active workspace 
           */
         Gee.HashMap<int, BackgroundGroup> backgrounds;
-#endif
 
 		Meta.PluginInfo info;
 
@@ -343,7 +336,6 @@ namespace Gala
             }
         }
 
-#if HAS_MUTTER314
         void configure_backgrounds ()
         {
             Meta.verbose ("%s\n", Log.METHOD);
@@ -352,10 +344,9 @@ namespace Gala
                 backgrounds = new Gee.HashMap<int, BackgroundGroup> ();
             }
 
-            background_group = null;
             foreach (var key in backgrounds.keys) {
-                window_group.remove_child (backgrounds[key]);
-                backgrounds[key].destroy ();
+                backgrounds[key].get_parent ().remove_child (backgrounds[key]);
+                //backgrounds[key].destroy ();
             }
             backgrounds.clear ();
 
@@ -366,9 +357,7 @@ namespace Gala
 
                 window_group.insert_child_below (backgrounds[i], null);
             }
-            background_group = backgrounds[0];
         }
-#endif
 
 		void configure_hotcorners ()
 		{
@@ -1540,10 +1529,21 @@ namespace Gala
 
 			if (!animation_settings.enable_animations
 				|| animation_duration == 0
-				|| (direction != MotionDirection.LEFT && direction != MotionDirection.RIGHT)) {
-				switch_workspace_completed ();
-				return;
-			}
+                || (direction != MotionDirection.LEFT && direction != MotionDirection.RIGHT)) {
+
+                var screen = get_screen ();
+                foreach (var key in backgrounds.keys) {
+                    window_group.remove_child (backgrounds[key]);
+                }
+                backgrounds.clear ();
+                for (var i = 0; i < screen.get_n_monitors (); i++) {
+                    backgrounds[i] = background_container.get_background (i, to);
+                    window_group.insert_child_below (backgrounds[i], null);
+                }
+
+                switch_workspace_completed ();
+                return;
+            }
 
 			float screen_width, screen_height;
 			var screen = get_screen ();
@@ -1562,7 +1562,7 @@ namespace Gala
 			var static_windows = new Clutter.Actor ();
 			var in_group  = new Clutter.Actor ();
 			var out_group = new Clutter.Actor ();
-			windows = new List<WindowActor> ();
+			windows = new List<Clutter.Actor> ();
 			parents = new List<Clutter.Actor> ();
 			tmp_actors = new List<Clutter.Actor> ();
 
@@ -1581,32 +1581,38 @@ namespace Gala
 			window_group.add_child (main_container);
 
 			// prepare wallpaper
-			Clutter.Actor wallpaper;
+			var wallpapers = new List<Clutter.Actor> ();
 			if (move_primary_only) {
-#if HAS_MUTTER314
-				wallpaper = background_container.get_background (primary, from);
-#else
-				wallpaper = background_group.get_child_at_index (primary);
-#endif
-				wallpaper.set_data<int> ("prev-x", (int) wallpaper.x);
-			} else {
-				wallpaper = background_group;
-			}
+				var wallpaper = background_container.get_background (primary, from);
+                wallpapers.append (wallpaper);
+                windows.prepend (wallpaper);
+                parents.prepend (wallpaper.get_parent ());
 
-			windows.prepend (wallpaper);
-			parents.prepend (wallpaper.get_parent ());
-
-			var wallpaper_to = background_container.get_background (primary, to);
-
-			// insert background to somewhere, or the wallpaper_clone will draw nothing
-			window_group.insert_child_at_index (wallpaper_to, 0);
-
-			var wallpaper_clone = new Clutter.Clone (wallpaper_to);
-			tmp_actors.prepend (wallpaper_clone);
+            } else {
+                for (var i = 0; i < screen.get_n_monitors (); i++) {
+                    var wallpaper = background_container.get_background (i, from);
+                    wallpapers.append (wallpaper);
+                    windows.prepend (wallpaper);
+                    parents.prepend (wallpaper.get_parent ());
+                }
+            }
 
 			// pack all containers
-			clutter_actor_reparent (wallpaper, main_container);
-			main_container.add_child (wallpaper_clone);
+            foreach (var wp in wallpapers) {
+                clutter_actor_reparent (wp, main_container);
+            }
+
+			var to_wallpapers = new List<Clutter.Actor> ();
+            backgrounds.clear ();
+            for (var i = 0; i < screen.get_n_monitors (); i++) {
+                backgrounds[i] = background_container.get_background (i, to);
+                window_group.insert_child_below (backgrounds[i], null);
+
+                var wallpaper_clone = new Clutter.Clone (backgrounds[i]);
+                to_wallpapers.append (wallpaper_clone);
+                tmp_actors.prepend (wallpaper_clone);
+                main_container.add_child (wallpaper_clone);
+            }
 			main_container.add_child (desktop_in_group);
 			main_container.add_child (desktop_out_group);
 			main_container.add_child (in_group);
@@ -1697,22 +1703,14 @@ namespace Gala
 			// windows on one of the groups. Simply raising seems not to
 			// work, mutter probably reverts the order internally to match
 			// the display stack
-			foreach (var window in docks) {
-				if (!to_has_fullscreened) {
+            if (!to_has_fullscreened && !from_has_fullscreened) {
+                foreach (var window in docks) {
 					var clone = new SafeWindowClone (window.get_meta_window ());
 					clone.x = window.x - clone_offset_x;
 					clone.y = window.y - clone_offset_y;
 
-					in_group.add_child (clone);
+                    main_container.add_child (clone);
 					tmp_actors.prepend (clone);
-				}
-
-				if (!from_has_fullscreened) {
-					windows.prepend (window);
-					parents.prepend (window.get_parent ());
-					window.set_translation (-clone_offset_x, -clone_offset_y, 0.0f);
-
-					clutter_actor_reparent (window, out_group);
 				}
 			}
 
@@ -1728,10 +1726,11 @@ namespace Gala
 
 			out_group.x = 0.0f;
 			desktop_out_group.x = 0;
-			wallpaper.x = 0.0f;
 			in_group.x = -x2;
 			desktop_in_group.x = -x2;
-			wallpaper_clone.x = -x2;
+            foreach (var wp in to_wallpapers) {
+                wp.x += -x2;
+            }
 
 			in_group.clip_to_allocation = out_group.clip_to_allocation = true;
 			in_group.width = out_group.width = move_primary_only ? monitor_geom.width : screen_width;
@@ -1749,22 +1748,27 @@ namespace Gala
 			desktop_out_group.set_easing_duration (animation_duration);
 			desktop_in_group.set_easing_mode (animation_mode);
 			desktop_in_group.set_easing_duration (animation_duration);
-			wallpaper_clone.set_easing_mode (animation_mode);
-			wallpaper_clone.set_easing_duration (animation_duration);
+            foreach (var wp in to_wallpapers) {
+                wp.set_easing_mode (animation_mode);
+                wp.set_easing_duration (animation_duration);
+            }
 
-			wallpaper.save_easing_state ();
-			wallpaper.set_easing_mode (animation_mode);
-			wallpaper.set_easing_duration (animation_duration);
+            foreach (var wp in wallpapers) {
+                wp.save_easing_state ();
+                wp.set_easing_mode (animation_mode);
+                wp.set_easing_duration (animation_duration);
+                wp.restore_easing_state ();
+            }
 
 			out_group.x = x2;
 			in_group.x = 0.0f;
 
 			desktop_out_group.x = x2;
 			desktop_in_group.x = 0.0f;
-
-			wallpaper.x = x2;
-			wallpaper_clone.x = 0.0f;
-			wallpaper.restore_easing_state ();
+            foreach (var wp in to_wallpapers) {
+                wp.x = 0.0f;
+                wp.restore_easing_state ();
+            }
 
 			var transition = in_group.get_transition ("x");
 			if (transition != null)
@@ -1789,29 +1793,11 @@ namespace Gala
 
 				// to maintain the correct order of monitor, we need to insert the Background
 				// back manually
-				if (actor is BackgroundManager) {
-					var background = (BackgroundManager) actor;
-
-					background.get_parent ().remove_child (background);
-					if (background_group.get_parent () != null) {
-						background_group.get_parent ().remove_child (background_group);
-					}
-					background_group = background_container.get_background (background.monitor_index,
-																			active_workspace.index ());
-					if (background_group.get_parent () != null) {
-						clutter_actor_reparent (background_group, window_group);
-					} else {
-						window_group.add_child (background_group);
-					}
-					window_group.set_child_below_sibling (background_group, null);
-					background.x = background.steal_data<int> ("prev-x");
-					continue;
-				} else if (actor is Meta.BackgroundGroup) {
-					actor.x = 0;
-					// thankfully mutter will take care of stacking it at the right place for us
-					clutter_actor_reparent (actor, window_group);
-					continue;
-				}
+                if (actor is BackgroundManager) {
+                    var background = (BackgroundManager) actor;
+                    background.get_parent ().remove_child (background);
+                    continue;
+                }
 
 				var window = actor as WindowActor;
 

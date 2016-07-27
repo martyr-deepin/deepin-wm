@@ -662,7 +662,6 @@ namespace Gala
 				modal_proxy = wm.push_modal ();
 				modal_proxy.keybinding_filter = keybinding_filter;
 
-				wm.background_group.hide ();
 				wm.window_group.hide ();
 				wm.top_window_group.hide ();
 				show ();
@@ -752,7 +751,6 @@ namespace Gala
 				Timeout.add (toggle_duration, () => {
 					hide ();
 
-					wm.background_group.show ();
 					wm.window_group.show ();
 					wm.top_window_group.show ();
 

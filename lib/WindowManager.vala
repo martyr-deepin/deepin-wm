@@ -87,11 +87,6 @@ namespace Gala
 		public abstract Clutter.Actor top_window_group { get; protected set; }
 
 		/**
-		 * The background group is a container for the background actors forming the wallpaper
-		 */
-		public abstract Meta.BackgroundGroup background_group { get; protected set; }
-
-		/**
 		 * Enters the modal mode, which means that all events are directed to the stage instead
 		 * of the windows. This is the only way to receive keyboard events besides shortcut listeners.
 		 *
