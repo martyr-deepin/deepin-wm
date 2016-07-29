@@ -27,7 +27,7 @@ namespace Gala
 	 */
 	class DeepinWorkspaceAddButton : DeepinCssStaticActor
 	{
-		const double PLUS_SIZE = 32.0;
+		const double PLUS_SIZE = 45.0;
 		const double PLUS_LINE_WIDTH = 2.0;
 
 		Gdk.RGBA color;

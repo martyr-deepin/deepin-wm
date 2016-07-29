@@ -33,32 +33,22 @@
     background: rgba(1, 189, 255, 1.0);
 }
 
-.deepin-workspace-name {
-    background: rgba(0,0,0,0.70);
-    color: rgba(255, 255, 255, 0.6);
-    border-radius: 6px;
-    font-weight: normal;
-    font-size: 16px;
-    box-shadow: 0px 2px 6px 0px rgba(0,0,0,0.50);
-    border: 1px solid rgba(255,255,255,0.30);
+.deepin-workspace-clone {
+    background: rgba(0, 0, 0, 0.0);
+    border-radius: 10px;
+}
+
+.deepin-workspace-thumb-clone {
+    border-radius: 4px;
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.1);
+    border: solid 1px rgba(0, 0, 0, 0.1);
 }
 
 .deepin-workspace-thumb-clone:selected {
-    background: rgba(1, 189, 255, 1.0);
+    background: rgba(36, 171, 255, 1.0);
     border-radius: 4px;
-}
-
-.deepin-workspace-thumb-clone-name {
-    background: rgba(255, 255, 255, 0.6);
-    color: rgba(0, 0, 0, 1.0);
-    border-radius: 4px;
-    font-weight: normal;
-    font-size: 12px;
-}
-
-.deepin-workspace-thumb-clone-name:selected {
-    background: rgba(1, 189, 255, 1.0);
-    color: rgba(255, 255, 255, 1.0);
+    box-shadow: 0 5px 5px 0 rgba(0, 0, 0, 0.1);
+    border: solid 1px rgba(0, 0, 0, 0.1);
 }
 
 .deepin-workspace-thumb-remove-tip {
@@ -70,14 +60,14 @@
 }
 
 .deepin-workspace-add-button {
-    background: rgba(73, 73, 73, 1.0);
-    color: rgba(128, 128, 128, 1.0);
+    background: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
     border-radius: 4px;
 }
 
 .deepin-window-clone:selected {
     background: rgba(0, 0, 0, 0.0); /*reset background*/
-    border: 5px solid rgba(1, 189, 255, 1.0);
+    border: 5px solid rgba(36, 171, 255, 1.0);
     border-radius: 5px;
 }
 

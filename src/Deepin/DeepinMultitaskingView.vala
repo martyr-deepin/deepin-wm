@@ -41,17 +41,17 @@ namespace Gala
 		/**
 		 * The percent value between workspace clones' horizontal offset and monitor's height.
 		 */
-		public const float HORIZONTAL_OFFSET_PERCENT = 0.03f;
+		public const float HORIZONTAL_OFFSET_PERCENT = 0.044f;
 
 		/**
 		 * The percent value between flow workspace's top offset and monitor's height.
 		 */
-		public const float FLOW_WORKSPACE_TOP_OFFSET_PERCENT = 0.24f;
+		public const float FLOW_WORKSPACE_TOP_OFFSET_PERCENT = 0.211f;
 
 		/**
 		 * The percent value between distance of flow workspaces and its width.
 		 */
-		public const float FLOW_WORKSPACE_DISTANCE_PERCENT = 0.10f;
+		public const float FLOW_WORKSPACE_DISTANCE_PERCENT = 0.089f;
 
 		public WindowManager wm { get; construct; }
 

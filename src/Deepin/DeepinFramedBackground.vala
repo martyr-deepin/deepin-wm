@@ -46,11 +46,7 @@ namespace Gala
 /**
  * Utility class which adds a border and a shadow to a Background
  */
-#if HAS_MUTTER314
 	class DeepinFramedBackground : BackgroundManager
-#else
-	class DeepinFramedBackground : Background
-#endif
 	{
 		public bool enable_shadow { get; construct; }
 		public bool enable_border { get; construct; }
@@ -59,15 +55,9 @@ namespace Gala
 			Screen screen, int workspace_index, bool enable_shadow = true,
 			bool enable_border = false)
 		{
-#if HAS_MUTTER314
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
 					monitor_index: screen.get_primary_monitor (), workspace_index: workspace_index,
 					control_position: false);
-#else
-			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
-					monitor: screen.get_primary_monitor (),
-					settings: BackgroundSettings.get_default ().schema);
-#endif
 		}
 
 		construct
@@ -94,10 +84,8 @@ namespace Gala
 
 		void on_monitors_changed ()
 		{
-#if HAS_MUTTER314
             create_background_actor ();
             queue_relayout ();
-#endif
 			var shadow_effect = get_effect ("shadow");
 			if (shadow_effect != null) {
 				var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
