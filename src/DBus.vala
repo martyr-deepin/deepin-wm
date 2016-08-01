@@ -44,6 +44,10 @@ namespace Gala
 
 		private DBus ()
 		{
+            var screen = wm.get_screen ();
+			screen.workspace_added.connect ((idx) => {workspace_added (idx); });
+			screen.workspace_removed.connect ((idx) => {workspace_removed (idx); });
+
 		}
 
 		public void perform_action (ActionType type)
@@ -82,5 +86,9 @@ namespace Gala
         {
             (wm as WindowManagerGala).cancel_hide_windows ();
         }
+
+        public signal void workspace_removed (int index);
+        public signal void workspace_added (int index);
+
 	}
 }
