@@ -107,22 +107,17 @@ namespace Gala
 			string filename = null;
 			string default_uri = settings.get_string ("picture-uri");
 
-			// extra-uris is used for the background images since 2nd workspace
-			string[] extra_uris = extra_settings.get_strv ("extra-picture-uris");
+			string[] extra_uris = extra_settings.get_strv ("background-uris");
 
 			string uri;
-			if (workspace_index == 0) {
-				uri = default_uri;
-			} else {
-				if (extra_uris.length >= workspace_index) {
-					uri = extra_uris[workspace_index - 1];
-					if (uri == "") {
-						uri = default_uri;
-					}
-				} else {
-					uri = default_uri;
-				}
-			}
+            if (extra_uris.length > 0 && extra_uris.length > workspace_index) {
+                uri = extra_uris[workspace_index];
+                if (uri == "") {
+                    uri = default_uri;
+                }
+            } else {
+                uri = default_uri;
+            }
 
 			if (Uri.parse_scheme (uri) != null) {
 				var file = File.new_for_uri (uri);
@@ -183,7 +178,7 @@ namespace Gala
 		// list of keys that are actually relevant for us
 		const string[] options = { "color-shading-type", "picture-opacity",
 								   "picture-options", "picture-uri", "primary-color", "secondary-color",
-								   "extra-picture-uris"};
+								   "background-uris"};
 
 		void settings_changed (string key)
 		{
@@ -219,7 +214,7 @@ namespace Gala
 
 		Variant get_current_extra_picture_uris ()
 		{
-			return extra_settings.get_value ("extra-picture-uris");
+			return extra_settings.get_value ("background-uris");
 		}
 	}
 }
