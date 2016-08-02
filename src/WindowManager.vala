@@ -67,7 +67,7 @@ namespace Gala
         /**
           * backgrounds for monitors of the active workspace 
           */
-        Gee.HashMap<int, BackgroundGroup> backgrounds;
+        Gee.HashMap<int, BackgroundManager> backgrounds;
 
 		Meta.PluginInfo info;
 
@@ -341,13 +341,9 @@ namespace Gala
             Meta.verbose ("%s\n", Log.METHOD);
 
             if (backgrounds == null) {
-                backgrounds = new Gee.HashMap<int, BackgroundGroup> ();
+                backgrounds = new Gee.HashMap<int, BackgroundManager> ();
             }
 
-            foreach (var key in backgrounds.keys) {
-                backgrounds[key].get_parent ().remove_child (backgrounds[key]);
-                //backgrounds[key].destroy ();
-            }
             backgrounds.clear ();
 
 			var screen = get_screen ();

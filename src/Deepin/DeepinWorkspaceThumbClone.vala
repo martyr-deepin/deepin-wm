@@ -149,7 +149,7 @@ namespace Gala
 
         void on_workspace_remove(int index)
         {
-            if (previous_index == index) return;
+            if (index >= previous_index) return;
 
             if (previous_index != workspace.index ()) {
                 previous_index = workspace.index ();

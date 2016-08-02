@@ -33,7 +33,7 @@ namespace Gala
 
         Gee.ArrayList<Meta.BlurredBackgroundActor>? actors;
 
-		BackgroundSource background_source;
+		BackgroundSource? background_source = null;
         ulong changed_handler = 0;
         ulong serial = 0;
 		int radius = 0;
@@ -50,9 +50,7 @@ namespace Gala
 			background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
 
-			changed_handler = background_source.changed.connect (() => {
-                create_background_actor ();
-			});
+			changed_handler = background_source.changed.connect (create_background_actor);
 
             actors = new Gee.ArrayList<Meta.BlurredBackgroundActor> ();
             create_background_actor ();
@@ -60,12 +58,11 @@ namespace Gala
 
 		~BackgroundManager ()
 		{
-            SignalHandler.disconnect (background_source, changed_handler);
+            background_source.changed.disconnect (create_background_actor);
             changed_handler = 0;
 
 			BackgroundCache.get_default ().release_background_source (
                     BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
-			background_source = null;
 
             actors.clear ();
             actors = null;

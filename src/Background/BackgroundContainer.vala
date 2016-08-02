@@ -19,7 +19,6 @@ namespace Gala
 {
 	public class BackgroundContainer : Object
 	{
-		public signal void changed ();
 		public signal void structure_changed ();
 
 		public Meta.Screen screen { get; construct; }
@@ -69,15 +68,11 @@ namespace Gala
 
 		void update ()
 		{
-			for (var i = 0; i < screen.get_n_workspaces (); i ++) {
-				var reference_child = get_background (0, i);
-				if (reference_child != null) {
-					reference_child.changed.disconnect (background_changed);
-				}
-			}
-
 			foreach (var background in backgrounds.values) {
-				background.destroy ();
+                if (background.get_parent () != null) {
+                    background.get_parent ().remove_child (background);
+                }
+                background.destroy ();
 			}
 			backgrounds.clear ();
 
@@ -87,20 +82,10 @@ namespace Gala
 					var background = new BackgroundManager (screen, i, j);
 
 					insert_background (i, j, background);
-
-					if (i == 0) {
-						background.changed.connect (background_changed);
-					}
 				}
 			}
 
             structure_changed ();
-		}
-
-		void background_changed ()
-		{
-            Meta.verbose ("%s\n", Log.METHOD);
-			changed ();
 		}
 	}
 }
