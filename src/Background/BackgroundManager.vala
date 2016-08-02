@@ -71,6 +71,16 @@ namespace Gala
             actors = null;
 		}
 
+        public void update_content (int new_index)
+        {
+            if (actors.size > 0) {
+                var actor = actors[actors.size - 1];
+                _workspace_index = new_index;
+                var background = background_source.get_background (monitor_index, workspace_index);
+                actor.background = background.background;
+            }
+        }
+
         public void set_radius (int radius)
         {
             this.radius = radius;

@@ -430,6 +430,8 @@ namespace Gala
 			flow_workspace.destroy ();
 
 			update_positions (opened);
+
+            update_background_actor ();
 		}
 
 		/**
