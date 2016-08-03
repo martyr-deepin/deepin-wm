@@ -34,14 +34,16 @@ namespace Gala
 		{
 			backgrounds = new Gee.HashMap<string,BackgroundManager> ();
 			screen.monitors_changed.connect (update);
-			screen.workspace_added.connect (update);
-			screen.workspace_removed.connect (update);
+			screen.workspace_added.connect (on_workspace_added);
+			screen.workspace_removed.connect (on_workspace_removed);
 			update ();
 		}
 
 		~BackgroundContainer ()
 		{
 			screen.monitors_changed.disconnect (update);
+			screen.workspace_added.disconnect (on_workspace_added);
+			screen.workspace_removed.disconnect (on_workspace_removed);
 		}
 
 		public BackgroundManager? get_default_background ()
@@ -68,6 +70,7 @@ namespace Gala
 
 		void update ()
 		{
+            stderr.printf ("%s\n", Log.METHOD);
 			foreach (var background in backgrounds.values) {
                 if (background.get_parent () != null) {
                     background.get_parent ().remove_child (background);
@@ -76,7 +79,6 @@ namespace Gala
 			}
 			backgrounds.clear ();
 
-			var num = 0;
 			for (var i = 0; i < screen.get_n_monitors (); i++) {
 				for (var j = 0; j < screen.get_n_workspaces (); j++) {
 					var background = new BackgroundManager (screen, i, j);
@@ -87,5 +89,58 @@ namespace Gala
 
             structure_changed ();
 		}
+
+        void on_workspace_removed (int index)
+        {
+			foreach (var background in backgrounds.values) {
+                if (background.get_parent () != null) {
+                    background.get_parent ().remove_child (background);
+                }
+			}
+
+            for (var i = 0; i < screen.get_n_monitors (); i++) {
+                string key = @"$i:$index";
+                if (backgrounds.has_key (key)) {
+                    var background = backgrounds[key];
+                    //stderr.printf(@"remove mon $i workspace $index \n");
+                    backgrounds.remove (key);
+                    if (background.get_parent () != null) {
+                        background.get_parent ().remove_child (background);
+                    }
+                    background.destroy ();
+                }
+            }
+
+			for (var i = 0; i < screen.get_n_monitors (); i++) {
+                for (var j = index+1; j < screen.get_n_workspaces ()+1; j++) {
+                    string key = @"$i:$j";
+                    if (backgrounds.has_key (key)) {
+                        //stderr.printf(@"update mon $i workspace $j to %d\n", j-1);
+                        var background = backgrounds[key];
+                        background.update_content (j-1);
+
+                        string new_key = @"$i:$(j-1)";
+                        backgrounds[new_key] = background;
+                        backgrounds.remove (key);
+                    }
+                }
+			}
+            structure_changed ();
+        }
+
+        void on_workspace_added (int index)
+        {
+			foreach (var background in backgrounds.values) {
+                if (background.get_parent () != null) {
+                    background.get_parent ().remove_child (background);
+                }
+			}
+
+			for (var i = 0; i < screen.get_n_monitors (); i++) {
+                var background = new BackgroundManager (screen, i, index);
+                insert_background (i, index, background);
+			}
+            structure_changed ();
+        }
 	}
 }
