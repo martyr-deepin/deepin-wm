@@ -63,8 +63,6 @@ namespace Gala
 		bool opened;
 
 		uint hover_activate_timeout = 0;
-        int previous_index = 0; // cached workspace id, can change if there is a workspace 
-                                // before it gets removed
 
 		public DeepinWorkspaceFlowClone (Workspace workspace)
 		{
@@ -75,7 +73,6 @@ namespace Gala
 		{
 			opened = false;
 
-            previous_index = workspace.index ();
 			var screen = workspace.get_screen ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
@@ -162,7 +159,7 @@ namespace Gala
 
 			relayout ();
 			screen.monitors_changed.connect (relayout);
-            screen.workspace_removed.connect (on_workspace_remove);
+            workspace.notify["workspace-index"].connect (on_workspace_index_changed);
 		}
 
 		~DeepinWorkspaceFlowClone ()
@@ -180,19 +177,14 @@ namespace Gala
 			listener.window_no_longer_on_all_workspaces.disconnect (add_window);
 
 			screen.monitors_changed.disconnect (relayout);
-            screen.workspace_removed.disconnect (on_workspace_remove);
+            workspace.notify["workspace-index"].disconnect (on_workspace_index_changed);
 
 			background.destroy ();
 		}
 
-        void on_workspace_remove(int index)
+        void on_workspace_index_changed(Object o, ParamSpec p)
         {
-            if (previous_index == index) return;
-
-            if (previous_index != workspace.index ()) {
-                previous_index = workspace.index ();
-                (background as DeepinFramedBackground).update_content (previous_index);
-            }
+            (background as DeepinFramedBackground).update_content (workspace.index ());
         }
 
 		/**

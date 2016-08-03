@@ -60,9 +60,6 @@ namespace Gala
 		Gdk.RGBA roundRectColorSelected;
 		DeepinRoundRectOutlineEffect roundRectOutlineEffect;
 
-        int previous_index = 0; // cached workspace id, can change if there is a workspace 
-                                // before it gets removed
-
 		public DeepinWorkspaceThumbCloneCore (Workspace workspace)
 		{
 			Object (workspace: workspace);
@@ -70,8 +67,6 @@ namespace Gala
 
 		construct
 		{
-            previous_index = workspace.index ();
-
 			// workspace shadow effect, angle:90°, size:5, distance:1, opacity:30%
 			workspace_shadow = new Actor ();
 			workspace_shadow.add_effect_with_name (
@@ -111,7 +106,7 @@ namespace Gala
 				return true;
 			});
 			workspace_clone.add_child (background);
-            workspace.get_screen ().workspace_removed.connect (on_workspace_remove);
+            workspace.notify["workspace-index"].connect (on_workspace_index_changed);
 
 			window_container = new DeepinWindowThumbContainer (workspace);
 			window_container.window_activated.connect ((w) => selected ());
@@ -141,20 +136,14 @@ namespace Gala
 
 		~DeepinWorkspaceThumbCloneCore ()
 		{
-
 			workspace.get_screen ().monitors_changed.disconnect (update_workspace_shadow);
-            workspace.get_screen ().workspace_removed.disconnect (on_workspace_remove);
+            workspace.notify["workspace-index"].disconnect (on_workspace_index_changed);
 			background.destroy ();
 		}
 
-        void on_workspace_remove(int index)
+        void on_workspace_index_changed(Object o, ParamSpec p)
         {
-            if (index >= previous_index) return;
-
-            if (previous_index != workspace.index ()) {
-                previous_index = workspace.index ();
-                (background as DeepinFramedBackground).update_content (previous_index);
-            }
+            (background as DeepinFramedBackground).update_content (workspace.index ());
         }
 
 		public override bool enter_event (CrossingEvent event)
