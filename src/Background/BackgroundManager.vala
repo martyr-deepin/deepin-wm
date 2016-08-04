@@ -82,10 +82,10 @@ namespace Gala
 
         void on_workspace_index_changed(Object o, ParamSpec p)
         {
-            stderr.printf ("on_workspace_index_changed %d -> %d\n", _workspace_index, workspace.index ());
+            //stderr.printf ("on_workspace_index_changed %d -> %d\n", _workspace_index, workspace.index ());
             _workspace_index = workspace.index ();
             Idle.add(() => {
-                stderr.printf ("idle update_content %d\n", workspace_index);
+                //stderr.printf ("idle update_content %d\n", workspace_index);
                 if (actors.size > 0) {
                     var actor = actors[actors.size - 1];
                     var background = background_source.get_background (monitor_index, workspace_index);
@@ -154,8 +154,8 @@ namespace Gala
         protected void create_background_actor ()
         {
             Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
-            stderr.printf ("%s: count %d mon %d ws %d\n", Log.METHOD, actors.size,
-                    monitor_index, workspace_index);
+            //stderr.printf ("%s: count %d mon %d ws %d\n", Log.METHOD, actors.size,
+                    //monitor_index, workspace_index);
 
             var background = background_source.get_background (monitor_index, workspace_index);
             var background_actor = new Meta.BlurredBackgroundActor (screen, monitor_index);

@@ -67,7 +67,7 @@ namespace Gala
         // change background for workspace index, this may not expand array
         public void change_background (int index, string uri)
         {
-            stderr.printf("change_background(%d, %s)\n", index, uri);
+            //stderr.printf("change_background(%d, %s)\n", index, uri);
 
             var nr_ws = screen.get_n_workspaces ();
             if (index >= nr_ws) return;
@@ -122,7 +122,7 @@ namespace Gala
 
         public void delete_background (int index)
         {
-            stderr.printf("delete_background(%d)\n", index);
+            //stderr.printf("delete_background(%d)\n", index);
             var nr_ws = screen.get_n_workspaces ();
             if (index > nr_ws) return;
 

@@ -1,7 +1,6 @@
 src/WindowManager.vala
 src/Widgets/WindowMenu.vala
 src/Deepin/DeepinWorkspaceThumbClone.vala
-src/Deepin/DeepinWorkspaceName.vala
 src/Deepin/DeepinMenu.vala
 lib/Granite/Widgets/Utils.c
 data/gala-multitaskingview.desktop.in
