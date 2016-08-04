@@ -87,9 +87,9 @@ namespace Gala
             (wm as WindowManagerGala).cancel_hide_windows ();
         }
 
-        public void change_workspace_background (int index, string uri)
+        public void change_current_workspace_background (string uri)
         {
-            (wm as WindowManagerGala).change_workspace_background (index, uri);
+            (wm as WindowManagerGala).change_workspace_background (uri);
         }
 
         public signal void workspace_removed (int index);

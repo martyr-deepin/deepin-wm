@@ -748,11 +748,12 @@ namespace Gala
 			}
 		}
 
-        public void change_workspace_background (int index, string uri)
+        public void change_workspace_background (string uri)
         {
 			var source = BackgroundCache.get_default ().get_background_source (
 				get_screen (), BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
-            source.change_background (index, uri);
+			var active_workspace = get_screen ().get_active_workspace ();
+            source.change_background (active_workspace.index (), uri);
         }
 
         //FIXME: need to disable wm operations, since nothing is visible...
