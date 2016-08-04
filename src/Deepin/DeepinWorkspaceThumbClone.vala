@@ -106,7 +106,6 @@ namespace Gala
 				return true;
 			});
 			workspace_clone.add_child (background);
-            workspace.notify["workspace-index"].connect (on_workspace_index_changed);
 
 			window_container = new DeepinWindowThumbContainer (workspace);
 			window_container.window_activated.connect ((w) => selected ());
@@ -137,14 +136,8 @@ namespace Gala
 		~DeepinWorkspaceThumbCloneCore ()
 		{
 			workspace.get_screen ().monitors_changed.disconnect (update_workspace_shadow);
-            workspace.notify["workspace-index"].disconnect (on_workspace_index_changed);
 			background.destroy ();
 		}
-
-        void on_workspace_index_changed(Object o, ParamSpec p)
-        {
-            (background as DeepinFramedBackground).update_content (workspace.index ());
-        }
 
 		public override bool enter_event (CrossingEvent event)
 		{

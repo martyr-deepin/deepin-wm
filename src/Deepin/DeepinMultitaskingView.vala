@@ -27,9 +27,6 @@ namespace Gala
 	 */
 	public class DeepinMultitaskingView : Actor, ActivatableComponent
 	{
-		const string BACKGROUND_SCHEMA = "com.deepin.wrap.gnome.desktop.background";
-		const string EXTRA_BACKGROUND_SCHEMA = "com.deepin.dde.appearance";
-
 		public const AnimationMode TOGGLE_MODE = AnimationMode.EASE_OUT_QUINT;
 		public const int WORKSPACE_SWITCH_DURATION = 400;
 		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUINT;
@@ -91,9 +88,15 @@ namespace Gala
 
             //TODO: handle workspace change signal
             background_source = BackgroundCache.get_default ().get_background_source (
-				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
-			background_source.changed.connect (() => {
-                update_background_actor ();
+				screen, BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
+			background_source.changed.connect ((indexes) => {
+                var active_index = screen.get_active_workspace ().index ();
+                foreach (var idx in indexes) {
+                    if (idx == active_index) {
+                        update_background_actor ();
+                        break;
+                    }
+                }
 			});
             background_actor = new Meta.BlurredBackgroundActor (screen, screen.get_primary_monitor ());
             update_background_actor ();

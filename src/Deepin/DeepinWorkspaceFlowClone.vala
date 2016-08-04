@@ -159,7 +159,6 @@ namespace Gala
 
 			relayout ();
 			screen.monitors_changed.connect (relayout);
-            workspace.notify["workspace-index"].connect (on_workspace_index_changed);
 		}
 
 		~DeepinWorkspaceFlowClone ()
@@ -177,15 +176,9 @@ namespace Gala
 			listener.window_no_longer_on_all_workspaces.disconnect (add_window);
 
 			screen.monitors_changed.disconnect (relayout);
-            workspace.notify["workspace-index"].disconnect (on_workspace_index_changed);
 
 			background.destroy ();
 		}
-
-        void on_workspace_index_changed(Object o, ParamSpec p)
-        {
-            (background as DeepinFramedBackground).update_content (workspace.index ());
-        }
 
 		/**
 		 * Add a window to the DeepinWindowFlowContainer and the DeepinWorkspaceThumbClone if

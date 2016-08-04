@@ -20,8 +20,8 @@ namespace Gala
 {
 	public class BackgroundManager : Meta.BackgroundGroup
 	{
-		const string BACKGROUND_SCHEMA = "com.deepin.wrap.gnome.desktop.background";
-		const string EXTRA_BACKGROUND_SCHEMA = "com.deepin.dde.appearance";
+		public const string BACKGROUND_SCHEMA = "com.deepin.wrap.gnome.desktop.background";
+		public const string EXTRA_BACKGROUND_SCHEMA = "com.deepin.dde.appearance";
 		const int FADE_ANIMATION_TIME = 1000;
 
 		public signal void changed ();
@@ -37,6 +37,7 @@ namespace Gala
         ulong changed_handler = 0;
         ulong serial = 0;
 		int radius = 0;
+        unowned Meta.Workspace workspace;
 
 		public BackgroundManager (Meta.Screen screen, int monitor_index, int workspace_index,
 								  bool control_position = true)
@@ -47,10 +48,20 @@ namespace Gala
 
 		construct
 		{
+            workspace = screen.get_workspace_by_index (workspace_index);
+            workspace.notify["workspace-index"].connect_after (on_workspace_index_changed);
+
 			background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
 
-			changed_handler = background_source.changed.connect (create_background_actor);
+			changed_handler = background_source.changed.connect ((indexes) => {
+                foreach (var idx in indexes) {
+                    if (idx == workspace_index) {
+                        create_background_actor ();
+                        break;
+                    }
+                }
+            });
 
             actors = new Gee.ArrayList<Meta.BlurredBackgroundActor> ();
             create_background_actor ();
@@ -59,6 +70,7 @@ namespace Gala
 		~BackgroundManager ()
 		{
             background_source.changed.disconnect (create_background_actor);
+            workspace.notify["workspace-index"].disconnect (on_workspace_index_changed);
             changed_handler = 0;
 
 			BackgroundCache.get_default ().release_background_source (
@@ -68,14 +80,19 @@ namespace Gala
             actors = null;
 		}
 
-        public void update_content (int new_index)
+        void on_workspace_index_changed(Object o, ParamSpec p)
         {
-            if (actors.size > 0) {
-                var actor = actors[actors.size - 1];
-                _workspace_index = new_index;
-                var background = background_source.get_background (monitor_index, workspace_index);
-                actor.background = background.background;
-            }
+            stderr.printf ("on_workspace_index_changed %d -> %d\n", _workspace_index, workspace.index ());
+            _workspace_index = workspace.index ();
+            Idle.add(() => {
+                stderr.printf ("idle update_content %d\n", workspace_index);
+                if (actors.size > 0) {
+                    var actor = actors[actors.size - 1];
+                    var background = background_source.get_background (monitor_index, workspace_index);
+                    actor.background = background.background;
+                }
+                return false;
+            });
         }
 
         public void set_radius (int radius)
@@ -137,6 +154,8 @@ namespace Gala
         protected void create_background_actor ()
         {
             Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
+            stderr.printf ("%s: count %d mon %d ws %d\n", Log.METHOD, actors.size,
+                    monitor_index, workspace_index);
 
             var background = background_source.get_background (monitor_index, workspace_index);
             var background_actor = new Meta.BlurredBackgroundActor (screen, monitor_index);

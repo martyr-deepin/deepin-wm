@@ -70,7 +70,6 @@ namespace Gala
 
 		void update ()
 		{
-            stderr.printf ("%s\n", Log.METHOD);
 			foreach (var background in backgrounds.values) {
                 if (background.get_parent () != null) {
                     background.get_parent ().remove_child (background);
@@ -102,7 +101,6 @@ namespace Gala
                 string key = @"$i:$index";
                 if (backgrounds.has_key (key)) {
                     var background = backgrounds[key];
-                    //stderr.printf(@"remove mon $i workspace $index \n");
                     backgrounds.remove (key);
                     if (background.get_parent () != null) {
                         background.get_parent ().remove_child (background);
@@ -115,9 +113,7 @@ namespace Gala
                 for (var j = index+1; j < screen.get_n_workspaces ()+1; j++) {
                     string key = @"$i:$j";
                     if (backgrounds.has_key (key)) {
-                        //stderr.printf(@"update mon $i workspace $j to %d\n", j-1);
                         var background = backgrounds[key];
-                        background.update_content (j-1);
 
                         string new_key = @"$i:$(j-1)";
                         backgrounds[new_key] = background;

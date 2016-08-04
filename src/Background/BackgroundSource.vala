@@ -19,7 +19,7 @@ namespace Gala
 {
 	public class BackgroundSource : Object
 	{
-		public signal void changed ();
+		public signal void changed (int[] workspaces);
 
 		public Meta.Screen screen { get; construct; }
 		public Settings settings { get; construct; }
@@ -45,9 +45,141 @@ namespace Gala
 
 			settings_hash_cache = get_current_settings_hash_cache ();
 			cache_extra_picture_uris = get_current_extra_picture_uris ();
-			settings.changed.connect (settings_changed);
-			extra_settings.changed.connect (settings_changed);
+
+            screen.workspace_added.connect (on_workspace_added);
+            screen.workspace_removed.connect (on_workspace_removed);
+
+			//settings.changed.connect (settings_changed);
+			//extra_settings.changed.connect (settings_changed);
 		}
+
+        void on_workspace_removed (int index)
+        {
+            delete_background (index);
+        }
+
+        void on_workspace_added (int index)
+        {
+			string default_uri = settings.get_string ("picture-uri");
+            change_background (index, default_uri);
+        }
+
+        // change background for workspace index, this may not expand array
+        public void change_background (int index, string uri)
+        {
+            stderr.printf("change_background(%d, %s)\n", index, uri);
+
+            var nr_ws = screen.get_n_workspaces ();
+            if (index >= nr_ws) return;
+
+            string old = get_picture_filename (0, index);
+            if (old == uri) return;
+
+			string default_uri = settings.get_string ("picture-uri");
+			string[] extra_uris = extra_settings.get_strv ("background-uris");
+
+            // keep sync with workspace length
+            if (extra_uris.length > nr_ws) {
+                extra_uris.resize (nr_ws);
+            } else if (extra_uris.length < nr_ws) {
+                int oldsz = extra_uris.length;
+                extra_uris.resize (nr_ws);
+                for (int i = oldsz; i < nr_ws; i++) {
+                    extra_uris[i] = default_uri;
+                }
+            }
+
+            extra_uris[index] = uri;
+            extra_uris += null;
+            extra_settings.set_strv ("background-uris", extra_uris);
+
+
+            notify_changed (index);
+        }
+
+        void notify_changed (int index, bool send_signal = true)
+        {
+			var n = screen.get_n_monitors ();
+			string[] to_remove = {};
+
+			foreach (var key in backgrounds.keys) {
+				var background = backgrounds[key];
+				var indexes = key.split(":");
+				var workspace_index = indexes[1].to_int ();
+                if (workspace_index == index) {
+                    to_remove += key;
+                    background.destroy ();
+                }
+			}
+
+            for (int i = 0; i < to_remove.length; i++) {
+				backgrounds.unset (to_remove[i]);
+			}
+
+            if (send_signal)
+                changed (new int[] {index});
+        }
+
+        public void delete_background (int index)
+        {
+            stderr.printf("delete_background(%d)\n", index);
+            var nr_ws = screen.get_n_workspaces ();
+            if (index > nr_ws) return;
+
+			string default_uri = settings.get_string ("picture-uri");
+			string[] extra_uris = extra_settings.get_strv ("background-uris");
+
+            if (index >= extra_uris.length) return;
+
+            var len = extra_uris.length;
+            extra_uris.move (index + 1, index, len - index - 1);
+            extra_uris.resize (len-1);
+
+            // keep sync with workspace length
+            if (extra_uris.length > nr_ws) {
+                extra_uris.resize (nr_ws);
+            } else if (extra_uris.length < nr_ws) {
+                int oldsz = extra_uris.length;
+                extra_uris.resize (nr_ws);
+                for (int i = oldsz; i < nr_ws; i++) {
+                    extra_uris[i] = default_uri;
+                }
+            }
+            extra_uris += null;
+            extra_settings.set_strv ("background-uris", extra_uris);
+
+            notify_delete (index, false);
+        }
+
+        void notify_delete (int index, bool send_signal = true)
+        {
+			var n = screen.get_n_monitors ();
+
+            for (var i = 0; i < n; i++) {
+                string key = @"$i:$index";
+                if (backgrounds.has_key (key)) {
+                    var background = backgrounds[key];
+                    backgrounds.remove (key);
+                    background.destroy ();
+                }
+            }
+
+			for (var i = 0; i < n; i++) {
+                for (var j = index+1; j < screen.get_n_workspaces ()+1; j++) {
+                    string key = @"$i:$j";
+                    if (backgrounds.has_key (key)) {
+                        var background = backgrounds[key];
+                        backgrounds.remove (key);
+
+                        string new_key = @"$i:$(j-1)";
+                        backgrounds[new_key] = background;
+                    }
+                }
+			}
+
+            if (send_signal)
+                changed (new int[] {index});
+        }
 
 		void monitors_changed ()
 		{
@@ -139,13 +271,13 @@ namespace Gala
 		{
             Meta.verbose ("BackgroundSource::%s\n", Log.METHOD);
 
-			foreach (var key in backgrounds.keys) {
-				var background = backgrounds[key];
+            foreach (var key in backgrounds.keys) {
+                var background = backgrounds[key];
                 background.destroy ();
             }
             backgrounds.clear ();
 
-			changed ();
+			//changed ();
 		}
 
 		public void destroy ()
@@ -155,6 +287,9 @@ namespace Gala
 			foreach (var background in backgrounds.values) {
 				background.destroy ();
 			}
+
+			screen.workspace_added.disconnect (on_workspace_added);
+			screen.workspace_removed.disconnect (on_workspace_removed);
 		}
 
 		// unfortunately the settings sometimes tend to fire random changes even though
