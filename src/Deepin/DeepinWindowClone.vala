@@ -48,6 +48,8 @@ namespace Gala
 		 */
 		public signal void closing ();
 
+		public signal void entered ();
+
 		/**
 		 * The window was moved or resized and a relayout of the tiling layout may be sensible right
 		 * now.
@@ -491,6 +493,7 @@ namespace Gala
 				close_button.restore_easing_state ();
 			}
 
+            entered ();
 			return false;
 		}
 

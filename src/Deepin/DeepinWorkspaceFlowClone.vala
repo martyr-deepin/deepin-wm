@@ -77,11 +77,11 @@ namespace Gala
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
 			background = new DeepinFramedBackground (screen, workspace.index ());
-			background.reactive = true;
-			background.button_press_event.connect (() => {
-				selected (true);
-				return false;
-			});
+            background.reactive = true;
+            background.button_press_event.connect (() => {
+                selected (true);
+                return false;
+            });
 
 			thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
 			thumb_workspace.selected.connect (() => {
@@ -94,6 +94,8 @@ namespace Gala
 			window_container.window_activated.connect ((w) => window_activated (w));
 			window_container.window_selected.connect (
 				(w) => thumb_workspace.window_container.select_window (w, false));
+            window_container.window_entered.connect (
+                (w) => window_container.select_window (w, true));
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
 			screen.restacked.connect (window_container.restack_windows);

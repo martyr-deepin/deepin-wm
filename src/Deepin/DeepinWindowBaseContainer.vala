@@ -31,6 +31,7 @@ namespace Gala
 		public signal void window_dragging (Window window);
 		public signal void window_removed (Window window);
 		public signal void window_selected (Window window);
+		public signal void window_entered (Window window);
 
 		public Workspace workspace { get; construct; }
 
@@ -189,6 +190,7 @@ namespace Gala
 			new_window.activated.connect (on_window_activated);
 			new_window.closing.connect (on_window_closing);
 			new_window.destroy.connect (on_window_destroyed);
+			new_window.entered.connect (on_window_entered);
 			new_window.request_reposition.connect (on_request_reposition);
 			new_window.notify["dragging"].connect (() => {
 				if (new_window.dragging) {
@@ -235,6 +237,11 @@ namespace Gala
 			window_activated (window_clone.window);
 		}
 
+		void on_window_entered (DeepinWindowClone window_clone)
+		{
+			window_entered (window_clone.window);
+		}
+
 		void on_window_closing (DeepinWindowClone window_clone)
 		{
 			window_closing (window_clone.window);
@@ -254,6 +261,7 @@ namespace Gala
 
 			window.destroy.disconnect (on_window_destroyed);
 			window.activated.disconnect (on_window_activated);
+			window.activated.disconnect (on_window_entered);
 			window.closing.disconnect (on_window_closing);
 			window.request_reposition.disconnect (on_request_reposition);
 
