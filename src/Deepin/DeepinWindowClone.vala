@@ -132,6 +132,10 @@ namespace Gala
 				close_button = Utils.create_close_button ();
 				close_button.opacity = 0;
 				close_button.button_press_event.connect (() => {
+                    // this prevent a drag being initiated
+					return true;
+				});
+				close_button.button_release_event.connect (() => {
 					close_window ();
 					return true;
 				});
