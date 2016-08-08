@@ -94,8 +94,6 @@ namespace Gala
 			window_container.window_activated.connect ((w) => window_activated (w));
 			window_container.window_selected.connect (
 				(w) => thumb_workspace.window_container.select_window (w, false));
-            window_container.window_entered.connect (
-                (w) => window_container.select_window (w, true));
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
 			screen.restacked.connect (window_container.restack_windows);
@@ -276,6 +274,13 @@ namespace Gala
 				display.get_focus_window () : null;
 			window_container.open (focus_window);
 			thumb_workspace.window_container.open (focus_window);
+
+            unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+            Timeout.add (animation_settings.multitasking_toggle_duration,
+                () => {
+                    window_container.window_entered.connect (on_window_entered);
+                    return false;
+                });
 		}
 
 		/**
@@ -290,11 +295,18 @@ namespace Gala
 
 			opened = false;
 
+            window_container.window_entered.disconnect (on_window_entered);
+
 			scale_out (true);
 
 			window_container.close ();
 			thumb_workspace.window_container.close ();
 		}
+
+        void on_window_entered (Meta.Window w)
+        {
+            if (opened) window_container.select_window (w, true);
+        }
 
 		public void scale_in (bool animate)
 		{

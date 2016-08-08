@@ -58,6 +58,9 @@ namespace Gala
 		bool toggling = false;
 		bool animating = false;
 		int toggle_duration = 450;
+        // indicate that next switch signal is caused by a workspace removal
+        // use this is optimize animation process
+        bool expected_workspace_switch_by_removal = false;
 
 		bool is_smooth_scrolling = false;
 
@@ -86,7 +89,6 @@ namespace Gala
 			opened = false;
 			screen = wm.get_screen ();
 
-            //TODO: handle workspace change signal
             background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
 			background_source.changed.connect ((indexes) => {
@@ -110,6 +112,9 @@ namespace Gala
 			thumb_container = new DeepinWorkspaceThumbContainer (screen);
 
 			thumb_container.workspace_closing.connect ((workspace) => {
+                if (screen.get_active_workspace () == workspace) {
+                    expected_workspace_switch_by_removal = true;
+                }
 				foreach (var child in flow_container.get_children ()) {
 					var flow_workspace = child as DeepinWorkspaceFlowClone;
 					if (flow_workspace.workspace == workspace) {
@@ -225,8 +230,12 @@ namespace Gala
             var background = background_source.get_background (0, to);
             background_actor.background = background.background;
 
-            var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
-            background_actor.set_size (monitor.width, monitor.height);
+            thumb_container.select_workspace (screen.get_active_workspace_index (), true);
+            if (expected_workspace_switch_by_removal) {
+                expected_workspace_switch_by_removal = false;
+                return;
+            }
+
 			update_positions (opened, direction);
 		}
 
@@ -291,7 +300,7 @@ namespace Gala
 		 */
 		void update_positions (bool animate, Meta.MotionDirection direction = Meta.MotionDirection.LEFT)
 		{
-			var active_index = screen.get_active_workspace ().index ();
+			var active_index = screen.get_active_workspace_index ();
 
 			int long_delay = 100;
 			int short_delay = 100;
@@ -322,8 +331,6 @@ namespace Gala
 				// container, for that the active workspace always make above others.
 				place_flow_workspace (child, index, animate, delay);
 			}
-
-			thumb_container.select_workspace (active_index, animate);
 
 			if (animate) {
 				animating = true;
@@ -432,6 +439,8 @@ namespace Gala
 
 			flow_workspace.destroy ();
 
+            //FIXME: remove workspace will cause a ws switch and a following ws remove signal 
+            // this cause two update_positions immediately, need to adjsut it
 			update_positions (opened);
 
             update_background_actor ();
@@ -702,6 +711,7 @@ namespace Gala
 			}
 
 			update_positions (false);
+            thumb_container.select_workspace (screen.get_active_workspace_index (), false);
 
 			var monitor_geom = screen.get_monitor_geometry (screen.get_primary_monitor ());
 			var thumb_y_value = GLib.Value (typeof (float));

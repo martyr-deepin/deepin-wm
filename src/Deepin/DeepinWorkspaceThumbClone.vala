@@ -126,6 +126,9 @@ namespace Gala
 			// block propagation of button presses on the close button, otherwise the click action
 			// on the WorkspaceTHumbClone will act weirdly
 			close_button.button_press_event.connect (() => {
+				return true;
+			});
+			close_button.button_release_event.connect (() => {
 				closing ();
 				return true;
 			});
@@ -400,13 +403,14 @@ namespace Gala
 				return;
 			}
 
-			closing ();
+            closing ();
 
 			DeepinUtils.start_fade_out_animation (
 				this,
 				DeepinMultitaskingView.WORKSPACE_FADE_DURATION,
 				DeepinMultitaskingView.WORKSPACE_FADE_MODE,
-				() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace));
+				() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace),
+                0.4);
 		}
 
 		public void set_select (bool value, bool animate = true)

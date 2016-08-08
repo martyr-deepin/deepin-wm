@@ -136,7 +136,7 @@ namespace Gala
 			if (Meta.Prefs.get_num_workspaces () >= WindowManagerGala.MAX_WORKSPACE_NUM) {
 				return null;
 			}
-			uint32 timestamp = screen.get_display ().get_current_time ();
+			uint32 timestamp = screen.get_display ().get_current_time_roundtrip ();
 			return screen.append_new_workspace (activate, timestamp);
 		}
 

@@ -60,6 +60,67 @@ namespace Gala
 			return false;
 		}
 	}
+	class DeepinWorkspaceAdder : Actor
+	{
+		public Meta.Screen screen { get; construct; }
+		public const int FADE_DURATION = 600;
+		public const AnimationMode FADE_MODE = AnimationMode.EASE_OUT_QUINT;
+
+        DeepinWorkspaceAddButton btn;
+        Meta.BackgroundActor background_actor;
+        BackgroundSource background_source;
+
+		public DeepinWorkspaceAdder (Meta.Screen screen)
+		{
+            Object (screen: screen);
+		}
+
+		construct
+		{
+            background_source = BackgroundCache.get_default ().get_background_source (
+				screen, BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
+			background_source.changed.connect (() => update_background_actor ());
+            background_actor = new BackgroundActor (screen, screen.get_primary_monitor ());
+            update_background_actor ();
+            background_actor.opacity = 0;
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+
+            btn = new DeepinWorkspaceAddButton ();
+            notify["allocation"].connect (() => {
+                float scale = (float)width / (float)monitor_geom.width;
+                background_actor.set_scale(scale, scale);
+
+                btn.set_size (width, height);
+            });
+
+			add_child (background_actor);
+            add_child (btn);
+		}
+
+        void update_background_actor ()
+        {
+            //assign a non-exist workspace will give us default background
+            var background = background_source.get_background (screen.get_primary_monitor (), 
+                    screen.get_n_workspaces ());
+            background_actor.background = background.background;
+        }
+
+        public override bool leave_event (Clutter.CrossingEvent ev)
+        {
+            //background_actor.opacity = 0;
+			DeepinUtils.start_fade_out_opacity_animation (background_actor,
+                    FADE_DURATION, FADE_MODE);
+            return false;
+        }
+
+        public override bool enter_event (Clutter.CrossingEvent ev)
+        {
+            //background_actor.opacity = 255;
+			DeepinUtils.start_fade_in_opacity_animation (background_actor,
+                    FADE_DURATION, FADE_MODE);
+            return false;
+        }
+	}
 
 	/**
 	 * This class contains the DeepinWorkspaceThumbClone which placed in the top of multitaskingview
@@ -87,8 +148,6 @@ namespace Gala
 
 		Actor plus_button;
 
-		int new_workspace_index_by_manual = -1;
-
 		public DeepinWorkspaceThumbContainer (Screen screen)
 		{
 			Object (screen: screen);
@@ -96,7 +155,7 @@ namespace Gala
 
 		construct
 		{
-			plus_button = new DeepinWorkspaceAddButton ();
+			plus_button = new DeepinWorkspaceAdder (screen);
 			plus_button.reactive = true;
 			plus_button.set_pivot_point (0.5f, 0.5f);
 			plus_button.button_press_event.connect (() => {
@@ -118,14 +177,9 @@ namespace Gala
 
 		public void append_new_workspace ()
 		{
-			DeepinUtils.start_fade_out_animation (plus_button,
-												  DeepinMultitaskingView.WORKSPACE_FADE_DURATION,
-												  DeepinMultitaskingView.WORKSPACE_FADE_MODE,
-												  () => {
-			 	remove_child (plus_button);
-				new_workspace_index_by_manual = Prefs.get_num_workspaces ();
-				DeepinUtils.append_new_workspace (screen);
-			});
+			if (Prefs.get_num_workspaces () + 1 >= WindowManagerGala.MAX_WORKSPACE_NUM)
+                remove_child (plus_button);
+            DeepinUtils.append_new_workspace (screen);
 		}
 
 		public void open ()
@@ -144,28 +198,14 @@ namespace Gala
 			var index = workspace_clone.workspace.index ();
 			insert_child_at_index (workspace_clone, index);
 			place_child (workspace_clone, index, false);
-			select_workspace (workspace_clone.workspace.index (), true);
 
 			workspace_clone.start_fade_in_animation ();
 
-			// if workspace is added manually, set workspace name field editable
-			if (workspace_clone.workspace.index () == new_workspace_index_by_manual) {
-				// since workspace name field grab key focus, other actors could not catch mouse
-				// leave_event, so we hide close button manually
-				hide_workspace_close_button ();
-
-				new_workspace_index_by_manual = -1;
-
-                enable_workspace_drag_action ();
-                append_plus_button_if_need ();
-                DeepinUtils.switch_to_workspace (workspace_clone.workspace.get_screen (),
-                        workspace_clone.workspace.index ());
-                if (cb != null) {
-                    cb ();
-                }
-                // or else
-                //select_workspace (screen.get_active_workspace_index (), true);
-			}
+            hide_workspace_close_button ();
+            enable_workspace_drag_action ();
+            if (cb != null) {
+                cb ();
+            }
 
 			workspace_clone.closing.connect (on_workspace_closing);
 
@@ -232,7 +272,6 @@ namespace Gala
 			if (could_append_plus_button ()) {
 				plus_button.opacity = 0;
 				add_child (plus_button);
-				place_child (plus_button, get_n_children () - 1, false);
 				DeepinUtils.start_fade_in_back_animation (plus_button, PLUS_FADE_IN_DURATION);
 
 				relayout ();
