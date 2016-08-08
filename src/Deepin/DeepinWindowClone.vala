@@ -532,7 +532,7 @@ namespace Gala
 		 * workspace, in which case we check if the new window is a dialog of the window we were
 		 * going to delete. If that's the case, we request to select our window.
 		 */
-		void close_window ()
+		public void close_window ()
 		{
 			start_fade_out_animation (do_close_window);
 			closing ();

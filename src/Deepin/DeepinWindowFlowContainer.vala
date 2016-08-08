@@ -350,5 +350,13 @@ namespace Gala
 				selected_clone.activated ();
 			}
 		}
+
+        public void close_active_window ()
+        {
+			var selected_clone = get_selected_clone ();
+			if (selected_clone != null) {
+                selected_clone.close_window ();
+			}
+        }
 	}
 }

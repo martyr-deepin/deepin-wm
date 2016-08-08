@@ -555,6 +555,13 @@ namespace Gala
 					}
 				}
 				break;
+			case Clutter.Key.Delete:
+			case Clutter.Key.KP_Delete:
+			case Clutter.Key.BackSpace:
+				if (get_active_workspace_clone ().window_container.has_selected_window ()) {
+					get_active_workspace_clone ().window_container.close_active_window ();
+				}
+				break;
 			}
 
 			return false;
