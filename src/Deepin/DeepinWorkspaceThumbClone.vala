@@ -419,9 +419,38 @@ namespace Gala
 		}
 
 		public void start_fade_in_animation ()
-		{
-			DeepinUtils.start_fade_in_back_animation (thumb_clone, FADE_IN_DURATION);
-		}
+        {
+            var animation = new TransitionGroup ();
+            animation.duration = DeepinMultitaskingView.WORKSPACE_FADE_DURATION + 50;
+            animation.remove_on_complete = true;
+            animation.progress_mode = DeepinMultitaskingView.WORKSPACE_FADE_MODE;
+
+            GLib.Value[] scales = {0.0f, 1.05f, 1.0f};
+            double[] keyframes = {0.0, 0.8, 1.0};
+
+            var opacity_transition = new PropertyTransition ("opacity");
+            opacity_transition.set_from_value (0);
+            opacity_transition.set_to_value (255);
+
+            var scale_x_transition = new KeyframeTransition ("scale-x");
+            scale_x_transition.set_from_value (0.0);
+            scale_x_transition.set_to_value (1.0);
+            scale_x_transition.set_key_frames (keyframes);
+            scale_x_transition.set_values (scales);
+
+            var scale_y_transition = new KeyframeTransition ("scale-y");
+            scale_y_transition.set_from_value (0.0);
+            scale_y_transition.set_to_value (1.0);
+            scale_y_transition.set_key_frames (keyframes);
+            scale_y_transition.set_values (scales);
+
+            animation.add_transition (opacity_transition);
+            animation.add_transition (scale_x_transition);
+            animation.add_transition (scale_y_transition);
+
+            thumb_clone.set_pivot_point (0.5f, 0.5f);
+            thumb_clone.add_transition ("fade-in", animation);
+        }
 
 		/**
 		 * Enable drag action, should be called after relayout.

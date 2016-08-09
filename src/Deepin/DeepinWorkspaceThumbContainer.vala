@@ -63,12 +63,14 @@ namespace Gala
 	class DeepinWorkspaceAdder : Actor
 	{
 		public Meta.Screen screen { get; construct; }
-		public const int FADE_DURATION = 600;
-		public const AnimationMode FADE_MODE = AnimationMode.EASE_OUT_QUINT;
+		public const int FADE_DURATION = 200;
+		public const AnimationMode FADE_MODE = AnimationMode.EASE_IN_OUT_CUBIC;
+        public const int BACKGROUND_OPACITY = 60;
 
         DeepinWorkspaceAddButton btn;
         Meta.BackgroundActor background_actor;
         BackgroundSource background_source;
+        DragDropAction window_drop_action;
 
 		public DeepinWorkspaceAdder (Meta.Screen screen)
 		{
@@ -89,12 +91,18 @@ namespace Gala
             notify["allocation"].connect (() => {
                 float scale = (float)width / (float)monitor_geom.width;
                 background_actor.set_scale(scale, scale);
-
                 btn.set_size (width, height);
             });
 
 			add_child (background_actor);
             add_child (btn);
+
+			window_drop_action = new DragDropAction (
+				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
+			add_action (window_drop_action);
+            window_drop_action.crossed.connect((hover) => {
+                background_animate (hover);
+            });
 		}
 
         void update_background_actor ()
@@ -105,19 +113,40 @@ namespace Gala
             background_actor.background = background.background;
         }
 
+        void background_animate (bool show)
+        {
+            var scale = GLib.Value (typeof (float));
+
+            if (show) {
+                scale.set_float (1.05f);
+            } else {
+                scale.set_float (1.0f);
+            }
+
+            DeepinUtils.start_animation_group (this, "deepin-workspace-adder",
+                    FADE_DURATION,
+                    (timeline) => {
+                        timeline.set_progress_mode (FADE_MODE);
+                    }, "scale-x", scale, "scale-y", &scale);
+
+            background_actor.opacity = show ? 0:BACKGROUND_OPACITY;
+            background_actor.save_easing_state ();
+            background_actor.set_easing_duration (FADE_DURATION);
+            background_actor.set_easing_mode (FADE_MODE);
+            background_actor.opacity = show ? BACKGROUND_OPACITY:0;
+
+            background_actor.restore_easing_state ();
+        }
+
         public override bool leave_event (Clutter.CrossingEvent ev)
         {
-            //background_actor.opacity = 0;
-			DeepinUtils.start_fade_out_opacity_animation (background_actor,
-                    FADE_DURATION, FADE_MODE);
+            background_animate (false);
             return false;
         }
 
         public override bool enter_event (Clutter.CrossingEvent ev)
         {
-            //background_actor.opacity = 255;
-			DeepinUtils.start_fade_in_opacity_animation (background_actor,
-                    FADE_DURATION, FADE_MODE);
+            background_animate (true);
             return false;
         }
 	}
@@ -142,7 +171,7 @@ namespace Gala
 		 */
 		const float SPACING_PERCENT = 0.02f;
 
-		const int LAYOUT_DURATION = 800;
+		const int LAYOUT_DURATION = 300;
 
 		public Screen screen { get; construct; }
 
@@ -177,8 +206,6 @@ namespace Gala
 
 		public void append_new_workspace ()
 		{
-			if (Prefs.get_num_workspaces () + 1 >= WindowManagerGala.MAX_WORKSPACE_NUM)
-                remove_child (plus_button);
             DeepinUtils.append_new_workspace (screen);
 		}
 
@@ -197,7 +224,15 @@ namespace Gala
 		{
 			var index = workspace_clone.workspace.index ();
 			insert_child_at_index (workspace_clone, index);
-			place_child (workspace_clone, index, false);
+			//place_child (workspace_clone, index, false);
+            workspace_clone.x = plus_button.x;
+            workspace_clone.y = plus_button.y;
+
+			if (Prefs.get_num_workspaces () >= WindowManagerGala.MAX_WORKSPACE_NUM) {
+                remove_child (plus_button);
+            } else {
+                plus_button_flash_in ();    
+            }
 
 			workspace_clone.start_fade_in_animation ();
 
@@ -211,6 +246,20 @@ namespace Gala
 
 			relayout ();
 		}
+
+        void plus_button_flash_in ()
+        {
+            ActorBox child_box = get_child_layout_box (screen, get_n_children (), false);
+            plus_button.opacity = 0;
+            plus_button.x = child_box.get_x () - child_box.get_width () / 2;
+            plus_button.y = child_box.get_y ();
+
+            plus_button.save_easing_state ();
+            plus_button.set_easing_duration (LAYOUT_DURATION);
+            plus_button.set_easing_mode (AnimationMode.LINEAR);
+            plus_button.opacity = 255;
+            plus_button.restore_easing_state ();
+        }
 
 		public void remove_workspace (DeepinWorkspaceThumbClone workspace_clone)
 		{
@@ -364,8 +413,8 @@ namespace Gala
 				var position_value = GLib.Value (typeof (Point));
 				position_value.set_boxed (position);
 				DeepinUtils.start_animation_group (child, "thumb-workspace-slot", LAYOUT_DURATION,
-												   DeepinUtils.clutter_set_mode_bezier_out_back,
-												   "position", &position_value);
+                        (tl) => { tl.progress_mode = (AnimationMode.LINEAR); },
+                        "position", &position_value);
 
 				// enable the drag action after workspace relayout when plus button will not be
 				// append later, which will queue relayout again

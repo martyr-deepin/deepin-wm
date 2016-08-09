@@ -726,6 +726,14 @@ namespace Gala
 				workspace = ((DeepinWorkspaceThumbClone)destination).workspace;
 			} else if (destination is DeepinFramedBackground) {
 				workspace = ((DeepinWorkspaceFlowClone)destination.get_parent ()).workspace;
+			} else if (destination is DeepinWorkspaceAdder) {
+                if (Prefs.get_num_workspaces () >= WindowManagerGala.MAX_WORKSPACE_NUM) {
+                    return;
+                }
+				window.change_workspace_by_index (Prefs.get_num_workspaces () + 1, true);
+                unmanaged ();
+				return;
+
 			} else if (destination is WorkspaceInsertThumb) {
 				if (!Prefs.get_dynamic_workspaces ()) {
 					on_drag_canceled ();
