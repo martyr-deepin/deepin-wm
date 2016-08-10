@@ -115,6 +115,10 @@ namespace Gala
 
         void background_animate (bool show)
         {
+            if (just_reset && !show) {
+                just_reset = false;
+                return;
+            }
             var scale = GLib.Value (typeof (float));
 
             if (show) {
@@ -129,13 +133,23 @@ namespace Gala
                         timeline.set_progress_mode (FADE_MODE);
                     }, "scale-x", scale, "scale-y", &scale);
 
-            background_actor.opacity = show ? 0:BACKGROUND_OPACITY;
-            background_actor.save_easing_state ();
-            background_actor.set_easing_duration (FADE_DURATION);
-            background_actor.set_easing_mode (FADE_MODE);
-            background_actor.opacity = show ? BACKGROUND_OPACITY:0;
+            var fading = new PropertyTransition ("opacity");
+            fading.set_duration (FADE_DURATION);
+            fading.set_from_value (show ? 0:BACKGROUND_OPACITY);
+            fading.set_to_value (show ? BACKGROUND_OPACITY:0);
+            fading.set_progress_mode (FADE_MODE);
+            fading.remove_on_complete = true;
 
-            background_actor.restore_easing_state ();
+            background_actor.add_transition ("fading", fading);
+        }
+
+        bool just_reset = false;
+        public void reset ()
+        {
+            set_scale (1.0f, 1.0f);
+            background_actor.remove_transition ("fading");
+            background_actor.opacity = 0;
+            just_reset = true;
         }
 
         public override bool leave_event (Clutter.CrossingEvent ev)
@@ -253,6 +267,8 @@ namespace Gala
             plus_button.opacity = 0;
             plus_button.x = child_box.get_x () - child_box.get_width () / 2;
             plus_button.y = child_box.get_y ();
+
+            (plus_button as DeepinWorkspaceAdder).reset ();
 
             plus_button.save_easing_state ();
             plus_button.set_easing_duration (LAYOUT_DURATION);
