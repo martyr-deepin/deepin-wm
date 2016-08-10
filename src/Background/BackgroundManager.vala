@@ -37,6 +37,7 @@ namespace Gala
         ulong changed_handler = 0;
         ulong serial = 0;
 		int radius = 0;
+		int rounds = 0;
         unowned Meta.Workspace workspace;
 
 		public BackgroundManager (Meta.Screen screen, int monitor_index, int workspace_index,
@@ -93,6 +94,14 @@ namespace Gala
                 }
                 return false;
             });
+        }
+        public void set_rounds (int rounds)
+        {
+            this.rounds = rounds;
+            if (actors.size > 0) {
+                var actor = actors[actors.size - 1];
+                actor.set_rounds (rounds);
+            }
         }
 
         public void set_radius (int radius)

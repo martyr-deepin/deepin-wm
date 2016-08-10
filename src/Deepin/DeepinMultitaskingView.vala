@@ -205,7 +205,8 @@ namespace Gala
             var active_index = screen.get_active_workspace ().index ();
             var background = background_source.get_background (screen.get_primary_monitor (), active_index);
             background_actor.background = background.background;
-            background_actor.set_radius (19);
+            background_actor.set_rounds (8);
+            background_actor.set_radius (9);
 
             var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
             background_actor.set_size (monitor.width, monitor.height);

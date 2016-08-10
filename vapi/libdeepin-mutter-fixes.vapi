@@ -25,6 +25,7 @@ namespace Meta {
 		public BlurredBackgroundActor (Meta.Screen screen, int monitor);
 		public void set_background (Meta.Background background);
 		public void set_radius (int radius);
+		public void set_rounds (int radius);
 		[NoAccessorMethod]
 		public Meta.Background background { owned get; set; }
 		[NoAccessorMethod]

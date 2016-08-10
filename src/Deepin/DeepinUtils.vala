@@ -457,41 +457,6 @@ namespace Gala
 			return trans_name;
 		}
 
-		/**
-		 * Start spread animation for target actor which will scale to target size and restore then.
-		 *
-		 * @param actor Target actor.
-		 * @param duration Animation duration.
-		 * @param max_scale Max scale value to spread.
-		 */
-		public static void start_spread_animation (Clutter.Actor actor, int duration,
-												   float max_scale)
-		{
-			var trans_name = "scale-x";
-
-			actor.save_easing_state ();
-
-			actor.set_easing_duration (duration / 2);
-			actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_BACK);
-			actor.set_scale (max_scale, max_scale);
-
-			actor.restore_easing_state ();
-
-			// use gobject data to pass duration value to avoid closure panic issue in vala 0.28.1
-			actor.set_data<int> ("restore-duration", duration / 2);
-			run_clutter_callback (actor, trans_name, (sub_actor) => {
-				int restore_duration = sub_actor.steal_data<int> ("restore-duration");
-
-				sub_actor.save_easing_state ();
-
-				sub_actor.set_easing_duration (restore_duration);
-				sub_actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_BACK);
-				sub_actor.set_scale (1.0f, 1.0f);
-
-				sub_actor.restore_easing_state ();
-			});
-		}
-
 		public static void run_clutter_callback (Clutter.Actor actor, string trans_name,
 												 PlainCallback? cb = null, double cb_progress = 1.0)
 		{

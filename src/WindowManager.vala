@@ -332,7 +332,8 @@ namespace Gala
                 backgrounds[i] = background_container.get_background (
                         i, screen.get_active_workspace_index ());
 
-                (backgrounds[i] as BackgroundManager).set_radius (on ? 19:0);
+                (backgrounds[i] as BackgroundManager).set_rounds (6);
+                (backgrounds[i] as BackgroundManager).set_radius (on ? 9:0);
             }
         }
 

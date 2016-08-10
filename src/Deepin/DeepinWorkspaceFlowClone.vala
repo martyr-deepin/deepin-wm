@@ -84,6 +84,7 @@ namespace Gala
             });
 
 			thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
+            thumb_workspace.set_pivot_point (0.5f, 0.5f);
 			thumb_workspace.selected.connect (() => {
 				if (workspace != screen.get_active_workspace ()) {
 					selected (false);
@@ -116,6 +117,22 @@ namespace Gala
 
 			var thumb_drop_action = new DragDropAction (
 				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
+            thumb_drop_action.crossed.connect ((hovered) => {
+                var scale = GLib.Value (typeof (float));
+
+                if (hovered) {
+                    scale.set_float (1.05f);
+                } else {
+                    scale.set_float (1.0f);
+                }
+
+                thumb_workspace.remove_transition ("deepin-thumb-workspace-hover");
+                DeepinUtils.start_animation_group (thumb_workspace, "deepin-thumb-workspace-hover",
+                        200,
+                        (timeline) => {
+                            timeline.set_progress_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+                        }, "scale-x", scale, "scale-y", &scale);
+            });
 			thumb_workspace.add_action (thumb_drop_action);
 
 			var background_drop_action = new DragDropAction (
@@ -199,11 +216,6 @@ namespace Gala
 
 			thumb_workspace.window_container.add_window (window);
 			window_container.add_window (window);
-
-			// start spread animation after window added by all containers
-			if (opened) {
-				DeepinUtils.start_spread_animation (thumb_workspace.thumb_clone, 600, 1.05f);
-			}
 		}
 
 		/**

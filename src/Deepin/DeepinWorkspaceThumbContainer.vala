@@ -101,7 +101,7 @@ namespace Gala
 				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
 			add_action (window_drop_action);
             window_drop_action.crossed.connect((hover) => {
-                background_animate (hover);
+                background_animate (hover, true);
             });
 		}
 
@@ -113,25 +113,31 @@ namespace Gala
             background_actor.background = background.background;
         }
 
-        void background_animate (bool show)
+        void background_animate (bool show, bool do_scale)
         {
             if (just_reset && !show) {
                 just_reset = false;
                 return;
             }
-            var scale = GLib.Value (typeof (float));
 
-            if (show) {
-                scale.set_float (1.05f);
-            } else {
-                scale.set_float (1.0f);
+            just_reset = false;
+
+            if (do_scale) {
+                var scale = GLib.Value (typeof (float));
+
+                if (show) {
+                    scale.set_float (1.05f);
+                } else {
+                    scale.set_float (1.0f);
+                }
+
+                this.remove_all_transitions ();
+                DeepinUtils.start_animation_group (this, "deepin-workspace-adder",
+                        FADE_DURATION,
+                        (timeline) => {
+                            timeline.set_progress_mode (FADE_MODE);
+                        }, "scale-x", scale, "scale-y", &scale);
             }
-
-            DeepinUtils.start_animation_group (this, "deepin-workspace-adder",
-                    FADE_DURATION,
-                    (timeline) => {
-                        timeline.set_progress_mode (FADE_MODE);
-                    }, "scale-x", scale, "scale-y", &scale);
 
             var fading = new PropertyTransition ("opacity");
             fading.set_duration (FADE_DURATION);
@@ -140,6 +146,7 @@ namespace Gala
             fading.set_progress_mode (FADE_MODE);
             fading.remove_on_complete = true;
 
+            background_actor.remove_all_transitions ();
             background_actor.add_transition ("fading", fading);
         }
 
@@ -154,13 +161,13 @@ namespace Gala
 
         public override bool leave_event (Clutter.CrossingEvent ev)
         {
-            background_animate (false);
+            background_animate (false, false);
             return false;
         }
 
         public override bool enter_event (Clutter.CrossingEvent ev)
         {
-            background_animate (true);
+            background_animate (true, false);
             return false;
         }
 	}
