@@ -65,6 +65,7 @@ namespace Gala
 		bool is_smooth_scrolling = false;
 
         Meta.BlurredBackgroundActor background_actor;
+        Actor dark_mask;
         BackgroundSource background_source;
 		uint changed_handler = -1;
 
@@ -103,6 +104,7 @@ namespace Gala
             background_actor = new Meta.BlurredBackgroundActor (screen, screen.get_primary_monitor ());
             update_background_actor ();
 
+            dark_mask = new DeepinCssStaticActor("deepin-window-manager-background-mask");
 
 			// TODO: does need keep workspace switching duration same with normal mode?
 			// WORKSPACE_SWITCH_DURATION = AnimationSettings.get_default ().workspace_switch_duration;
@@ -132,6 +134,7 @@ namespace Gala
 			dock_clones = new Actor ();
 
             add_child (background_actor);
+            add_child (dark_mask);
 			add_child (thumb_container);
 			add_child (flow_container);
 			add_child (dock_clones);
@@ -220,6 +223,7 @@ namespace Gala
             set_position (primary_geometry.x, primary_geometry.y);
             set_size (primary_geometry.width, primary_geometry.height);
 
+            dark_mask.set_size (primary_geometry.width, primary_geometry.height);
             background_actor.set_size (primary_geometry.width, primary_geometry.height);
 
             update_positions (true);
