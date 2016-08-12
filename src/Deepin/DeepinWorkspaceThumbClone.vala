@@ -281,6 +281,7 @@ namespace Gala
 	{
 		public const float POSITION_PERCENT = 0.449f;
 		public const float MESSAGE_PERCENT = 0.572f;
+		public const float LINE_START = 0.060f;
 
 		const double LINE_WIDTH = 0.5;
 
@@ -327,8 +328,8 @@ namespace Gala
 		bool on_draw_content (Cairo.Context cr, int width, int height)
 		{
 			// draw dash line
-			cr.move_to (0, height * POSITION_PERCENT);
-			cr.line_to (width, height * POSITION_PERCENT);
+			cr.move_to (width * LINE_START, height * POSITION_PERCENT);
+			cr.line_to (width * (1.0f - 2.0f * LINE_START), height * POSITION_PERCENT);
 
 			cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);
 			cr.set_line_width (LINE_WIDTH);
