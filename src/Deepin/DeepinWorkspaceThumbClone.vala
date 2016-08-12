@@ -279,12 +279,14 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceThumbRemoveTip : DeepinCssStaticActor
 	{
-		public const float POSITION_PERCENT = 0.66f;
+		public const float POSITION_PERCENT = 0.449f;
+		public const float MESSAGE_PERCENT = 0.572f;
 
-		const double LINE_WIDTH = 3.0;
+		const double LINE_WIDTH = 0.5;
 
 		Gdk.RGBA color;
 		Text message;
+        Clutter.Actor icon;
 
 		public DeepinWorkspaceThumbRemoveTip ()
 		{
@@ -297,13 +299,29 @@ namespace Gala
 
 			(content as Canvas).draw.connect (on_draw_content);
 
-			var name_font = DeepinUtils.get_css_font ("deepin-workspace-thumb-clone-name");
+			var name_font = DeepinUtils.get_css_font ("deepin-workspace-thumb-remove-tip");
 
 			message = new Text ();
 			message.set_font_description (name_font);
 			message.color = DeepinUtils.gdkrgba2color (color);
 			message.text = (_("Drag upwards to remove"));
 			add_child (message);
+
+            icon = new Clutter.Actor ();
+
+            var pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/path.svg");
+            var image = new Clutter.Image ();
+
+            image.set_data (pixbuf.get_pixels (),
+                    pixbuf.get_has_alpha () ? Cogl.PixelFormat.RGBA_8888 : Cogl.PixelFormat.RGB_888,
+                    pixbuf.get_width (),
+                    pixbuf.get_height (),
+                    pixbuf.get_rowstride ());
+
+            icon.content = image;
+            icon.set_size (pixbuf.get_width (), pixbuf.get_height ());
+            icon.set_position (0, 0);
+            add_child (icon);
 		}
 
 		bool on_draw_content (Cairo.Context cr, int width, int height)
@@ -314,7 +332,7 @@ namespace Gala
 
 			cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);
 			cr.set_line_width (LINE_WIDTH);
-			cr.set_dash ({12.0, 8.0}, 1);
+			cr.set_dash ({5.0, 3.0}, 1);
 			cr.stroke ();
 
 			return false;
@@ -324,11 +342,20 @@ namespace Gala
 		{
 			base.allocate (box, flags);
 
+            var total = message.width + icon.width + 9;
+			var icon_x = (box.get_width () - total)/2;
+            var msg_x = icon_x + icon.width + 9;
+
 			// allocate workspace clone
 			var message_box = ActorBox ();
 			message_box.set_size (message.width, message.height);
-			message_box.set_origin ((box.get_width () - message_box.get_width ()) / 2, box.get_height () * POSITION_PERCENT + 6);
+			message_box.set_origin (msg_x, box.get_height () * MESSAGE_PERCENT);
 			message.allocate (message_box, flags);
+
+			var icon_box = ActorBox ();
+			icon_box.set_size (icon.width, icon.height);
+			icon_box.set_origin (icon_x, box.get_height () * MESSAGE_PERCENT);
+            icon.allocate (icon_box, flags);
 		}
 	}
 
@@ -568,16 +595,7 @@ namespace Gala
 					}
 
 					uint opacity = 255 - (uint)(delta_y / refer_height * 200);
-
-					drag_actor.save_easing_state ();
-					drag_actor.set_easing_duration (DRAG_MOVE_DURATION);
 					drag_actor.opacity = opacity;
-					drag_actor.restore_easing_state ();
-
-					remove_tip.save_easing_state ();
-					remove_tip.set_easing_duration (DRAG_MOVE_DURATION);
-					remove_tip.opacity = opacity;
-					remove_tip.restore_easing_state ();
 				}
 			}
 		}

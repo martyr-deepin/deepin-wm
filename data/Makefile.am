@@ -30,6 +30,7 @@ EXTRA_DIST = \
 	gala-multitaskingview.desktop.in \
 	texture.png \
 	close.png \
+	path.svg \
 	org.pantheon.desktop.gala.gschema.xml.in.in \
 	$(NULL)
 
