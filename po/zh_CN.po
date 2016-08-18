@@ -107,7 +107,7 @@ msgstr "移至左边的工作区(_L)"
 
 #: ../src/Deepin/DeepinMenu.vala:102
 msgid "Move to Workspace R_ight"
-msgstr "移至右边的工作区(I)"
+msgstr "移至右边的工作区(_I)"
 
 #: ../src/Deepin/DeepinMenu.vala:104
 msgid "_Close"
