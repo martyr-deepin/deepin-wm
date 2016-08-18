@@ -663,6 +663,18 @@ namespace Gala
 			toggle ();
 		}
 
+        public void reorder_workspace (Meta.Workspace ws, int new_index)
+        {
+            background_source.reorder_workspace_background (ws.index (), new_index);
+            wm.get_screen().reorder_workspace (ws, new_index, 0);
+
+			flow_container.remove_all_transitions ();
+			foreach (var child in flow_container.get_children ()) {
+				child.remove_all_transitions ();
+			}
+			update_positions (false);
+        }
+         
 		/**
 		 * Toggles the view open or closed. Takes care of all the wm related tasks, like starting
 		 * the modal mode and hiding the WindowGroup. Finally tells all components to animate to

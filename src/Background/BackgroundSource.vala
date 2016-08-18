@@ -120,6 +120,70 @@ namespace Gala
                 changed (new int[] {index});
         }
 
+
+        public void reorder_workspace_background (int from, int to)
+        {
+            stderr.printf("%s(%d, %d)\n", Log.METHOD, from, to);
+
+            var nr_ws = screen.get_n_workspaces ();
+			string[] extra_uris = extra_settings.get_strv ("background-uris");
+
+            // keep sync with workspace length
+            assert (extra_uris.length == nr_ws);
+
+            var tmp = extra_uris[from];
+
+            var news = new string[nr_ws];
+            for (int i = 0; i < nr_ws; i++) {
+                news[i] = extra_uris[i];
+                stderr.printf("%d: %s\n", i, news[i]);
+            }
+
+            int d = from < to ? 1 : -1;
+            for (int k = from+d; d > 0 ? k <= to : k >= to; k += d) {
+                news[k-d] = news[k];
+            }
+            news[to] = tmp;
+            
+            for (int i = 0; i < nr_ws; i++) {
+                stderr.printf("after %d: %s\n", i, news[i]);
+            }
+            news += null;
+            extra_settings.set_strv ("background-uris", news);
+
+            notify_switched (from, to);
+        }
+
+        void notify_switched (int from, int to, bool send_signal = true)
+        {
+			var n = screen.get_n_monitors ();
+			string[] to_remove = {};
+
+            if (from > to) {var t = to; to = from; from = t;}
+
+			foreach (var key in backgrounds.keys) {
+				var background = backgrounds[key];
+				var indexes = key.split(":");
+				var workspace_index = indexes[1].to_int ();
+                if (workspace_index >= from && workspace_index <= to) {
+                    to_remove += key;
+                    background.destroy ();
+                }
+			}
+
+            for (int i = 0; i < to_remove.length; i++) {
+				backgrounds.unset (to_remove[i]);
+			}
+
+            if (send_signal) {
+                int[] ids = {};
+                for (int i = from; i <= to; i++) {
+                    ids += i;
+                }
+                changed (ids);
+            }
+        }
+
         public void delete_background (int index)
         {
             //stderr.printf("delete_background(%d)\n", index);

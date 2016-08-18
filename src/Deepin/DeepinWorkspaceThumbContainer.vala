@@ -187,10 +187,11 @@ namespace Gala
 		const int PLUS_FADE_IN_DURATION = 700;
 
 		public signal void workspace_closing (Workspace workspace);
+        
 		/**
 		 * The percent value between distance of thumbnail workspace clones and monitor's width.
 		 */
-		const float SPACING_PERCENT = 0.02f;
+		public const float SPACING_PERCENT = 0.02f;
 
 		const int LAYOUT_DURATION = 300;
 
@@ -381,6 +382,30 @@ namespace Gala
 				}
 			}
 		}
+
+        public void start_reorder_workspace(Actor ws, Actor target)
+        {
+			var i = 0, j = 0, k = 0;
+			foreach (var child in get_children ()) {
+                if (child == ws) {
+                    i = k;
+                } else if (target == child) {
+                    j = k;
+                }
+                k++;
+			}
+            stderr.printf("switch %d => %d\n", i, j);
+            set_child_at_index (ws, j);
+            place_child (ws, j, false);
+
+            int d = i < j ? 1 : -1;
+            for (k = i; d > 0 ? k < j : k > j; k += d) {
+                stderr.printf("replacing %d => %d\n", k, k+d);
+                place_child (get_child_at_index (k), k);
+            }
+            assert (ws == get_child_at_index(j));
+            assert (target == get_child_at_index(j-d));
+        }
 
 		public static void get_prefer_thumb_size (Screen screen, out float width, out float height)
 		{

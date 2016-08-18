@@ -92,6 +92,14 @@ namespace Gala
             (wm as WindowManagerGala).change_workspace_background (uri);
         }
 
+        //for testing purpose
+        public void switch_workspace(int index, int new_index)
+        {
+            var gala = (wm as WindowManagerGala);
+            var ws = gala.get_screen().get_workspace_by_index(index);
+            gala.get_screen().reorder_workspace(ws, new_index, 0);
+        }
+
         public signal void workspace_removed (int index);
         public signal void workspace_added (int index);
 

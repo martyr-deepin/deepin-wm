@@ -36,6 +36,7 @@ namespace Gala
 			screen.monitors_changed.connect (update);
 			screen.workspace_added.connect (on_workspace_added);
 			screen.workspace_removed.connect (on_workspace_removed);
+			screen.workspace_reordered.connect (update);
 			update ();
 		}
 

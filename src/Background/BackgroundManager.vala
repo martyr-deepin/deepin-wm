@@ -83,10 +83,9 @@ namespace Gala
 
         void on_workspace_index_changed(Object o, ParamSpec p)
         {
-            //stderr.printf ("on_workspace_index_changed %d -> %d\n", _workspace_index, workspace.index ());
+            stderr.printf ("on_workspace_index_changed %d -> %d\n", _workspace_index, workspace.index ());
             _workspace_index = workspace.index ();
             Idle.add(() => {
-                //stderr.printf ("idle update_content %d\n", workspace_index);
                 if (actors.size > 0) {
                     var actor = actors[actors.size - 1];
                     var background = background_source.get_background (monitor_index, workspace_index);

@@ -387,7 +387,13 @@ namespace Gala
 		float drag_prev_x = 0;
 		float drag_prev_y = 0;
 		int drag_prev_index = -1;
-		bool drag_to_remove = false;
+
+        enum DragOperation {
+            NULL = 0,
+            DRAG_TO_REMOVE = 1,
+            DRAG_TO_SWITCH = 2
+        }
+
 
 		public DeepinWorkspaceThumbClone (Workspace workspace)
 		{
@@ -409,7 +415,7 @@ namespace Gala
 
 			drag_action = new DragDropAction (DragDropActionType.SOURCE,
 											  "deepin-workspace-thumb-clone");
-			drag_action.allow_direction = DragDropActionDirection.UP;
+            drag_action.allow_direction = DragDropActionDirection.ALL;
 			drag_action.actor_clicked.connect (on_actor_clicked);
 			drag_action.drag_begin.connect (on_drag_begin);
 			drag_action.drag_motion.connect (on_drag_motion);
@@ -485,7 +491,7 @@ namespace Gala
 		 */
 		public void enable_drag_action ()
 		{
-			drag_action.allow_direction = DragDropActionDirection.UP;
+			drag_action.allow_direction = DragDropActionDirection.ALL & ~DragDropActionDirection.DOWN;
 		}
 
 		/**
@@ -525,6 +531,10 @@ namespace Gala
 			}
 		}
 
+        DragOperation current_op = DragOperation.NULL;
+        ActorBox? drag_to_remove_box = null;
+
+        // TODO: log previous indexes of each ws
 		Actor on_drag_begin (float click_x, float click_y)
 		{
 			if (Prefs.get_num_workspaces () <= 1) {
@@ -532,9 +542,10 @@ namespace Gala
 				return null;
 			}
 
-			Actor drag_actor = thumb_clone;
+            current_op = DragOperation.NULL;
+            drag_to_remove_box = null;
 
-			drag_to_remove = false;
+			Actor drag_actor = thumb_clone;
 
 			float abs_x, abs_y;
 			float prev_width, prev_height;
@@ -558,10 +569,75 @@ namespace Gala
 			drag_actor.set_size (prev_width, prev_height);
 			drag_actor.set_position (abs_x, abs_y);
 
-			remove_tip.opacity = 255;
-
 			return drag_actor;
 		}
+
+        void toggle_remove_tip (bool show)
+        {
+            if (show && remove_tip.opacity == 255) {
+                return;
+            } else if (!show && remove_tip.opacity == 0) {
+                return;
+            }
+
+            remove_tip.save_easing_state ();
+            remove_tip.set_easing_duration (DRAG_MOVE_DURATION);
+            remove_tip.opacity = show?255:0;
+            remove_tip.restore_easing_state ();
+        }
+
+        ActorBox get_drag_to_remove_area()
+		{
+            if (drag_to_remove_box == null) {
+                var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
+
+                var box = ActorBox ();
+
+                float child_width = 0, child_height = 0;
+                float child_spacing = monitor_geom.width * DeepinWorkspaceThumbContainer.SPACING_PERCENT;
+                float abs_x, abs_y;
+
+                get_transformed_position (out abs_x, out abs_y);
+
+                DeepinWorkspaceThumbContainer.get_prefer_thumb_size (workspace.get_screen (),
+                        out child_width, out child_height);
+                box.set_size ((child_width + child_spacing) * 2.0f, child_height + abs_y);
+                box.set_origin (abs_x - child_spacing - child_width / 2.0f, 0.0f);
+
+                drag_to_remove_box = box;
+                stderr.printf("drag_to_remove_area (%f, %f, %f, %f)\n", box.x1, box.y1, box.x2-box.x1, box.y2-box.y1);
+            }
+			return drag_to_remove_box;
+		}
+
+        DragOperation get_drag_operation()
+        {
+			Actor drag_actor = thumb_clone;
+
+			float tip_height = drag_actor.height *
+				(1 - DeepinWorkspaceThumbRemoveTip.POSITION_PERCENT);
+
+            if (current_op == DragOperation.DRAG_TO_SWITCH) {
+                return current_op;
+            }
+            var box = get_drag_to_remove_area ();
+
+            unowned Clutter.Event ev = Clutter.get_current_event ();
+            float x, y;
+            ev.get_coords (out x, out y);
+
+            var old = current_op;
+            if (box.contains (x, y)) {
+
+                current_op = DragOperation.DRAG_TO_REMOVE;
+            } else {
+                current_op = DragOperation.DRAG_TO_SWITCH;
+            }
+
+            if (old != current_op) 
+                stderr.printf("drag op %d\n", current_op);
+            return current_op;
+        }
 
 		void on_drag_motion (float delta_x, float delta_y)
 		{
@@ -572,51 +648,95 @@ namespace Gala
 				(1 - DeepinWorkspaceThumbRemoveTip.POSITION_PERCENT);
 			float refer_height = drag_actor.height - tip_height;
 
-			// "delta_y < 0" means dragging up
-			if (delta_y < 0) {
-				delta_y = Math.fabsf (delta_y);
-				if (delta_y <= tip_height + 15) {
-					drag_to_remove = false;
+            if (delta_y > 0) return; // impossible
 
-					drag_actor.save_easing_state ();
-					drag_actor.set_easing_duration (DRAG_MOVE_DURATION);
-					drag_actor.opacity = 255;
-					drag_actor.restore_easing_state ();
+            var op = get_drag_operation();
 
-					remove_tip.save_easing_state ();
-					remove_tip.set_easing_duration (DRAG_MOVE_DURATION);
-					remove_tip.opacity = 255;
-					remove_tip.restore_easing_state ();
-				} else {
-					drag_to_remove = true;
+            delta_y = Math.fabsf (delta_y);
+            switch (op) {
+                case DragOperation.DRAG_TO_REMOVE:
+                    if (delta_y <= tip_height) {
+                        op = DragOperation.NULL;
 
-					delta_y -= tip_height;
-					if (delta_y >= refer_height) {
-						delta_y = refer_height;
-					}
+                        drag_actor.save_easing_state ();
+                        drag_actor.set_easing_duration (DRAG_MOVE_DURATION);
+                        drag_actor.opacity = 255;
+                        drag_actor.restore_easing_state ();
 
-					uint opacity = 255 - (uint)(delta_y / refer_height * 200);
-					drag_actor.opacity = opacity;
-				}
-			}
+                        toggle_remove_tip (false);
+                    } else {
+                        delta_y -= tip_height;
+                        uint opacity = 255 - (uint)(delta_y / refer_height * 200);
+                        drag_actor.opacity = opacity;
+                        toggle_remove_tip (true);
+                    }
+                    break;
+
+                case DragOperation.DRAG_TO_SWITCH:
+                    unowned Clutter.Event ev = Clutter.get_current_event ();
+                    float x, y;
+                    ev.get_coords (out x, out y);
+
+                    if (remove_tip.opacity != 0) {
+                        drag_actor.save_easing_state ();
+                        drag_actor.set_easing_duration (DRAG_MOVE_DURATION);
+                        drag_actor.opacity = 255;
+                        drag_actor.restore_easing_state ();
+
+                        toggle_remove_tip (false);
+                    }
+
+                    Actor current_switching_target = null;
+                    var cntr = get_parent () as DeepinWorkspaceThumbContainer;
+                    foreach (var actor in cntr.get_children ()) {
+                        if (!(actor is DeepinWorkspaceThumbClone))
+                            continue;
+
+                        if (actor == this) continue;
+
+                        var box = ActorBox ();
+                        float w, h;
+                        actor.get_transformed_position (out box.x1, out box.y1);
+                        actor.get_transformed_size (out w, out h);
+                        box.set_size (w, h);
+
+                        if (box.contains (x, y)) {
+                            current_switching_target = actor;
+                            break;
+                        }
+                    }
+
+                    if (current_switching_target != null) {
+                        if (current_switching_target.get_data<bool>("switching") != true) {
+                            current_switching_target.set_data<bool>("switching", true);
+                            cntr.start_reorder_workspace(this, current_switching_target);
+
+                            current_switching_target.transition_stopped.connect((name, finished) => {
+                                if (name == "thumb-workspace-slot") {
+                                    current_switching_target.set_data<bool>("switching", false);
+                                }
+                            });
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+            }
 		}
 
 		/**
-		 * Remove current workpsace if drag crossed remove tipe or restore it.
+		 * Remove current workpsace if drag crossed remove-tip or restore it.
 		 */
 		void on_drag_canceled ()
 		{
 			Actor drag_actor = thumb_clone;
 
-			if (drag_to_remove) {
+			if (current_op == DragOperation.DRAG_TO_REMOVE) {
 				// remove current workspace
 
 				closing ();
-
-				remove_tip.save_easing_state ();
-				remove_tip.set_easing_duration (DeepinMultitaskingView.WORKSPACE_FADE_DURATION);
-				remove_tip.opacity = 0;
-				remove_tip.restore_easing_state ();
+                toggle_remove_tip (false);
 
 				drag_actor.save_easing_state ();
 				drag_actor.set_easing_duration (DeepinMultitaskingView.WORKSPACE_FADE_DURATION);
@@ -627,35 +747,42 @@ namespace Gala
 				DeepinUtils.run_clutter_callback (drag_actor, "opacity", () => {
 					DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
 				});
-			} else {
-				// restore state
-				remove_tip.save_easing_state ();
-				remove_tip.set_easing_duration (DRAG_RESTORE_DURATION);
-				remove_tip.opacity = 0;
-				remove_tip.restore_easing_state ();
+			} else if (current_op == DragOperation.DRAG_TO_SWITCH) {
 
 				(drag_actor as DeepinWorkspaceThumbCloneCore).show_close_button (false);
+                Idle.add (() => {
+                    do_drag_restore ();
+                    return false;
+                });
 
-				drag_actor.save_easing_state ();
-				drag_actor.set_easing_duration (DRAG_RESTORE_DURATION);
-				drag_actor.opacity = 255;
-				drag_actor.x = drag_prev_x;
-				drag_actor.y = drag_prev_y;
-				drag_actor.restore_easing_state ();
-
-				DeepinUtils.run_clutter_callback (drag_actor, "opacity", () => {
-					// use Idle to split the inner callback or will panic for could not site
-					// drag_actor correctly
-					Idle.add (() => {
-						do_drag_restore ();
-						return false;
-					});
-				});
+                do_real_switching_workspaces ();
 			}
+
+            current_op = DragOperation.NULL;
+            drag_to_remove_box = null;
 		}
+
+        void do_real_switching_workspaces ()
+        {
+			var i = 0;
+            var cntr = get_parent () as DeepinWorkspaceThumbContainer;
+			foreach (var child in cntr.get_children ()) {
+                if (child == this) {
+                    break;
+                }
+                i++;
+			}
+
+            stderr.printf("switch done, do real switch from %d -> %d\n", workspace.index (), i);
+            var p = get_parent ().get_parent ();
+            var mt = (p as DeepinMultitaskingView);
+            mt.reorder_workspace(workspace, i);
+        }
+
 		void do_drag_restore ()
 		{
 			Actor drag_actor = thumb_clone;
+            drag_actor.opacity = 255;
 			DeepinUtils.clutter_actor_reparent (drag_actor, this);
 			this.set_child_at_index (drag_actor, drag_prev_index);
 			queue_relayout ();
