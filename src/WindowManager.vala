@@ -1202,6 +1202,26 @@ namespace Gala
 						return;
 					}
 
+                    if ("deepin-terminal" == window.get_wm_class_instance ()) {
+                        actor.set_pivot_point (0.5f, 0.5f);
+                        var origin = actor.y;
+                        actor.set_y (-actor.height);
+
+                        actor.save_easing_state ();
+                        actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUINT);
+                        actor.set_easing_duration (duration);
+                        actor.set_y (origin);
+                        actor.restore_easing_state ();
+
+                        ulong map_handler_id = 0UL;
+                        map_handler_id = actor.transitions_completed.connect (() => {
+                            actor.disconnect (map_handler_id);
+                            mapping.remove (actor);
+                            map_completed (actor);
+                        });
+                        break;
+                    }
+
 					mapping.add (actor);
 
 					actor.set_pivot_point (0.5f, 0.5f);
@@ -1353,6 +1373,24 @@ namespace Gala
 					}
 
 					destroying.add (actor);
+
+                    if ("deepin-terminal" == window.get_wm_class_instance ()) {
+                        actor.set_pivot_point (0.5f, 0.5f);
+                        actor.save_easing_state ();
+                        actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_QUINT);
+                        actor.set_easing_duration (duration);
+                        actor.set_y (-actor.height);
+                        actor.restore_easing_state ();
+
+                        ulong destroy_handler_id = 0UL;
+                        destroy_handler_id = actor.transitions_completed.connect (() => {
+                            actor.disconnect (destroy_handler_id);
+                            destroying.remove (actor);
+                            destroy_completed (actor);
+                        });
+                        break;
+                    }
+
 					actor.save_easing_state ();
 					actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUAD);
 					actor.set_easing_duration (duration);
