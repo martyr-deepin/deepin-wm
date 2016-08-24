@@ -36,7 +36,7 @@ namespace Gala
 			screen.monitors_changed.connect (update);
 			screen.workspace_added.connect (on_workspace_added);
 			screen.workspace_removed.connect (on_workspace_removed);
-			screen.workspace_reordered.connect (update);
+			screen.workspace_reordered.connect (on_workspace_reordered);
 			update ();
 		}
 
@@ -45,6 +45,7 @@ namespace Gala
 			screen.monitors_changed.disconnect (update);
 			screen.workspace_added.disconnect (on_workspace_added);
 			screen.workspace_removed.disconnect (on_workspace_removed);
+			screen.workspace_reordered.connect (on_workspace_reordered);
 		}
 
 		public BackgroundManager? get_default_background ()
@@ -89,6 +90,11 @@ namespace Gala
 
             structure_changed ();
 		}
+
+        void on_workspace_reordered (int from, int to)
+        {
+            update ();
+        }
 
         void on_workspace_removed (int index)
         {

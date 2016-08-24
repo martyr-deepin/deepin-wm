@@ -673,6 +673,7 @@ namespace Gala
 				child.remove_all_transitions ();
 			}
 			update_positions (false);
+            update_background_actor ();
         }
          
 		/**

@@ -394,17 +394,16 @@ namespace Gala
                 }
                 k++;
 			}
-            stderr.printf("switch %d => %d\n", i, j);
+            //stderr.printf("switch %d => %d\n", i, j);
             set_child_at_index (ws, j);
             place_child (ws, j, false);
 
             int d = i < j ? 1 : -1;
             for (k = i; d > 0 ? k < j : k > j; k += d) {
-                stderr.printf("replacing %d => %d\n", k, k+d);
                 place_child (get_child_at_index (k), k);
             }
-            assert (ws == get_child_at_index(j));
-            assert (target == get_child_at_index(j-d));
+            //assert (ws == get_child_at_index(j));
+            //assert (target == get_child_at_index(j-d));
         }
 
 		public static void get_prefer_thumb_size (Screen screen, out float width, out float height)

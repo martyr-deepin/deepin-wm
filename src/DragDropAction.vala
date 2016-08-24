@@ -121,6 +121,12 @@ namespace Gala
 		 */
 		public DragDropActionDirection allow_direction = DragDropActionDirection.ALL;
 
+        /**
+         * This is dirty: it means although Y direction is disabled, there is still
+         * a small Y area where drag-moving is allowed.
+         */
+        public float allow_y_overflow = 0.0f;
+
 
 		Actor? hovered = null;
 		bool clicked = false;
@@ -241,6 +247,10 @@ namespace Gala
                 return true;
             }
 
+            if (Math.fabsf(y - last_y) < allow_y_overflow) {
+                return true;
+            }
+
             return false;
         }
 
@@ -342,6 +352,12 @@ namespace Gala
                             handle.y = y - offset.y;
 						}
 					}
+
+                    if (allow_y_overflow > 0.0f) {
+                        var d = y - offset.y - orig_y;
+                        if (d < allow_y_overflow) 
+                            handle.y = y - offset.y;
+                    }
 
                     if (handle.x != orig_x || handle.y != orig_y)
                         drag_motion (handle.x - orig_x, handle.y - orig_y);

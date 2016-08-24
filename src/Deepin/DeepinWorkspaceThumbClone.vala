@@ -415,7 +415,7 @@ namespace Gala
 
 			drag_action = new DragDropAction (DragDropActionType.SOURCE,
 											  "deepin-workspace-thumb-clone");
-            drag_action.allow_direction = DragDropActionDirection.ALL;
+			drag_action.allow_direction = DragDropActionDirection.ALL & ~DragDropActionDirection.DOWN;
 			drag_action.actor_clicked.connect (on_actor_clicked);
 			drag_action.drag_begin.connect (on_drag_begin);
 			drag_action.drag_motion.connect (on_drag_motion);
@@ -569,6 +569,9 @@ namespace Gala
 			drag_actor.set_size (prev_width, prev_height);
 			drag_actor.set_position (abs_x, abs_y);
 
+            // precalculate 
+            get_drag_to_remove_area ();
+
 			return drag_actor;
 		}
 
@@ -595,17 +598,19 @@ namespace Gala
 
                 float child_width = 0, child_height = 0;
                 float child_spacing = monitor_geom.width * DeepinWorkspaceThumbContainer.SPACING_PERCENT;
+                float allowed_height = monitor_geom.height * DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT;
                 float abs_x, abs_y;
 
                 get_transformed_position (out abs_x, out abs_y);
 
                 DeepinWorkspaceThumbContainer.get_prefer_thumb_size (workspace.get_screen (),
                         out child_width, out child_height);
-                box.set_size ((child_width + child_spacing) * 2.0f, child_height + abs_y);
+                box.set_size ((child_width + child_spacing) * 2.0f, allowed_height);
                 box.set_origin (abs_x - child_spacing - child_width / 2.0f, 0.0f);
 
+                drag_action.allow_y_overflow = allowed_height - abs_y - child_height;
                 drag_to_remove_box = box;
-                stderr.printf("drag_to_remove_area (%f, %f, %f, %f)\n", box.x1, box.y1, box.x2-box.x1, box.y2-box.y1);
+                //stderr.printf("drag_to_remove_area (%f, %f, %f, %f)\n", box.x1, box.y1, box.x2-box.x1, box.y2-box.y1);
             }
 			return drag_to_remove_box;
 		}
@@ -626,7 +631,6 @@ namespace Gala
             float x, y;
             ev.get_coords (out x, out y);
 
-            var old = current_op;
             if (box.contains (x, y)) {
 
                 current_op = DragOperation.DRAG_TO_REMOVE;
@@ -634,8 +638,6 @@ namespace Gala
                 current_op = DragOperation.DRAG_TO_SWITCH;
             }
 
-            if (old != current_op) 
-                stderr.printf("drag op %d\n", current_op);
             return current_op;
         }
 
@@ -648,15 +650,13 @@ namespace Gala
 				(1 - DeepinWorkspaceThumbRemoveTip.POSITION_PERCENT);
 			float refer_height = drag_actor.height - tip_height;
 
-            if (delta_y > 0) return; // impossible
-
             var op = get_drag_operation();
 
             delta_y = Math.fabsf (delta_y);
             switch (op) {
                 case DragOperation.DRAG_TO_REMOVE:
                     if (delta_y <= tip_height) {
-                        op = DragOperation.NULL;
+                        current_op = DragOperation.NULL;
 
                         drag_actor.save_easing_state ();
                         drag_actor.set_easing_duration (DRAG_MOVE_DURATION);
@@ -756,7 +756,13 @@ namespace Gala
                 });
 
                 do_real_switching_workspaces ();
-			}
+			} else {
+				(drag_actor as DeepinWorkspaceThumbCloneCore).show_close_button (false);
+                Idle.add (() => {
+                    do_drag_restore ();
+                    return false;
+                });
+            }
 
             current_op = DragOperation.NULL;
             drag_to_remove_box = null;
@@ -773,7 +779,7 @@ namespace Gala
                 i++;
 			}
 
-            stderr.printf("switch done, do real switch from %d -> %d\n", workspace.index (), i);
+            //stderr.printf("switch done, do real switch from %d -> %d\n", workspace.index (), i);
             var p = get_parent ().get_parent ();
             var mt = (p as DeepinMultitaskingView);
             mt.reorder_workspace(workspace, i);

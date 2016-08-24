@@ -83,7 +83,6 @@ namespace Gala
 
         void on_workspace_index_changed(Object o, ParamSpec p)
         {
-            stderr.printf ("on_workspace_index_changed %d -> %d\n", _workspace_index, workspace.index ());
             _workspace_index = workspace.index ();
             Idle.add(() => {
                 if (actors.size > 0) {

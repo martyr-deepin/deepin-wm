@@ -123,7 +123,7 @@ namespace Gala
 
         public void reorder_workspace_background (int from, int to)
         {
-            stderr.printf("%s(%d, %d)\n", Log.METHOD, from, to);
+            //stderr.printf("%s(%d, %d)\n", Log.METHOD, from, to);
 
             var nr_ws = screen.get_n_workspaces ();
 			string[] extra_uris = extra_settings.get_strv ("background-uris");
@@ -136,7 +136,6 @@ namespace Gala
             var news = new string[nr_ws];
             for (int i = 0; i < nr_ws; i++) {
                 news[i] = extra_uris[i];
-                stderr.printf("%d: %s\n", i, news[i]);
             }
 
             int d = from < to ? 1 : -1;
@@ -145,9 +144,6 @@ namespace Gala
             }
             news[to] = tmp;
             
-            for (int i = 0; i < nr_ws; i++) {
-                stderr.printf("after %d: %s\n", i, news[i]);
-            }
             news += null;
             extra_settings.set_strv ("background-uris", news);
 
