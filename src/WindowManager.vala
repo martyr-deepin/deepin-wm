@@ -77,6 +77,8 @@ namespace Gala
 		ActivatableComponent? window_overview = null;
         ScreenTilePreview? tile_preview = null;
 
+        DeepinWorkspaceIndicator? workspace_indicator = null;
+
 		// used to detect which corner was used to trigger an action
 		Clutter.Actor? last_hotcorner;
 		ScreenSaver? screensaver;
@@ -265,6 +267,10 @@ namespace Gala
 				window_overview = new WindowOverview (this);
 				ui_group.add_child ((Clutter.Actor) window_overview);
 			}
+
+            workspace_indicator = new DeepinWorkspaceIndicator (this, get_screen ());
+            workspace_indicator.visible = false;
+            ui_group.add_child (workspace_indicator);
 
 			display.add_keybinding ("expose-windows", keybinding_schema, 0, () => {
                 if (hiding_windows) return;
@@ -1588,6 +1594,10 @@ namespace Gala
                 return;
             }
 
+            if (!workspace_view.is_opened ()) {
+                workspace_indicator.open ();
+            }
+
 			float screen_width, screen_height;
 			var screen = get_screen ();
 			var primary = screen.get_primary_monitor ();
@@ -1877,7 +1887,7 @@ namespace Gala
 
 			switch_workspace_completed ();
 
-            //TODO: add workspace switch overlay
+
 		}
 
 		public override void kill_switch_workspace ()

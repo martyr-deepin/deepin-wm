@@ -63,6 +63,7 @@ gala_VALASOURCES = \
 	Deepin/DeepinWorkspaceFlowClone.vala \
 	Deepin/DeepinWorkspaceThumbClone.vala \
 	Deepin/DeepinWorkspaceThumbContainer.vala \
+	Deepin/DeepinWorkspaceIndicator.vala \
 	Deepin/DeepinIMText.vala \
 	Deepin/DeepinMenu.vala \
 	Background/Animation.vala \
