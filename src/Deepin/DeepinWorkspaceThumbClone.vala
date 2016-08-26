@@ -444,7 +444,7 @@ namespace Gala
 				DeepinMultitaskingView.WORKSPACE_FADE_DURATION,
 				DeepinMultitaskingView.WORKSPACE_FADE_MODE,
 				() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace),
-                0.4);
+                0.6);
 		}
 
 		public void set_select (bool value, bool animate = true)

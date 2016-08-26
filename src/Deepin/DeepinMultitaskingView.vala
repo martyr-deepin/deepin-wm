@@ -61,6 +61,7 @@ namespace Gala
         // indicate that next switch signal is caused by a workspace removal
         // use this is optimize animation process
         bool expected_workspace_switch_by_removal = false;
+        bool workspace_removing = false;
 
 		bool is_smooth_scrolling = false;
 
@@ -114,18 +115,6 @@ namespace Gala
                 if (screen.get_active_workspace () == workspace) {
                     expected_workspace_switch_by_removal = true;
                 }
-				foreach (var child in flow_container.get_children ()) {
-					var flow_workspace = child as DeepinWorkspaceFlowClone;
-					if (flow_workspace.workspace == workspace) {
-						animating = true;
-						DeepinUtils.start_fade_out_opacity_animation (
-							flow_workspace, WORKSPACE_FADE_DURATION, WORKSPACE_FADE_MODE);
-						Timeout.add (WORKSPACE_FADE_DURATION, () => {
-							animating = false;
-							return false;
-						});
-					}
-				}
 			});
 
 			dock_clones = new Actor ();
@@ -151,6 +140,8 @@ namespace Gala
 					(pref != Preference.DYNAMIC_WORKSPACES && pref != Preference.NUM_WORKSPACES)) {
 					return;
 				}
+
+                if (workspace_removing) return;
 
 				Idle.add (() => {
 					unowned List<Workspace> existing_workspaces = screen.get_workspaces ();
@@ -417,6 +408,8 @@ namespace Gala
 
 		void remove_workspace (int index)
 		{
+            workspace_removing = true;
+
 			DeepinWorkspaceFlowClone? flow_workspace = null;
 
 			// FIXME is there a better way to get the removed workspace?
@@ -438,14 +431,21 @@ namespace Gala
 			flow_workspace.selected.disconnect (activate_workspace);
 
 			thumb_container.remove_workspace (flow_workspace.thumb_workspace);
+            flow_workspace.reparent (this);
 
-			flow_workspace.destroy ();
+			DeepinUtils.start_fade_out_animation ( flow_workspace,
+				DeepinMultitaskingView.WORKSPACE_FADE_DURATION,
+				DeepinMultitaskingView.WORKSPACE_FADE_MODE, 
+                () => {
+                    update_positions (opened);
+                    update_background_actor ();
+                }, 0.3);
 
-            //FIXME: remove workspace will cause a ws switch and a following ws remove signal 
-            // this cause two update_positions immediately, need to adjsut it
-			update_positions (opened);
+            flow_workspace.transitions_completed.connect(() => {
+                flow_workspace.destroy ();
+                workspace_removing = false;
 
-            update_background_actor ();
+            });
 		}
 
 		/**
