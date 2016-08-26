@@ -106,9 +106,6 @@ namespace Gala
 
             dark_mask = new DeepinCssStaticActor("deepin-window-manager-background-mask");
 
-			// TODO: does need keep workspace switching duration same with normal mode?
-			// WORKSPACE_SWITCH_DURATION = AnimationSettings.get_default ().workspace_switch_duration;
-
 			flow_container = new Actor ();
 
 			thumb_container = new DeepinWorkspaceThumbContainer (screen);

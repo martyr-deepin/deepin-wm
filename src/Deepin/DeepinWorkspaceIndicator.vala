@@ -348,7 +348,7 @@ namespace Gala
         public const int MARGIN_HORIZONTAL = 22;
         public const int MARGIN_VERTICAL   = 21;
 
-        const int POPUP_TIMEOUT = 2000;
+        int POPUP_TIMEOUT = 2000;
 
 		public WindowManager wm { get; construct; }
         public Screen screen { get; construct; }
@@ -398,6 +398,8 @@ namespace Gala
 
         public void open ()
         {
+            POPUP_TIMEOUT = AnimationSettings.get_default ().workspace_popup_duration;
+
             if (!visible) {
                 foreach (var workspace in screen.get_workspaces ()) {
                     var snapshot = new DeepinWorkspaceSnapshot (workspace);

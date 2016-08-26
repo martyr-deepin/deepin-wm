@@ -210,6 +210,10 @@
 			<default>300</default>
 			<_summary>Duration of the workspace switch animation</_summary>
 		</key>
+		<key type="i" name="workspace-popup-duration">
+			<default>1000</default>
+			<_summary>Duration of the workspace switching indicator popup</_summary>
+		</key>
 		<key type="i" name="menu-duration">
 			<default>150</default>
 			<_summary>Duration of the menu mapping animation</_summary>
