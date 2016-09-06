@@ -51,7 +51,6 @@ namespace Gala
 			popup.set_easing_duration (FADE_DURATION);
 			popup.set_easing_mode (FADE_MODE);
 			popup.layout_manager = new BoxLayout ();
-			popup.add_constraint (new AlignConstraint (this, AlignAxis.BOTH, 0.5f));
 
 			var font = DeepinUtils.get_css_font ("deepin-workspace-name");
 
@@ -89,6 +88,9 @@ namespace Gala
 
             set_position (monitor_geom.x, monitor_geom.y);
             set_size (monitor_geom.width, monitor_geom.height);
+
+            popup.set_position ((monitor_geom.width - popup.width) / 2,
+                    (monitor_geom.height - popup.height) / 2);
         }
 
 		public void show_popup ()
