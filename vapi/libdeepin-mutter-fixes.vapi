@@ -25,7 +25,7 @@ namespace Meta {
 		public BlurredBackgroundActor (Meta.Screen screen, int monitor);
 		public void set_background (Meta.Background background);
 		public void set_radius (int radius);
-		public void set_rounds (int radius);
+		public void set_rounds (int rounds);
 		[NoAccessorMethod]
 		public Meta.Background background { owned get; set; }
 		[NoAccessorMethod]
@@ -34,5 +34,17 @@ namespace Meta {
 		public Meta.Screen meta_screen { owned get; construct; }
 		[NoAccessorMethod]
 		public int monitor { get; construct; }
+	}
+
+	[CCode (cheader_filename = "meta/meta-blur-actor.h", type_id = "meta_blur_actor_get_type ()")]
+	public class BlurActor : Clutter.Actor, Atk.Implementor, Clutter.Animatable, Clutter.Container, Clutter.Scriptable {
+		[CCode (has_construct_function = false, type = "ClutterActor*")]
+		public BlurActor (Meta.Screen screen);
+		public void set_radius (int radius);
+		public void set_rounds (int rounds);
+		[NoAccessorMethod]
+		public int radius { get; set; }
+		[NoAccessorMethod]
+		public Meta.Screen meta_screen { owned get; construct; }
 	}
 }

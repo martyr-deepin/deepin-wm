@@ -78,6 +78,8 @@ namespace Gala
         ScreenTilePreview? tile_preview = null;
 
         DeepinWorkspaceIndicator? workspace_indicator = null;
+        BlurActor? blur_actor = null;
+        Clutter.Texture? tex_actor = null;
 
 		// used to detect which corner was used to trigger an action
 		Clutter.Actor? last_hotcorner;
@@ -164,11 +166,13 @@ namespace Gala
 			stage.insert_child_below (system_background, null);
 
 			ui_group = new Clutter.Actor ();
+            ui_group.set_name ("ui_group");
 
 			ui_group.reactive = true;
 			stage.add_child (ui_group);
 
 			window_group = Compositor.get_window_group_for_screen (screen);
+            window_group.set_name ("window_group");
 			stage.remove_child (window_group);
 			ui_group.add_child (window_group);
 
@@ -177,6 +181,7 @@ namespace Gala
             background_container.structure_changed.connect (configure_backgrounds);
 
 			top_window_group = Compositor.get_top_window_group_for_screen (screen);
+            top_window_group.set_name ("top_window_group");
 			stage.remove_child (top_window_group);
 			ui_group.add_child (top_window_group);
 

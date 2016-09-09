@@ -29,15 +29,16 @@ namespace Gala
 		const int MIN_DELTA = 100;
 
 		// time after popup shown
-		const int POPUP_SCREEN_PADDING = 20;
+		const int POPUP_SCREEN_PADDING = 40;
 
-		const int POPUP_PADDING = 36;
+		const int POPUP_PADDING = 32;
 
 		public WindowManager wm { get; construct; }
 
 		DeepinWindowSwitcherItem? current_item = null;
 
 		Actor popup;
+        BlurActor background;
 		Actor item_container;
 		Actor window_clones;
 		List<Actor> clone_sort_order;
@@ -56,16 +57,13 @@ namespace Gala
 
 		construct
 		{
-			popup = new DeepinCssStaticActor ("deepin-window-switcher");
-			popup.opacity = 0;
-
-			var layout = new BoxLayout ();
-			layout.orientation = Orientation.HORIZONTAL;
-			popup.layout_manager = layout;
-
 			var screen = wm.get_screen ();
 
+            popup = new DeepinCssStaticActor ("deepin-window-switcher");
+			popup.opacity = 0;
+
 			item_container = new Actor ();
+            item_container.set_name ("item_container");
 			item_container.margin_bottom = POPUP_PADDING;
 			item_container.margin_left = POPUP_PADDING;
 			item_container.margin_right = POPUP_PADDING;
@@ -73,10 +71,18 @@ namespace Gala
 			item_container.layout_manager = new DeepinWindowSwitcherLayout ();
 
 			item_container.actor_removed.connect (on_item_removed);
+
+            background = new BlurActor (screen);
+            background.set_radius (15);
+            background.set_name ("blur-switcher");
+
+            popup.add_child (background);
 			popup.add_child (item_container);
 
 			window_clones = new Actor ();
+            window_clones.set_name ("window_clones");
 			window_clones.actor_removed.connect (on_clone_removed);
+            window_clones.opacity = 0;
 
 			add_child (window_clones);
 			add_child (popup);
@@ -112,7 +118,9 @@ namespace Gala
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
             popup.set_position ((monitor_geom.width - popup.width) / 2,
                     (monitor_geom.height - popup.height) / 2);
+            background.set_size (popup.width, popup.height);
 
+            window_clones.opacity = 255;
 			popup.opacity = 255;
 		}
 
@@ -247,7 +255,7 @@ namespace Gala
 						 name == "switch-group" || name == "switch-group-backward");
 			};
 
-			dim_items ();
+            dim_items ();
 			grab_key_focus ();
 
 			if ((get_current_modifiers () & modifier_mask) == 0) {
@@ -269,7 +277,7 @@ namespace Gala
 					}
 
 					show_clones ();
-					hide_windows (workspace);
+                    hide_windows (workspace);
 					dim_items ();
 					show_popup ();
 				}
@@ -478,31 +486,31 @@ namespace Gala
 
 			var window_opacity =
 				(int)Math.floor (AppearanceSettings.get_default ().alt_tab_window_opacity * 255);
+            
+            foreach (var child in window_clones.get_children ()) {
+                var clone = child as SafeWindowClone;
 
-			foreach (var child in window_clones.get_children ()) {
-				var clone = child as SafeWindowClone;
+                clone.save_easing_state ();
+                clone.set_easing_duration (animate ? 250 : 0);
+                clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
 
-				clone.save_easing_state ();
-				clone.set_easing_duration (animate ? 250 : 0);
-				clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+                if (current_item is DeepinWindowSwitcherWindowItem) {
+                    if (clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
+                        window_clones.set_child_above_sibling (clone, null);
+                        clone.z_position = 0;
+                        clone.opacity = 255;
+                    } else {
+                        clone.z_position = -200;
+                        clone.opacity = window_opacity;
+                    }
+                } else {
+                    // when desktop item selected, hide all clones
+                    clone.z_position = -200;
+                    clone.opacity = 0;
+                }
 
-				if (current_item is DeepinWindowSwitcherWindowItem) {
-					if (clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
-						window_clones.set_child_above_sibling (clone, null);
-						clone.z_position = 0;
-						clone.opacity = 255;
-					} else {
-						clone.z_position = -200;
-						clone.opacity = window_opacity;
-					}
-				} else {
-					// when desktop item selected, hide all clones
-					clone.z_position = -200;
-					clone.opacity = 0;
-				}
-
-				clone.restore_easing_state ();
-			}
+                clone.restore_easing_state ();
+            }
 
 			foreach (var child in item_container.get_children ()) {
 				var item = child as DeepinWindowSwitcherItem;
@@ -530,7 +538,7 @@ namespace Gala
 
 				if (type != WindowType.DOCK && type != WindowType.DESKTOP &&
 					type != WindowType.NOTIFICATION) {
-					actor.hide ();
+                    actor.hide ();
 				}
 			}
 		}
@@ -546,7 +554,7 @@ namespace Gala
 				unowned Window window = actor.get_meta_window ();
 
 				if (window.get_workspace () == workspace && window.showing_on_its_workspace ()) {
-					actor.show ();
+                    actor.show ();
 				}
 			}
 		}

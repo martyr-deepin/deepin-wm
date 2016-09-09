@@ -354,6 +354,8 @@ namespace Gala
         public Screen screen { get; construct; }
 
 		Actor popup;
+        BlurActor background;
+
         uint popup_timeout_id = 0;
 
         //caches
@@ -370,7 +372,12 @@ namespace Gala
             
             monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-			popup = new DeepinCssStaticActor ("deepin-window-switcher");
+            popup = new DeepinCssStaticActor ("deepin-window-switcher");
+
+            background = new BlurActor (screen);
+            background.set_radius (13);
+            add_child (background);
+
             add_child (popup);
         }
 
@@ -406,6 +413,8 @@ namespace Gala
                     popup.add_child (snapshot);
                 }
                 relayout ();
+                background.set_position (popup.x, popup.y);
+                background.set_size (popup.width, popup.height);
 
                 popup.opacity = 255;
                 visible = true;
