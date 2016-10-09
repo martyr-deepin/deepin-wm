@@ -283,7 +283,7 @@ namespace Gala
             }
         }
 
-        Gdk.Event? to_gdk_event (Clutter.KeyEvent ev)
+        Gdk.Event? to_gdk_event (Clutter.Event ev)
         {
             if (event_window == null)
                 return null;
@@ -295,10 +295,10 @@ namespace Gala
             event_window.ref ();
             gdkev.key.window = event_window;
             gdkev.key.send_event = 0;
-            gdkev.key.time = ev.time;
-            gdkev.key.state = (Gdk.ModifierType)ev.modifier_state;
-            gdkev.key.keyval = ev.keyval;
-            gdkev.key.hardware_keycode = ev.hardware_keycode;
+            gdkev.key.time = ev.get_time();
+            gdkev.key.state = (Gdk.ModifierType)ev.key.modifier_state;
+            gdkev.key.keyval = ev.key.keyval;
+            gdkev.key.hardware_keycode = ev.key.hardware_keycode;
             gdkev.key.length = 0;
             gdkev.key.str = null;
             gdkev.key.is_modifier = is_modifier (gdkev.key.keyval);
@@ -314,9 +314,7 @@ namespace Gala
                 return false;
 
             if (this.editable) {
-                var kev = event.key;
-
-                var gdkev = to_gdk_event (kev);
+                var gdkev = to_gdk_event (event);
                 if (gdkev == null) return false;
 
                 if (imctx != null && gdkev != null && imctx.filter_keypress (gdkev.key)) {
@@ -324,7 +322,7 @@ namespace Gala
                 }
 
                 if (type == Clutter.EventType.KEY_PRESS && 
-                        kev.keyval == Clutter.Key.Return) {
+                        event.key.keyval == Clutter.Key.Return) {
                     if (imctx != null) imctx.reset ();
                 }
             }
