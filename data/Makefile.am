@@ -3,7 +3,7 @@ SUBDIRS = \
 	$(NULL)
 
 stylesdir = $(pkgdatadir)
-styles_DATA = deepin-wm.css gala.css texture.png close.png
+styles_DATA = deepin-wm.css gala.css texture.png close.png path.svg
 
 applicationsdir = $(datadir)/applications
 applications_DATA = gala.desktop gala-wayland.desktop gala-multitaskingview.desktop
