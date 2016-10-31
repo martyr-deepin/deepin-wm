@@ -115,10 +115,12 @@ namespace Gala
 
 		void show_popup ()
 		{
+            background.set_size (item_container.width, item_container.height);
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
             popup.set_position ((monitor_geom.width - popup.width) / 2,
                     (monitor_geom.height - popup.height) / 2);
-            background.set_size (popup.width, popup.height);
+
+            background.queue_redraw ();
 
             window_clones.opacity = 255;
 			popup.opacity = 255;
@@ -255,7 +257,7 @@ namespace Gala
 						 name == "switch-group" || name == "switch-group-backward");
 			};
 
-            dim_items ();
+            //dim_items ();
 			grab_key_focus ();
 
 			if ((get_current_modifiers () & modifier_mask) == 0) {
@@ -520,6 +522,11 @@ namespace Gala
 					item.set_select (false, animate);
 				}
 			}
+
+            Timeout.add(animate ? 250: 0, () => {
+                background.queue_redraw ();
+                return false;
+            });
 		}
 
 		void show_clones ()
