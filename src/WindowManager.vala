@@ -899,9 +899,6 @@ namespace Gala
 			kill_window_effects (actor);
 			minimizing.add (actor);
 
-			int width, height;
-			get_screen ().get_size (out width, out height);
-
 			Rectangle icon = {};
 			if (actor.get_meta_window ().get_icon_geometry (out icon)) {
 
@@ -909,13 +906,12 @@ namespace Gala
 				float scale_y  = (float)icon.height / actor.height;
 				float anchor_x = (float)(actor.x - icon.x) / (icon.width  - actor.width);
 				float anchor_y = (float)(actor.y - icon.y) / (icon.height - actor.height);
-				actor.set_pivot_point (anchor_x, anchor_y);
+                actor.set_pivot_point (anchor_x, anchor_y);
 
 				actor.save_easing_state ();
 				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_EXPO);
 				actor.set_easing_duration (duration);
 				actor.set_scale (scale_x, scale_y);
-				actor.opacity = 0U;
 				actor.restore_easing_state ();
 
 				ulong minimize_handler_id = 0UL;
@@ -923,7 +919,6 @@ namespace Gala
 					actor.disconnect (minimize_handler_id);
 					actor.set_pivot_point (0.0f, 0.0f);
 					actor.set_scale (1.0f, 1.0f);
-					actor.opacity = 255U;
 					minimize_completed (actor);
 					minimizing.remove (actor);
 				});
@@ -1103,13 +1098,11 @@ namespace Gala
 
 					actor.set_pivot_point (0.5f, 1.0f);
 					actor.set_scale (0.01f, 0.1f);
-					actor.opacity = 0U;
 
 					actor.save_easing_state ();
 					actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_EXPO);
 					actor.set_easing_duration (duration);
 					actor.set_scale (1.0f, 1.0f);
-					actor.opacity = 255U;
 					actor.restore_easing_state ();
 
 					ulong unminimize_handler_id = 0UL;
@@ -1291,6 +1284,7 @@ namespace Gala
 				return;
 			}
 
+            kill_window_effects (actor);
 			actor.remove_all_transitions ();
 
 			switch (window.window_type) {
