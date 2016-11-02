@@ -89,7 +89,7 @@ namespace Gala
 			bg_color_normal = DeepinUtils.get_css_background_color_gdk_rgba (style_class);
 			bg_color_selected = DeepinUtils.get_css_background_color_gdk_rgba (
 				style_class, Gtk.StateFlags.SELECTED);
-			border_radius = DeepinUtils.get_css_border_radius (style_class);
+			border_radius = DeepinUtils.get_css_border_radius (style_class, Gtk.StateFlags.SELECTED);
 
 			var canvas = new Canvas ();
 			canvas.draw.connect (on_draw_content);

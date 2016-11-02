@@ -75,8 +75,8 @@ namespace Gala
             background = new BlurActor (screen);
             background.set_radius (15);
             background.set_name ("blur-switcher");
+            background.visible = false;
 
-            popup.add_child (background);
 			popup.add_child (item_container);
 
 			window_clones = new Actor ();
@@ -85,6 +85,7 @@ namespace Gala
             window_clones.opacity = 0;
 
 			add_child (window_clones);
+            add_child (background);
 			add_child (popup);
 
 			wm.get_screen ().monitors_changed.connect (relayout);
@@ -119,15 +120,16 @@ namespace Gala
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
             popup.set_position ((monitor_geom.width - popup.width) / 2,
                     (monitor_geom.height - popup.height) / 2);
-
-            background.queue_redraw ();
+            background.set_position (popup.x, popup.y);
 
             window_clones.opacity = 255;
+            background.visible = true;
 			popup.opacity = 255;
 		}
 
 		void hide_popup ()
 		{
+            background.visible = false;
 			popup.opacity = 0;
 		}
 
@@ -522,11 +524,6 @@ namespace Gala
 					item.set_select (false, animate);
 				}
 			}
-
-            Timeout.add(animate ? 250: 0, () => {
-                background.queue_redraw ();
-                return false;
-            });
 		}
 
 		void show_clones ()
