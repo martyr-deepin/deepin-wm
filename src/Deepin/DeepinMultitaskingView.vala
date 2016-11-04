@@ -65,7 +65,8 @@ namespace Gala
 
 		bool is_smooth_scrolling = false;
 
-        Meta.BlurredBackgroundActor background_actor;
+        List<BlurredBackgroundActor> background_actors;
+
         Actor dark_mask;
         BackgroundSource background_source;
 		uint changed_handler = -1;
@@ -97,13 +98,18 @@ namespace Gala
                 var active_index = screen.get_active_workspace ().index ();
                 foreach (var idx in indexes) {
                     if (idx == active_index) {
-                        update_background_actor ();
+                        update_background_actors ();
                         break;
                     }
                 }
 			});
-            background_actor = new Meta.BlurredBackgroundActor (screen, screen.get_primary_monitor ());
-            update_background_actor ();
+
+            //for (var monitor = 0; monitor < screen.get_n_monitors (); monitor++) {
+                //var background_actor = new BlurredBackgroundActor (screen, monitor);
+                //background_actors.append (background_actor);
+                //add_child (background_actor);
+            //}
+            //update_background_actors ();
 
             dark_mask = new DeepinCssStaticActor("deepin-window-manager-background-mask");
 
@@ -119,7 +125,6 @@ namespace Gala
 
 			dock_clones = new Actor ();
 
-            add_child (background_actor);
             add_child (dark_mask);
 			add_child (thumb_container);
 			add_child (flow_container);
@@ -169,7 +174,7 @@ namespace Gala
 
 		~DeepinMultitaskingView ()
 		{
-			background_source.changed.disconnect (update_background_actor);
+			background_source.changed.disconnect (update_background_actors);
             screen.monitors_changed.disconnect (on_monitors_changed);
 			screen.workspace_added.disconnect (add_workspace);
 			screen.workspace_removed.disconnect (remove_workspace);
@@ -191,16 +196,20 @@ namespace Gala
 			});
 		}
 
-        void update_background_actor ()
+        void update_background_actors ()
         {
             var active_index = screen.get_active_workspace ().index ();
-            var background = background_source.get_background (screen.get_primary_monitor (), active_index);
-            background_actor.background = background.background;
-            background_actor.set_rounds (8);
-            background_actor.set_radius (9);
+            foreach (var background_actor in background_actors) {
+                var background = background_source.get_background (background_actor.monitor, active_index);
 
-            var monitor = screen.get_monitor_geometry (screen.get_primary_monitor ());
-            background_actor.set_size (monitor.width, monitor.height);
+                background_actor.background = background.background;
+                background_actor.set_rounds (8);
+                background_actor.set_radius (9);
+
+                var monitor = screen.get_monitor_geometry (background_actor.monitor);
+                background_actor.set_size (monitor.width, monitor.height);
+                background_actor.set_position (monitor.x, monitor.y);
+            }
         }
 
         void on_monitors_changed ()
@@ -211,17 +220,30 @@ namespace Gala
             set_position (primary_geometry.x, primary_geometry.y);
             set_size (primary_geometry.width, primary_geometry.height);
 
-            dark_mask.set_size (primary_geometry.width, primary_geometry.height);
-            background_actor.set_size (primary_geometry.width, primary_geometry.height);
+            foreach (var background_actor in background_actors) {
+				background_actor.destroy ();
+            }
+                        
+            for (var monitor = 0; monitor < screen.get_n_monitors (); monitor++) {
+                var background_actor = new BlurredBackgroundActor (screen, monitor);
+                background_actors.append (background_actor);
+				background_actor.visible = opened;
+                wm.ui_group.insert_child_below (background_actor, null);
+            }
 
+            update_background_actors ();
+
+            dark_mask.set_size (primary_geometry.width, primary_geometry.height);
             update_positions (true);
 
         }
 
 		void on_workspace_switched (int from, int to, Meta.MotionDirection direction)
 		{
-            var background = background_source.get_background (0, to);
-            background_actor.background = background.background;
+            foreach (var background_actor in background_actors) {
+                var background = background_source.get_background (background_actor.monitor, to);
+                background_actor.background = background.background;
+            }
 
             thumb_container.select_workspace (screen.get_active_workspace_index (), true);
             if (expected_workspace_switch_by_removal) {
@@ -442,7 +464,7 @@ namespace Gala
 				DeepinMultitaskingView.WORKSPACE_FADE_MODE, 
                 () => {
                     update_positions (opened);
-                    update_background_actor ();
+                    update_background_actors ();
                 }, 0.3);
 
             flow_workspace.transitions_completed.connect(() => {
@@ -674,7 +696,7 @@ namespace Gala
 				child.remove_all_transitions ();
 			}
 			update_positions (false);
-            update_background_actor ();
+            update_background_actors ();
         }
          
 		/**
@@ -778,6 +800,10 @@ namespace Gala
 					dock.opacity = 0;
 					dock_clones.add_child (dock);
 				}
+
+                foreach (var background_actor in background_actors) {
+                    background_actor.visible = opened;
+                }
 			} else {
 				foreach (var child in dock_clones.get_children ()) {
 					var dock = (Clone)child;
@@ -791,6 +817,10 @@ namespace Gala
 			if (!opening) {
 				Timeout.add (toggle_duration, () => {
 					hide ();
+
+                    foreach (var background_actor in background_actors) {
+                        background_actor.visible = opened;
+                    }
 
 					wm.window_group.show ();
 					wm.top_window_group.show ();
