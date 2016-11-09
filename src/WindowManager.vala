@@ -78,7 +78,6 @@ namespace Gala
         ScreenTilePreview? tile_preview = null;
 
         DeepinWorkspaceIndicator? workspace_indicator = null;
-        BlurActor? blur_actor = null;
         Clutter.Texture? tex_actor = null;
 
 		// used to detect which corner was used to trigger an action

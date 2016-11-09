@@ -287,6 +287,7 @@ namespace Gala
 
 			always_on_top.checked = current_window.is_above ();
 
+            on_visible_workspace.visible = screen.get_n_workspaces () > 1;
 			on_visible_workspace.checked = current_window.on_all_workspaces;
 
 			move_right.visible = !current_window.on_all_workspaces && 
