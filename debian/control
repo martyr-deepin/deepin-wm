@@ -32,22 +32,6 @@ Description: Deepin Window Manager
  window overview, animating windows, maximization, multiple workspaces,
  providing accessibility features like zoom, and more.
 
-Package: deepin-wm-dbg
-Architecture: any
-Section: debug
-Priority: extra
-Depends: deepin-wm (= ${binary:Version}),
-         libdeepin-wm0 (= ${binary:Version}),
-         ${misc:Depends}
-Description: Deepin Window Manager (debugging symbols)
- deepin-wm(fork of gala) is a window & compositing manager based on libmutter. It manages the
- various windows a user has open.
- It takes care of behaviors such as moving windows around, window switching,
- window overview, animating windows, maximization, multiple workspaces,
- providing accessibility features like zoom, and more.
- .
- This package contains debugging symbols for deepin-wm.
-
 Package: libdeepin-wm0
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}
