@@ -1,0 +1,131 @@
+deepin-wm (1.1.0-1) stable; urgency=low
+
+  * Autobuild Tag 1.1.0 
+
+ -- TagBuilder <tagbuilder@deepin.com>  Fri, 12 Aug 2016 15:18:30 +0000
+
+deepin-wm (1.0.9-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.9 
+
+ -- TagBuilder <tagbuilder@deepin.com>  Wed, 20 Jul 2016 01:34:56 +0000
+
+deepin-wm (1.0.8-2) stable; urgency=low
+
+  * Rebuild Version 1.0.8 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Mon, 30 May 2016 09:46:10 +0000
+
+deepin-wm (1.0.8-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.8 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Thu, 26 May 2016 19:02:09 +0000
+
+deepin-wm (1.0.7-2) stable; urgency=low
+
+  * Rebuild Version 1.0.7 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Mon, 23 May 2016 13:47:31 +0000
+
+deepin-wm (1.0.7-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.7 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Tue, 17 May 2016 19:27:14 +0000
+
+deepin-wm (1.0.5-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.5 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Thu, 21 Apr 2016 16:19:01 +0000
+
+deepin-wm (1.0.4-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.4 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Thu, 25 Feb 2016 09:51:58 +0000
+
+deepin-wm (1.0.3-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.3 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Mon, 22 Feb 2016 17:01:37 +0000
+
+deepin-wm (1.0.2-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.2 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Fri, 22 Jan 2016 20:21:05 +0000
+
+deepin-wm (1.0.1-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.1 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Tue, 29 Dec 2015 22:02:05 +0000
+
+deepin-wm (1.0.0-1) stable; urgency=low
+
+  * Autobuild Tag 1.0.0 
+
+ -- TagBuilder <tagbuilder@linuxdeepin.com>  Mon, 28 Dec 2015 23:16:47 +0000
+
+deepin-wm (0.91.6-2) stable; urgency=low
+
+  * Rebuild Version 0.91.6 
+
+ -- TagBuilder <tabbuilder@linuxdeepin.com>  Sun, 20 Dec 2015 11:44:54 +0000
+
+deepin-wm (0.91.6-1) stable; urgency=low
+
+  * Autobuild Tag 0.91.6 
+
+ -- TagBuilder <tabbuilder@linuxdeepin.com>  Sat, 19 Dec 2015 14:01:05 +0000
+
+deepin-wm (0.91.4-1) stable; urgency=low
+
+  * Autobuild Tag 0.91.4 
+
+ -- TagBuilder <tabbuilder@linuxdeepin.com>  Wed, 09 Dec 2015 22:37:28 +0000
+
+deepin-wm (0.91.3-1) stable; urgency=low
+
+  * Autobuild Tag 0.91.3 
+
+ -- TagBuilder <tabbuilder@linuxdeepin.com>  Fri, 20 Nov 2015 09:39:26 +0000
+
+deepin-wm (0.2.1-1) stable; urgency=low
+
+  * Autobuild Tag 0.2.1 
+
+ -- TagBuilder <tabbuilder@linuxdeepin.com>  Fri, 03 Jul 2015 10:13:18 +0000
+
+deepin-wm (0.2.0-1) stable; urgency=low
+
+  * Autobuild Tag 0.2.0 
+
+ -- TagBuilder <tabbuilder@linuxdeepin.com>  Wed, 01 Jul 2015 16:05:13 +0000
+
+deepin-wm (0.2.0) trusty; urgency=medium
+
+  * Update from upstream.
+
+ -- 宋文武 <songwenwu@linuxdeepin.com>  Tue, 21 Oct 2014 14:57:50 +0800
+
+deepin-wm (0.1.0) trusty; urgency=medium
+
+  * Fork from gala.
+
+ -- 宋文武 <songwenwu@linuxdeepin.com>  Tue, 21 Oct 2014 14:57:50 +0800
+
+gala (0.1.0~r420+pkg29~ubuntu14.10.1) utopic; urgency=low
+
+  * Auto build.
+
+ -- Launchpad Package Builder <noreply@launchpad.net>  Mon, 20 Oct 2014 08:46:43 +0000
+
+gala (0.1) UNRELEASED; urgency=low
+
+  * Initial release.
+
+ -- Sergey "Shnatsel" Davidoff <sergey@elementaryos.org>  Wed, 23 May 2012 16:19:58 +0400
