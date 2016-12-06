@@ -45,8 +45,9 @@ namespace Gala
 		private DBus ()
 		{
             var screen = wm.get_screen ();
-			screen.workspace_added.connect ((idx) => {workspace_added (idx); });
-			screen.workspace_removed.connect ((idx) => {workspace_removed (idx); });
+			screen.workspace_added.connect ((idx) => {workspace_added (idx);});
+            screen.workspace_removed.connect ((idx) => {workspace_removed (idx);});
+            screen.workspace_switched.connect ((from, to, dir) => {workspace_switched (from, to);});
 
 		}
 
@@ -92,8 +93,13 @@ namespace Gala
             (wm as WindowManagerGala).change_workspace_background (uri);
         }
 
+        public string get_current_workspace_background ()
+        {
+            return (wm as WindowManagerGala).get_current_workspace_background ();
+        }
+
         //for testing purpose
-        public void switch_workspace(int index, int new_index)
+        private void switch_workspace(int index, int new_index)
         {
             var gala = (wm as WindowManagerGala);
             var ws = gala.get_screen().get_workspace_by_index(index);
@@ -102,6 +108,7 @@ namespace Gala
 
         public signal void workspace_removed (int index);
         public signal void workspace_added (int index);
+        public signal void workspace_switched (int from, int to);
 
 	}
 }

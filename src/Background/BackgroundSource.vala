@@ -241,6 +241,23 @@ namespace Gala
                 changed (new int[] {index});
         }
 
+        public string get_background_uri (int index)
+        {
+            //stderr.printf("get_background_uri(%d)\n", index);
+
+            var nr_ws = screen.get_n_workspaces ();
+            if (index < 0 || index >= nr_ws) return "";
+
+			string default_uri = settings.get_string ("picture-uri");
+			string[] extra_uris = extra_settings.get_strv ("background-uris");
+
+            if (index >= 0 && index < extra_uris.length) {
+                return extra_uris[index];
+            } else {
+                return default_uri;
+            }
+        }
+
 		void monitors_changed ()
 		{
 			var n = screen.get_n_monitors ();

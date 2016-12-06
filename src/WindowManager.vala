@@ -767,6 +767,14 @@ namespace Gala
             source.change_background (active_workspace.index (), uri);
         }
 
+        public string get_current_workspace_background ()
+        {
+			var source = BackgroundCache.get_default ().get_background_source (
+				get_screen (), BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
+			var active_workspace = get_screen ().get_active_workspace ();
+            return source.get_background_uri (active_workspace.index ());
+        }
+
         //FIXME: need to disable wm operations, since nothing is visible...
         public void request_hide_windows ()
         {
