@@ -104,13 +104,6 @@ namespace Gala
                 }
 			});
 
-            //for (var monitor = 0; monitor < screen.get_n_monitors (); monitor++) {
-                //var background_actor = new BlurredBackgroundActor (screen, monitor);
-                //background_actors.append (background_actor);
-                //add_child (background_actor);
-            //}
-            //update_background_actors ();
-
             dark_mask = new DeepinCssStaticActor("deepin-window-manager-background-mask");
 
 			flow_container = new Actor ();

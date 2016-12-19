@@ -1621,23 +1621,31 @@ namespace Gala
 			var static_windows = new Clutter.Actor ();
 			var in_group  = new Clutter.Actor ();
 			var out_group = new Clutter.Actor ();
+            var out_wallpaper_group = new Clutter.Actor ();
+
 			windows = new List<Clutter.Actor> ();
 			parents = new List<Clutter.Actor> ();
 			tmp_actors = new List<Clutter.Actor> ();
 
-			// Handle desktop windows specially instead appending theme to in_group and out_group to
-			// fix desktop always top issue when switching workspaces.
-			var desktop_in_group  = new Clutter.Actor ();
-			var desktop_out_group  = new Clutter.Actor ();
+            // Handle desktop windows specially instead appending theme to in_group and out_group to
+            // fix desktop always top issue when switching workspaces.
+            var desktop_in_group  = new Clutter.Actor ();
+            var desktop_out_group  = new Clutter.Actor ();
 
 			tmp_actors.prepend (main_container);
 			tmp_actors.prepend (in_group);
 			tmp_actors.prepend (out_group);
-			tmp_actors.prepend (desktop_in_group);
-			tmp_actors.prepend (desktop_out_group);
+            tmp_actors.prepend (desktop_in_group);
+            tmp_actors.prepend (desktop_out_group);
 			tmp_actors.prepend (static_windows);
 
 			window_group.add_child (main_container);
+
+            var mask = new Clutter.Actor();
+            mask.set_background_color (DeepinUtils.get_css_background_color ("deepin-window-manager"));
+            mask.add_constraint (new Clutter.BindConstraint (stage,
+                        Clutter.BindCoordinate.ALL, 0));
+            main_container.add_child (mask);
 
 			// prepare wallpaper
 			var wallpapers = new List<Clutter.Actor> ();
@@ -1658,8 +1666,9 @@ namespace Gala
 
 			// pack all containers
             foreach (var wp in wallpapers) {
-                clutter_actor_reparent (wp, main_container);
+                clutter_actor_reparent (wp, out_wallpaper_group);
             }
+            main_container.add_child (out_wallpaper_group);
 
 			var to_wallpapers = new List<Clutter.Actor> ();
             backgrounds.clear ();
@@ -1672,8 +1681,9 @@ namespace Gala
                 tmp_actors.prepend (wallpaper_clone);
                 main_container.add_child (wallpaper_clone);
             }
-			main_container.add_child (desktop_in_group);
-			main_container.add_child (desktop_out_group);
+
+            main_container.add_child (desktop_in_group);
+            main_container.add_child (desktop_out_group);
 			main_container.add_child (in_group);
 			main_container.add_child (out_group);
 			main_container.add_child (static_windows);
@@ -1711,16 +1721,16 @@ namespace Gala
 					if (window.window_type == WindowType.DOCK) {
 						docks.prepend (actor);
 					} else if (window.window_type == WindowType.DESKTOP) {
-						windows.prepend (actor);
-						parents.prepend (actor.get_parent ());
-						actor.set_translation (-clone_offset_x, -clone_offset_y, 0);
-						clutter_actor_reparent (actor, desktop_out_group);
+                        windows.prepend (actor);
+                        parents.prepend (actor.get_parent ());
+                        actor.set_translation (-clone_offset_x, -clone_offset_y, 0);
+                        clutter_actor_reparent (actor, desktop_out_group);
 
-						var clone = new SafeWindowClone (actor.get_meta_window ());
-						clone.x = actor.x - clone_offset_x;
-						clone.y = actor.y - clone_offset_y;
-						desktop_in_group.add_child (clone);
-						tmp_actors.prepend (clone);
+                        var clone = new SafeWindowClone (actor.get_meta_window ());
+                        clone.x = actor.x - clone_offset_x;
+                        clone.y = actor.y - clone_offset_y;
+                        desktop_in_group.add_child (clone);
+                        tmp_actors.prepend (clone);
 					} else {
 						// windows that are on all workspaces will be faded out and back in
 						windows.prepend (actor);
@@ -1784,9 +1794,10 @@ namespace Gala
 				x2 = -x2;
 
 			out_group.x = 0.0f;
-			desktop_out_group.x = 0;
+            desktop_out_group.x = 0.0f;
+            out_wallpaper_group.x = 0.0f;
 			in_group.x = -x2;
-			desktop_in_group.x = -x2;
+            desktop_in_group.x = -x2;
             foreach (var wp in to_wallpapers) {
                 wp.x += -x2;
             }
@@ -1794,38 +1805,40 @@ namespace Gala
 			in_group.clip_to_allocation = out_group.clip_to_allocation = true;
 			in_group.width = out_group.width = move_primary_only ? monitor_geom.width : screen_width;
 			in_group.height = out_group.height = move_primary_only ? monitor_geom.height : screen_height;
-			desktop_in_group.width = desktop_out_group.width = in_group.width;
-			desktop_in_group.height = desktop_out_group.height = in_group.height;
+            desktop_in_group.width = desktop_out_group.width = in_group.width;
+            desktop_in_group.height = desktop_out_group.height = in_group.height;
+			out_wallpaper_group.width = in_group.width;
+			out_wallpaper_group.height =  in_group.height;
 
 			var animation_mode = Clutter.AnimationMode.EASE_OUT_CUBIC;
 
+            out_wallpaper_group.save_easing_state ();
+			out_wallpaper_group.set_easing_mode (animation_mode);
+			out_wallpaper_group.set_easing_duration (animation_duration);
 			out_group.set_easing_mode (animation_mode);
 			out_group.set_easing_duration (animation_duration);
 			in_group.set_easing_mode (animation_mode);
 			in_group.set_easing_duration (animation_duration);
-			desktop_out_group.set_easing_mode (animation_mode);
-			desktop_out_group.set_easing_duration (animation_duration);
-			desktop_in_group.set_easing_mode (animation_mode);
-			desktop_in_group.set_easing_duration (animation_duration);
-            foreach (var wp in to_wallpapers) {
-                wp.set_easing_mode (animation_mode);
-                wp.set_easing_duration (animation_duration);
-            }
+            desktop_out_group.set_easing_mode (animation_mode);
+            desktop_out_group.set_easing_duration (animation_duration);
+            desktop_in_group.set_easing_mode (animation_mode);
+            desktop_in_group.set_easing_duration (animation_duration);
 
-            foreach (var wp in wallpapers) {
+            foreach (var wp in to_wallpapers) {
                 wp.save_easing_state ();
                 wp.set_easing_mode (animation_mode);
                 wp.set_easing_duration (animation_duration);
-                wp.restore_easing_state ();
             }
 
 			out_group.x = x2;
+            out_wallpaper_group.x = x2;
+            desktop_out_group.x = x2;
 			in_group.x = 0.0f;
+            desktop_in_group.x = 0.0f;
+            out_wallpaper_group.restore_easing_state ();
 
-			desktop_out_group.x = x2;
-			desktop_in_group.x = 0.0f;
             foreach (var wp in to_wallpapers) {
-                wp.x = 0.0f;
+                wp.x += x2;
                 wp.restore_easing_state ();
             }
 
