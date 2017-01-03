@@ -116,11 +116,11 @@ namespace Gala
 
 		void show_popup ()
 		{
-            background.set_size (item_container.width, item_container.height);
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
             popup.set_position ((monitor_geom.width - popup.width) / 2,
                     (monitor_geom.height - popup.height) / 2);
             background.set_position (popup.x, popup.y);
+            background.set_size (popup.width, popup.height);
 
             window_clones.opacity = 255;
             background.visible = true;
