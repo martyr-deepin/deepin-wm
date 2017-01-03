@@ -87,20 +87,22 @@ namespace Gala
 					rects = {rect};
 					break;
 				case InputArea.DEFAULT:
-					var schema = BehaviorSettings.get_default ().schema;
+#if 0
+					var schema = DeepinZoneSettings.get_default ().schema;
 
 					// if ActionType is NONE make it 0 sized
-					ushort tl_size = (schema.get_enum ("hotcorner-topleft") != ActionType.NONE ? 1 : 0);
-					ushort tr_size = (schema.get_enum ("hotcorner-topright") != ActionType.NONE ? 1 : 0);
-					ushort bl_size = (schema.get_enum ("hotcorner-bottomleft") != ActionType.NONE ? 1 : 0);
-					ushort br_size = (schema.get_enum ("hotcorner-bottomright") != ActionType.NONE ? 1 : 0);
+                    ushort tl_size = (schema.get_string ("left-up").length != 0 ? 1 : 0);
+                    ushort tr_size = (schema.get_string ("right-up").length != 0 ? 1 : 0);
+                    ushort bl_size = (schema.get_string ("left-down").length != 0 ? 1 : 0);
+                    ushort br_size = (schema.get_string ("right-down").length != 0 ? 1 : 0);
 
 					X.Xrectangle topleft = {(short)geometry.x, (short)geometry.y, tl_size, tl_size};
 					X.Xrectangle topright = {(short)(geometry.x + geometry.width - 1), (short)geometry.y, tr_size, tr_size};
 					X.Xrectangle bottomleft = {(short)geometry.x, (short)(geometry.y + geometry.height - 1), bl_size, bl_size};
 					X.Xrectangle bottomright = {(short)(geometry.x + geometry.width - 1), (short)(geometry.y + geometry.height - 1), br_size, br_size};
 
-					rects = {topleft, topright, bottomleft, bottomright};
+                    rects = {topleft, topright, bottomleft, bottomright};
+#endif
 
 					// add plugin's requested areas
 					if (area == InputArea.FULLSCREEN || area == InputArea.DEFAULT) {
