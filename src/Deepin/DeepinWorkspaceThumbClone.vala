@@ -152,12 +152,14 @@ namespace Gala
 				show_close_button (true);
 			}
 
+            window_container.splay_windows ();
 			return false;
 		}
 
 		public override bool leave_event (CrossingEvent event)
 		{
 			show_close_button (false);
+            window_container.relayout ();
 			return false;
 		}
 

@@ -29,6 +29,11 @@ namespace Gala
 		const int WINDOW_OPACITY_SELECTED = 255;
 		const int WINDOW_OPACITY_UNSELECTED = 200;
 
+		int padding_top { get; set; default = 6; }
+		int padding_left { get; set; default = 6; }
+		int padding_right { get; set; default = 6; }
+		int padding_bottom { get; set; default = 6; }
+
 		public DeepinWindowThumbContainer (Workspace workspace)
 		{
 			Object (workspace: workspace);
@@ -81,6 +86,38 @@ namespace Gala
 				var rect = DeepinUtils.new_rect_for_actor_box (box);
 				window_clone.take_slot (rect);
 			}
+		}
+
+		public void splay_windows ()
+		{
+            if (get_children ().length() < 1)
+                return;
+
+			var windows = new List <InternalUtils.TilableWindow?> ();
+			foreach (var child in get_children ()) {
+				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
+				windows.prepend ({ window_clone.window.get_frame_rect (), window_clone });
+			}
+
+			// make sure the windows are always in the same order so the algorithm doesn't give us
+			// different slots based on stacking order, which can lead to windows flying around
+			// weirdly
+			windows.sort ((a, b) => {
+				var seq_a = (a.id as DeepinWindowClone).window.get_stable_sequence ();
+				var seq_b = (b.id as DeepinWindowClone).window.get_stable_sequence ();
+				return (int)(seq_b - seq_a);
+			});
+
+			Meta.Rectangle area = { padding_left, padding_top,
+									(int)width - padding_left - padding_right,
+									(int)height - padding_top - padding_bottom };
+
+            var window_positions = InternalUtils.calculate_grid_placement (area, windows, false);
+
+            foreach (var tilable in window_positions) {
+                var window_clone = tilable.id as DeepinWindowClone;
+                window_clone.take_slot (tilable.rect);
+            }
 		}
 
         /* move window into target monitor and then translate it into 
