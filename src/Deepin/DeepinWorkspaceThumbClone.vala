@@ -755,7 +755,7 @@ namespace Gala
                     return false;
                 });
 
-                do_real_switching_workspaces ();
+                do_real_workspaces_reorder ();
 			} else {
 				(drag_actor as DeepinWorkspaceThumbCloneCore).show_close_button (false);
                 Idle.add (() => {
@@ -768,7 +768,7 @@ namespace Gala
             drag_to_remove_box = null;
 		}
 
-        void do_real_switching_workspaces ()
+        void do_real_workspaces_reorder ()
         {
 			var i = 0;
             var cntr = get_parent () as DeepinWorkspaceThumbContainer;
