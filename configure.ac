@@ -113,6 +113,8 @@ GALA_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  libdeepin-mutter >= $MUTTER_MIN_VERSION \
                  gee-0.8 \
                  gnome-desktop-3.0 \
+                 plank >= $PLANK_MIN_VERSION \
+                 granite \
                  libwnck-3.0"
 
 GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
@@ -127,6 +129,8 @@ GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gdesktopenums-3.0 \
                       --pkg gnome-desktop-3.0 \
                       --pkg posix \
+                      --pkg plank \
+                      --pkg granite \
                       --pkg xfixes-4.0 \
                       --pkg libwnck-3.0"
 
