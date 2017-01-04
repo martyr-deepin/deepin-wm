@@ -76,7 +76,7 @@ namespace Gala
 
 		public bool enable_shadow = true;
 		public bool enable_icon = true;
-		public bool enable_close_button = true;
+		public bool enable_buttons = true;
 
 		DragDropAction? drag_action = null;
 		Clone? clone = null;
@@ -91,7 +91,10 @@ namespace Gala
 		uint shadow_update_timeout = 0;
 
 		Actor shape;
-		Actor? close_button = null;
+		DeepinIconActor? close_button = null;
+        // pin here means keep on top
+		DeepinIconActor? pin_button = null;
+		DeepinIconActor? unpin_button = null;
 		GtkClutter.Texture? window_icon = null;
 
 		public DeepinWindowClone (Meta.Window window, bool thumbnail_mode = false)
@@ -104,11 +107,11 @@ namespace Gala
 			if (thumbnail_mode) {
 				enable_shadow = false;
 				enable_icon = false;
-				enable_close_button = false;
+				enable_buttons = false;
 			} else {
 				enable_shadow = true;
 				enable_icon = true;
-				enable_close_button = true;
+				enable_buttons = true;
 			}
 
 			reactive = true;
@@ -128,18 +131,31 @@ namespace Gala
 			drag_action.actor_clicked.connect (on_actor_clicked);
 			add_action (drag_action);
 
-			if (enable_close_button) {
-				close_button = Utils.create_close_button ();
+			if (enable_buttons) {
+				close_button = new DeepinIconActor ("close");
 				close_button.opacity = 0;
-				close_button.button_press_event.connect (() => {
-                    // this prevent a drag being initiated
-					return true;
-				});
-				close_button.button_release_event.connect (() => {
+				close_button.released.connect (() => {
 					close_window ();
-					return true;
 				});
 				add_child (close_button);
+
+				pin_button = new DeepinIconActor ("sticked");
+				pin_button.opacity = 0;
+				pin_button.released.connect (() => {
+                    window.make_above ();
+				});
+				add_child (pin_button);
+
+				unpin_button = new DeepinIconActor ("unsticked");
+				unpin_button.opacity = 0;
+				unpin_button.released.connect (() => {
+                    window.unmake_above ();
+				});
+				add_child (unpin_button);
+
+                pin_button.visible = !window.is_above ();
+                unpin_button.visible = window.is_above ();
+                window.notify["above"].connect (on_above_state_changed);
 			}
 
 			if (enable_icon) {
@@ -160,6 +176,7 @@ namespace Gala
 		{
 			window.unmanaged.disconnect (unmanaged);
 			window.notify["on-all-workspaces"].disconnect (on_all_workspaces_changed);
+            window.notify["above"].disconnect (on_above_state_changed);
 
 			if (shadow_update_timeout != 0) {
 				Source.remove (shadow_update_timeout);
@@ -197,8 +214,10 @@ namespace Gala
 			add_child (clone);
 
 			set_child_below_sibling (shape, clone);
-			if (close_button != null) {
+			if (enable_buttons) {
 				set_child_above_sibling (close_button, clone);
+				set_child_above_sibling (pin_button, clone);
+				set_child_above_sibling (unpin_button, clone);
 			}
 			if (window_icon != null) {
 				set_child_above_sibling (window_icon, clone);
@@ -254,12 +273,20 @@ namespace Gala
 			});
 		}
 
+        void on_above_state_changed ()
+        {
+            if (enable_buttons) {
+                pin_button.visible = !window.is_above ();
+                unpin_button.visible = window.is_above ();
+            }
+        }
+
 		void on_all_workspaces_changed ()
 		{
 			// we don't display windows that are on all workspaces
-			if (window.on_all_workspaces) {
-				unmanaged ();
-			}
+            if (window.on_all_workspaces) {
+                unmanaged ();
+            }
 		}
 
 		public void set_select (bool value, bool animate = true) {
@@ -338,15 +365,18 @@ namespace Gala
 				window_icon.restore_easing_state ();
 			}
 
-			if (close_button != null) {
-				close_button.save_easing_state ();
+            Actor[] btns = {close_button, pin_button, unpin_button};
+            foreach (var btn in btns) {
+                if (btn != null) {
+                    btn.save_easing_state ();
 
-				close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-				close_button.set_easing_duration (animate ? 300 : 0);
-				close_button.opacity = 0;
+                    btn.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+                    btn.set_easing_duration (animate ? 300 : 0);
+                    btn.opacity = 0;
 
-				close_button.restore_easing_state ();
-			}
+                    btn.restore_easing_state ();
+                }
+            }
 		}
 
 		/**
@@ -428,25 +458,32 @@ namespace Gala
 								   box.get_height () + shape_border_size };
 			shape.allocate (shape_box, flags);
 
-			if (close_button != null) {
-				var close_box = ActorBox ();
-				close_box.set_size (close_button.width, close_button.height);
+            if (close_button != null) {
+                var close_box = ActorBox ();
+                close_box.set_size (close_button.width, close_button.height);
+                close_box.set_origin (box.get_width () - close_box.get_width () * 0.50f,
+                        -close_button.height * 0.50f);
 
-				Granite.CloseButtonPosition pos;
-				Granite.Widgets.Utils.get_default_close_button_position (out pos);
-				switch (pos) {
-				case Granite.CloseButtonPosition.RIGHT:
-					close_box.set_origin (box.get_width () - close_box.get_width () * 0.60f,
-										  -close_button.height * 0.40f);
-					break;
-				case Granite.CloseButtonPosition.LEFT:
-					close_box.set_origin (-close_box.get_width () * 0.60f,
-										  -close_button.height * 0.40f);
-					break;
-				}
+                close_button.allocate (close_box, flags);
+            }
 
-				close_button.allocate (close_box, flags);
-			}
+            if (pin_button != null) {
+                var pin_box = ActorBox ();
+                pin_box.set_size (pin_button.width, pin_button.height);
+                pin_box.set_origin (-pin_box.get_width () * 0.50f,
+                        -pin_button.height * 0.50f);
+
+                pin_button.allocate (pin_box, flags);
+            }
+
+            if (unpin_button != null) {
+                var unpin_box = ActorBox ();
+                unpin_box.set_size (unpin_button.width, unpin_button.height);
+                unpin_box.set_origin (-unpin_box.get_width () * 0.50f,
+                        -unpin_button.height * 0.50f);
+
+                unpin_button.allocate (unpin_box, flags);
+            }
 
 			if (!dragging && window_icon != null) {
 				var icon_box = ActorBox ();
@@ -485,34 +522,32 @@ namespace Gala
 			return true;
 		}
 
+        void animate_buttons (bool show)
+        {
+            Actor[] btns = {close_button, pin_button, unpin_button};
+            foreach (var btn in btns) {
+                if (btn != null) {
+                    btn.save_easing_state ();
+
+                    btn.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+                    btn.set_easing_duration (200);
+                    btn.opacity = show ? 255 : 0;
+
+                    btn.restore_easing_state ();
+                }
+            }
+        }
+
 		public override bool enter_event (Clutter.CrossingEvent event)
 		{
-			if (close_button != null) {
-				close_button.save_easing_state ();
-
-				close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-				close_button.set_easing_duration (200);
-				close_button.opacity = 255;
-
-				close_button.restore_easing_state ();
-			}
-
+            animate_buttons (true);
             entered ();
 			return false;
 		}
 
 		public override bool leave_event (Clutter.CrossingEvent event)
 		{
-			if (close_button != null) {
-				close_button.save_easing_state ();
-
-				close_button.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
-				close_button.set_easing_duration (200);
-				close_button.opacity = 0;
-
-				close_button.restore_easing_state ();
-			}
-
+            animate_buttons (false);
 			return false;
 		}
 
@@ -652,8 +687,10 @@ namespace Gala
 				window_icon.opacity = 0;
 			}
 
-			if (close_button != null) {
+			if (enable_buttons) {
 				close_button.opacity = 0;
+				pin_button.opacity = 0;
+				unpin_button.opacity = 0;
 			}
 
 			if (_select) {

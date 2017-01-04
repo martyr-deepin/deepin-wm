@@ -3,7 +3,17 @@ SUBDIRS = \
 	$(NULL)
 
 stylesdir = $(pkgdatadir)
-styles_DATA = deepin-wm.css gala.css texture.png close.png path.svg
+styles_DATA = deepin-wm.css gala.css texture.png close.png \
+	close_hover.png \
+	close_normal.png \
+	close_press.png \
+	sticked_hover.png \
+	sticked_normal.png \
+	sticked_press.png \
+	unsticked_hover.png \
+	unsticked_normal.png \
+	unsticked_press.png \
+	path.svg
 
 applicationsdir = $(datadir)/applications
 applications_DATA = gala.desktop gala-wayland.desktop gala-multitaskingview.desktop
@@ -30,6 +40,15 @@ EXTRA_DIST = \
 	gala-multitaskingview.desktop.in \
 	texture.png \
 	close.png \
+	close_hover.png \
+	close_normal.png \
+	close_press.png \
+	sticked_hover.png \
+	sticked_normal.png \
+	sticked_press.png \
+	unsticked_hover.png \
+	unsticked_normal.png \
+	unsticked_press.png \
 	path.svg \
 	org.pantheon.desktop.gala.gschema.xml.in.in \
 	$(NULL)
