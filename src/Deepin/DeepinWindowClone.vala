@@ -139,14 +139,14 @@ namespace Gala
 				});
 				add_child (close_button);
 
-				pin_button = new DeepinIconActor ("sticked");
+				pin_button = new DeepinIconActor ("unsticked");
 				pin_button.opacity = 0;
 				pin_button.released.connect (() => {
                     window.make_above ();
 				});
 				add_child (pin_button);
 
-				unpin_button = new DeepinIconActor ("unsticked");
+				unpin_button = new DeepinIconActor ("sticked");
 				unpin_button.opacity = 0;
 				unpin_button.released.connect (() => {
                     window.unmake_above ();
