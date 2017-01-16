@@ -148,8 +148,9 @@ namespace Gala
 					if (window.window_type != WindowType.NORMAL &&
 						window.window_type != WindowType.DOCK) {
 						var actor = window.get_compositor_private () as WindowActor;
-						if (actor != null)
+						if (actor != null) {
 							actor.hide ();
+                        }
 						continue;
 					}
 					if (window.window_type == WindowType.DOCK)
@@ -165,7 +166,9 @@ namespace Gala
                             used_windows.append (window);
                         } else {
                             var actor = window.get_compositor_private () as WindowActor;
-                            if (actor != null) actor.hide ();
+                            if (actor != null) {
+                                actor.hide ();
+                            } 
                         }
                     } else {
                         used_windows.append (window);
@@ -174,8 +177,10 @@ namespace Gala
 			}
 
 			var n_windows = used_windows.length ();
-			if (n_windows == 0)
+			if (n_windows == 0) {
+                cleanup ();
 				return;
+            }
 
             (wm as WindowManagerGala).toggle_background_blur (true);
 			ready = false;
@@ -333,7 +338,7 @@ namespace Gala
 			ready = true;
 			visible = false;
 
-			foreach (var window in screen.get_active_workspace ().list_windows ())
+            foreach (var window in screen.get_active_workspace ().list_windows ())
 				if (window.showing_on_its_workspace ())
 					((Actor) window.get_compositor_private ()).show ();
 
