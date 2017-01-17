@@ -3,7 +3,7 @@ SUBDIRS = \
 	$(NULL)
 
 stylesdir = $(pkgdatadir)
-styles_DATA = deepin-wm.css gala.css texture.png close.png \
+styles_DATA = deepin-wm.css texture.png close.png \
 	close_hover.png \
 	close_normal.png \
 	close_press.png \
@@ -34,7 +34,6 @@ all-local: gschemas.compiled
 EXTRA_DIST = \
 	deepin-test.desktop \
 	deepin-wm.css \
-	gala.css \
 	gala.desktop \
 	gala-wayland.desktop \
 	gala-multitaskingview.desktop.in \
@@ -63,5 +62,6 @@ CLEANFILES = \
 # rename data file with prefix 'deepin'
 install-data-hook:
 	mv $(DESTDIR)$(applicationsdir)/gala.desktop $(DESTDIR)$(applicationsdir)/deepin-wm.desktop
+	mv $(DESTDIR)$(applicationsdir)/gala-wayland.desktop $(DESTDIR)$(applicationsdir)/deepin-wm-wayland.desktop
 	mv $(DESTDIR)$(applicationsdir)/gala-multitaskingview.desktop $(DESTDIR)$(applicationsdir)/deepin-wm-multitaskingview.desktop
 	mv $(DESTDIR)$(gsettingsschemadir)/org.pantheon.desktop.gala.gschema.xml $(DESTDIR)$(gsettingsschemadir)/com.deepin.wrap.pantheon.desktop.gala.gschema.xml
