@@ -183,31 +183,4 @@ namespace Gala
 			return instance;
 		}
 	}
-
-	public class DeepinZoneSettings : Granite.Services.Settings
-	{
-		public string right_down { get; set; }
-		public string right_up { get; set; }
-		public string left_down { get; set; }
-		public string left_up { get; set; }
-		public int delay { get; set; default = 0; }
-        public string[] white_list { get; set; }
-        public string[] black_list { get; set; }
-
-		static DeepinZoneSettings? instance = null;
-
-		private DeepinZoneSettings ()
-		{
-			base (Config.DEEPIN_SCHEMA + ".zone");
-		}
-
-		public static unowned DeepinZoneSettings get_default ()
-		{
-			if (instance == null)
-				instance = new DeepinZoneSettings ();
-
-			return instance;
-		}
-	}
-
 }
