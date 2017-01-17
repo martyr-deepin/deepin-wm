@@ -95,7 +95,6 @@ fi
 # -----------------------------------------------------------
 GTK_MIN_VERSION=3.4.0
 GLIB_MIN_VERSION=2.32.0
-PLANK_MIN_VERSION=0.3.0
 CLUTTER_MIN_VERSION=1.12.0
 MUTTER_MIN_VERSION=3.14.4
 MUTTER_API="3.14"
@@ -113,7 +112,6 @@ GALA_CORE_PKGS="gobject-2.0 >= $GLIB_MIN_VERSION \
                  libdeepin-mutter >= $MUTTER_MIN_VERSION \
                  gee-0.8 \
                  gnome-desktop-3.0 \
-                 plank >= $PLANK_MIN_VERSION \
                  granite \
                  libwnck-3.0"
 
@@ -129,7 +127,6 @@ GALA_CORE_VALA_PKGS="--pkg gio-unix-2.0 \
                       --pkg gdesktopenums-3.0 \
                       --pkg gnome-desktop-3.0 \
                       --pkg posix \
-                      --pkg plank \
                       --pkg granite \
                       --pkg xfixes-4.0 \
                       --pkg libwnck-3.0"
@@ -177,13 +174,6 @@ if test "x$have_mutter320" = "xyes" ; then
     PKG_CHECK_MODULES(MUTTER320, [libdeepin-mutter >= 3.19.1])
     VALAFLAGS="$VALAFLAGS --define HAS_MUTTER320"
     MUTTER_API="3.20"
-fi
-
-# Check for newer Plank
-PLANK_PKGS="plank >= 0.10.9"
-PKG_CHECK_MODULES(PLANK_0_11, $PLANK_PKGS, [enable_plank_0_11=yes], [enable_plank_0_11=no])
-if test "x$enable_plank_0_11" = "xyes" ; then
-    VALAFLAGS="$VALAFLAGS --define HAVE_PLANK_0_11"
 fi
 
 # Check for Gnome Settings Daemon 3.10

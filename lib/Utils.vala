@@ -20,6 +20,11 @@ namespace Gala
 {
 	public class Utils
 	{
+		const string DEFAULT_ICON = "application-default-icon";
+
+		static Mutex icon_theme_mutex;
+		static Gtk.IconTheme icon_theme;
+
 		// Cache xid:pixbuf and icon:pixbuf pairs to provide a faster way aquiring icons
 		static HashTable<string, Gdk.Pixbuf> xid_pixbuf_cache;
 		static HashTable<string, Gdk.Pixbuf> icon_pixbuf_cache;
@@ -116,6 +121,161 @@ namespace Gala
 			return result;
 		}
 
+		public static string? get_icon_from_gicon (Icon? icon)
+		{
+			if (icon is ThemedIcon) {
+				var icons = string.joinv (";;", ((ThemedIcon) icon).get_names ());
+				// Remove possible null values which sneaked through joinv, possibly a GTK+ bug?
+				return icons.replace ("(null);;", "");
+			}
+			
+			if (icon is FileIcon)
+				return ((FileIcon) icon).get_file ().get_path ();
+			
+			return null;
+		}
+
+		public static File? try_get_icon_file (string name)
+		{
+			File? file = null;
+			var name_down = name.down ();			
+			
+			if (name_down.has_prefix ("resource://"))
+				file = File.new_for_uri (name);
+			else if (name_down.has_prefix ("file://"))
+				file = File.new_for_uri (name);
+			else if (name.has_prefix ("~/"))
+				file = File.new_for_path (name.replace ("~", Environment.get_home_dir ()));
+			else if (name.has_prefix ("/"))
+				file = File.new_for_path (name);
+			
+			if (file != null && file.query_exists ())
+				return file;
+			
+			return null;
+		}
+
+		static Gdk.Pixbuf? load_pixbuf_from_file (File file, int width, int height)
+		{
+			Gdk.Pixbuf? pbuf = null;
+			
+			try {
+				var fis = file.read ();
+				pbuf = new Gdk.Pixbuf.from_stream_at_scale (fis, width, height, true);
+			} catch { }
+			
+			return pbuf;
+		}
+
+		public static unowned Gtk.IconTheme get_icon_theme ()
+		{
+			icon_theme_mutex.lock ();
+			
+			if (icon_theme == null)
+				icon_theme = Gtk.IconTheme.get_for_screen (Gdk.Screen.get_default ());
+			
+			icon_theme_mutex.unlock ();
+			
+			return icon_theme;
+		}
+
+		static Gdk.Pixbuf? load_pixbuf (string icon, int size)
+		{
+			Gdk.Pixbuf? pbuf = null;
+			unowned Gtk.IconTheme icon_theme = get_icon_theme ();
+			
+			icon_theme_mutex.lock ();
+			
+			try {
+				pbuf = icon_theme.load_icon (icon, size, 0);
+			} catch { }
+			
+			try {
+				if (pbuf == null && icon.contains (".")) {
+					var parts = icon.split (".");
+					pbuf = icon_theme.load_icon (parts [0], size, 0);
+				}
+			} catch { }
+			
+			icon_theme_mutex.unlock ();
+			
+			return pbuf;
+		}
+
+		public static Gdk.Pixbuf load_icon (string names, int width, int height)
+		{
+			Gdk.Pixbuf? pbuf = null;
+			
+			var all_names = names.split (";;");
+			all_names += DEFAULT_ICON;
+			
+			foreach (unowned string name in all_names) {
+				var file = try_get_icon_file (name);
+				if (file != null) {
+					pbuf = load_pixbuf_from_file (file, width, height);
+					if (pbuf != null)
+						break;
+				}
+				
+				pbuf = load_pixbuf (name, int.max (width, height));
+				if (pbuf != null)
+					break;
+				
+				if (name != DEFAULT_ICON)
+					message ("Could not find icon '%s'", name);
+			}
+			
+			// Load internal default icon as last resort
+			//if (pbuf == null)
+				//pbuf = load_pixbuf_from_resource (Plank.G_RESOURCE_PATH + "/img/application-default-icon.svg", width, height);
+			
+			if (pbuf != null) {
+				if (width != -1 && height != -1 && (width != pbuf.width || height != pbuf.height))
+					return ar_scale (pbuf, width, height);
+				return pbuf;
+			}
+			
+			warning ("No icon found, return empty pixbuf");
+			
+			return get_empty_pixbuf (int.max (1, width), int.max (1, height));
+		}
+
+		static Gdk.Pixbuf? load_pixbuf_from_resource (string resource, int width, int height)
+		{
+			Gdk.Pixbuf? pbuf = null;
+			
+			try {
+				pbuf = new Gdk.Pixbuf.from_resource_at_scale (resource, width, height, true);
+			} catch { }
+			
+			return pbuf;
+		}
+
+		static Gdk.Pixbuf get_empty_pixbuf (int width, int height)
+		{
+			var pbuf = new Gdk.Pixbuf (Gdk.Colorspace.RGB, true, 8, width, height);
+			pbuf.fill (0x00000000);
+			return pbuf;
+		}
+
+		public static Gdk.Pixbuf ar_scale (Gdk.Pixbuf source, int width, int height)
+		{
+			var source_width = (double) source.width;
+			var source_height = (double) source.height;
+			
+			var x_scale = width / source_width;
+			var y_scale = height / source_height;
+			var scale = double.min (x_scale, y_scale);
+			
+			if (scale == 1)
+				return source;
+			
+			var scaled_width = int.max (1, (int) (source_width * scale));
+			var scaled_height = int.max (1, (int) (source_height * scale));
+			
+			return source.scale_simple (scaled_width, scaled_height, Gdk.InterpType.HYPER);
+		}
+
 		/**
 		 * Returns a pixbuf for this application or a default icon
 		 *
@@ -133,19 +293,11 @@ namespace Gala
 			if (app != null && app.get_desktop_file () != null) {
 				var appinfo = new DesktopAppInfo.from_filename (app.get_desktop_file ());
 				if (appinfo != null) {
-#if HAVE_PLANK_0_11
-					icon = Plank.DrawingService.get_icon_from_gicon (appinfo.get_icon ());
-#else
-					icon = Plank.Drawing.DrawingService.get_icon_from_gicon (appinfo.get_icon ());
-#endif
+					icon = get_icon_from_gicon (appinfo.get_icon ());
 					icon_key = "%s::%i".printf (icon, size);
 					if (icon != null &&
                         (ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null)) {
-#if HAVE_PLANK_0_11
-						image = Plank.DrawingService.load_icon (icon, size, size);
-#else
-						image = Plank.Drawing.DrawingService.load_icon (icon, size, size);
-#endif
+						image = load_icon (icon, size, size);
 						not_cached = true;
 					}
 				}
@@ -208,12 +360,7 @@ namespace Gala
 
 			if (not_cached) {
 				if (size != image.width || size != image.height)
-#if HAVE_PLANK_0_11
-                    image = Plank.DrawingService.ar_scale (image, size, size);
-#else
-                image = Plank.Drawing.DrawingService.ar_scale (image, size, size);
-#endif
-
+                    image = ar_scale (image, size, size);
 				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE,
 												 WindowIcon.SHADOW_DISTANCE,
 												 WindowIcon.SHADOW_OPACITY);
