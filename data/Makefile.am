@@ -13,6 +13,10 @@ styles_DATA = deepin-wm.css texture.png close.png \
 	unsticked_hover.png \
 	unsticked_normal.png \
 	unsticked_press.png \
+	topleft.png \
+	topright.png \
+	bottomleft.png \
+	bottomright.png \
 	path.svg
 
 applicationsdir = $(datadir)/applications
@@ -48,6 +52,10 @@ EXTRA_DIST = \
 	unsticked_hover.png \
 	unsticked_normal.png \
 	unsticked_press.png \
+	topleft.png \
+	topright.png \
+	bottomleft.png \
+	bottomright.png \
 	path.svg \
 	org.pantheon.desktop.gala.gschema.xml.in.in \
 	$(NULL)

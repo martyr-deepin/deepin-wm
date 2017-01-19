@@ -39,6 +39,372 @@ namespace Gala
         public Meta.Rectangle  tile_rect;
     }
 
+    const int CORNER_SIZE = 32;
+    const int CORNER_THRESHOLD = 150;
+
+	class DeepinCornerIndicator : Clutter.Actor
+	{
+        public Meta.ScreenCorner direction {get; construct;}
+        public WindowManagerGala wm {get; construct;}
+        public string key {get; construct;}
+        public string action {get; set;}
+
+        int strokeCount = 0;
+        bool startRecord = false;
+
+        [CCode(notify = true)]
+        public float last_distance_factor {get; set; default = 0.0f;}
+
+        int64 last_trigger_time = 0; // 0 is invalid
+        int64 last_reset_time = 0; // 0 is invalid
+
+        GtkClutter.Texture effect;
+
+        Gdk.Device pointer;
+
+		public DeepinCornerIndicator (WindowManagerGala wm, Meta.ScreenCorner dir, string key)
+		{
+			Object (wm: wm, direction: dir, key: key);
+		}
+
+		construct
+		{
+            effect = create_texture ();
+            add_child (effect);
+
+            effect.opacity = 0;
+            notify["last-distance-factor"].connect(() => {
+                effect.opacity = (uint)(last_distance_factor * 255.0f);
+            });
+
+            (wm as Meta.Plugin).get_screen ().corner_entered.connect (corner_entered);
+            //(wm as Meta.Plugin).get_screen ().corner_leaved.connect (corner_leaved);
+
+            pointer = Gdk.Display.get_default ().get_device_manager ().get_client_pointer ();
+		}
+
+        bool blocked ()
+        {
+            if (action.length == 0)
+                return true;
+
+            var active_window = wm.get_screen ().get_display ().get_focus_window ();
+            if (active_window == null) 
+                return false;
+
+            var isLauncherShowing = false;
+            var wm_class = active_window.wm_class;
+            if (wm_class.length > 0) {
+                if (wm_class == "dde-launcher") {
+                    isLauncherShowing = true;
+                }
+            }
+
+			if (isLauncherShowing) {
+                if ("com.deepin.dde.Launcher" in this.action) {
+                    return false;
+                }
+				GLib.debug ("launcher is showing, do not exec action");
+				return true;
+			}
+
+            return false;
+        }
+
+        bool is_app_in_list (int pid, string[] list)
+        {
+            char cmd[256] = {};
+            string proc = @"/proc/$pid/cmdline";
+            Posix.readlink (proc, cmd);
+
+            foreach (var app in list) {
+                if (app in (string)cmd) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool should_perform_action ()
+        {
+            var black_list = DeepinZoneSettings.get_default ().black_list;
+            var active_window = wm.get_screen ().get_display ().get_focus_window ();
+            if (active_window == null) 
+                return true;
+
+            var pid = active_window.get_pid ();
+            if (is_app_in_list(pid, black_list)) {
+                GLib.debug("active window app in blacklist");
+                return false;
+            }
+
+           if (active_window.is_fullscreen ()) {
+               var white_list = DeepinZoneSettings.get_default ().white_list;
+               if (is_app_in_list(pid, white_list)) {
+                   GLib.debug("active window is fullscreen, and in whiteList");
+                   return true;
+               }
+               GLib.debug("active window is fullscreen, and not in whiteList");
+               return false;
+           }
+
+           return true;
+        }
+
+        uint polling_id = 0;
+        void corner_leaved (Meta.ScreenCorner corner)
+        {
+            if (corner != this.direction)
+                return;
+
+            if (startRecord) {
+                GLib.debug ("leave [%s]", this.name);
+                strokeCount = 0;
+                startRecord = false;
+                last_distance_factor = 0.0f;
+                effect.opacity = 0;
+
+                if (polling_id != 0) {
+                    Source.remove (polling_id);
+                    polling_id = 0;
+                }
+
+                (wm as Meta.Plugin).get_screen ().leave_corner (this.direction);
+            }
+        }
+
+        void corner_entered (Meta.ScreenCorner corner)
+        {
+            if (corner != this.direction)
+                return;
+
+            if (blocked ())
+                return;
+
+            startRecord = true;
+            GLib.debug ("enter [%s]", this.name);
+
+            if (polling_id != 0) {
+                Source.remove (polling_id);
+                polling_id = 0;
+            }
+            polling_id = Timeout.add(50, polling_timeout);
+        }
+
+        bool polling_timeout ()
+        {
+            Clutter.Point pos = Clutter.Point.alloc ();
+            pointer.get_position (null, out pos.x, out pos.y);
+            if (startRecord) mouse_move (pos);
+            return true;
+        }
+
+        public void mouse_move (Clutter.Point pos)
+        {
+            if (startRecord) {
+                if (!inside_effect_region (pos)) {
+                    corner_leaved (this.direction);
+                    return;
+                }
+
+                int64 timestamp = get_monotonic_time () / 1000;
+                if (reach_threshold(pos)) {
+                    if (strokeCount > 1) {
+                        perform_action ();
+                        strokeCount = 0;
+                        last_trigger_time = get_monotonic_time () / 1000;
+                        last_reset_time = 0;
+
+                    } else if (last_reset_time != 0) {
+                        if (timestamp - last_reset_time >= CORNER_THRESHOLD) {
+                            strokeCount++;
+                        }
+
+                    } else if (last_trigger_time == 0 || 
+                            timestamp - last_trigger_time >= CORNER_THRESHOLD) {
+                        last_reset_time = get_monotonic_time () / 1000;
+                        strokeCount++;
+                    }
+
+                } else if (at_trigger_point (pos)) {
+                    if (last_reset_time != 0 && 
+                            timestamp - last_reset_time >= CORNER_THRESHOLD) {
+                        strokeCount++;
+                        // warp mouse cursor back a little
+                        push_back (pos);
+                    }
+
+                }
+            }
+        }
+
+		Gdk.Pixbuf? get_button_pixbuf ()
+        {
+            Gdk.Pixbuf? pixbuf;
+            
+            string icon_name = "";
+            switch (direction) {
+                case Meta.ScreenCorner.TOPLEFT: icon_name = "topleft"; break;
+                case Meta.ScreenCorner.TOPRIGHT: icon_name = "topright"; break;
+                case Meta.ScreenCorner.BOTTOMLEFT: icon_name = "bottomleft"; break;
+                case Meta.ScreenCorner.BOTTOMRIGHT: icon_name = "bottomright"; break;
+            }
+
+            try {
+                pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/" + icon_name + ".png");
+            } catch (Error e) {
+                warning (e.message);
+                return null;
+            }
+
+            return pixbuf;
+        }
+
+		GtkClutter.Texture create_texture ()
+		{
+			var texture = new GtkClutter.Texture ();
+			var pixbuf = get_button_pixbuf ();
+
+			if (pixbuf != null) {
+				try {
+					texture.set_from_pixbuf (pixbuf);
+				} catch (Error e) {}
+			} else {
+				// we'll just make this red so there's at least something as an
+				// indicator that loading failed. Should never happen and this
+				// works as good as some weird fallback-image-failed-to-load pixbuf
+				texture.background_color = { 255, 0, 0, 255 };
+			}
+
+			return texture;
+		}
+
+        float distance_factor (Clutter.Point pos, float cx, float cy)
+        {
+            float ex = pos.x, ey = pos.y;
+
+            var dx = (ex - cx);
+            var dy = (ey - cy);
+            var d = dx.abs() + dy.abs();
+
+            var factor = d / (CORNER_SIZE * 2);
+            return 1.0f - float.max(float.min(factor, 1.0f), 0.0f);
+        }
+
+        bool at_trigger_point (Clutter.Point pos)
+        {
+            Clutter.Stage stage = get_stage ();
+
+            float d = 0.0f;
+            switch (direction) {
+                case Meta.ScreenCorner.TOPLEFT:
+                    d = distance_factor (pos, 0.0f, 0.0f); break;
+
+                case Meta.ScreenCorner.TOPRIGHT:
+                    d = distance_factor (pos, stage.width-1, 0.0f); break;
+
+                case Meta.ScreenCorner.BOTTOMLEFT:
+                    d = distance_factor (pos, 0.0f, stage.height-1); break;
+
+                case Meta.ScreenCorner.BOTTOMRIGHT:
+                    d = distance_factor (pos, stage.width-1, stage.height-1); break;
+            }
+
+            return d == 1.0f;
+        }
+
+        bool inside_effect_region (Clutter.Point pos)
+        {
+            Clutter.Stage stage = get_stage ();
+
+            switch (direction) {
+                case Meta.ScreenCorner.TOPLEFT:
+                    return pos.x < CORNER_SIZE && pos.y < CORNER_SIZE; break;
+
+                case Meta.ScreenCorner.TOPRIGHT:
+                    return pos.x > stage.width - CORNER_SIZE && pos.y < CORNER_SIZE; break;
+
+                case Meta.ScreenCorner.BOTTOMLEFT:
+                    return pos.x < CORNER_SIZE && pos.y > stage.height - CORNER_SIZE; break;
+
+                case Meta.ScreenCorner.BOTTOMRIGHT:
+                    return pos.x > stage.width - CORNER_SIZE && pos.y > stage.height - CORNER_SIZE; break;
+            }
+
+            return true;
+        }
+
+        bool reach_threshold (Clutter.Point pos)
+        {
+            Clutter.Stage stage = get_stage ();
+
+            float d = 0.0f;
+            switch (direction) {
+                case Meta.ScreenCorner.TOPLEFT:
+                    d = distance_factor (pos, 0.0f, 0.0f); break;
+
+                case Meta.ScreenCorner.TOPRIGHT:
+                    d = distance_factor (pos, stage.width-1, 0.0f); break;
+
+                case Meta.ScreenCorner.BOTTOMLEFT:
+                    d = distance_factor (pos, 0.0f, stage.height-1); break;
+
+                case Meta.ScreenCorner.BOTTOMRIGHT:
+                    d = distance_factor (pos, stage.width-1, stage.height-1); break;
+            }
+
+            bool hit = false;
+            if (last_distance_factor != d) {
+                last_distance_factor = d;
+                hit = d == 1.0f;
+                GLib.debug ("distance factor = %f", d);
+            }
+            return hit;
+        }
+
+        void push_back (Clutter.Point pos) 
+        {
+            float ex = pos.x, ey = pos.y;
+
+            switch (direction) {
+                case Meta.ScreenCorner.TOPLEFT:
+                    ex += 1.0f; ey += 1.0f; break;
+
+                case Meta.ScreenCorner.TOPRIGHT:
+                    ex -= 1.0f; ey += 1.0f; break;
+
+                case Meta.ScreenCorner.BOTTOMLEFT:
+                    ex += 1.0f; ey -= 1.0f; break;
+
+                case Meta.ScreenCorner.BOTTOMRIGHT:
+                    ex -= 1.0f; ey -= 1.0f; break;
+            }
+
+            pointer.warp (Gdk.Display.get_default ().get_default_screen (), (int)ex, (int)ey);
+        }
+
+        public void perform_action ()
+        {
+            if (!blocked () && should_perform_action ()) {
+                GLib.debug ("[%s]: action: %s", this.name, action);
+
+                int d = 0;
+                if ("com.deepin.dde.ControlCenter" in this.action) 
+                    d = DeepinZoneSettings.get_default ().delay;
+
+                Timeout.add(d,
+                    () => {
+                        try {
+                            Process.spawn_command_line_sync (action);
+                        } catch (Error e) { warning (e.message); }
+
+                        return false;
+                    });
+            }
+        }
+	}
+
 	public class WindowManagerGala : Meta.Plugin, WindowManager
 	{
 		const uint GL_VENDOR = 0x1F00;
@@ -227,6 +593,7 @@ namespace Gala
 			stage.remove_child (top_window_group);
 			ui_group.add_child (top_window_group);
 
+
 			/*keybindings*/
 
 			var keybinding_schema = KeybindingSettings.get_default ().schema;
@@ -276,14 +643,6 @@ namespace Gala
 			InternalUtils.reload_shadow ();
 			ShadowSettings.get_default ().notify.connect (InternalUtils.reload_shadow);
 
-#if 0
-			/*hot corner, getting enum values from GraniteServicesSettings did not work, so we use GSettings directly*/
-            configure_hotcorners ();
-            screen.monitors_changed.connect (configure_hotcorners);
-#endif
-
-			BehaviorSettings.get_default ().schema.changed.connect ((key) => update_input_area ());
-
 			// initialize plugins and add default components if no plugin overrides them
 			var plugin_manager = PluginManager.get_default ();
 			plugin_manager.initialize (this);
@@ -318,6 +677,12 @@ namespace Gala
             workspace_indicator = new DeepinWorkspaceIndicator (this, get_screen ());
             workspace_indicator.visible = false;
             ui_group.add_child (workspace_indicator);
+
+			/*hot corner, getting enum values from GraniteServicesSettings did not work, so we use GSettings directly*/
+            configure_hotcorners ();
+            screen.monitors_changed.connect (configure_hotcorners);
+			DeepinZoneSettings.get_default ().schema.changed.connect (configure_hotcorners);
+
 
 			display.add_keybinding ("expose-windows", keybinding_schema, 0, () => {
                 if (hiding_windows) return;
@@ -376,6 +741,44 @@ namespace Gala
 			return false;
 		}
 
+		void configure_hotcorners ()
+		{
+
+			var geometry = get_screen ().get_monitor_geometry (get_screen ().get_primary_monitor ());
+
+			add_hotcorner (geometry.x, geometry.y,
+                    Meta.ScreenCorner.TOPLEFT, "left-up");
+			add_hotcorner (geometry.x + geometry.width - CORNER_SIZE, geometry.y,
+                    Meta.ScreenCorner.TOPRIGHT, "right-up");
+			add_hotcorner (geometry.x, geometry.y + geometry.height - CORNER_SIZE,
+                    Meta.ScreenCorner.BOTTOMLEFT, "left-down");
+			add_hotcorner (geometry.x + geometry.width - CORNER_SIZE, geometry.y + geometry.height - CORNER_SIZE,
+                    Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
+
+            //update_input_area ();
+		}
+
+		void add_hotcorner (float x, float y, Meta.ScreenCorner dir, string key)
+		{
+            Clutter.Actor? hot_corner = stage.find_child_by_name (key);
+
+			// if the hot corner already exists, just reposition it, create it otherwise
+			if (hot_corner == null) {
+				hot_corner = new DeepinCornerIndicator (this, dir, key);
+				hot_corner.width = CORNER_SIZE;
+				hot_corner.height = CORNER_SIZE;
+                hot_corner.name = key;
+                //hot_corner.background_color = {0, 0, 0, 100};
+
+                stage.add_child (hot_corner);
+			}
+
+            var action = DeepinZoneSettings.get_default ().schema.get_string (key);
+            (hot_corner as DeepinCornerIndicator).action = action;
+			hot_corner.x = x;
+			hot_corner.y = y;
+		}
+
         // blur active workspace backgrounds
         public void toggle_background_blur (bool on)
         {
@@ -408,45 +811,6 @@ namespace Gala
                 window_group.insert_child_below (backgrounds[i], null);
             }
         }
-
-		void configure_hotcorners ()
-		{
-			var geometry = get_screen ().get_monitor_geometry (get_screen ().get_primary_monitor ());
-
-			add_hotcorner (geometry.x, geometry.y, "hotcorner-topleft");
-			add_hotcorner (geometry.x + geometry.width - 1, geometry.y, "hotcorner-topright");
-			add_hotcorner (geometry.x, geometry.y + geometry.height - 1, "hotcorner-bottomleft");
-			add_hotcorner (geometry.x + geometry.width - 1, geometry.y + geometry.height - 1, "hotcorner-bottomright");
-
-			update_input_area ();
-		}
-
-		void add_hotcorner (float x, float y, string key)
-		{
-			Clutter.Actor hot_corner;
-			var stage = Compositor.get_stage_for_screen (get_screen ());
-
-			// if the hot corner already exists, just reposition it, create it otherwise
-			if ((hot_corner = stage.find_child_by_name (key)) == null) {
-				hot_corner = new Clutter.Actor ();
-				hot_corner.width = 1;
-				hot_corner.height = 1;
-				hot_corner.opacity = 0;
-				hot_corner.reactive = true;
-				hot_corner.name = key;
-
-				stage.add_child (hot_corner);
-
-				hot_corner.enter_event.connect (() => {
-					last_hotcorner = hot_corner;
-					perform_action ((ActionType)BehaviorSettings.get_default ().schema.get_enum (key));
-					return false;
-				});
-			}
-
-			hot_corner.x = x;
-			hot_corner.y = y;
-		}
 
 		[CCode (instance_pos = -1)]
 		void handle_switch_input_source (Meta.Display display, Meta.Screen screen, Meta.Window? window,
