@@ -1777,64 +1777,101 @@ namespace Gala
 				//       We can't spend arbitrary amounts of time transparent since the overlay fades away,
 				//       about a third has proven to be a solid time. So this fix will only apply for
 				//       durations >= FLASH_PREVENT_TIMEOUT*3
+
 				const int FLASH_PREVENT_TIMEOUT = 80;
 				var delay = 0;
-                if (FLASH_PREVENT_TIMEOUT <= duration / 3) {
-                    actor.opacity = 0;
-                    delay = FLASH_PREVENT_TIMEOUT;
-                    Timeout.add (FLASH_PREVENT_TIMEOUT, () => {
-                        actor.opacity = 255;
-                        return false;
-                    });
-                }
 
 				var scale_x = (double) ew / old_inner_rect.width;
 				var scale_y = (double) eh / old_inner_rect.height;
 
-				old_actor.save_easing_state ();
-				old_actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
-				old_actor.set_easing_duration (duration);
-				old_actor.set_position (ex, ey);
-				old_actor.set_scale (scale_x, scale_y);
 
-				// the opacity animation is special, since we have to wait for the
-				// FLASH_PREVENT_TIMEOUT to be done before we can safely fade away
-                old_actor.save_easing_state ();
-                old_actor.set_easing_delay (delay);
-                old_actor.set_easing_duration (duration - delay);
-                old_actor.opacity = 0;
-                old_actor.restore_easing_state ();
+                if (Config.DEEPIN_ARCH.has_prefix("mips")) {
+                    actor.opacity = 0;
+                    Timeout.add (duration, () => {
+                            actor.opacity = 255;
+                            return false;
+                        });
+
+                    old_actor.save_easing_state ();
+                    old_actor.set_easing_mode (Clutter.AnimationMode.LINEAR);
+                    old_actor.set_easing_delay (80);
+                    old_actor.set_easing_duration (duration);
+                    old_actor.set_position (ex, ey);
+                    old_actor.set_scale (scale_x, scale_y);
+
+                } else {
+                    if (FLASH_PREVENT_TIMEOUT <= duration / 3) {
+                        actor.opacity = 0;
+                        delay = FLASH_PREVENT_TIMEOUT;
+                        Timeout.add (FLASH_PREVENT_TIMEOUT, () => {
+                                actor.opacity = 255;
+                                return false;
+                                });
+                    }
+
+                    old_actor.save_easing_state ();
+                    old_actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
+                    old_actor.set_easing_duration (duration);
+                    old_actor.set_position (ex, ey);
+                    old_actor.set_scale (scale_x, scale_y);
+
+                    // the opacity animation is special, since we have to wait for the
+                    // FLASH_PREVENT_TIMEOUT to be done before we can safely fade away
+                    old_actor.save_easing_state ();
+                    old_actor.set_easing_delay (delay);
+                    old_actor.set_easing_duration (duration - delay);
+                    old_actor.opacity = 0;
+                    old_actor.restore_easing_state ();
+                } 
 
                 var transition = old_actor.get_transition ("x");
                 if (transition != null) {
                     transition.stopped.connect (() => {
                         old_actor.destroy ();
-                        actor.set_translation (0.0f, 0.0f, 0.0f);
+                        if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
+                            actor.set_translation (0.0f, 0.0f, 0.0f);
+                        } else {
+#if !HAS_MUTTER318
+                            maximize_completed (actor);
+#else
+                            size_change_completed (actor);
+#endif
+                        }
                     });
                 } else {
                     old_actor.transitions_completed.connect (() => {
                         old_actor.destroy ();
-                        actor.set_translation (0.0f, 0.0f, 0.0f);
+                        if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
+                            actor.set_translation (0.0f, 0.0f, 0.0f);
+                        } else {
+#if !HAS_MUTTER318
+                            maximize_completed (actor);
+#else
+                            size_change_completed (actor);
+#endif
+                        }
                     });
                 }
 				old_actor.restore_easing_state ();
 
+
+                if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
+                    actor.set_pivot_point (0.0f, 0.0f);
+                    actor.set_translation (old_inner_rect.x - ex, old_inner_rect.y - ey, 0.0f);
+                    actor.set_scale (1.0f / scale_x, 1.0f / scale_y);
+
+                    actor.save_easing_state ();
+                    actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
+                    actor.set_easing_duration (duration);
+                    actor.set_scale (1.0f, 1.0f);
+                    actor.set_translation (0.0f, 0.0f, 0.0f);
+                    actor.restore_easing_state ();
 #if !HAS_MUTTER318
-				maximize_completed (actor);
+                    maximize_completed (actor);
 #else
-                size_change_completed (actor);
+                    size_change_completed (actor);
 #endif
-
-				actor.set_pivot_point (0.0f, 0.0f);
-				actor.set_translation (old_inner_rect.x - ex, old_inner_rect.y - ey, 0.0f);
-				actor.set_scale (1.0f / scale_x, 1.0f / scale_y);
-
-				actor.save_easing_state ();
-				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
-				actor.set_easing_duration (duration);
-				actor.set_scale (1.0f, 1.0f);
-				actor.set_translation (0.0f, 0.0f, 0.0f);
-				actor.restore_easing_state ();
+                }
 
 				return;
 			}
@@ -2241,15 +2278,30 @@ namespace Gala
 
 				ui_group.add_child (old_actor);
 
+                if (Config.DEEPIN_ARCH.has_prefix("mips")) {
+                    actor.opacity = 0;
+                    Timeout.add (duration, () => {
+                            actor.opacity = 255;
+                            return false;
+                        });
+                }
+
 				var scale_x = (float) ew / old_rect.width;
 				var scale_y = (float) eh / old_rect.height;
 
 				old_actor.save_easing_state ();
-				old_actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
+                if (Config.DEEPIN_ARCH.has_prefix("mips")) {
+                    old_actor.set_easing_delay (80);
+                    old_actor.set_easing_mode (Clutter.AnimationMode.LINEAR);
+                } else {
+                    old_actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
+                }
 				old_actor.set_easing_duration (duration);
 				old_actor.set_position (ex, ey);
 				old_actor.set_scale (scale_x, scale_y);
-				old_actor.opacity = 0U;
+                if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
+                    old_actor.opacity = 0U;
+                }
 				old_actor.restore_easing_state ();
 
 				ulong unmaximize_old_handler_id = 0UL;
@@ -2265,18 +2317,20 @@ namespace Gala
 #else
                 size_change_completed (actor);
 #endif
-				actor.set_pivot_point (0.0f, 0.0f);
-                //NOTE: this sets wrong position, It seems insane
-                //actor.set_position (ex, ey);
-				actor.set_translation (-ex + offset_x * (1.0f / scale_x - 1.0f) + maximized_x, -ey + offset_y * (1.0f / scale_y - 1.0f) + maximized_y, 0.0f);
-				actor.set_scale (1.0f / scale_x, 1.0f / scale_y);
+                if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
+                    actor.set_pivot_point (0.0f, 0.0f);
+                    //NOTE: this sets wrong position, It seems insane
+                    //actor.set_position (ex, ey);
+                    actor.set_translation (-ex + offset_x * (1.0f / scale_x - 1.0f) + maximized_x, -ey + offset_y * (1.0f / scale_y - 1.0f) + maximized_y, 0.0f);
+                    actor.set_scale (1.0f / scale_x, 1.0f / scale_y);
 
-				actor.save_easing_state ();
-				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
-				actor.set_easing_duration (duration);
-				actor.set_scale (1.0f, 1.0f);
-				actor.set_translation (0.0f, 0.0f, 0.0f);
-				actor.restore_easing_state ();
+                    actor.save_easing_state ();
+                    actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUAD);
+                    actor.set_easing_duration (duration);
+                    actor.set_scale (1.0f, 1.0f);
+                    actor.set_translation (0.0f, 0.0f, 0.0f);
+                    actor.restore_easing_state ();
+                }
 
 				return;
 			}
