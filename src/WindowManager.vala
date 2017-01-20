@@ -743,17 +743,13 @@ namespace Gala
 
 		void configure_hotcorners ()
 		{
+            int width, height;
+			get_screen ().get_size (out width, out height);
 
-			var geometry = get_screen ().get_monitor_geometry (get_screen ().get_primary_monitor ());
-
-			add_hotcorner (geometry.x, geometry.y,
-                    Meta.ScreenCorner.TOPLEFT, "left-up");
-			add_hotcorner (geometry.x + geometry.width - CORNER_SIZE, geometry.y,
-                    Meta.ScreenCorner.TOPRIGHT, "right-up");
-			add_hotcorner (geometry.x, geometry.y + geometry.height - CORNER_SIZE,
-                    Meta.ScreenCorner.BOTTOMLEFT, "left-down");
-			add_hotcorner (geometry.x + geometry.width - CORNER_SIZE, geometry.y + geometry.height - CORNER_SIZE,
-                    Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
+			add_hotcorner (0, 0, Meta.ScreenCorner.TOPLEFT, "left-up");
+			add_hotcorner (width - CORNER_SIZE, 0, Meta.ScreenCorner.TOPRIGHT, "right-up");
+			add_hotcorner (0, height - CORNER_SIZE, Meta.ScreenCorner.BOTTOMLEFT, "left-down");
+			add_hotcorner (width - CORNER_SIZE, height - CORNER_SIZE, Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
 
             //update_input_area ();
 		}
