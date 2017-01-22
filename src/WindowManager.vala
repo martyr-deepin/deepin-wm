@@ -179,8 +179,10 @@ namespace Gala
             if (corner != this.direction)
                 return;
 
-            if (blocked ())
+            if (blocked ()) {
+                (wm as Meta.Plugin).get_screen ().leave_corner (this.direction);
                 return;
+            }
 
             startRecord = true;
             GLib.debug ("enter [%s]", this.name);
@@ -396,7 +398,7 @@ namespace Gala
                 Timeout.add(d,
                     () => {
                         try {
-                            Process.spawn_command_line_sync (action);
+                            Process.spawn_command_line_async (action);
                         } catch (Error e) { warning (e.message); }
 
                         return false;
