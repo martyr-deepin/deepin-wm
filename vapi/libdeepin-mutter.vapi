@@ -556,6 +556,10 @@ namespace Meta {
 		public void reorder_workspace (Meta.Workspace workspace, int new_index, uint32 timestamp);
 		public void set_cm_selection ();
 		public void set_cursor (Meta.Cursor cursor);
+
+		public void enter_corner (Meta.ScreenCorner corner);
+		public void leave_corner (Meta.ScreenCorner corner);
+
 #if !HAS_MUTTER316
 		public void unset_cm_selection ();
 #endif
@@ -571,6 +575,8 @@ namespace Meta {
 		public signal void workspace_removed (int object);
 		public signal void workspace_switched (int object, int p0, Meta.MotionDirection p1);
 		public signal void workspace_reordered (int object, int p0);
+		public signal void corner_entered (Meta.ScreenCorner corner);
+		public signal void corner_leaved (Meta.ScreenCorner corner);
 	}
 #if HAS_MUTTER318
 	[CCode (cheader_filename = "meta/meta-shadow-factory.h", ref_function = "meta_shadow_ref", type_id = "meta_shadow_get_type ()", unref_function = "meta_shadow_unref")]
