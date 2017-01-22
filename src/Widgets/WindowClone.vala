@@ -95,7 +95,7 @@ namespace Gala
 		ulong check_confirm_dialog_cb = 0;
 		uint shadow_update_timeout = 0;
 
-		Actor close_button;
+		DeepinIconActor close_button;
 		Actor active_shape;
 		GtkClutter.Texture window_icon;
 
@@ -129,7 +129,7 @@ namespace Gala
 				add_action (drag_action);
 			}
 
-			close_button = Utils.create_close_button ();
+            close_button = new DeepinIconActor ("close");
 			close_button.opacity = 0;
 			close_button.set_easing_duration (200);
 			close_button.button_press_event.connect (() => {
@@ -393,7 +393,7 @@ namespace Gala
 			close_button.save_easing_state ();
 			close_button.set_easing_duration (0);
 
-			close_button.y = -close_button.height * 0.33f;
+			close_button.y = -close_button.height * 0.5f;
 
 			switch (pos) {
 				case Granite.CloseButtonPosition.RIGHT:
