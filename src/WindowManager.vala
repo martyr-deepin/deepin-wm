@@ -294,67 +294,47 @@ namespace Gala
             return 1.0f - float.max(float.min(factor, 1.0f), 0.0f);
         }
 
-        bool at_trigger_point (Clutter.Point pos)
+        float distance_factor_for_corner (Clutter.Point pos, Meta.ScreenCorner direction)
         {
-            Clutter.Stage stage = get_stage ();
+            var box = Clutter.ActorBox ();
+            box.set_origin (this.x, this.y);
+            box.set_size (this.width, this.height);
 
             float d = 0.0f;
             switch (direction) {
                 case Meta.ScreenCorner.TOPLEFT:
-                    d = distance_factor (pos, 0.0f, 0.0f); break;
+                    d = distance_factor (pos, box.x1, box.y1); break;
 
                 case Meta.ScreenCorner.TOPRIGHT:
-                    d = distance_factor (pos, stage.width-1, 0.0f); break;
+                    d = distance_factor (pos, box.x2-1, box.y1); break;
 
                 case Meta.ScreenCorner.BOTTOMLEFT:
-                    d = distance_factor (pos, 0.0f, stage.height-1); break;
+                    d = distance_factor (pos, box.x1, box.y2-1); break;
 
                 case Meta.ScreenCorner.BOTTOMRIGHT:
-                    d = distance_factor (pos, stage.width-1, stage.height-1); break;
+                    d = distance_factor (pos, box.x2-1, box.y2-1); break;
             }
 
-            return d == 1.0f;
+            return d;
+        }
+
+        bool at_trigger_point (Clutter.Point pos)
+        {
+            return distance_factor_for_corner (pos, this.direction) == 1.0f;
         }
 
         bool inside_effect_region (Clutter.Point pos)
         {
-            Clutter.Stage stage = get_stage ();
+            var box = Clutter.ActorBox ();
+            box.set_origin (this.x, this.y);
+            box.set_size (this.width, this.height);
 
-            switch (direction) {
-                case Meta.ScreenCorner.TOPLEFT:
-                    return pos.x < CORNER_SIZE && pos.y < CORNER_SIZE; break;
-
-                case Meta.ScreenCorner.TOPRIGHT:
-                    return pos.x > stage.width - CORNER_SIZE && pos.y < CORNER_SIZE; break;
-
-                case Meta.ScreenCorner.BOTTOMLEFT:
-                    return pos.x < CORNER_SIZE && pos.y > stage.height - CORNER_SIZE; break;
-
-                case Meta.ScreenCorner.BOTTOMRIGHT:
-                    return pos.x > stage.width - CORNER_SIZE && pos.y > stage.height - CORNER_SIZE; break;
-            }
-
-            return true;
+            return pos.x >= box.x1 && pos.x <= box.x2 && pos.y >= box.y1 && pos.y <= box.y2;
         }
 
         bool reach_threshold (Clutter.Point pos)
         {
-            Clutter.Stage stage = get_stage ();
-
-            float d = 0.0f;
-            switch (direction) {
-                case Meta.ScreenCorner.TOPLEFT:
-                    d = distance_factor (pos, 0.0f, 0.0f); break;
-
-                case Meta.ScreenCorner.TOPRIGHT:
-                    d = distance_factor (pos, stage.width-1, 0.0f); break;
-
-                case Meta.ScreenCorner.BOTTOMLEFT:
-                    d = distance_factor (pos, 0.0f, stage.height-1); break;
-
-                case Meta.ScreenCorner.BOTTOMRIGHT:
-                    d = distance_factor (pos, stage.width-1, stage.height-1); break;
-            }
+            float d = distance_factor_for_corner (pos, this.direction);
 
             bool hit = false;
             if (last_distance_factor != d) {
@@ -748,12 +728,44 @@ namespace Gala
             int width, height;
 			get_screen ().get_size (out width, out height);
 
-			add_hotcorner (0, 0, Meta.ScreenCorner.TOPLEFT, "left-up");
-			add_hotcorner (width - CORNER_SIZE, 0, Meta.ScreenCorner.TOPRIGHT, "right-up");
-			add_hotcorner (0, height - CORNER_SIZE, Meta.ScreenCorner.BOTTOMLEFT, "left-down");
-			add_hotcorner (width - CORNER_SIZE, height - CORNER_SIZE, Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
+            int n = get_screen ().get_n_monitors ();
+            int tl_x, tl_y, tr_x, tr_y, bl_x, bl_y, br_x, br_y;
 
-            //update_input_area ();
+            tl_x = 0;
+            tl_y = height;
+            bl_x = 0;
+            bl_y = 0;
+            for (var i = 0; i < n; i++) {
+                // test if monitor is on the left
+                var geo = get_screen ().get_monitor_geometry (i);
+                if (geo.x != 0) {
+                    continue;
+                }
+
+                tl_y = int.min (geo.y, tl_y);
+                bl_y = int.max (geo.y + geo.height, bl_y);
+            }
+
+
+            tr_x = width;
+            tr_y = height;
+            br_x = width;
+            br_y = 0;
+            for (var i = 0; i < n; i++) {
+                // test if monitor is on the right
+                var geo = get_screen ().get_monitor_geometry (i);
+                if (geo.x + geo.width != width) {
+                    continue;
+                }
+
+                tr_y = int.min (geo.y, tr_y);
+                br_y = int.max (geo.y + geo.height, br_y);
+            }
+
+			add_hotcorner (tl_x, tl_y, Meta.ScreenCorner.TOPLEFT, "left-up");
+			add_hotcorner (tr_x - CORNER_SIZE, tr_y, Meta.ScreenCorner.TOPRIGHT, "right-up");
+			add_hotcorner (bl_x, bl_y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMLEFT, "left-down");
+			add_hotcorner (br_x - CORNER_SIZE, br_y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
 		}
 
 		void add_hotcorner (float x, float y, Meta.ScreenCorner dir, string key)
@@ -766,7 +778,6 @@ namespace Gala
 				hot_corner.width = CORNER_SIZE;
 				hot_corner.height = CORNER_SIZE;
                 hot_corner.name = key;
-                //hot_corner.background_color = {0, 0, 0, 100};
 
                 stage.add_child (hot_corner);
 			}
