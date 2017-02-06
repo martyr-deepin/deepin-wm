@@ -48,9 +48,6 @@ namespace Gala
 
             screen.workspace_added.connect (on_workspace_added);
             screen.workspace_removed.connect (on_workspace_removed);
-
-			//settings.changed.connect (settings_changed);
-			//extra_settings.changed.connect (settings_changed);
 		}
 
         void on_workspace_removed (int index)
@@ -58,10 +55,14 @@ namespace Gala
             delete_background (index);
         }
 
+        string default_uri ()
+        {
+            return "file://@fallback_background_name";
+        }
+
         void on_workspace_added (int index)
         {
-			string default_uri = settings.get_string ("picture-uri");
-            change_background (index, default_uri);
+            change_background (index, default_uri ());
         }
 
         // change background for workspace index, this may not expand array
@@ -75,7 +76,6 @@ namespace Gala
             string old = get_picture_filename (0, index);
             if (old == uri) return;
 
-			string default_uri = settings.get_string ("picture-uri");
 			string[] extra_uris = extra_settings.get_strv ("background-uris");
 
             // keep sync with workspace length
@@ -85,7 +85,7 @@ namespace Gala
                 int oldsz = extra_uris.length;
                 extra_uris.resize (nr_ws);
                 for (int i = oldsz; i < nr_ws; i++) {
-                    extra_uris[i] = default_uri;
+                    extra_uris[i] = default_uri ();
                 }
             }
 
@@ -186,7 +186,6 @@ namespace Gala
             var nr_ws = screen.get_n_workspaces ();
             if (index > nr_ws) return;
 
-			string default_uri = settings.get_string ("picture-uri");
 			string[] extra_uris = extra_settings.get_strv ("background-uris");
 
             if (index >= extra_uris.length) return;
@@ -202,7 +201,7 @@ namespace Gala
                 int oldsz = extra_uris.length;
                 extra_uris.resize (nr_ws);
                 for (int i = oldsz; i < nr_ws; i++) {
-                    extra_uris[i] = default_uri;
+                    extra_uris[i] = default_uri ();
                 }
             }
             extra_uris += null;
@@ -248,13 +247,12 @@ namespace Gala
             var nr_ws = screen.get_n_workspaces ();
             if (index < 0 || index >= nr_ws) return "";
 
-			string default_uri = settings.get_string ("picture-uri");
 			string[] extra_uris = extra_settings.get_strv ("background-uris");
 
             if (index >= 0 && index < extra_uris.length) {
                 return extra_uris[index];
             } else {
-                return default_uri;
+                return default_uri ();
             }
         }
 
@@ -314,7 +312,6 @@ namespace Gala
 		string get_picture_filename (int monitor_index, int workspace_index)
 		{
 			string filename = null;
-			string default_uri = settings.get_string ("picture-uri");
 
 			string[] extra_uris = extra_settings.get_strv ("background-uris");
 
@@ -322,10 +319,10 @@ namespace Gala
             if (extra_uris.length > 0 && extra_uris.length > workspace_index) {
                 uri = extra_uris[workspace_index];
                 if (uri == "") {
-                    uri = default_uri;
+                    uri = default_uri ();
                 }
             } else {
-                uri = default_uri;
+                uri = default_uri ();
             }
 
 			if (Uri.parse_scheme (uri) != null) {
