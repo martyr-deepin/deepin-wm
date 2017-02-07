@@ -51,7 +51,7 @@ namespace Gala
 
 		public Actor background;
 
-		Actor close_button;
+		DeepinIconActor close_button;
 
 		// The DeepinRoundRectEffect works bad, so we drawing the outline to make it looks
 		// antialise, but the drawing color is different for normal and selected state, so we must
@@ -119,18 +119,10 @@ namespace Gala
 			add_child (workspace_clone);
 
 			// close button
-			close_button = Utils.create_close_button ();
-			close_button.reactive = true;
+            close_button = new DeepinIconActor ("close");
 			close_button.opacity = 0;
-
-			// block propagation of button presses on the close button, otherwise the click action
-			// on the WorkspaceTHumbClone will act weirdly
-			close_button.button_press_event.connect (() => {
-				return true;
-			});
-			close_button.button_release_event.connect (() => {
+			close_button.released.connect (() => {
 				closing ();
-				return true;
 			});
 
 			add_child (close_button);
@@ -257,19 +249,8 @@ namespace Gala
 
 			var close_box = ActorBox ();
 			close_box.set_size (close_button.width, close_button.height);
-
-			Granite.CloseButtonPosition pos;
-			Granite.Widgets.Utils.get_default_close_button_position (out pos);
-			switch (pos) {
-			case Granite.CloseButtonPosition.RIGHT:
-				close_box.set_origin (box.get_width () - close_box.get_width () * 0.60f,
-									  -close_button.height * 0.40f);
-				break;
-			case Granite.CloseButtonPosition.LEFT:
-				close_box.set_origin (-close_box.get_width () * 0.60f,
-									  -close_button.height * 0.40f);
-				break;
-			}
+            close_box.set_origin (box.get_width () - close_box.get_width () * 0.55f,
+                                  -close_button.height * 0.50f);
 
 			close_button.allocate (close_box, flags);
 		}
