@@ -559,6 +559,7 @@ namespace Meta {
 
 		public void enter_corner (Meta.ScreenCorner corner);
 		public void leave_corner (Meta.ScreenCorner corner);
+        public void enable_corner_actions (bool val);
 
 #if !HAS_MUTTER316
 		public void unset_cm_selection ();

@@ -429,6 +429,7 @@ namespace Gala
 		public BackgroundContainer background_container { get; protected set; }
 
         public bool hiding_windows {get; protected set; }
+        bool hotcorner_enabeld = true;
 
         /**
           * backgrounds for monitors of the active workspace 
@@ -718,6 +719,14 @@ namespace Gala
 
 			return false;
 		}
+
+        public void enable_zone_detected (bool val)
+        {
+            if (hotcorner_enabeld != val) {
+                hotcorner_enabeld = val;
+                get_screen ().enable_corner_actions (val);
+            }
+        }
 
 		void configure_hotcorners ()
 		{

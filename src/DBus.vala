@@ -98,6 +98,11 @@ namespace Gala
             return (wm as WindowManagerGala).get_current_workspace_background ();
         }
 
+        public void enable_zone_detected (bool val)
+        {
+            (wm as WindowManagerGala).enable_zone_detected (val);
+        }
+
         //for testing purpose
         private void switch_workspace(int index, int new_index)
         {
