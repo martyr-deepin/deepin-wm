@@ -78,7 +78,6 @@ namespace Gala
             });
 
             (wm as Meta.Plugin).get_screen ().corner_entered.connect (corner_entered);
-            //(wm as Meta.Plugin).get_screen ().corner_leaved.connect (corner_leaved);
 
             pointer = Gdk.Display.get_default ().get_device_manager ().get_client_pointer ();
 		}
@@ -179,11 +178,6 @@ namespace Gala
             if (corner != this.direction)
                 return;
 
-            if (blocked ()) {
-                (wm as Meta.Plugin).get_screen ().leave_corner (this.direction);
-                return;
-            }
-
             startRecord = true;
             GLib.debug ("enter [%s]", this.name);
 
@@ -209,6 +203,8 @@ namespace Gala
                     corner_leaved (this.direction);
                     return;
                 }
+
+                if (blocked()) return;
 
                 int64 timestamp = get_monotonic_time () / 1000;
                 if (reach_threshold(pos)) {
