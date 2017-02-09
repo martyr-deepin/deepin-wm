@@ -58,7 +58,8 @@ namespace Gala
         int64 last_trigger_time = 0; // 0 is invalid
         int64 last_reset_time = 0; // 0 is invalid
 
-        GtkClutter.Texture effect;
+        GtkClutter.Texture? effect;
+        GtkClutter.Texture? effect_2nd;
 
         Gdk.Device pointer;
 
@@ -70,9 +71,13 @@ namespace Gala
 		construct
 		{
             effect = create_texture ();
+            effect_2nd = create_texture ();
             add_child (effect);
+            add_child (effect_2nd);
 
             effect.opacity = 0;
+            effect_2nd.opacity = 0;
+			effect_2nd.set_scale (0.0f, 0.0f);
             notify["last-distance-factor"].connect(() => {
                 effect.opacity = (uint)(last_distance_factor * 255.0f);
             });
@@ -371,15 +376,79 @@ namespace Gala
                 if ("com.deepin.dde.ControlCenter" in this.action) 
                     d = DeepinZoneSettings.get_default ().delay;
 
-                Timeout.add(d,
-                    () => {
-                        try {
-                            Process.spawn_command_line_async (action);
-                        } catch (Error e) { warning (e.message); }
-
-                        return false;
-                    });
+                Timeout.add(d, exec_delayed_action);
             }
+        }
+
+        bool exec_delayed_action ()
+        {
+            start_animations ();
+            var trans = new Clutter.TransitionGroup ();
+            try {
+                Process.spawn_command_line_async (action);
+            } catch (Error e) { warning (e.message); }
+
+            return false;
+        }
+
+		void start_animations ()
+        {
+            var name = "corner-triggered";
+
+            float px = 0.0f, py = 0.0f;
+            switch (direction) {
+                case Meta.ScreenCorner.TOPLEFT:
+                    px = py = 0.0f; break;
+
+                case Meta.ScreenCorner.TOPRIGHT:
+                    px = 1.0f; py = 0.0f; break;
+
+                case Meta.ScreenCorner.BOTTOMLEFT:
+                    px = 0.0f; py = 1.0f; break;
+
+                case Meta.ScreenCorner.BOTTOMRIGHT:
+                    px = py = 1.0f; break;
+            }
+			effect.set_pivot_point (px, py);
+			effect_2nd.set_pivot_point (px, py);
+
+            var t = build_animation (400, 0, 1.5f); 
+            effect.remove_transition (name);
+            effect.add_transition (name, t);
+
+            t = build_animation (600, 255, 1.0f);
+            t.stopped.connect(() => {
+                effect.opacity = 255;
+                effect.scale_x = 1.0f;
+                effect.scale_y = 1.0f;
+
+                effect_2nd.opacity = 0;
+                effect_2nd.scale_x = 0.0f;
+                effect_2nd.scale_y = 0.0f;
+            });
+            effect_2nd.remove_transition (name);
+            effect_2nd.add_transition (name, t);
+        }
+
+        Clutter.TransitionGroup build_animation (int duration, int opacity, float scale)
+        {
+            var t = new Clutter.TransitionGroup ();
+            t.set_duration (duration);
+            t.set_progress_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
+
+            var t1 = new Clutter.PropertyTransition ("opacity");
+            t1.set_to_value (opacity);
+            t.add_transition (t1);
+
+            t1 = new Clutter.PropertyTransition ("scale-x");
+            t1.set_to_value (scale);
+            t.add_transition (t1);
+
+            t1 = new Clutter.PropertyTransition ("scale-y");
+            t1.set_to_value (scale);
+            t.add_transition (t1);
+
+            return t;
         }
 	}
 
