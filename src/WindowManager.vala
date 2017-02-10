@@ -168,6 +168,8 @@ namespace Gala
                 startRecord = false;
                 last_distance_factor = 0.0f;
                 effect.opacity = 0;
+                effect_2nd.opacity = 0;
+                effect_2nd.set_scale (0.0f, 0.0f);
 
                 if (polling_id != 0) {
                     Source.remove (polling_id);
@@ -418,13 +420,11 @@ namespace Gala
 
             t = build_animation (600, 255, 1.0f);
             t.stopped.connect(() => {
-                effect.opacity = 255;
-                effect.scale_x = 1.0f;
-                effect.scale_y = 1.0f;
+                effect.opacity = startRecord ? 255 : 0;
+                effect.set_scale (1.0f, 1.0f);
 
                 effect_2nd.opacity = 0;
-                effect_2nd.scale_x = 0.0f;
-                effect_2nd.scale_y = 0.0f;
+                effect_2nd.set_scale (0.0f, 0.0f);
             });
             effect_2nd.remove_transition (name);
             effect_2nd.add_transition (name, t);
