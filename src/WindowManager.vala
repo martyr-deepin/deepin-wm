@@ -417,12 +417,13 @@ namespace Gala
             var t = build_animation (400, 0, 1.5f); 
             effect.remove_transition (name);
             effect.add_transition (name, t);
-
-            t = build_animation (600, 255, 1.0f);
             t.stopped.connect(() => {
                 effect.opacity = startRecord ? 255 : 0;
                 effect.set_scale (1.0f, 1.0f);
+            });
 
+            t = build_animation (400, 255, 1.0f);
+            t.stopped.connect(() => {
                 effect_2nd.opacity = 0;
                 effect_2nd.set_scale (0.0f, 0.0f);
             });
