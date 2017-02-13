@@ -58,6 +58,8 @@ namespace Gala
         int64 last_trigger_time = 0; // 0 is invalid
         int64 last_reset_time = 0; // 0 is invalid
 
+        bool animating = false;
+
         GtkClutter.Texture? effect;
         GtkClutter.Texture? effect_2nd;
 
@@ -76,10 +78,10 @@ namespace Gala
             add_child (effect_2nd);
 
             effect.opacity = 0;
-            effect_2nd.opacity = 0;
 			effect_2nd.set_scale (0.0f, 0.0f);
             notify["last-distance-factor"].connect(() => {
-                effect.opacity = (uint)(last_distance_factor * 255.0f);
+                if (!animating)
+                    effect.opacity = (uint)(last_distance_factor * 255.0f);
             });
 
             (wm as Meta.Plugin).get_screen ().corner_entered.connect (corner_entered);
@@ -168,7 +170,6 @@ namespace Gala
                 startRecord = false;
                 last_distance_factor = 0.0f;
                 effect.opacity = 0;
-                effect_2nd.opacity = 0;
                 effect_2nd.set_scale (0.0f, 0.0f);
 
                 if (polling_id != 0) {
@@ -417,14 +418,15 @@ namespace Gala
             var t = build_animation (400, 0, 1.5f); 
             effect.remove_transition (name);
             effect.add_transition (name, t);
+            t.started.connect(() => animating = true);
             t.stopped.connect(() => {
                 effect.opacity = startRecord ? 255 : 0;
                 effect.set_scale (1.0f, 1.0f);
+                animating = false;
             });
 
             t = build_animation (400, 255, 1.0f);
             t.stopped.connect(() => {
-                effect_2nd.opacity = 0;
                 effect_2nd.set_scale (0.0f, 0.0f);
             });
             effect_2nd.remove_transition (name);
