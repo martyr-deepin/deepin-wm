@@ -1422,10 +1422,10 @@ namespace Gala
                 actor.set_pivot_point (anchor_x, anchor_y);
 
 				actor.save_easing_state ();
-				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_EXPO);
+				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_CUBIC);
 				actor.set_easing_duration (duration);
 				actor.set_scale (scale_x, scale_y);
-                actor.opacity = 102;
+                actor.opacity = 51;
 				actor.restore_easing_state ();
 
 				ulong minimize_handler_id = 0UL;
@@ -1442,10 +1442,10 @@ namespace Gala
                 actor.set_pivot_point (0.5f, 1.0f);
 
 				actor.save_easing_state ();
-				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_EXPO);
+				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_CUBIC);
 				actor.set_easing_duration (duration);
 				actor.set_scale (0.0f, 0.0f);
-				actor.opacity = 102;
+				actor.opacity = 51;
 				actor.restore_easing_state ();
 
 				ulong minimize_handler_id = 0UL;
@@ -1613,10 +1613,10 @@ namespace Gala
 
 					actor.set_pivot_point (0.5f, 1.0f);
 					actor.set_scale (0.01f, 0.1f);
-                    actor.opacity = 102;
+                    actor.opacity = 51;
 
 					actor.save_easing_state ();
-					actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_EXPO);
+					actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_CUBIC);
 					actor.set_easing_duration (duration);
 					actor.set_scale (1.0f, 1.0f);
                     actor.opacity = 255;
