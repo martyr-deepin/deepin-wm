@@ -45,8 +45,6 @@ namespace Gala
 		 */
 		public signal void request_reposition ();
 
-		protected DeepinCssActor shape;
-
 		public DeepinWindowSwitcherItem ()
 		{
 			Object ();
@@ -56,40 +54,6 @@ namespace Gala
 		{
 			x_align = ActorAlign.FILL;
 			y_align = ActorAlign.FILL;
-
-			shape = new DeepinCssActor ("deepin-window-switcher-item");
-			shape.set_pivot_point (0.5f, 0.5f);
-
-			add_child (shape);
-		}
-
-		public void set_select (bool value, bool animate = true)
-		{
-			shape.save_easing_state ();
-
-			shape.set_easing_duration (animate ? 280 : 0);
-			shape.set_easing_mode (AnimationMode.EASE_IN_OUT_QUAD);
-			shape.select = value;
-
-			if (value) {
-				shape.scale_x = 1.033;
-				shape.scale_y = 1.033;
-			} else {
-				shape.scale_x = 1.0;
-				shape.scale_y = 1.0;
-			}
-
-			shape.restore_easing_state ();
-		}
-
-		public override void allocate (ActorBox box, AllocationFlags flags)
-		{
-			base.allocate (box, flags);
-
-			var shape_box = ActorBox ();
-			shape_box.set_size (box.get_width (), box.get_height ());
-			shape_box.set_origin (0, 0);
-			shape.allocate (shape_box, flags);
 		}
 	}
 

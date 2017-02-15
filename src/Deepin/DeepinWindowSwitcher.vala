@@ -41,6 +41,7 @@ namespace Gala
         BlurActor background;
 		Actor item_container;
 		Actor window_clones;
+		protected DeepinCssActor shape;
 		List<Actor> clone_sort_order;
 
 		uint popup_delay_timeout_id = 0;
@@ -62,13 +63,21 @@ namespace Gala
             popup = new DeepinCssStaticActor ("deepin-window-switcher");
 			popup.opacity = 0;
 
+			shape = new DeepinCssActor ("deepin-window-switcher-item");
+			shape.set_pivot_point (0.5f, 0.5f);
+            shape.scale_x = 1.033;
+            shape.scale_y = 1.033;
+			shape.select = true;
+            shape.visible = false;
+
 			item_container = new Actor ();
             item_container.set_name ("item_container");
-			item_container.margin_bottom = POPUP_PADDING;
+            item_container.margin_bottom = POPUP_PADDING;
 			item_container.margin_left = POPUP_PADDING;
-			item_container.margin_right = POPUP_PADDING;
+            item_container.margin_right = POPUP_PADDING;
 			item_container.margin_top = POPUP_PADDING;
 			item_container.layout_manager = new DeepinWindowSwitcherLayout ();
+            item_container.layout_manager.layout_changed.connect(update_shape_size);
 
 			item_container.actor_removed.connect (on_item_removed);
 
@@ -77,6 +86,7 @@ namespace Gala
             background.set_name ("blur-switcher");
             background.visible = false;
 
+            //popup.add_child (shape);
 			popup.add_child (item_container);
 
 			window_clones = new Actor ();
@@ -86,6 +96,7 @@ namespace Gala
 
 			add_child (window_clones);
             add_child (background);
+            add_child (shape);
 			add_child (popup);
 
 			wm.get_screen ().monitors_changed.connect (relayout);
@@ -100,6 +111,61 @@ namespace Gala
 			}
 
 			wm.get_screen ().monitors_changed.disconnect (relayout);
+		}
+
+        void update_shape_size ()
+        {
+            var item = item_container.get_last_child ();
+            if (item == null && current_item != null) {
+                item = current_item;
+            }
+            if (item != null) {
+                var box = item.get_allocation_box ();
+                float width = box.get_width (), height = box.get_height ();
+
+                shape.set_size (width, height);
+            }
+        }
+
+        private Clutter.TransitionGroup build_animation (int duration, float x, float y)
+        {
+            var t = new Clutter.TransitionGroup ();
+            t.set_duration (duration);
+            t.set_progress_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
+
+            var t1 = new Clutter.PropertyTransition ("x");
+            t1.set_to_value (x);
+            t.add_transition (t1);
+
+            t1 = new Clutter.PropertyTransition ("y");
+            t1.set_to_value (y);
+            t.add_transition (t1);
+
+            return t;
+        }
+
+		public void shape_move (DeepinWindowSwitcherItem target, bool animating = true)
+		{
+            var box = target.get_allocation_box ();
+            float tx, ty;
+            target.get_transformed_position (out tx, out ty);
+
+            var cx = tx + (box.x2 - box.x1)/2;
+            var cy = ty + (box.y2 - box.y1)/2;
+
+            if (animating && shape.visible) {
+                shape.save_easing_state ();
+
+                shape.set_easing_duration (200);
+                shape.set_easing_mode (AnimationMode.EASE_IN_OUT_CUBIC);
+                shape.x = cx - shape.width / 2;
+                shape.y = cy - shape.height / 2;
+
+                shape.restore_easing_state ();
+            } else {
+                shape.x = cx - shape.width / 2;
+                shape.y = cy - shape.height / 2;
+            }
 		}
 
 		public void relayout ()
@@ -122,15 +188,19 @@ namespace Gala
             background.set_position (popup.x, popup.y);
             background.set_size (popup.width, popup.height);
 
+            update_shape_size ();
+            shape_move (current_item, false);
             window_clones.opacity = 255;
             background.visible = true;
 			popup.opacity = 255;
+            shape.visible = true;
 		}
 
 		void hide_popup ()
 		{
             background.visible = false;
 			popup.opacity = 0;
+            shape.visible = false;
 		}
 
 		bool on_clicked_item (Clutter.ButtonEvent event)
@@ -516,14 +586,7 @@ namespace Gala
                 clone.restore_easing_state ();
             }
 
-			foreach (var child in item_container.get_children ()) {
-				var item = child as DeepinWindowSwitcherItem;
-				if (item == current_item) {
-					item.set_select (true, animate);
-				} else {
-					item.set_select (false, animate);
-				}
-			}
+            shape_move (current_item);
 		}
 
 		void show_clones ()
