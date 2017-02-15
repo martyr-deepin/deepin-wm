@@ -57,7 +57,7 @@ namespace Gala
 
         string default_uri ()
         {
-            return "file://@fallback_background_name";
+            return @"file://$fallback_background_name";
         }
 
         void on_workspace_added (int index)
