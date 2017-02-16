@@ -49,7 +49,7 @@ namespace Gala
 			notify["allocation"].connect (() => canvas.set_size ((int)width, (int)height));
 		}
 
-		bool on_draw_content (Cairo.Context cr, int width, int height)
+		protected virtual bool on_draw_content (Cairo.Context cr, int width, int height)
 		{
 			// clear the content
 			cr.set_operator (Cairo.Operator.CLEAR);

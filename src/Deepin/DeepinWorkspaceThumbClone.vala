@@ -26,7 +26,8 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceThumbCloneCore : Actor
 	{
-		const int THUMB_SHAPE_PADDING = 2;
+		const int THUMB_SHAPE_SELECTED_PADDING = 4;
+		const int THUMB_SHAPE_PADDING = 1;
 
 		/**
 		 * The workspace clone has been clicked. The MultitaskingView should consider activating its
@@ -45,6 +46,7 @@ namespace Gala
 
 		// selected shape for workspace thumbnail clone
 		Actor thumb_shape;
+		Actor thumb_shape_selected;
 
 		Actor workspace_shadow;
 		Actor workspace_clone;
@@ -58,7 +60,6 @@ namespace Gala
 		// update it manually.
 		Gdk.RGBA roundRectColorNormal;
 		Gdk.RGBA roundRectColorSelected;
-		DeepinRoundRectOutlineEffect roundRectOutlineEffect;
 
 		public DeepinWorkspaceThumbCloneCore (Workspace workspace)
 		{
@@ -67,20 +68,25 @@ namespace Gala
 
 		construct
 		{
-			// workspace shadow effect, angle:90°, size:5, distance:1, opacity:30%
 			workspace_shadow = new Actor ();
 			workspace_shadow.add_effect_with_name (
 				"shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
-											get_thumb_workspace_prefer_heigth (), 10, 1, 76));
+											get_thumb_workspace_prefer_heigth (), 10, 4, 50));
 			add_child (workspace_shadow);
 
 			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
 
-			// selected shape for workspace thumbnail clone
-			thumb_shape =
-				new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			thumb_shape.opacity = 0;
-			add_child (thumb_shape);
+            thumb_shape =
+                new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.NORMAL);
+            thumb_shape.set_pivot_point (0.5f, 0.5f);
+
+            // selected shape for workspace thumbnail clone
+            thumb_shape_selected =
+                new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+            thumb_shape_selected.opacity = 0;
+            thumb_shape_selected.set_pivot_point (0.5f, 0.5f);
+            add_child (thumb_shape);
+            add_child (thumb_shape_selected);
 
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
@@ -93,10 +99,6 @@ namespace Gala
 				"deepin-window-manager");
 			roundRectColorSelected = DeepinUtils.get_css_background_color_gdk_rgba (
 				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			roundRectOutlineEffect =
-				new DeepinRoundRectOutlineEffect ((int)width, (int)height, radius,
-												  roundRectColorNormal);
-			workspace_clone.add_effect (roundRectOutlineEffect);
 			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
 
 			background = new DeepinFramedBackground (workspace.get_screen (),
@@ -175,21 +177,17 @@ namespace Gala
 		{
 			int duration = animate ? DeepinMultitaskingView.WORKSPACE_SWITCH_DURATION : 0;
 
+            thumb_shape.visible = !value;
+
 			// selected shape for workspace thumbnail clone
-			thumb_shape.save_easing_state ();
+            thumb_shape_selected.save_easing_state ();
 
-			thumb_shape.set_easing_duration (duration);
-			thumb_shape.set_easing_mode (AnimationMode.LINEAR);
-			thumb_shape.opacity = value ? 255 : 0;
+            thumb_shape_selected.set_easing_duration (duration);
+            thumb_shape_selected.set_easing_mode (AnimationMode.LINEAR);
+            thumb_shape_selected.opacity = value ? 255 : 0;
 
-			thumb_shape.restore_easing_state ();
+            thumb_shape_selected.restore_easing_state ();
 
-			// update the outline fixing color for rounded rectangle effect
-			if (value) {
-				roundRectOutlineEffect.update_color (roundRectColorSelected);
-			} else {
-				roundRectOutlineEffect.update_color (roundRectColorNormal);
-			}
 			queue_redraw ();
 		}
 
@@ -246,6 +244,12 @@ namespace Gala
 			thumb_shape_box.set_origin (
 				(box.get_width () - thumb_shape_box.get_width ()) / 2, -THUMB_SHAPE_PADDING);
 			thumb_shape.allocate (thumb_shape_box, flags);
+
+            thumb_shape_box.set_size (
+                    thumb_width + THUMB_SHAPE_SELECTED_PADDING * 2, thumb_height + THUMB_SHAPE_SELECTED_PADDING * 2);
+            thumb_shape_box.set_origin (
+                    (box.get_width () - thumb_shape_box.get_width ()) / 2, -THUMB_SHAPE_SELECTED_PADDING);
+            thumb_shape_selected.allocate (thumb_shape_box, flags);
 
 			var close_box = ActorBox ();
 			close_box.set_size (close_button.width, close_button.height);

@@ -128,7 +128,7 @@ namespace Gala
 	 */
 	public class DeepinWindowSwitcherWindowItem : DeepinWindowSwitcherItem
 	{
-		const int ICON_SIZE = 48;
+		const int ICON_SIZE = 58;
 
 		public Window window { get; construct; }
 

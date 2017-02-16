@@ -41,11 +41,15 @@ namespace Gala
 		{
 			color = DeepinUtils.get_css_color_gdk_rgba (style_class);
 
-			(content as Canvas).draw.connect (on_draw_content);
+			//(content as Canvas).draw.connect (on_draw_content);
 		}
 
-		bool on_draw_content (Cairo.Context cr, int width, int height)
+		protected override bool on_draw_content (Cairo.Context cr, int width, int height)
 		{
+			style_context.set_state (state);
+            style_context.render_background (cr, 0, 0, width, height);
+            style_context.render_frame (cr, 0, 0, width, height);
+
 			// draw tha plus button
 			cr.move_to (width / 2 - PLUS_SIZE / 2, height / 2);
 			cr.line_to (width / 2 + PLUS_SIZE / 2, height / 2);

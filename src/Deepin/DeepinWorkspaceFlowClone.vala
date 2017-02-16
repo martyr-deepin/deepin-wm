@@ -76,7 +76,7 @@ namespace Gala
 			var screen = workspace.get_screen ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-			background = new DeepinFramedBackground (screen, workspace.index ());
+			background = new DeepinFramedBackground (screen, workspace.index (), true, false, 30, 16, 50);
             background.reactive = true;
             background.button_press_event.connect (() => {
                 selected (true);
@@ -161,6 +161,16 @@ namespace Gala
 
 			add_child (background);
 			add_child (window_container);
+
+            int radius = DeepinUtils.get_css_border_radius (
+                    "deepin-workspace-clone", Gtk.StateFlags.SELECTED);
+            background.add_effect (new DeepinRoundRectEffect (radius));
+            var roundRectColorNormal = DeepinUtils.get_css_background_color_gdk_rgba (
+                    "deepin-window-manager");
+            var roundRectOutlineEffect =
+                new DeepinRoundRectOutlineEffect ((int)background.width, (int)background.height, radius,
+                        roundRectColorNormal);
+            background.add_effect (roundRectOutlineEffect);
 
 			// add existing windows
 			var windows = workspace.list_windows ();
