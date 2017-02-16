@@ -144,14 +144,17 @@ namespace Gala
             return t;
         }
 
-		public void shape_move (DeepinWindowSwitcherItem target, bool animating = true)
+		public void shape_move (DeepinWindowSwitcherItem? target, bool animating = true)
 		{
             var box = target.get_allocation_box ();
-            float tx, ty;
+            float tx, ty, cx, cy;
             target.get_transformed_position (out tx, out ty);
+            //WTF: use transform_stage_point here cause target position incorrect, wtf!
+            //transform_stage_point (tx, ty, out cx, out cy);
+            cx = tx - this.x; cy = ty - this.y;
 
-            var cx = tx + (box.x2 - box.x1)/2;
-            var cy = ty + (box.y2 - box.y1)/2;
+            cx += (box.x2 - box.x1)/2;
+            cy += (box.y2 - box.y1)/2;
 
             if (animating && shape.visible) {
                 shape.save_easing_state ();
