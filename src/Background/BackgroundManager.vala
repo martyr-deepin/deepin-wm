@@ -111,6 +111,22 @@ namespace Gala
             }
         }
 
+        public void add_child_effect_with_name (string name, Clutter.Effect effect)
+        {
+            if (actors.size > 0) {
+                var actor = actors[actors.size - 1];
+                actor.add_effect_with_name (name, effect);
+            }
+        }
+
+        public void remove_child_effect_by_name (string name)
+        {
+            if (actors.size > 0) {
+                var actor = actors[actors.size - 1];
+                actor.remove_effect_by_name (name);
+            }
+        }
+
         void on_background_actor_loaded (Meta.BlurredBackgroundActor background_actor)
         {
             insert_child_below (background_actor, null);

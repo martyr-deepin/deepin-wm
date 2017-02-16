@@ -495,6 +495,8 @@ namespace Gala
 		 */
 		public Clutter.Actor top_window_group { get; protected set; }
 
+		public Clutter.Actor mask_group { get; protected set; }
+
 		/**
 		 * Container for the background actors forming the wallpaper for monitors and workspaces
 		 */
@@ -624,6 +626,10 @@ namespace Gala
 				Clutter.BindCoordinate.ALL, 0));
 			stage.insert_child_below (system_background, null);
 
+            mask_group = new Clutter.Actor ();
+            mask_group.set_name ("mask_group");
+            stage.add_child (mask_group);
+
 			ui_group = new Clutter.Actor ();
             ui_group.set_name ("ui_group");
 
@@ -734,6 +740,14 @@ namespace Gala
             screen.monitors_changed.connect (configure_hotcorners);
 			DeepinZoneSettings.get_default ().schema.changed.connect (configure_hotcorners);
 
+			screen.monitors_changed.connect (update_background_mask_layer);
+			screen.workspace_added.connect (update_background_mask_layer);
+			screen.workspace_removed.connect (update_background_mask_layer);
+			screen.workspace_reordered.connect (update_background_mask_layer);
+            update_background_mask_layer ();
+
+			screen.monitors_changed.connect (update_background_dark_mask_layer);
+            update_background_dark_mask_layer ();
 
 			display.add_keybinding ("expose-windows", keybinding_schema, 0, () => {
                 if (hiding_windows) return;
@@ -976,6 +990,66 @@ namespace Gala
 			screen.get_workspace_by_index (index).activate (display.get_current_time ());
 		}
 
+        Gee.HashMap<string, BackgroundManager>? masks;
+        Gee.HashMap<string, Clutter.Actor>? dark_masks;
+        void update_background_mask_layer ()
+        {
+            var screen = get_screen ();
+
+            Meta.verbose ("%s\n", Log.METHOD);
+            if (masks != null) {
+                mask_group.remove_all_children ();
+                foreach (var mask in masks.values) {
+                    mask.destroy ();
+                }
+                masks.clear ();
+            } else {
+                masks = new Gee.HashMap<string, BackgroundManager> ();
+            }
+
+            int first = 0, last = screen.n_workspaces - 1;
+            for (var i = 0; i < screen.get_n_monitors (); i++) {
+                var key = @"$i:$first";
+
+                var bm = new BackgroundManager (screen, i, first);
+                bm.set_rounds (6);
+                bm.set_radius (9);
+                masks[key] = bm;
+
+                key = @"$i:$last";
+                bm = new BackgroundManager (screen, i, last);
+                bm.set_rounds (6);
+                bm.set_radius (9);
+                masks[key] = bm;
+            }
+        }
+
+        void update_background_dark_mask_layer ()
+        {
+            var screen = get_screen ();
+
+            Meta.verbose ("%s\n", Log.METHOD);
+            if (dark_masks != null) {
+                mask_group.remove_all_children ();
+                foreach (var dm in dark_masks.values) {
+                    dm.destroy ();
+                }
+                dark_masks.clear ();
+
+            } else {
+                dark_masks = new Gee.HashMap<string, Clutter.Actor> ();
+            }
+
+            for (var i = 0; i < screen.get_n_monitors (); i++) {
+                var key = @"$i";
+                var geom = screen.get_monitor_geometry (i);
+
+                dark_masks[key] = new DeepinCssStaticActor("deepin-window-manager-background-mask");
+                dark_masks[key].set_position (geom.x - 32, geom.y);
+                dark_masks[key].set_size (32, geom.height);
+            }
+        }
+
 		/**
 		 * {@inheritDoc}
 		 */
@@ -995,13 +1069,34 @@ namespace Gala
 			if (ui_group.get_transition ("nudge") != null)
 				return;
 
-			var dest = (direction == MotionDirection.LEFT ? 32.0f : -32.0f);
+            mask_group.remove_all_children ();
+            var index = screen.get_active_workspace_index ();
+            assert (index == 0 || index == screen.get_n_workspaces () - 1);
+            for (var i = 0; i < screen.get_n_monitors (); i++) {
+                var key = @"$i:$index";
+                assert (masks.contains(key));
+                masks[key].set_rounds (6);
+                masks[key].set_radius (9);
+                mask_group.add_child (masks[key]);
+            }
+
+            foreach(var dm in dark_masks.values) {
+                mask_group.add_child (dm);
+            }
+
+            foreach (var bg in backgrounds) {
+                var geom = screen.get_monitor_geometry (bg.monitor_index);
+                var shadow_effect = new ShadowEffect (geom.width, geom.height, 30, 5, 128);
+                bg.add_child_effect_with_name ("shadow", shadow_effect);
+            }
+
+            var dest = (direction == MotionDirection.LEFT ? 32.0f : -32.0f);
 
 			double[] keyframes = { 0.28, 0.58 };
 			GLib.Value[] x = { dest, dest };
 
 			var nudge = new Clutter.KeyframeTransition ("x");
-			nudge.duration = 360;
+			nudge.duration = 450;
 			nudge.remove_on_complete = true;
 			nudge.progress_mode = Clutter.AnimationMode.LINEAR;
 			nudge.set_from_value (0.0f);
@@ -1010,6 +1105,12 @@ namespace Gala
 			nudge.set_values (x);
 
 			ui_group.add_transition ("nudge", nudge);
+
+            nudge.stopped.connect(() => {
+                foreach (var bg in backgrounds) {
+                    bg.remove_child_effect_by_name ("shadow");
+                }
+            });
 		}
 
 		void update_input_area ()
