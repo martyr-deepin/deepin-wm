@@ -1691,50 +1691,54 @@ namespace Gala
 		{
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 
-			if (!animation_settings.enable_animations) {
-				actor.show ();
+			actor.remove_all_transitions ();
+            actor.show ();
+
+            var duration = animation_settings.minimize_duration;
+			if (!animation_settings.enable_animations || duration == 0) {
 				unminimize_completed (actor);
 				return;
 			}
 
 			var window = actor.get_meta_window ();
+			if (window.window_type != WindowType.NORMAL) {
+                unminimize_completed (actor);
+                return;
+            }
 
-			actor.remove_all_transitions ();
-			actor.show ();
+            kill_window_effects (actor);
+            unminimizing.add (actor);
 
-			switch (window.window_type) {
-				case WindowType.NORMAL:
-					var duration = animation_settings.minimize_duration;
-					if (duration == 0) {
-						unminimize_completed (actor);
-						return;
-					}
+            actor.opacity = 51;
 
-					unminimizing.add (actor);
+			Rectangle icon = {};
+			if (actor.get_meta_window ().get_icon_geometry (out icon)) {
+				float scale_x  = (float)icon.width  / actor.width;
+				float scale_y  = (float)icon.height / actor.height;
+				float anchor_x = (float)(actor.x - icon.x) / (icon.width  - actor.width);
+				float anchor_y = (float)(actor.y - icon.y) / (icon.height - actor.height);
+                actor.set_pivot_point (anchor_x, anchor_y);
+                actor.set_scale (scale_x, scale_y);
+            } else {
+                actor.set_pivot_point (0.5f, 1.0f);
+                actor.set_scale (0.01f, 0.1f);
+            }
 
-					actor.set_pivot_point (0.5f, 1.0f);
-					actor.set_scale (0.01f, 0.1f);
-                    actor.opacity = 51;
+            actor.save_easing_state ();
+            actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_CUBIC);
+            actor.set_easing_duration (duration);
+            actor.set_scale (1.0f, 1.0f);
+            actor.opacity = 255;
+            actor.restore_easing_state ();
 
-					actor.save_easing_state ();
-					actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_CUBIC);
-					actor.set_easing_duration (duration);
-					actor.set_scale (1.0f, 1.0f);
-                    actor.opacity = 255;
-					actor.restore_easing_state ();
 
-					ulong unminimize_handler_id = 0UL;
-					unminimize_handler_id = actor.transitions_completed.connect (() => {
-						actor.disconnect (unminimize_handler_id);
-						unminimizing.remove (actor);
-						unminimize_completed (actor);
-					});
 
-					break;
-				default:
-					unminimize_completed (actor);
-					break;
-			}
+            ulong unminimize_handler_id = 0UL;
+            unminimize_handler_id = actor.transitions_completed.connect (() => {
+                actor.disconnect (unminimize_handler_id);
+                unminimizing.remove (actor);
+                unminimize_completed (actor);
+            });
 		}
 
 		public override void map (WindowActor actor)
