@@ -1045,7 +1045,7 @@ namespace Gala
                 var geom = screen.get_monitor_geometry (i);
 
                 dark_masks[key] = new DeepinCssStaticActor("deepin-window-manager-background-mask");
-                dark_masks[key].set_position (geom.x - 32, geom.y);
+                dark_masks[key].set_position (geom.x, geom.y);
                 dark_masks[key].set_size (32, geom.height);
             }
         }
