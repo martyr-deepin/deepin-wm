@@ -1092,17 +1092,19 @@ namespace Gala
 
             var dest = (direction == MotionDirection.LEFT ? 32.0f : -32.0f);
 
-			double[] keyframes = { 0.28, 0.58 };
-			GLib.Value[] x = { dest, dest };
+			double[] keyframes = { 0.5, 1.0 };
+			GLib.Value[] x = { dest, 0.0f };
+            Clutter.AnimationMode[] modes = {Clutter.AnimationMode.EASE_IN_QUAD,
+                Clutter.AnimationMode.EASE_OUT_QUAD};
 
 			var nudge = new Clutter.KeyframeTransition ("x");
 			nudge.duration = 450;
 			nudge.remove_on_complete = true;
-			nudge.progress_mode = Clutter.AnimationMode.LINEAR;
 			nudge.set_from_value (0.0f);
 			nudge.set_to_value (0.0f);
 			nudge.set_key_frames (keyframes);
 			nudge.set_values (x);
+            nudge.set_modes (modes);
 
 			ui_group.add_transition ("nudge", nudge);
 
