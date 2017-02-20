@@ -41,6 +41,7 @@ namespace Gala
 
     const int CORNER_SIZE = 32;
     const int CORNER_THRESHOLD = 150;
+    const int REACTIVATION_THRESHOLD = 450; // cooldown time for consective reactivation
 
 	class DeepinCornerIndicator : Clutter.Actor
 	{
@@ -49,7 +50,6 @@ namespace Gala
         public string key {get; construct;}
         public string action {get; set;}
 
-        int strokeCount = 0;
         bool startRecord = false;
 
         [CCode(notify = true)]
@@ -166,7 +166,6 @@ namespace Gala
 
             if (startRecord) {
                 GLib.debug ("leave [%s]", this.name);
-                strokeCount = 0;
                 startRecord = false;
                 last_distance_factor = 0.0f;
                 effect.opacity = 0;
@@ -204,44 +203,54 @@ namespace Gala
             return true;
         }
 
+        bool can_activate (Clutter.Point pos, int64 timestamp)
+        {
+            if (last_reset_time == 0 || (timestamp - last_reset_time) > REACTIVATION_THRESHOLD) {
+                last_reset_time = timestamp;
+                return false;
+            }
+
+            if (last_trigger_time != 0 && 
+                    (timestamp - last_trigger_time) < REACTIVATION_THRESHOLD - CORNER_THRESHOLD) {
+                // still cooldown
+                return false;
+            }
+
+            if (timestamp - last_reset_time < CORNER_THRESHOLD) {
+                return false;
+            }
+
+            return true;
+        }
+
         public void mouse_move (Clutter.Point pos)
         {
-            if (startRecord) {
-                if (!inside_effect_region (pos)) {
-                    corner_leaved (this.direction);
-                    return;
-                }
+            if (!inside_effect_region (pos)) {
+                corner_leaved (this.direction);
+                return;
+            }
 
-                if (blocked()) return;
+            if (blocked()) return;
 
-                int64 timestamp = get_monotonic_time () / 1000;
-                if (reach_threshold(pos)) {
-                    if (strokeCount > 1) {
-                        perform_action ();
-                        strokeCount = 0;
-                        last_trigger_time = get_monotonic_time () / 1000;
-                        last_reset_time = 0;
+            update_distance_factor (pos);
+            if (!at_trigger_point (pos)) {
+                return;
+            }
 
-                    } else if (last_reset_time != 0) {
-                        if (timestamp - last_reset_time >= CORNER_THRESHOLD) {
-                            strokeCount++;
-                        }
+            int64 timestamp = get_monotonic_time () / 1000;
+            if (last_trigger_time != 0 && 
+                    (timestamp - last_trigger_time) < REACTIVATION_THRESHOLD - CORNER_THRESHOLD) {
+                // still cooldown
+                return;
+            }
 
-                    } else if (last_trigger_time == 0 || 
-                            timestamp - last_trigger_time >= CORNER_THRESHOLD) {
-                        last_reset_time = get_monotonic_time () / 1000;
-                        strokeCount++;
-                    }
-
-                } else if (at_trigger_point (pos)) {
-                    if (last_reset_time != 0 && 
-                            timestamp - last_reset_time >= CORNER_THRESHOLD) {
-                        strokeCount++;
-                        // warp mouse cursor back a little
-                        push_back (pos);
-                    }
-
-                }
+            if (can_activate (pos, timestamp)) {
+                last_trigger_time = timestamp;
+                last_reset_time = 0;
+                perform_action ();
+            } else {
+                // warp mouse cursor back a little
+                push_back (pos);
             }
         }
 
@@ -336,17 +345,14 @@ namespace Gala
             return pos.x >= box.x1 && pos.x <= box.x2 && pos.y >= box.y1 && pos.y <= box.y2;
         }
 
-        bool reach_threshold (Clutter.Point pos)
+        void update_distance_factor (Clutter.Point pos)
         {
             float d = distance_factor_for_corner (pos, this.direction);
 
-            bool hit = false;
             if (last_distance_factor != d) {
                 last_distance_factor = d;
-                hit = d == 1.0f;
                 GLib.debug ("distance factor = %f", d);
             }
-            return hit;
         }
 
         void push_back (Clutter.Point pos) 
