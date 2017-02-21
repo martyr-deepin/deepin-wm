@@ -203,7 +203,7 @@
 			<_summary>Duration of the close animation</_summary>
 		</key>
 		<key type="i" name="minimize-duration">
-			<default>200</default>
+			<default>220</default>
 			<_summary>Duration of the minimize animation</_summary>
 		</key>
 		<key type="i" name="workspace-switch-duration">
