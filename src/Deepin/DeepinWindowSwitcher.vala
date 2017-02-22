@@ -192,7 +192,7 @@ namespace Gala
             background.set_size (popup.width, popup.height);
             popup.clear_effects ();
             popup.add_effect_with_name ( "shadow",
-                    new ShadowEffect ((int)popup.width, (int)popup.height, 9, 2, 26));
+                    new ShadowEffect ((int)popup.width, (int)popup.height, 10, 3, 50));
 
             update_shape_size ();
             shape_move (current_item, false);

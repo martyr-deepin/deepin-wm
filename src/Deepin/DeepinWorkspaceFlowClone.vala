@@ -76,7 +76,7 @@ namespace Gala
 			var screen = workspace.get_screen ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-			background = new DeepinFramedBackground (screen, workspace.index (), true, false, 30, 16, 50);
+			background = new DeepinFramedBackground (screen, workspace.index (), true, false, 30, 14, 66, 14);
             background.reactive = true;
             background.button_press_event.connect (() => {
                 selected (true);

@@ -53,14 +53,16 @@ namespace Gala
 		public int shadow_size { get; construct; }
 		public int shadow_spread { get; construct; }
         public uint8 shadow_opacity {get; construct; }
+        public int shadow_yoffset {get; construct; }
 
 		public DeepinFramedBackground (
 			Screen screen, int workspace_index, bool enable_shadow = true,
-			bool enable_border = false, int sz = 30, int ss = 5, uint8 so = 128)
+			bool enable_border = false, int sz = 30, int ss = 5, uint8 so = 128, int yoff = -1)
 		{
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
 					monitor_index: screen.get_primary_monitor (), workspace_index: workspace_index,
-					control_position: false, shadow_size: sz, shadow_spread: ss, shadow_opacity: so);
+					control_position: false, shadow_size: sz, shadow_spread: ss, shadow_opacity: so, 
+                    shadow_yoffset: yoff);
 		}
 
 		construct
@@ -68,8 +70,8 @@ namespace Gala
 			if (enable_shadow) {
 				var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-				var shadow_effect = new ShadowEffect (monitor_geom.width, monitor_geom.height, 
-                        shadow_size, shadow_spread, shadow_opacity);
+                var shadow_effect = new ShadowEffect (monitor_geom.width, monitor_geom.height, 
+                        shadow_size, shadow_spread, shadow_opacity, shadow_yoffset);
 				add_effect_with_name ("shadow", shadow_effect);
 			}
 			if (enable_border) {
