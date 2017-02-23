@@ -41,7 +41,7 @@ namespace Gala
 
     const int CORNER_SIZE = 32;
     const int CORNER_THRESHOLD = 150;
-    const int REACTIVATION_THRESHOLD = 450; // cooldown time for consective reactivation
+    const int REACTIVATION_THRESHOLD = 550; // cooldown time for consective reactivation
 
 	class DeepinCornerIndicator : Clutter.Actor
 	{
@@ -240,6 +240,7 @@ namespace Gala
             int64 timestamp = get_monotonic_time () / 1000;
             if (last_trigger_time != 0 && 
                     (timestamp - last_trigger_time) < REACTIVATION_THRESHOLD - CORNER_THRESHOLD) {
+                GLib.debug ("cool down");
                 // still cooldown
                 return;
             }
@@ -357,6 +358,7 @@ namespace Gala
 
         void push_back (Clutter.Point pos) 
         {
+            GLib.debug ("push_back");
             float ex = pos.x, ey = pos.y;
 
             switch (direction) {
