@@ -141,7 +141,6 @@ namespace Gala
                 actor.remove_all_transitions ();
                 remove_child (actor);
 
-                actor.background = null;
                 actor.destroy ();
             }
 

@@ -53,7 +53,6 @@ namespace Gala
 		construct
 		{
 			background = new Meta.Background (screen);
-			background.set_data<Background> ("delegate", this);
 
 			cancellable = new Cancellable ();
 
@@ -74,6 +73,7 @@ namespace Gala
 
             SignalHandler.disconnect (background, handler);
             handler = 0;
+            background = null;
 		}
 
 		public void update_resolution ()
