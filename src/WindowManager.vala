@@ -246,9 +246,9 @@ namespace Gala
             }
 
             if (can_activate (pos, timestamp)) {
-                last_trigger_time = timestamp;
-                last_reset_time = 0;
                 perform_action ();
+                push_back (pos);
+
             } else {
                 // warp mouse cursor back a little
                 push_back (pos);
@@ -398,6 +398,9 @@ namespace Gala
             try {
                 Process.spawn_command_line_async (action);
             } catch (Error e) { warning (e.message); }
+
+            last_trigger_time = get_monotonic_time () / 1000;
+            last_reset_time = 0;
 
             return false;
         }

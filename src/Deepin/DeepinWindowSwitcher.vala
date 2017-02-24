@@ -86,7 +86,6 @@ namespace Gala
             background.set_name ("blur-switcher");
             background.visible = false;
 
-            //popup.add_child (shape);
 			popup.add_child (item_container);
 
 			window_clones = new Actor ();
@@ -372,6 +371,7 @@ namespace Gala
 
 			visible = false;
 			closing = false;
+            current_item = null;
 
 			window_clones.destroy_all_children ();
 

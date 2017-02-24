@@ -73,7 +73,6 @@ namespace Gala
 
             SignalHandler.disconnect (background, handler);
             handler = 0;
-            background = null;
 		}
 
 		public void update_resolution ()
@@ -228,15 +227,9 @@ namespace Gala
 
 #if HAS_MUTTER316
             background.set_file (File.new_for_path (filename), style);
-            var image = cache.load (File.new_for_path (filename));
 #else
             background.set_filename (filename, style);
-            var image = cache.load (filename);
 #endif
-
-            if (image.is_loaded ()) {
-                set_loaded ();
-            }
 
             watch_file (filename);
         }

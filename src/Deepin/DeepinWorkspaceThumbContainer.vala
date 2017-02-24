@@ -72,7 +72,7 @@ namespace Gala
         public const int BACKGROUND_OPACITY = 60;
 
         DeepinWorkspaceAddButton btn;
-        Meta.BackgroundActor background_actor;
+        BlurredBackgroundActor background_actor;
         BackgroundSource background_source;
         DragDropAction window_drop_action;
 
@@ -86,7 +86,7 @@ namespace Gala
             background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
 			background_source.changed.connect (() => update_background_actor ());
-            background_actor = new BackgroundActor (screen, screen.get_primary_monitor ());
+            background_actor = new BlurredBackgroundActor (screen, screen.get_primary_monitor ());
             update_background_actor ();
             background_actor.opacity = 0;
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);

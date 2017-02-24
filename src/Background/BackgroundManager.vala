@@ -176,8 +176,6 @@ namespace Gala
         protected void create_background_actor ()
         {
             Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
-            //stderr.printf ("%s: count %d mon %d ws %d\n", Log.METHOD, actors.size,
-                    //monitor_index, workspace_index);
 
             var background = background_source.get_background (monitor_index, workspace_index);
             var background_actor = new Meta.BlurredBackgroundActor (screen, monitor_index);

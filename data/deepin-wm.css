@@ -30,7 +30,7 @@
 }
 
 .deepin-window-switcher-item:selected {
-    background: rgba(1, 189, 255, 1.0);
+    background: rgba(44, 167, 248, 1.0);
     border-radius: 4px;
 }
 
