@@ -366,7 +366,7 @@ namespace Gala
             
             monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-            popup = new DeepinCssStaticActor ("deepin-window-switcher");
+            popup = new DeepinCssStaticActor ("deepin-workspace-indicator");
 
             background = new BlurActor (screen);
             background.set_radius (13);
@@ -397,6 +397,7 @@ namespace Gala
             });
         }
 
+        Cairo.Region? last_region = null;
         public void open ()
         {
             POPUP_TIMEOUT = AnimationSettings.get_default ().workspace_popup_duration;
@@ -407,8 +408,21 @@ namespace Gala
                     popup.add_child (snapshot);
                 }
                 relayout ();
+
                 background.set_position (popup.x, popup.y);
                 background.set_size (popup.width, popup.height);
+
+                Cairo.RectangleInt r =  {0, 0, (int)popup.width, (int)popup.height};
+                Cairo.RectangleInt[] rects = { r };
+                int[] radius = {5, 5};
+
+                var region = new Cairo.Region.rectangles (rects);
+                if (!region.equal (last_region)) {
+                    var blur_mask = DeepinUtils.build_blur_mask (rects, radius);
+                    background.set_blur_mask (blur_mask);
+                    last_region = region;
+                }
+
                 popup.clear_effects ();
                 popup.add_effect_with_name ( "shadow",
                         new ShadowEffect ((int)popup.width, (int)popup.height, 10, 3, 50));

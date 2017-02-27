@@ -41,7 +41,7 @@ namespace Gala
         BlurActor background;
 		Actor item_container;
 		Actor window_clones;
-		protected DeepinCssActor shape;
+		Actor shape;
 		List<Actor> clone_sort_order;
 
 		uint popup_delay_timeout_id = 0;
@@ -63,11 +63,10 @@ namespace Gala
             popup = new DeepinCssStaticActor ("deepin-window-switcher");
 			popup.opacity = 0;
 
-			shape = new DeepinCssActor ("deepin-window-switcher-item");
+			shape = new DeepinCssStaticActor ("deepin-window-switcher-item", Gtk.StateFlags.SELECTED);
 			shape.set_pivot_point (0.5f, 0.5f);
             shape.scale_x = 1.033;
             shape.scale_y = 1.033;
-			shape.select = true;
             shape.visible = false;
 
 			item_container = new Actor ();
@@ -182,6 +181,7 @@ namespace Gala
             switcher_layout.max_width = max_width;
         }
 
+        Cairo.Region? last_region = null;
 		void show_popup ()
 		{
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (wm.get_screen ());
@@ -189,6 +189,18 @@ namespace Gala
                     (monitor_geom.height - popup.height) / 2);
             background.set_position (popup.x, popup.y);
             background.set_size (popup.width, popup.height);
+
+            Cairo.RectangleInt r =  {0, 0, (int)popup.width, (int)popup.height};
+            Cairo.RectangleInt[] rects = { r };
+            int[] radius = {5, 5};
+
+            var region = new Cairo.Region.rectangles (rects);
+            if (!region.equal (last_region)) {
+                var blur_mask = DeepinUtils.build_blur_mask (rects, radius);
+                background.set_blur_mask (blur_mask);
+                last_region = region;
+            }
+
             popup.clear_effects ();
             popup.add_effect_with_name ( "shadow",
                     new ShadowEffect ((int)popup.width, (int)popup.height, 10, 3, 50));

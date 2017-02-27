@@ -253,7 +253,7 @@ namespace Gala
 
 			var close_box = ActorBox ();
 			close_box.set_size (close_button.width, close_button.height);
-            close_box.set_origin (box.get_width () - close_box.get_width () * 0.55f,
+            close_box.set_origin (box.get_width () - close_box.get_width () * 0.50f,
                                   -close_button.height * 0.50f);
 
 			close_button.allocate (close_box, flags);

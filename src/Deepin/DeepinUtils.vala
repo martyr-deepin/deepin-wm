@@ -29,6 +29,7 @@ namespace Gala
 		public delegate void PlainCallback (Clutter.Actor? actor = null);
 
 		public delegate void CustomTimelineSetupFunc (Clutter.Timeline timeline);
+        const float PI = 3.141592653589793f;
 
 		/* WM functions */
 
@@ -700,5 +701,128 @@ namespace Gala
 			box.set_origin (new_x, new_y);
 			box.set_size (new_width, new_height);
 		}
+
+        static void _draw_round_box2 (Cairo.Context cr, int width, int height, double xradius, double yradius)
+        {
+            cr.set_antialias(Cairo.Antialias.BEST);
+
+            double xc = xradius, yc = yradius;
+            double angle1 = 180.0  * (PI/180.0);  /* angles are specified */
+            double angle2 = 270.0 * (PI/180.0);  /* in radians           */
+
+            {
+                cr.save ();
+                cr.translate (xc, yc);
+                cr.scale (1.0, yradius / xradius);
+                cr.translate (-xc, -yc);
+                cr.arc (xc, yc, xradius, angle1, angle2);
+                cr.restore ();
+            }
+
+            xc = width - xradius;
+            angle1 = 270.0 * (PI/180.0);
+            angle2 = 360.0 * (PI/180.0);
+            {
+                cr.save ();
+                cr.translate (xc, yc);
+                cr.scale (1.0, yradius / xradius);
+                cr.translate (-xc, -yc);
+                cr.arc (xc, yc, xradius, angle1, angle2);
+                cr.restore ();
+            }
+
+            yc = height - yradius;
+            angle1 = 0.0 * (PI/180.0);
+            angle2 = 90.0 * (PI/180.0);
+            {
+                cr.save ();
+                cr.translate (xc, yc);
+                cr.scale (1.0, yradius / xradius);
+                cr.translate (-xc, -yc);
+                cr.arc (xc, yc, xradius, angle1, angle2);
+                cr.restore ();
+            }
+
+            xc = xradius;
+            angle1 = 90.0 * (PI/180.0);
+            angle2 = 180.0 * (PI/180.0);
+            {
+                cr.save ();
+                cr.translate (xc, yc);
+                cr.scale (1.0, yradius / xradius);
+                cr.translate (-xc, -yc);
+                cr.arc (xc, yc, xradius, angle1, angle2);
+                cr.restore ();
+            }
+
+            cr.set_antialias (Cairo.Antialias.DEFAULT);
+        }
+
+        static void _draw_round_box (Cairo.Context cr, int width, int height, double radius)
+        {
+            cr.set_antialias (Cairo.Antialias.BEST);
+
+            double xc = radius, yc = radius;
+            double angle1 = 180.0  * (PI/180.0);  /* angles are specified */
+            double angle2 = 270.0 * (PI/180.0);  /* in radians           */
+
+            cr.arc (xc, yc, radius, angle1, angle2);
+
+            xc = width - radius;
+            angle1 = 270.0 * (PI/180.0);
+            angle2 = 360.0 * (PI/180.0);
+            cr.arc (xc, yc, radius, angle1, angle2);
+
+            yc = height - radius;
+            angle1 = 0.0 * (PI/180.0);
+            angle2 = 90.0 * (PI/180.0);
+            cr.arc (xc, yc, radius, angle1, angle2);
+
+            xc = radius;
+            angle1 = 90.0 * (PI/180.0);
+            angle2 = 180.0 * (PI/180.0);
+            cr.arc (xc, yc, radius, angle1, angle2);
+
+            cr.set_antialias(Cairo.Antialias.DEFAULT);
+        }
+
+        public static Cairo.Surface? build_blur_mask (Cairo.RectangleInt[] origin_rects, int[] radius)
+        { 
+            var region = new Cairo.Region.rectangles (origin_rects);
+            if (region.is_empty()) {
+                return null;
+            }
+
+            var bounds = region.get_extents ();
+            var surface = new Cairo.ImageSurface (Cairo.Format.A8, bounds.width, bounds.height);
+            var cr = new Cairo.Context (surface);
+
+            cr.set_source_rgba (1, 1, 1, 0);
+            cr.rectangle (0, 0, bounds.width, bounds.height);
+            cr.fill ();
+
+            for (int i = 0; i < origin_rects.length; i++) {
+                Cairo.RectangleInt r = {
+                    origin_rects[i].x - bounds.x, 
+                    origin_rects[i].y - bounds.y, 
+                    origin_rects[i].width,
+                    origin_rects[i].height,
+                };
+                cr.save ();
+                cr.set_source_rgba (1, 1, 1, 1);
+                cr.translate (r.x, r.y);
+                if (radius[i*2] == radius[i*2+1]) {
+                    _draw_round_box (cr, r.width, r.height, radius[i*2]);
+                } else {
+                    _draw_round_box2 (cr, r.width, r.height, radius[i*2], radius[i*2+1]);
+                }
+                cr.fill ();
+                cr.restore ();
+                GLib.debug ("%s: (%d, %d, %d, %d, %d, %d)\n", Log.METHOD,
+                        r.x, r.y, r.width, r.height, radius[i*2], radius[i*2+1]);
+            }
+
+            return surface;
+        }
 	}
 }
