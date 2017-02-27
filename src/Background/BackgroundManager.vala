@@ -30,21 +30,23 @@ namespace Gala
 		public int monitor_index { get; construct; }
 		public int workspace_index { get; construct; }
 		public bool control_position { get; construct; }
+        public float background_scale { get; construct; }
 
-        Gee.ArrayList<Meta.BlurredBackgroundActor>? actors;
+        protected Gee.ArrayList<Meta.BlurredBackgroundActor>? actors;
 
 		BackgroundSource? background_source = null;
         ulong changed_handler = 0;
         ulong serial = 0;
 		int radius = 0;
 		int rounds = 0;
+        protected int rounded_radius = 0;
         unowned Meta.Workspace workspace;
 
 		public BackgroundManager (Meta.Screen screen, int monitor_index, int workspace_index,
-								  bool control_position = true)
+								  bool control_position = true, float background_scale = 1.0f)
 		{
 			Object (screen: screen, monitor_index: monitor_index, workspace_index: workspace_index,
-					control_position: control_position);
+					control_position: control_position, background_scale: background_scale);
 		}
 
 		construct
@@ -102,12 +104,48 @@ namespace Gala
             }
         }
 
+        // blur radius
         public void set_radius (int radius)
         {
             this.radius = radius;
             if (actors.size > 0) {
                 var actor = actors[actors.size - 1];
                 actor.set_radius (radius);
+            }
+        }
+
+        public void set_rounded_radius (int rd)
+        {
+            rounded_radius = rd;
+            if (actors.size == 0) {
+                return;
+            }
+
+            foreach (var actor in actors) {
+                set_actor_rounded_radius (actor, rd);
+            }
+        }
+
+        Cairo.Region? last_region = null;
+        Cairo.Surface? last_blur_mask = null;
+        protected void set_actor_rounded_radius (Meta.BlurredBackgroundActor actor, int rd, bool forced = false)
+        {
+            if (rd == 0) {
+                actor.set_blur_mask (null);
+            } else {
+                Cairo.RectangleInt r =  {0, 0, (int)actor.width, (int)actor.height};
+                Cairo.RectangleInt[] rects = { r };
+                int[] radius = {rd, rd};
+
+                var region = new Cairo.Region.rectangles (rects);
+                if (forced || !region.equal (last_region)) {
+                    var blur_mask = DeepinUtils.build_blur_mask (rects, radius);
+                    actor.set_blur_mask (blur_mask);
+                    last_blur_mask = blur_mask;
+                    last_region = region;
+                } else {
+                    actor.set_blur_mask (last_blur_mask);
+                }
             }
         }
 
@@ -131,6 +169,7 @@ namespace Gala
         {
             insert_child_below (background_actor, null);
             actors.add (background_actor);
+            set_actor_rounded_radius (background_actor, rounded_radius, true);
             Meta.verbose ("%s: add %s\n", Log.METHOD, background_actor.name);
 
             while (actors.size > 2) {
@@ -183,7 +222,9 @@ namespace Gala
             serial++;
 
             var monitor = screen.get_monitor_geometry (monitor_index);
-            background_actor.set_size (monitor.width, monitor.height);
+            //background_actor.set_size (monitor.width, monitor.height);
+            background_actor.set_size (monitor.width * background_scale, 
+                    monitor.height * background_scale);
 
             if (control_position) {
                 background_actor.set_position (monitor.x, monitor.y);

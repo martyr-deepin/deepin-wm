@@ -58,7 +58,8 @@ namespace Gala
 		 */
 		public DeepinWorkspaceThumbClone thumb_workspace { get; private set; }
 
-		Actor background;
+		Actor thumb_shape;
+		DeepinFramedBackground background;
 		float background_scale;
 		bool opened;
 
@@ -76,12 +77,13 @@ namespace Gala
 			var screen = workspace.get_screen ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-            background = new DeepinFramedBackground (screen, workspace.index (), true, false, 30, 14, 66, 14);
+            background = new DeepinFramedBackground (screen, workspace.index (), true, false, 1.0f, 30, 14, 66, 14);
             background.reactive = true;
             background.button_press_event.connect (() => {
                 selected (true);
                 return false;
             });
+            background.set_rounded_radius (10);
 
 			thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
             thumb_workspace.set_pivot_point (0.5f, 0.5f);
@@ -159,18 +161,13 @@ namespace Gala
 			workspace.window_added.connect (add_window);
 			workspace.window_removed.connect (remove_window);
 
-			add_child (background);
-			add_child (window_container);
+            thumb_shape =
+                new DeepinCssStaticActor ("deepin-workspace-clone", Gtk.StateFlags.NORMAL);
+            //thumb_shape.set_pivot_point (0.5f, 0.5f);
 
-            int radius = DeepinUtils.get_css_border_radius (
-                    "deepin-workspace-clone", Gtk.StateFlags.SELECTED);
-            background.add_effect (new DeepinRoundRectEffect (radius));
-            var roundRectColorNormal = DeepinUtils.get_css_background_color_gdk_rgba (
-                    "deepin-window-manager");
-            var roundRectOutlineEffect =
-                new DeepinRoundRectOutlineEffect ((int)background.width, (int)background.height, radius,
-                        roundRectColorNormal);
-            background.add_effect (roundRectOutlineEffect);
+			add_child (background);
+            add_child (thumb_shape);
+			add_child (window_container);
 
 			// add existing windows
 			var windows = workspace.list_windows ();
@@ -257,12 +254,14 @@ namespace Gala
 				(int)(monitor_geom.height * DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT);
 			int bottom_offset =
 				(int)(monitor_geom.height * DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT);
-			float scale =
-				(float)(monitor_geom.height - top_offset - bottom_offset) / monitor_geom.height;
-			float pivot_y = top_offset / (monitor_geom.height - monitor_geom.height * scale);
+            float scale = (1.0f - DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT -
+                    DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT);
+			float pivot_y =  DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT / (1.0f - scale);
 			background_scale = scale;
-
 			background.set_pivot_point (0.5f, pivot_y);
+
+            thumb_shape.set_size (monitor_geom.width, monitor_geom.height);
+			thumb_shape.set_pivot_point (0.5f, pivot_y);
 
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
@@ -270,6 +269,8 @@ namespace Gala
 			window_container.padding_left = window_container.padding_right =
 				(int)(monitor_geom.width - monitor_geom.width * scale) / 2;
 			window_container.padding_bottom = bottom_offset;
+
+            //thumb_shape.set_position (top_offset, window_container.padding_left);
 		}
 
 		/**
@@ -341,8 +342,14 @@ namespace Gala
 												   DeepinUtils.clutter_set_mode_ease_out_quint,
 												   "scale-x", &scale_value,
 												   "scale-y", &scale_value);
+				DeepinUtils.start_animation_group (thumb_shape, "open",
+                                                   animation_settings.multitasking_toggle_duration,
+												   DeepinUtils.clutter_set_mode_ease_out_quint,
+												   "scale-x", &scale_value,
+												   "scale-y", &scale_value);
 			} else {
 				background.set_scale (background_scale, background_scale);
+                thumb_shape.set_scale (background_scale, background_scale);
 			}
 		}
 
@@ -375,8 +382,18 @@ namespace Gala
                     background.x = orig_x;
                 });
 
+				ag = DeepinUtils.start_animation_group (thumb_shape, "close", 
+                                                   duration,
+												   DeepinUtils.clutter_set_mode_ease_out_quint,
+												   "scale-x", &scale_value, "scale-y", &scale_value,
+                                                   "x", &x_value);
+                ag.stopped.connect ((is_finished) => {
+                    thumb_shape.x = orig_x;
+                });
+
 			} else {
 				background.set_scale (1.0f, 1.0f);
+                thumb_shape.set_scale (1.0f, 1.0f);
 			}
 		}
 	}

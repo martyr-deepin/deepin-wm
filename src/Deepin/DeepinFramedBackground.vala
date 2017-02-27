@@ -57,12 +57,13 @@ namespace Gala
 
 		public DeepinFramedBackground (
 			Screen screen, int workspace_index, bool enable_shadow = true,
-			bool enable_border = false, int sz = 30, int ss = 5, uint8 so = 128, int yoff = -1)
+			bool enable_border = false, float background_scale = 1.0f,
+            int sz = 30, int ss = 5, uint8 so = 128, int yoff = -1)
 		{
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
 					monitor_index: screen.get_primary_monitor (), workspace_index: workspace_index,
-					control_position: false, shadow_size: sz, shadow_spread: ss, shadow_opacity: so, 
-                    shadow_yoffset: yoff);
+					control_position: false, background_scale: background_scale,
+                    shadow_size: sz, shadow_spread: ss, shadow_opacity: so, shadow_yoffset: yoff);
 		}
 
 		construct

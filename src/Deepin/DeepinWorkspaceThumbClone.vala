@@ -26,9 +26,6 @@ namespace Gala
 	 */
 	public class DeepinWorkspaceThumbCloneCore : Actor
 	{
-		const int THUMB_SHAPE_SELECTED_PADDING = 4;
-		const int THUMB_SHAPE_PADDING = 1;
-
 		/**
 		 * The workspace clone has been clicked. The MultitaskingView should consider activating its
 		 * workspace.
@@ -51,15 +48,9 @@ namespace Gala
 		Actor workspace_shadow;
 		Actor workspace_clone;
 
-		public Actor background;
+		DeepinFramedBackground background;
 
 		DeepinIconActor close_button;
-
-		// The DeepinRoundRectEffect works bad, so we drawing the outline to make it looks
-		// antialise, but the drawing color is different for normal and selected state, so we must
-		// update it manually.
-		Gdk.RGBA roundRectColorNormal;
-		Gdk.RGBA roundRectColorSelected;
 
 		public DeepinWorkspaceThumbCloneCore (Workspace workspace)
 		{
@@ -72,7 +63,7 @@ namespace Gala
 			workspace_shadow.add_effect_with_name (
 				"shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
 											get_thumb_workspace_prefer_heigth (), 10, 4, 50));
-			add_child (workspace_shadow);
+            add_child (workspace_shadow);
 
 			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
 
@@ -85,28 +76,20 @@ namespace Gala
                 new DeepinCssStaticActor ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
             thumb_shape_selected.opacity = 0;
             thumb_shape_selected.set_pivot_point (0.5f, 0.5f);
-            add_child (thumb_shape);
-            add_child (thumb_shape_selected);
 
 			// workspace thumbnail clone
 			workspace_clone = new Actor ();
 			workspace_clone.set_pivot_point (0.5f, 0.5f);
 
-			// setup rounded rectangle effect
-			int radius = DeepinUtils.get_css_border_radius (
-				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			roundRectColorNormal = DeepinUtils.get_css_background_color_gdk_rgba (
-				"deepin-window-manager");
-			roundRectColorSelected = DeepinUtils.get_css_background_color_gdk_rgba (
-				"deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-			workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
-
+			// size-scaled background
 			background = new DeepinFramedBackground (workspace.get_screen (),
-													 workspace.index (), false);
+													 workspace.index (), false, false, 
+                                                     DeepinWorkspaceThumbContainer.WORKSPACE_WIDTH_PERCENT);
 			background.button_press_event.connect (() => {
 				selected ();
 				return true;
 			});
+            background.set_rounded_radius (6);
 			workspace_clone.add_child (background);
 
 			window_container = new DeepinWindowThumbContainer (workspace);
@@ -119,6 +102,8 @@ namespace Gala
 			workspace_clone.add_child (window_container);
 
 			add_child (workspace_clone);
+            add_child (thumb_shape);
+            add_child (thumb_shape_selected);
 
 			// close button
             close_button = new DeepinIconActor ("close");
@@ -233,22 +218,15 @@ namespace Gala
 			workspace_shadow.allocate (thumb_box, flags);
 			window_container.allocate (thumb_box, flags);
 
-			// scale background
-			float scale =
-				box.get_width () != 0 ? box.get_width () / (float)monitor_geom.width : 0.5f;
-			background.set_scale (scale, scale);
+            background.set_size (box.get_width (), box.get_height ());
 
 			var thumb_shape_box = ActorBox ();
-			thumb_shape_box.set_size (
-				thumb_width + THUMB_SHAPE_PADDING * 2, thumb_height + THUMB_SHAPE_PADDING * 2);
-			thumb_shape_box.set_origin (
-				(box.get_width () - thumb_shape_box.get_width ()) / 2, -THUMB_SHAPE_PADDING);
+			thumb_shape_box.set_size (thumb_width, thumb_height);
+			thumb_shape_box.set_origin (0, 0);
 			thumb_shape.allocate (thumb_shape_box, flags);
 
-            thumb_shape_box.set_size (
-                    thumb_width + THUMB_SHAPE_SELECTED_PADDING * 2, thumb_height + THUMB_SHAPE_SELECTED_PADDING * 2);
-            thumb_shape_box.set_origin (
-                    (box.get_width () - thumb_shape_box.get_width ()) / 2, -THUMB_SHAPE_SELECTED_PADDING);
+            thumb_shape_box.set_size (thumb_width, thumb_height);
+            thumb_shape_box.set_origin (0, 0);
             thumb_shape_selected.allocate (thumb_shape_box, flags);
 
 			var close_box = ActorBox ();
@@ -471,6 +449,11 @@ namespace Gala
 
             thumb_clone.set_pivot_point (0.5f, 0.5f);
             thumb_clone.add_transition ("fade-in", animation);
+
+            animation.stopped.connect(() => {
+                thumb_clone.opacity = 255;
+                thumb_clone.set_scale (1.0f, 1.0f);
+            });
         }
 
 		/**

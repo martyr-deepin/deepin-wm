@@ -26,6 +26,7 @@ namespace Meta {
 		public void set_background (Meta.Background background);
 		public void set_radius (int radius);
 		public void set_rounds (int rounds);
+        public void set_blur_mask (Cairo.Surface? mask);
 		[NoAccessorMethod]
 		public Meta.Background background { owned get; set; }
 		[NoAccessorMethod]

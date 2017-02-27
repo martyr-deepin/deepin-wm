@@ -196,7 +196,7 @@ namespace Gala
         Actor workspace_shadow;
         Actor workspace_clone;
 
-        public Actor background;
+        DeepinFramedBackground background;
 
         public DeepinWorkspaceSnapshot (Workspace workspace)
         {
@@ -230,12 +230,9 @@ namespace Gala
             workspace_clone = new Actor ();
             workspace_clone.set_pivot_point (0.5f, 0.5f);
 
-            // setup rounded rectangle effect
-            int radius = DeepinUtils.get_css_border_radius (
-                    "deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
-            workspace_clone.add_effect (new DeepinRoundRectEffect (radius));
-
-            background = new DeepinFramedBackground (workspace.get_screen (), workspace.index (), false);
+            background = new DeepinFramedBackground (workspace.get_screen (), workspace.index (), 
+                    false, false, DeepinWorkspaceIndicator.WORKSPACE_SCALE);
+            background.set_rounded_radius (6);
             workspace_clone.add_child (background);
 
             window_container = new DeepinWindowSnapshotContainer (workspace);
@@ -305,10 +302,7 @@ namespace Gala
             workspace_shadow.allocate (thumb_box, flags);
             window_container.allocate (thumb_box, flags);
 
-            // scale background
-            float scale =
-                box.get_width () != 0 ? box.get_width () / (float)monitor_geom.width : 0.5f;
-            background.set_scale (scale, scale);
+            background.set_size (box.get_width (), box.get_height ());
 
             var thumb_shape_box = ActorBox ();
             thumb_shape_box.set_size (

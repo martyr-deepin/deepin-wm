@@ -65,7 +65,7 @@ namespace Gala
 	{
 		public Screen screen { get; construct; }
 
-		Actor background;
+		DeepinFramedBackground background;
 
 		public DeepinWindowSwitcherDesktopItem (Screen screen)
 		{
@@ -74,8 +74,14 @@ namespace Gala
 
 		construct
 		{
+			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+
+			float scale_x = RECT_PREFER_WIDTH / (float)monitor_geom.width;
+			float scale_y = RECT_PREFER_HEIGHT / (float)monitor_geom.height;
+			float scale = Math.fminf (scale_x, scale_y);
+
 			background = new DeepinFramedBackground (screen, screen.get_active_workspace_index (),
-													 false, false);
+													 false, false, scale);
 			add_child (background);
 		}
 
@@ -110,13 +116,9 @@ namespace Gala
 			bg_box.set_origin ((box.get_width () - bg_box.get_width ()) / 2,
 							   (box.get_height () - bg_box.get_height ()) / 2);
 
-			// scale background to fix the allocated size
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
-			float bg_scale = (bg_width > 0) ? bg_width / (float)monitor_geom.width : 0.5f;
-			if (bg_scale != 1.0f) {
-				background.scale_x = bg_scale;
-				background.scale_y = bg_scale;
-			}
+			// scale background to relative to preferred size
+            background.scale_x = scale;
+            background.scale_y = scale;
 
 			background.allocate (bg_box, flags);
 		}
