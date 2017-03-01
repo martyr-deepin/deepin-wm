@@ -37,6 +37,7 @@ namespace Gala
 
 		DeepinWindowSwitcherItem? current_item = null;
 
+        Actor popup_border;
 		Actor popup;
         BlurActor background;
 		Actor item_container;
@@ -59,6 +60,10 @@ namespace Gala
 		construct
 		{
 			var screen = wm.get_screen ();
+
+            popup_border =
+                new DeepinCssStaticActor ("deepin-window-switcher-border", Gtk.StateFlags.NORMAL);
+            popup_border.set_pivot_point (0.5f, 0.5f);
 
             popup = new DeepinCssStaticActor ("deepin-window-switcher");
 			popup.opacity = 0;
@@ -93,6 +98,7 @@ namespace Gala
             window_clones.opacity = 0;
 
 			add_child (window_clones);
+            add_child (popup_border);
             add_child (background);
             add_child (shape);
 			add_child (popup);
@@ -189,6 +195,9 @@ namespace Gala
                     (monitor_geom.height - popup.height) / 2);
             background.set_position (popup.x, popup.y);
             background.set_size (popup.width, popup.height);
+
+            popup_border.set_position (popup.x-1, popup.y-1);
+            popup_border.set_size (popup.width+2, popup.height+2);
 
             Cairo.RectangleInt r =  {0, 0, (int)popup.width, (int)popup.height};
             Cairo.RectangleInt[] rects = { r };

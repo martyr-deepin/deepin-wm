@@ -163,7 +163,6 @@ namespace Gala
 
             thumb_shape =
                 new DeepinCssStaticActor ("deepin-workspace-clone", Gtk.StateFlags.NORMAL);
-            //thumb_shape.set_pivot_point (0.5f, 0.5f);
 
 			add_child (background);
             add_child (thumb_shape);

@@ -341,6 +341,7 @@ namespace Gala
 		public WindowManager wm { get; construct; }
         public Screen screen { get; construct; }
 
+        Actor popup_border;
 		Actor popup;
         BlurActor background;
 
@@ -360,12 +361,17 @@ namespace Gala
             
             monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
+            popup_border =
+                new DeepinCssStaticActor ("deepin-workspace-indicator-border", Gtk.StateFlags.NORMAL);
+            popup_border.set_pivot_point (0.5f, 0.5f);
+
             popup = new DeepinCssStaticActor ("deepin-workspace-indicator");
 
             background = new BlurActor (screen);
             background.set_radius (13);
-            add_child (background);
 
+            add_child (popup_border);
+            add_child (background);
             add_child (popup);
         }
 
@@ -405,6 +411,9 @@ namespace Gala
 
                 background.set_position (popup.x, popup.y);
                 background.set_size (popup.width, popup.height);
+
+                popup_border.set_position (popup.x-1, popup.y-1);
+                popup_border.set_size (popup.width+2, popup.height+2);
 
                 Cairo.RectangleInt r =  {0, 0, (int)popup.width, (int)popup.height};
                 Cairo.RectangleInt[] rects = { r };
