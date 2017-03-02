@@ -485,6 +485,37 @@ namespace Gala
 			}
 		}
 
+        void start_nudge_effect_for (Actor actor, MotionDirection direction)
+        {
+            if (actor.get_transition ("nudge") != null) {
+                return;
+            }
+
+            var dest = (direction == MotionDirection.LEFT ? 32.0f : -32.0f);
+
+            double[] keyframes = { 0.5, 1.0 };
+            GLib.Value[] x = { dest, 0.0f };
+            Clutter.AnimationMode[] modes = {Clutter.AnimationMode.EASE_IN_QUAD,
+                Clutter.AnimationMode.EASE_OUT_QUAD};
+
+            var nudge = new Clutter.KeyframeTransition ("x");
+            nudge.duration = 450;
+            nudge.remove_on_complete = true;
+            nudge.set_from_value (0.0f);
+            nudge.set_to_value (0.0f);
+            nudge.set_key_frames (keyframes);
+            nudge.set_values (x);
+            nudge.set_modes (modes);
+
+            actor.add_transition ("nudge", nudge);
+        }
+
+        void start_nudge_effect (MotionDirection direction)
+        {
+            start_nudge_effect_for (thumb_container, direction);
+            start_nudge_effect_for (flow_container, direction);
+        }
+
 		/**
 		 * Collect key events, mainly for redirecting them to the WindowCloneContainers to select
 		 * the active window.
@@ -545,10 +576,27 @@ namespace Gala
 				select_window_by_order (backward);
 				break;
 			case Clutter.Key.Left:
-				wm.switch_to_next_workspace (MotionDirection.LEFT);
+                var screen = wm.get_screen ();
+                var active_workspace = screen.get_active_workspace ();
+                var neighbor = active_workspace.get_neighbor (MotionDirection.LEFT);
+
+                if (neighbor != active_workspace) {
+                    wm.switch_to_next_workspace (MotionDirection.LEFT);
+                } else {
+                    start_nudge_effect (MotionDirection.LEFT);
+                }
+
 				break;
 			case Clutter.Key.Right:
-				wm.switch_to_next_workspace (MotionDirection.RIGHT);
+                var screen = wm.get_screen ();
+                var active_workspace = screen.get_active_workspace ();
+                var neighbor = active_workspace.get_neighbor (MotionDirection.RIGHT);
+
+                if (neighbor != active_workspace) {
+                    wm.switch_to_next_workspace (MotionDirection.RIGHT);
+                } else {
+                    start_nudge_effect (MotionDirection.RIGHT);
+                }
 				break;
 			case Clutter.Key.plus:
 			case Clutter.Key.equal:
@@ -723,6 +771,8 @@ namespace Gala
 				grab_key_focus ();
 			} else {
 				DragDropAction.cancel_all_by_id ("deepin-multitaskingview-window");
+                thumb_container.remove_transition ("nudge");
+                flow_container.remove_transition ("nudge");
 			}
 
 			// find active workspace clone and raise it, so there are no overlaps while
