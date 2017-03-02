@@ -906,14 +906,16 @@ namespace Gala
 			case KeyBindingAction.WORKSPACE_10:
 			case KeyBindingAction.WORKSPACE_11:
 			case KeyBindingAction.WORKSPACE_12:
-			case KeyBindingAction.WORKSPACE_LEFT:
-			case KeyBindingAction.WORKSPACE_RIGHT:
 			case KeyBindingAction.WORKSPACE_UP:
 			case KeyBindingAction.WORKSPACE_DOWN:
 #if HAS_MUTTER314
 			case KeyBindingAction.WORKSPACE_LAST:
 #endif
 				return false;
+			case KeyBindingAction.WORKSPACE_LEFT:
+			case KeyBindingAction.WORKSPACE_RIGHT:
+                /* disable this for nudge effect */
+                return true;
 			default:
 				return true;
 			}
