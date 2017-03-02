@@ -102,8 +102,8 @@ namespace Gala
 			workspace_clone.add_child (window_container);
 
             add_child (thumb_shape);
-            add_child (thumb_shape_selected);
 			add_child (workspace_clone);
+            add_child (thumb_shape_selected);
 
 			// close button
             close_button = new DeepinIconActor ("close");

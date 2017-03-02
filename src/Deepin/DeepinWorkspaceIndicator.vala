@@ -182,9 +182,6 @@ namespace Gala
 
     public class DeepinWorkspaceSnapshot: Actor
     {
-        const int THUMB_SHAPE_SELECTED_PADDING = 4;
-        const int THUMB_SHAPE_PADDING = 1;
-
         public Workspace workspace { get; construct; }
 
         public DeepinWindowSnapshotContainer window_container;
@@ -224,7 +221,6 @@ namespace Gala
             thumb_shape_selected.opacity = 0;
             thumb_shape_selected.set_pivot_point (0.5f, 0.5f);
             add_child (thumb_shape);
-            add_child (thumb_shape_selected);
 
             // workspace thumbnail clone
             workspace_clone = new Actor ();
@@ -240,6 +236,7 @@ namespace Gala
 
 
             add_child (workspace_clone);
+            add_child (thumb_shape_selected);
         }
 
         ~DeepinWorkspaceSnapshot ()
@@ -304,17 +301,13 @@ namespace Gala
 
             background.set_size (box.get_width (), box.get_height ());
 
-            var thumb_shape_box = ActorBox ();
-            thumb_shape_box.set_size (
-                    thumb_width + THUMB_SHAPE_PADDING * 2, thumb_height + THUMB_SHAPE_PADDING * 2);
-            thumb_shape_box.set_origin (
-                    (box.get_width () - thumb_shape_box.get_width ()) / 2, -THUMB_SHAPE_PADDING);
-            thumb_shape.allocate (thumb_shape_box, flags);
+			var thumb_shape_box = ActorBox ();
+			thumb_shape_box.set_size (thumb_width+2, thumb_height+2);
+			thumb_shape_box.set_origin (-1, -1);
+			thumb_shape.allocate (thumb_shape_box, flags);
 
-            thumb_shape_box.set_size (
-                    thumb_width + THUMB_SHAPE_SELECTED_PADDING * 2, thumb_height + THUMB_SHAPE_SELECTED_PADDING * 2);
-            thumb_shape_box.set_origin (
-                    (box.get_width () - thumb_shape_box.get_width ()) / 2, -THUMB_SHAPE_SELECTED_PADDING);
+            thumb_shape_box.set_size (thumb_width+6, thumb_height+6);
+            thumb_shape_box.set_origin (-3, -3);
             thumb_shape_selected.allocate (thumb_shape_box, flags);
         }
     }
