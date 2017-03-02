@@ -71,12 +71,25 @@ namespace Gala
             add_child (normal_icon);
 
 			reactive = true;
-			set_size (48, 48);
             state = IconState.Normal;
 		}
 
 		~DeepinIconActor ()
 		{
+		}
+
+		public override void get_preferred_width (float for_height,
+												  out float min_width_p, out float nat_width_p)
+		{
+			nat_width_p = 48;
+			min_width_p = 48;
+		}
+
+		public override void get_preferred_height (float for_width,
+												   out float min_height_p, out float nat_height_p)
+		{
+			nat_height_p = 48;
+			min_height_p = 48;
 		}
 
 		public override bool enter_event (Clutter.CrossingEvent event)

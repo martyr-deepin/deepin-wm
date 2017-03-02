@@ -101,9 +101,9 @@ namespace Gala
 			});
 			workspace_clone.add_child (window_container);
 
-			add_child (workspace_clone);
             add_child (thumb_shape);
             add_child (thumb_shape_selected);
+			add_child (workspace_clone);
 
 			// close button
             close_button = new DeepinIconActor ("close");
@@ -111,6 +111,9 @@ namespace Gala
 			close_button.released.connect (() => {
 				closing ();
 			});
+            close_button.notify["scale_x"].connect(() => {
+                stderr.printf("close_button scaled: %f\n", close_button.scale_x);
+            });
 
 			add_child (close_button);
 		}
@@ -155,7 +158,7 @@ namespace Gala
 				close_button.opacity = 0;
 			}
 
-			close_button.restore_easing_state ();
+            close_button.restore_easing_state ();
 		}
 
 		public void set_select (bool value, bool animate = true)
@@ -221,20 +224,20 @@ namespace Gala
             background.set_size (box.get_width (), box.get_height ());
 
 			var thumb_shape_box = ActorBox ();
-			thumb_shape_box.set_size (thumb_width, thumb_height);
-			thumb_shape_box.set_origin (0, 0);
+			thumb_shape_box.set_size (thumb_width+2, thumb_height+2);
+			thumb_shape_box.set_origin (-1, -1);
 			thumb_shape.allocate (thumb_shape_box, flags);
 
-            thumb_shape_box.set_size (thumb_width, thumb_height);
-            thumb_shape_box.set_origin (0, 0);
+            thumb_shape_box.set_size (thumb_width+6, thumb_height+6);
+            thumb_shape_box.set_origin (-3, -3);
             thumb_shape_selected.allocate (thumb_shape_box, flags);
 
-			var close_box = ActorBox ();
-			close_box.set_size (close_button.width, close_button.height);
+            var close_box = ActorBox ();
+            close_box.set_size (close_button.width, close_button.height);
             close_box.set_origin (box.get_width () - close_box.get_width () * 0.50f,
                                   -close_button.height * 0.50f);
 
-			close_button.allocate (close_box, flags);
+            close_button.allocate (close_box, flags);
 		}
 	}
 
@@ -424,8 +427,8 @@ namespace Gala
             animation.remove_on_complete = true;
             animation.progress_mode = DeepinMultitaskingView.WORKSPACE_FADE_MODE;
 
-            GLib.Value[] scales = {0.0f, 1.05f, 1.0f};
-            double[] keyframes = {0.0, 0.8, 1.0};
+            GLib.Value[] scales = {0.0f, 1.0f};
+            double[] keyframes = {0.0, 1.0};
 
             var opacity_transition = new PropertyTransition ("opacity");
             opacity_transition.set_from_value (0);

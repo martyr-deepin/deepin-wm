@@ -210,8 +210,8 @@ namespace Gala
                 last_region = region;
             }
 
-            popup.clear_effects ();
-            popup.add_effect_with_name ( "shadow",
+            popup_border.clear_effects ();
+            popup_border.add_effect_with_name ( "shadow",
                     new ShadowEffect ((int)popup.width, (int)popup.height, 10, 3, 50));
 
             update_shape_size ();
