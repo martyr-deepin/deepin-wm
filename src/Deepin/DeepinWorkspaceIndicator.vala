@@ -421,7 +421,7 @@ namespace Gala
 
                 popup_border.clear_effects ();
                 popup_border.add_effect_with_name ( "shadow",
-                        new ShadowEffect ((int)popup.width, (int)popup.height, 10, 3, 50));
+                        new ShadowEffect ((int)popup_border.width, (int)popup_border.height, 10, 3, 50));
 
                 popup.opacity = 255;
                 visible = true;
