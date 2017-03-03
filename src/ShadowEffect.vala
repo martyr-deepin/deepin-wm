@@ -107,8 +107,26 @@ namespace Gala
 			var surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
 			var cr = new Cairo.Context (surface);
 
+            Cairo.RectangleInt r1 = {0, 0, width, height};
+            Cairo.RectangleInt r2 = {shadow_size, shadow_size + shadow_yoffset, actor_width, actor_height - shadow_yoffset};
+
+            cr.set_fill_rule (Cairo.FillRule.EVEN_ODD);
+            cr.new_path ();
+            //FIXME: should pass radius from parent
+            DeepinUtils.draw_round_box (cr, r2.width, r2.height, 5, r2.x, r2.y);
+
+            cr.new_sub_path ();
+            cr.move_to (r1.width, 0);
+            cr.line_to (0, 0);
+            cr.line_to (0, r1.height);
+            cr.line_to (r1.width, r1.height);
+            cr.close_path ();
+
+            cr.clip ();
+
+            cr.rectangle (r1.x, r1.y, r1.width, r1.height);
             cr.set_source_surface (buffer.surface, 0, 0);
-			cr.paint ();
+			cr.fill ();
 
 			var texture = new Cogl.Texture.from_data (width, height, 0, Cogl.PixelFormat.BGRA_8888_PRE,
 				Cogl.PixelFormat.ANY, surface.get_stride (), surface.get_data ());

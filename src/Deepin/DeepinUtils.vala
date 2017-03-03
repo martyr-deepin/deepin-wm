@@ -702,11 +702,12 @@ namespace Gala
 			box.set_size (new_width, new_height);
 		}
 
-        static void _draw_round_box2 (Cairo.Context cr, int width, int height, double xradius, double yradius)
+        public static void draw_round_box2 (Cairo.Context cr, int width, int height, double xradius, double yradius,
+                int xoff = 0, int yoff = 0)
         {
             cr.set_antialias(Cairo.Antialias.BEST);
 
-            double xc = xradius, yc = yradius;
+            double xc = xradius + xoff, yc = yradius + yoff;
             double angle1 = 180.0  * (PI/180.0);  /* angles are specified */
             double angle2 = 270.0 * (PI/180.0);  /* in radians           */
 
@@ -719,7 +720,7 @@ namespace Gala
                 cr.restore ();
             }
 
-            xc = width - xradius;
+            xc = width - xradius + xoff;
             angle1 = 270.0 * (PI/180.0);
             angle2 = 360.0 * (PI/180.0);
             {
@@ -731,7 +732,7 @@ namespace Gala
                 cr.restore ();
             }
 
-            yc = height - yradius;
+            yc = height - yradius + yoff;
             angle1 = 0.0 * (PI/180.0);
             angle2 = 90.0 * (PI/180.0);
             {
@@ -743,7 +744,7 @@ namespace Gala
                 cr.restore ();
             }
 
-            xc = xradius;
+            xc = xradius + xoff;
             angle1 = 90.0 * (PI/180.0);
             angle2 = 180.0 * (PI/180.0);
             {
@@ -758,27 +759,28 @@ namespace Gala
             cr.set_antialias (Cairo.Antialias.DEFAULT);
         }
 
-        static void _draw_round_box (Cairo.Context cr, int width, int height, double radius)
+        public static void draw_round_box (Cairo.Context cr, int width, int height, double radius,
+                int xoff = 0, int yoff = 0)
         {
             cr.set_antialias (Cairo.Antialias.BEST);
 
-            double xc = radius, yc = radius;
+            double xc = radius + xoff, yc = radius + yoff;
             double angle1 = 180.0  * (PI/180.0);  /* angles are specified */
             double angle2 = 270.0 * (PI/180.0);  /* in radians           */
 
             cr.arc (xc, yc, radius, angle1, angle2);
 
-            xc = width - radius;
+            xc = width - radius + xoff;
             angle1 = 270.0 * (PI/180.0);
             angle2 = 360.0 * (PI/180.0);
             cr.arc (xc, yc, radius, angle1, angle2);
 
-            yc = height - radius;
+            yc = height - radius + yoff;
             angle1 = 0.0 * (PI/180.0);
             angle2 = 90.0 * (PI/180.0);
             cr.arc (xc, yc, radius, angle1, angle2);
 
-            xc = radius;
+            xc = radius + xoff;
             angle1 = 90.0 * (PI/180.0);
             angle2 = 180.0 * (PI/180.0);
             cr.arc (xc, yc, radius, angle1, angle2);
@@ -812,9 +814,9 @@ namespace Gala
                 cr.set_source_rgba (1, 1, 1, 1);
                 cr.translate (r.x, r.y);
                 if (radius[i*2] == radius[i*2+1]) {
-                    _draw_round_box (cr, r.width, r.height, radius[i*2]);
+                    draw_round_box (cr, r.width, r.height, radius[i*2]);
                 } else {
-                    _draw_round_box2 (cr, r.width, r.height, radius[i*2], radius[i*2+1]);
+                    draw_round_box2 (cr, r.width, r.height, radius[i*2], radius[i*2+1]);
                 }
                 cr.fill ();
                 cr.restore ();
