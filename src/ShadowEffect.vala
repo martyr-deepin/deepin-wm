@@ -95,24 +95,115 @@ namespace Gala
 
 			// fill a new texture for this size
 			var buffer = new Granite.Drawing.BufferSurface (width, height);
-			//buffer.context.rectangle (shadow_size - shadow_spread, shadow_size - shadow_spread,
-            buffer.context.rectangle (shadow_size - shadow_spread,
-                    shadow_size + shadow_yoffset,
-                actor_width + shadow_spread * 2, actor_height + shadow_spread - shadow_yoffset);
-			buffer.context.set_source_rgba (0, 0, 0, 0.7);
-			buffer.context.fill ();
 
-			buffer.exponential_blur (shadow_size / 2);
+            Cairo.Rectangle box = {0, 0, width, height};
+
+            const double PI = 3.1415926;
+            double angle1 = 180.0 * (PI/180.0);  /* angles are specified */
+            double angle2 = 270.0 * (PI/180.0);  /* in radians           */
+            double range = shadow_size;
+            double xc = box.x + range, yc = box.y + range;
+
+            double[] clr = {0.0, 0.0, 0.0, 0.7};
+
+            // center part
+            buffer.context.rectangle (shadow_size, shadow_size,
+               actor_width, actor_height);
+            buffer.context.set_source_rgba (clr[0], clr[1], clr[2], clr[3]);
+            buffer.context.fill ();
+
+            // 4 corners
+            {
+                var radpat = new Cairo.Pattern.radial (xc, yc, 0, xc, yc, range);
+                radpat.add_color_stop_rgba (0.0, clr[0], clr[1], clr[2], clr[3]);
+                radpat.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 0.0);
+                buffer.context.set_source (radpat);
+                buffer.context.arc (xc, yc, range, angle1, angle2);
+                buffer.context.line_to (xc, yc);
+                buffer.context.line_to (box.x, box.y + range);
+                buffer.context.fill ();
+            }
+            {
+                xc = box.x + box.width - range;
+                var radpat = new Cairo.Pattern.radial (xc, yc, 0, xc, yc, range);
+                radpat.add_color_stop_rgba (0.0, clr[0], clr[1], clr[2], clr[3]);
+                radpat.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 0.0);
+                buffer.context.set_source (radpat);
+                angle1 = 270.0 * (PI/180.0);
+                angle2 = 360.0 * (PI/180.0);
+                buffer.context.arc (xc, yc, range, angle1, angle2);
+                buffer.context.line_to (xc, yc);
+                buffer.context.line_to (xc, box.y);
+                buffer.context.fill ();
+            }
+            {
+                xc = box.x + box.width - range;
+                yc = box.y + box.height - range;
+                var radpat = new Cairo.Pattern.radial (xc, yc, 0, xc, yc, range);
+                radpat.add_color_stop_rgba (0.0, clr[0], clr[1], clr[2], clr[3]);
+                radpat.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 0.0);
+                buffer.context.set_source (radpat);
+                angle1 = 0.0 * (PI/180.0);
+                angle2 = 90.0 * (PI/180.0);
+                buffer.context.arc (xc, yc, range, angle1, angle2);
+                buffer.context.line_to (xc, yc);
+                buffer.context.line_to (xc + range, yc);
+                buffer.context.fill ();
+            }
+            {
+                xc = box.x + range;
+                yc = box.y + box.height - range;
+                var radpat = new Cairo.Pattern.radial (xc, yc, 0, xc, yc, range);
+                radpat.add_color_stop_rgba (0.0, clr[0], clr[1], clr[2], clr[3]);
+                radpat.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 0.0);
+                buffer.context.set_source (radpat);
+                angle1 = 90.0 * (PI/180.0);
+                angle2 = 180.0 * (PI/180.0);
+                buffer.context.arc (xc, yc, range, angle1, angle2);
+                buffer.context.line_to (xc, yc);
+                buffer.context.line_to (xc, box.y + box.height);
+                buffer.context.fill ();
+            }
+
+            var lpat = new Cairo.Pattern.linear (box.x, box.y + box.height/2, box.x + range, box.y + box.height/2);
+            lpat.add_color_stop_rgba (1.0, clr[0], clr[1], clr[2], clr[3]);
+            lpat.add_color_stop_rgba (0.0, 0.0, 0.0, 0.0, 0.0);
+            buffer.context.set_source (lpat);
+            buffer.context.rectangle (box.x, box.y + range, box.x + range, box.y + box.height - range * 2);
+            buffer.context.fill ();
+
+            var rpat = new Cairo.Pattern.linear (box.x + box.width - range, box.y + box.height/2, box.x + box.width, box.y + box.height/2);
+            rpat.add_color_stop_rgba (0.0, clr[0], clr[1], clr[2], clr[3]);
+            rpat.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 0.0);
+            buffer.context.set_source (rpat);
+            buffer.context.rectangle (box.x + box.width - range, box.y + range, box.x + box.width, box.y + box.height - range * 2);
+            buffer.context.fill ();
+
+            var bpat = new Cairo.Pattern.linear (box.x + box.width/2, box.y + box.height - range, box.x + box.width/2, box.y + box.height);
+            bpat.add_color_stop_rgba (0.0, clr[0], clr[1], clr[2], clr[3]);
+            bpat.add_color_stop_rgba (1.0, 0.0, 0.0, 0.0, 0.0);
+            buffer.context.set_source (bpat);
+            buffer.context.rectangle (box.x + range, box.y + box.height - range, box.x + box.width - range * 2, box.y + box.height);
+            buffer.context.fill ();
+
+            var tpat = new Cairo.Pattern.linear (box.x + box.width/2, box.y, box.x + box.width/2, box.y + range);
+            tpat.add_color_stop_rgba (1.0, clr[0], clr[1], clr[2], clr[3]);
+            tpat.add_color_stop_rgba (0.0, 0.0, 0.0, 0.0, 0.0);
+            buffer.context.set_source (tpat);
+            buffer.context.rectangle (box.x + range, box.y, box.x + box.width - range * 2, box.y + range);
+            buffer.context.fill ();
+
+            //buffer.exponential_blur (shadow_size / 2);
+            //buffer.gaussian_blur (shadow_size);
 
 			var surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
 			var cr = new Cairo.Context (surface);
 
             Cairo.RectangleInt r1 = {0, 0, width, height};
-            Cairo.RectangleInt r2 = {shadow_size, shadow_size + shadow_yoffset, actor_width, actor_height - shadow_yoffset};
+            Cairo.RectangleInt r2 = {shadow_size, shadow_size - shadow_yoffset, actor_width, actor_height};
 
             cr.set_fill_rule (Cairo.FillRule.EVEN_ODD);
             cr.new_path ();
-            //FIXME: should pass radius from parent
             DeepinUtils.draw_round_box (cr, r2.width, r2.height, 5, r2.x, r2.y);
 
             cr.new_sub_path ();
@@ -160,7 +251,7 @@ namespace Gala
 			material.set_color (alpha);
 
 			Cogl.set_source (material);
-            Cogl.rectangle (-size, -size, actor.width + size, actor.height + size);
+            Cogl.rectangle (-size, -size + shadow_yoffset, actor.width + size, actor.height + size + shadow_yoffset);
 
 			actor.continue_paint ();
 		}
