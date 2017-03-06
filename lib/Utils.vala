@@ -398,8 +398,7 @@ namespace Gala
 			var buffer = new Granite.Drawing.BufferSurface.with_surface (new_width, new_height, surface);
 			buffer.context.set_source_surface (surface_black, size, distance);
 			buffer.context.paint ();
-
-            buffer.exponential_blur (size / 2);
+            buffer.gaussian_blur (WindowIcon.SHADOW_BLUR);
 
 			buffer.context.set_source_surface (surface, size, 0);
 			buffer.context.paint ();
@@ -426,7 +425,7 @@ namespace Gala
 				data[0] = 0;
 				data[1] = 0;
 				data[2] = 0;
-				data[3] = data[3] != 0 ? opacity : 0;
+                data[3] = data[3] != 0 ? opacity : 0;
 				data += 4;
 			}
 		}
