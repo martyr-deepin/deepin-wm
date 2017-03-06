@@ -62,7 +62,7 @@ namespace Gala
 			workspace_shadow = new Actor ();
 			workspace_shadow.add_effect_with_name (
 				"shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
-											get_thumb_workspace_prefer_heigth (), 5, 0, 25));
+											get_thumb_workspace_prefer_heigth (), 10, 4, 50));
             add_child (workspace_shadow);
 
 			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);

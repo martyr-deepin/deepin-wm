@@ -58,7 +58,7 @@ namespace Gala
 		public DeepinFramedBackground (
 			Screen screen, int workspace_index, bool enable_shadow = true,
 			bool enable_border = false, float background_scale = 1.0f,
-            int sz = 15, int ss = 0, uint8 so = 128, int yoff = -1)
+            int sz = 30, int ss = 5, uint8 so = 128, int yoff = -1)
 		{
 			Object (screen: screen, enable_shadow: enable_shadow, enable_border: enable_border,
 					monitor_index: screen.get_primary_monitor (), workspace_index: workspace_index,

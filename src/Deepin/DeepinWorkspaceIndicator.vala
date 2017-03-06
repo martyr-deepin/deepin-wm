@@ -202,10 +202,11 @@ namespace Gala
 
         construct
         {
+            // workspace shadow effect, angle:90°, size:5, distance:1, opacity:30%
             workspace_shadow = new Actor ();
             workspace_shadow.add_effect_with_name (
                     "shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
-                        get_thumb_workspace_prefer_heigth (), 2, 0, 25));
+                        get_thumb_workspace_prefer_heigth (), 10, 4, 50));
             add_child (workspace_shadow);
 
             workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
@@ -420,7 +421,7 @@ namespace Gala
 
                 popup_border.clear_effects ();
                 popup_border.add_effect_with_name ( "shadow",
-                        new ShadowEffect ((int)popup_border.width, (int)popup_border.height, 4, 0, 11, 3));
+                        new ShadowEffect ((int)popup_border.width, (int)popup_border.height, 10, 3, 50));
 
                 popup.opacity = 255;
                 visible = true;
