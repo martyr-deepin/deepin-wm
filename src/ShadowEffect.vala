@@ -98,7 +98,7 @@ namespace Gala
             Granite.Drawing.Utilities.cairo_rounded_rectangle (buffer.context, 
                     shadow_size - shadow_spread, shadow_size - shadow_spread + shadow_yoffset,
                     actor_width + shadow_spread * 2 + 4, actor_height + shadow_spread * 2, 
-                    5);
+                    6);
             buffer.context.set_source_rgba (0, 0, 0, 1.0);
 			buffer.context.fill ();
 

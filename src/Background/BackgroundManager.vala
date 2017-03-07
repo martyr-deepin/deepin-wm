@@ -222,7 +222,6 @@ namespace Gala
             serial++;
 
             var monitor = screen.get_monitor_geometry (monitor_index);
-            //background_actor.set_size (monitor.width, monitor.height);
             background_actor.set_size (monitor.width * background_scale, 
                     monitor.height * background_scale);
 
