@@ -1097,7 +1097,7 @@ namespace Gala
 
             foreach (var bg in backgrounds) {
                 var geom = screen.get_monitor_geometry (bg.monitor_index);
-                var shadow_effect = new ShadowEffect (geom.width, geom.height, 40, 5, 76, 0, false);
+                var shadow_effect = new ShadowEffect (geom.width, geom.height, 40, 5, 76, 0, false, true);
                 bg.add_child_effect_with_name ("shadow", shadow_effect);
             }
 

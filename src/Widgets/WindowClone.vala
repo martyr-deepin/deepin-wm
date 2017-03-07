@@ -199,7 +199,7 @@ namespace Gala
 			transition_to_original_state (false);
 
 			var outer_rect = window.get_frame_rect ();
-			shadow_effect = new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5, 50);
+			shadow_effect = new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5, 50, -1, true, false);
 			add_effect_with_name ("shadow", shadow_effect);
 			window.size_changed.connect (update_shadow_size);
 

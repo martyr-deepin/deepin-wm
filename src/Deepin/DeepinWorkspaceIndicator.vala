@@ -334,6 +334,7 @@ namespace Gala
         public Screen screen { get; construct; }
 
         Actor popup_border;
+        Actor popup_lighter;
 		Actor popup;
         BlurActor background;
 
@@ -357,13 +358,18 @@ namespace Gala
                 new DeepinCssStaticActor ("deepin-workspace-indicator-border", Gtk.StateFlags.NORMAL);
             popup_border.set_pivot_point (0.5f, 0.5f);
 
+            popup_lighter =
+                new DeepinCssStaticActor ("deepin-workspace-indicator-lighter", Gtk.StateFlags.NORMAL);
+            popup_lighter.set_pivot_point (0.5f, 0.5f);
+
             popup = new DeepinCssStaticActor ("deepin-workspace-indicator");
 
             background = new BlurActor (screen);
             background.set_radius (13);
 
-            add_child (popup_border);
             add_child (background);
+            add_child (popup_lighter);
+            add_child (popup_border);
             add_child (popup);
         }
 
@@ -400,14 +406,21 @@ namespace Gala
                     popup.add_child (snapshot);
                 }
                 relayout ();
+                float x = Math.floorf(popup.x);
+                float y = Math.floorf(popup.y);
+                float w = Math.floorf(popup.width);
+                float h = Math.floorf(popup.height);
 
-                background.set_position (popup.x, popup.y);
-                background.set_size (popup.width, popup.height);
+                background.set_position (x, y);
+                background.set_size (w, h);
 
-                popup_border.set_position (popup.x-1, popup.y-1);
-                popup_border.set_size (popup.width+2, popup.height+2);
+                popup_border.set_position (x-1, y-1);
+                popup_border.set_size (w+2, h+2);
 
-                Cairo.RectangleInt r =  {0, 0, (int)popup.width, (int)popup.height};
+                popup_lighter.set_position (x, y);
+                popup_lighter.set_size (w, h);
+
+                Cairo.RectangleInt r =  {0, 0, (int)w, (int)h};
                 Cairo.RectangleInt[] rects = { r };
                 int[] radius = {5, 5};
 
@@ -418,9 +431,9 @@ namespace Gala
                     last_region = region;
                 }
 
-                popup_border.clear_effects ();
-                popup_border.add_effect_with_name ( "shadow",
-                        new ShadowEffect ((int)popup_border.width, (int)popup_border.height, 18, 0, 30, 3));
+                popup_lighter.clear_effects ();
+                popup_lighter.add_effect_with_name ( "shadow",
+                        new ShadowEffect ((int)popup_lighter.width, (int)popup_lighter.height, 18, 0, 30, 3));
 
                 popup.opacity = 255;
                 visible = true;

@@ -48,19 +48,22 @@ namespace Gala
 		public float scale_factor { get; set; default = 1; }
 		public uint8 shadow_opacity { get; set; default = 255; }
 		public int shadow_yoffset { get; construct; }
+        public bool do_clip_shadow {get; set; default = true; }
+        public bool high_blur_effect {get; set; default = true; }
 
-        bool high_blur_effect = true;
 		Cogl.Material material;
 		string? current_key = null;
 
 		public ShadowEffect (int actor_width, int actor_height, int shadow_size, int shadow_spread,
-							 uint8 shadow_opacity = 255, int yoffset = -1, bool high_blur_effect = true)
+							 uint8 shadow_opacity = 255, int yoffset = -1,
+                             bool high_blur_effect = true, bool do_clip_shadow = true)
 		{
             if (yoffset < 0) { yoffset = shadow_spread; }
-			Object (shadow_size: shadow_size, shadow_spread: shadow_spread,
-					shadow_opacity: shadow_opacity, shadow_yoffset: yoffset);
 
-            high_blur_effect = high_blur_effect;
+			Object (shadow_size: shadow_size, shadow_spread: shadow_spread,
+					shadow_opacity: shadow_opacity, shadow_yoffset: yoffset, 
+                    high_blur_effect: high_blur_effect, do_clip_shadow: do_clip_shadow);
+
 			material = new Cogl.Material ();
 
 			update_size (actor_width, actor_height);
@@ -113,22 +116,23 @@ namespace Gala
 			var cr = new Cairo.Context (surface);
 
             Cairo.RectangleInt r1 = {0, 0, width, height};
-            Cairo.RectangleInt r2 = {shadow_size, shadow_size - shadow_yoffset, actor_width, actor_height - shadow_yoffset};
+            Cairo.RectangleInt r2 = {shadow_size, shadow_size - shadow_yoffset, actor_width, actor_height};
 
-            cr.set_fill_rule (Cairo.FillRule.EVEN_ODD);
-            cr.new_path ();
-            //FIXME: should pass radius from parent
-            DeepinUtils.draw_round_box (cr, r2.width, r2.height, 5, r2.x, r2.y);
+            if (do_clip_shadow) {
+                cr.set_fill_rule (Cairo.FillRule.EVEN_ODD);
+                cr.new_path ();
+                //FIXME: should pass radius from parent
+                DeepinUtils.draw_round_box (cr, r2.width, r2.height, 5, r2.x, r2.y);
 
-            cr.new_sub_path ();
-            cr.move_to (r1.width, 0);
-            cr.line_to (0, 0);
-            cr.line_to (0, r1.height);
-            cr.line_to (r1.width, r1.height);
-            cr.close_path ();
+                cr.new_sub_path ();
+                cr.move_to (r1.width, 0);
+                cr.line_to (0, 0);
+                cr.line_to (0, r1.height);
+                cr.line_to (r1.width, r1.height);
+                cr.close_path ();
 
-            cr.clip ();
-
+                cr.clip ();
+            }
             cr.rectangle (r1.x, r1.y, r1.width, r1.height);
             cr.set_source_surface (buffer.surface, 0, 0);
 			cr.fill ();
