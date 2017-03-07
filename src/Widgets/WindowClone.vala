@@ -199,7 +199,7 @@ namespace Gala
 			transition_to_original_state (false);
 
 			var outer_rect = window.get_frame_rect ();
-			shadow_effect = new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5);
+			shadow_effect = new ShadowEffect (outer_rect.width, outer_rect.height, 20, 5, 76);
 			add_effect_with_name ("shadow", shadow_effect);
 			window.size_changed.connect (update_shadow_size);
 
@@ -426,9 +426,9 @@ namespace Gala
 			shadow_transition.progress_mode = MultitaskingView.ANIMATION_MODE;
 
 			if (show)
-				shadow_transition.interval = new Clutter.Interval (typeof (uint8), 0, 255);
+				shadow_transition.interval = new Clutter.Interval (typeof (uint8), 0, 76);
 			else
-				shadow_transition.interval = new Clutter.Interval (typeof (uint8), 255, 0);
+				shadow_transition.interval = new Clutter.Interval (typeof (uint8), 76, 0);
 
 			add_transition ("shadow-opacity", shadow_transition);
 		}
@@ -677,7 +677,7 @@ namespace Gala
 			clone.opacity = 255;
 
 			Clutter.Callback finished = () => {
-				((ShadowEffect) get_effect ("shadow")).shadow_opacity = 255;
+				((ShadowEffect) get_effect ("shadow")).shadow_opacity = 76;
 			};
 
 			var transition = clone.get_transition ("scale-x");

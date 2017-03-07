@@ -29,7 +29,7 @@ namespace Gala
 	{
 		public const int LAYOUT_DURATION = 400;
 		public const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
-        public const uint8 SHADOW_OPACITY = 204;
+        public const uint8 SHADOW_OPACITY = 76;
 
 		const int FADE_IN_DURATION = 500;
 		const int FADE_OUT_DURATION = 300;
@@ -229,7 +229,7 @@ namespace Gala
 				var outer_rect = window.get_frame_rect ();
 				// shadow effect, angle:90°, size:8, distance:5, opacity:35%
 				add_effect_with_name (
-					"shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5, SHADOW_OPACITY));
+					"shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 28, 6, SHADOW_OPACITY));
 				window.size_changed.connect (update_shadow_size);
 			}
 

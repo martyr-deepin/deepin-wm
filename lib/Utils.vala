@@ -381,29 +381,36 @@ namespace Gala
 		 */
 		static Gdk.Pixbuf add_outline_blur_effect (Gdk.Pixbuf pixbuf, int size, int distance, uint8 opacity)
 		{
+            int range = WindowIcon.SHADOW_BLUR;
+
 			// TODO: draw blur effect for Gdk.Pixbuf directly to improve performance
 			var width = pixbuf.width;
 			var height = pixbuf.height;
-			var new_width = pixbuf.width + size * 2;
-			var new_height = pixbuf.height + size + distance;
+			var new_width = pixbuf.width + range * 2;
+			var new_height = pixbuf.height + range + distance;
 
 			// convert Gdk.Pixbuf to Cairo.Surface
 			var surface = Gdk.cairo_surface_create_from_pixbuf (pixbuf, 1, null);
 
 			// black colorize
 			var surface_black = new_cairo_image_surface (surface, width, height + distance, 0, distance);
-			add_black_colorize_effect (surface_black, opacity);
+			add_black_colorize_effect (surface_black, 255);
 
 			// draw blur effect through BufferSurface
-			var buffer = new Granite.Drawing.BufferSurface.with_surface (new_width, new_height, surface);
-			buffer.context.set_source_surface (surface_black, size, distance);
-			buffer.context.paint ();
-            buffer.gaussian_blur (WindowIcon.SHADOW_BLUR);
+			var shadow = new Granite.Drawing.BufferSurface.with_surface (new_width, new_height, surface);
+			shadow.context.set_source_surface (surface_black, range, distance);
+			shadow.context.paint ();
+            shadow.gaussian_blur (WindowIcon.SHADOW_BLUR);
 
-			buffer.context.set_source_surface (surface, size, 0);
-			buffer.context.paint ();
 
-			var new_pixbuf = Gdk.pixbuf_get_from_surface (buffer.surface, 0, 0, new_width, new_height);
+			var buffer2 = new Granite.Drawing.BufferSurface.with_surface (new_width, new_height, surface);
+			buffer2.context.set_source_surface (shadow.surface, 0, 0);
+			buffer2.context.paint_with_alpha ((double)opacity / 255.0);
+
+            buffer2.context.set_source_surface (surface, range, 0);
+            buffer2.context.paint ();
+
+			var new_pixbuf = Gdk.pixbuf_get_from_surface (buffer2.surface, 0, 0, new_width, new_height);
 			return new_pixbuf;
 		}
 

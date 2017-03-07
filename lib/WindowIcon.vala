@@ -25,8 +25,8 @@ namespace Gala
 	public class WindowIcon : GtkClutter.Texture
 	{
 		public const int SHADOW_SIZE = 6;
-		public const int SHADOW_DISTANCE = 4; // offset in y-axis
-		public const uint8 SHADOW_OPACITY = 66;
+		public const int SHADOW_DISTANCE = 5; // offset in y-axis
+		public const uint8 SHADOW_OPACITY = 76;
 		public const uint8 SHADOW_BLUR = 14;
 
 		static Bamf.Matcher matcher;

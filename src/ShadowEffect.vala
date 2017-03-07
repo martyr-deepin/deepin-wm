@@ -95,20 +95,20 @@ namespace Gala
 
 			// fill a new texture for this size
 			var buffer = new Granite.Drawing.BufferSurface (width, height);
-			//buffer.context.rectangle (shadow_size - shadow_spread, shadow_size - shadow_spread,
-            buffer.context.rectangle (shadow_size - shadow_spread,
-                    shadow_size + shadow_yoffset,
-                actor_width + shadow_spread * 2, actor_height + shadow_spread - shadow_yoffset);
-			buffer.context.set_source_rgba (0, 0, 0, 0.7);
+            Granite.Drawing.Utilities.cairo_rounded_rectangle (buffer.context, 
+                    shadow_size - shadow_spread, shadow_size - shadow_spread + shadow_yoffset,
+                    actor_width + shadow_spread * 2 + 4, actor_height + shadow_spread * 2, 
+                    5);
+            buffer.context.set_source_rgba (0, 0, 0, 1.0);
 			buffer.context.fill ();
 
-			buffer.exponential_blur (shadow_size / 2);
+            buffer.gaussian_blur (shadow_size / 2 + 2);
 
 			var surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
 			var cr = new Cairo.Context (surface);
 
             Cairo.RectangleInt r1 = {0, 0, width, height};
-            Cairo.RectangleInt r2 = {shadow_size, shadow_size + shadow_yoffset, actor_width, actor_height - shadow_yoffset};
+            Cairo.RectangleInt r2 = {shadow_size, shadow_size - shadow_yoffset, actor_width, actor_height - shadow_yoffset};
 
             cr.set_fill_rule (Cairo.FillRule.EVEN_ODD);
             cr.new_path ();
@@ -145,7 +145,6 @@ namespace Gala
 
 			if (--shadow.users == 0) {
 				shadow_cache.unset (key);
-                //shadow.unref ();
             }
 		}
 
@@ -160,7 +159,8 @@ namespace Gala
 			material.set_color (alpha);
 
 			Cogl.set_source (material);
-            Cogl.rectangle (-size, -size, actor.width + size, actor.height + size);
+            Cogl.rectangle (-size, -size + shadow_yoffset,
+                    actor.width + size, actor.height + size + shadow_yoffset);
 
 			actor.continue_paint ();
 		}
