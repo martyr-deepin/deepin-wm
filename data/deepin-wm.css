@@ -38,8 +38,12 @@
     border: solid 1px rgba(0, 0, 0, 0.1);
 }
 
-.deepin-window-switcher {
+.deepin-window-switcher-lighter {
     background: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+}
+
+.deepin-window-switcher {
     border-radius: 5px;
 }
 

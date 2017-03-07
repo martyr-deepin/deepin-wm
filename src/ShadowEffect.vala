@@ -49,16 +49,18 @@ namespace Gala
 		public uint8 shadow_opacity { get; set; default = 255; }
 		public int shadow_yoffset { get; construct; }
 
+        bool high_blur_effect = true;
 		Cogl.Material material;
 		string? current_key = null;
 
 		public ShadowEffect (int actor_width, int actor_height, int shadow_size, int shadow_spread,
-							 uint8 shadow_opacity = 255, int yoffset = -1)
+							 uint8 shadow_opacity = 255, int yoffset = -1, bool high_blur_effect = true)
 		{
             if (yoffset < 0) { yoffset = shadow_spread; }
 			Object (shadow_size: shadow_size, shadow_spread: shadow_spread,
 					shadow_opacity: shadow_opacity, shadow_yoffset: yoffset);
 
+            high_blur_effect = high_blur_effect;
 			material = new Cogl.Material ();
 
 			update_size (actor_width, actor_height);
@@ -102,7 +104,10 @@ namespace Gala
             buffer.context.set_source_rgba (0, 0, 0, 1.0);
 			buffer.context.fill ();
 
-            buffer.gaussian_blur (shadow_size / 2 + 2);
+            if (high_blur_effect)
+                buffer.gaussian_blur (shadow_size / 2 + 2);
+            else 
+                buffer.exponential_blur (shadow_size / 2 + 2);
 
 			var surface = new Cairo.ImageSurface (Cairo.Format.ARGB32, width, height);
 			var cr = new Cairo.Context (surface);

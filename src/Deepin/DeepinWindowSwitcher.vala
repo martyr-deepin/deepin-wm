@@ -38,6 +38,7 @@ namespace Gala
 		DeepinWindowSwitcherItem? current_item = null;
 
         Actor popup_border;
+        Actor popup_lighter;
 		Actor popup;
         BlurActor background;
 		Actor item_container;
@@ -64,6 +65,12 @@ namespace Gala
             popup_border =
                 new DeepinCssStaticActor ("deepin-window-switcher-border", Gtk.StateFlags.NORMAL);
             popup_border.set_pivot_point (0.5f, 0.5f);
+            popup_border.visible = false;
+
+            popup_lighter =
+                new DeepinCssStaticActor ("deepin-window-switcher-lighter", Gtk.StateFlags.NORMAL);
+            popup_lighter.set_pivot_point (0.5f, 0.5f);
+            popup_border.visible = false;
 
             popup = new DeepinCssStaticActor ("deepin-window-switcher");
 			popup.opacity = 0;
@@ -100,6 +107,7 @@ namespace Gala
 			add_child (window_clones);
             add_child (popup_border);
             add_child (background);
+            add_child (popup_lighter);
             add_child (shape);
 			add_child (popup);
 
@@ -199,6 +207,9 @@ namespace Gala
             popup_border.set_position (popup.x-1, popup.y-1);
             popup_border.set_size (popup.width+2, popup.height+2);
 
+            popup_lighter.set_position (popup.x, popup.y);
+            popup_lighter.set_size (popup.width, popup.height);
+
             Cairo.RectangleInt r =  {0, 0, (int)popup.width, (int)popup.height};
             Cairo.RectangleInt[] rects = { r };
             int[] radius = {5, 5};
@@ -217,8 +228,10 @@ namespace Gala
             update_shape_size ();
             shape_move (current_item, false);
             window_clones.opacity = 255;
-            background.visible = true;
 			popup.opacity = 255;
+            popup_border.visible = true;
+            popup_lighter.visible = true;
+            background.visible = true;
             shape.visible = true;
 		}
 
