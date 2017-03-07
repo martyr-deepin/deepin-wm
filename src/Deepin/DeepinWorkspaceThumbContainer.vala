@@ -93,9 +93,9 @@ namespace Gala
 
             btn = new DeepinWorkspaceAddButton ();
             notify["allocation"].connect (() => {
-                float scale = (float)width / (float)monitor_geom.width;
-                background_actor.set_scale(scale, scale);
-                btn.set_size (width, height);
+                background_actor.set_size (width, height);
+                set_rounded_radius (background_actor, 6);
+                btn.set_size (width-1, height);
             });
 
 			add_child (background_actor);
@@ -108,6 +108,29 @@ namespace Gala
                 background_animate (hover, true);
             });
 		}
+
+        Cairo.Region? last_region = null;
+        Cairo.Surface? last_blur_mask = null;
+        void set_rounded_radius (Meta.BlurredBackgroundActor actor, int rd, bool forced = false)
+        {
+            if (rd == 0) {
+                actor.set_blur_mask (null);
+            } else {
+                Cairo.RectangleInt r =  {0, 0, (int)actor.width, (int)actor.height};
+                Cairo.RectangleInt[] rects = { r };
+                int[] radius = {rd, rd};
+
+                var region = new Cairo.Region.rectangles (rects);
+                if (forced || !region.equal (last_region)) {
+                    var blur_mask = DeepinUtils.build_blur_mask (rects, radius);
+                    actor.set_blur_mask (blur_mask);
+                    last_blur_mask = blur_mask;
+                    last_region = region;
+                } else {
+                    actor.set_blur_mask (last_blur_mask);
+                }
+            }
+        }
 
         void update_background_actor ()
         {
@@ -124,6 +147,7 @@ namespace Gala
                 return;
             }
 
+            set_pivot_point (0.5f, 0.5f);
             just_reset = false;
 
             if (do_scale) {
@@ -250,7 +274,6 @@ namespace Gala
 		{
 			var index = workspace_clone.workspace.index ();
 			insert_child_at_index (workspace_clone, index);
-			//place_child (workspace_clone, index, false);
             workspace_clone.x = plus_button.x;
             workspace_clone.y = plus_button.y;
 

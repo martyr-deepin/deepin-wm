@@ -111,9 +111,6 @@ namespace Gala
 			close_button.released.connect (() => {
 				closing ();
 			});
-            close_button.notify["scale_x"].connect(() => {
-                stderr.printf("close_button scaled: %f\n", close_button.scale_x);
-            });
 
 			add_child (close_button);
 		}

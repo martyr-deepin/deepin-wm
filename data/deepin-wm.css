@@ -29,7 +29,7 @@
 }
 
 .deepin-workspace-indicator {
-    background: rgba(0, 0, 0, 0);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 5px;
 }
 
@@ -39,7 +39,7 @@
 }
 
 .deepin-window-switcher {
-    background: rgba(0, 0, 0, 0.0);
+    background: rgba(255, 255, 255, 0.3);
     border-radius: 5px;
 }
 
@@ -73,11 +73,7 @@
 
 .deepin-workspace-add-button {
     background: rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.5);
     border-radius: 6px;
-    border-color: rgba(0, 0, 0, 0.1);
-    border-width: 1px;
-    border-style: solid;
 }
 
 .deepin-window-clone:selected {
