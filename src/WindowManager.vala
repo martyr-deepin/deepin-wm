@@ -302,10 +302,10 @@ namespace Gala
 
             var dx = (ex - cx);
             var dy = (ey - cy);
-            var d = dx.abs() + dy.abs();
+            var d = Math.fabsf(dx) + Math.fabsf(dy);
 
             var factor = d / (CORNER_SIZE * 2);
-            return 1.0f - float.max(float.min(factor, 1.0f), 0.0f);
+            return 1.0f - Math.fmaxf(Math.fminf(factor, 1.0f), 0.0f);
         }
 
         float distance_factor_for_corner (Clutter.Point pos, Meta.ScreenCorner direction)
