@@ -78,10 +78,13 @@ namespace Gala
             add_child (effect_2nd);
 
             effect.opacity = 0;
+			effect.set_scale (0.0f, 0.0f);
 			effect_2nd.set_scale (0.0f, 0.0f);
             notify["last-distance-factor"].connect(() => {
-                if (!animating)
+                if (!animating) {
                     effect.opacity = (uint)(last_distance_factor * 255.0f);
+                    effect.set_scale (last_distance_factor, last_distance_factor);
+                }
             });
 
             (wm as Meta.Plugin).get_screen ().corner_entered.connect (corner_entered);
@@ -1097,7 +1100,7 @@ namespace Gala
 
             foreach (var bg in backgrounds) {
                 var geom = screen.get_monitor_geometry (bg.monitor_index);
-                var shadow_effect = new ShadowEffect (geom.width, geom.height, 40, 5, 76, 0, false, true);
+                var shadow_effect = new ShadowEffect (geom.width, geom.height, 40, 8, 100, 0, false, true);
                 bg.add_child_effect_with_name ("shadow", shadow_effect);
             }
 
