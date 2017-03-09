@@ -227,27 +227,27 @@
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/shadows/" id="com.deepin.wrap.pantheon.desktop.gala.shadows" gettext-domain="@GETTEXT_PACKAGE@">
 
 		<key type="as" name="normal-focused">
-			<default>['20', '-1', '0', '15', '220']</default>
+			<default>['16', '-1', '0', '15', '110']</default>
 			<_summary>Defines the shadow of normal focused windows</_summary>
 			<_description>The first value is the radius of the blur of the shadow, the second one the top fade (which is usually just -1), the third and fourth the x- and y-offset and the last the opacity. So [blur-radius, top-fade, x-offset, y-offset, opacity]</_description>
 		</key>
 		<key type="as" name="normal-unfocused">
-			<default>['8', '-1', '0', '6', '150']</default>
+			<default>['10', '-1', '0', '12', '45']</default>
 			<_summary>Defines the shadow of a normal unfocused window</_summary>
 			<_description>See normal-focused</_description>
 		</key>
 		<key type="as" name="menu">
-			<default>['7', '-1', '0', '5', '130']</default>
+			<default>['5', '-1', '0', '5', '40']</default>
 			<_summary>Defines the shadow of a menu</_summary>
 			<_description>See normal-focused</_description>
 		</key>
 		<key type="as" name="dialog-focused">
-			<default>['12', '-1', '0', '7', '190']</default>
+			<default>['16', '-1', '0', '15', '110']</default>
 			<_summary>Defines the shadow of a focused dialog</_summary>
 			<_description>See normal-focused</_description>
 		</key>
 		<key type="as" name="dialog-unfocused">
-			<default>['7', '-1', '0', '4', '130']</default>
+			<default>['10', '-1', '0', '12', '45']</default>
 			<_summary>Defines the shadow of an unfocused dialog</_summary>
 			<_description>See normal-focused</_description>
 		</key>

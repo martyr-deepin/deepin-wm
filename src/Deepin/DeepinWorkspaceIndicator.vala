@@ -233,6 +233,8 @@ namespace Gala
             window_container = new DeepinWindowSnapshotContainer (workspace);
             workspace_clone.add_child (window_container);
 
+            int radius = DeepinUtils.get_css_border_radius ("deepin-workspace-thumb-clone", Gtk.StateFlags.SELECTED);
+            window_container.add_effect (new DeepinRoundRectEffect (radius));
 
             add_child (workspace_clone);
             add_child (thumb_shape_selected);
