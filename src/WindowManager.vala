@@ -80,6 +80,24 @@ namespace Gala
             effect.opacity = 0;
 			effect.set_scale (0.0f, 0.0f);
 			effect_2nd.set_scale (0.0f, 0.0f);
+
+            float px = 0.0f, py = 0.0f;
+            switch (direction) {
+                case Meta.ScreenCorner.TOPLEFT:
+                    px = py = 0.0f; break;
+
+                case Meta.ScreenCorner.TOPRIGHT:
+                    px = 1.0f; py = 0.0f; break;
+
+                case Meta.ScreenCorner.BOTTOMLEFT:
+                    px = 0.0f; py = 1.0f; break;
+
+                case Meta.ScreenCorner.BOTTOMRIGHT:
+                    px = py = 1.0f; break;
+            }
+			effect.set_pivot_point (px, py);
+			effect_2nd.set_pivot_point (px, py);
+
             notify["last-distance-factor"].connect(() => {
                 if (!animating) {
                     effect.opacity = (uint)(last_distance_factor * 255.0f);
@@ -411,23 +429,6 @@ namespace Gala
 		void start_animations ()
         {
             var name = "corner-triggered";
-
-            float px = 0.0f, py = 0.0f;
-            switch (direction) {
-                case Meta.ScreenCorner.TOPLEFT:
-                    px = py = 0.0f; break;
-
-                case Meta.ScreenCorner.TOPRIGHT:
-                    px = 1.0f; py = 0.0f; break;
-
-                case Meta.ScreenCorner.BOTTOMLEFT:
-                    px = 0.0f; py = 1.0f; break;
-
-                case Meta.ScreenCorner.BOTTOMRIGHT:
-                    px = py = 1.0f; break;
-            }
-			effect.set_pivot_point (px, py);
-			effect_2nd.set_pivot_point (px, py);
 
             var t = build_animation (400, 0, 1.5f); 
             effect.remove_transition (name);
