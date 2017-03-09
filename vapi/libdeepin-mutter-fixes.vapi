@@ -43,7 +43,6 @@ namespace Meta {
 		public BlurActor (Meta.Screen screen);
 		public void set_radius (int radius);
 		public void set_rounds (int rounds);
-        public void set_mask (Cogl.Texture? mask);
         public void set_blur_mask (Cairo.Surface? mask);
 		[NoAccessorMethod]
 		public int radius { get; set; }
