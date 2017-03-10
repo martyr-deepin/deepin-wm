@@ -1540,10 +1540,10 @@ namespace Gala
                 actor.set_pivot_point (anchor_x, anchor_y);
 
 				actor.save_easing_state ();
-				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_CUBIC);
+				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUART);
 				actor.set_easing_duration (duration);
 				actor.set_scale (scale_x, scale_y);
-                actor.opacity = 51;
+                actor.opacity = 25;
 				actor.restore_easing_state ();
 
 				ulong minimize_handler_id = 0UL;
@@ -1560,10 +1560,10 @@ namespace Gala
                 actor.set_pivot_point (0.5f, 1.0f);
 
 				actor.save_easing_state ();
-				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_CUBIC);
+				actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_QUART);
 				actor.set_easing_duration (duration);
 				actor.set_scale (0.0f, 0.0f);
-				actor.opacity = 51;
+				actor.opacity = 25;
 				actor.restore_easing_state ();
 
 				ulong minimize_handler_id = 0UL;
@@ -1726,7 +1726,7 @@ namespace Gala
             kill_window_effects (actor);
             unminimizing.add (actor);
 
-            actor.opacity = 51;
+            actor.opacity = 25;
 
 			Rectangle icon = {};
 			if (actor.get_meta_window ().get_icon_geometry (out icon)) {
@@ -1742,7 +1742,7 @@ namespace Gala
             }
 
             actor.save_easing_state ();
-            actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_CUBIC);
+            actor.set_easing_mode (Clutter.AnimationMode.EASE_OUT_QUART);
             actor.set_easing_duration (duration);
             actor.set_scale (1.0f, 1.0f);
             actor.opacity = 255;
