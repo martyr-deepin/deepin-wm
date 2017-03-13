@@ -205,25 +205,22 @@ namespace Gala
 
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
 
-			// calculate ratio for monitor width and height
-			float monitor_whr = (float)monitor_geom.height / monitor_geom.width;
-
 			// allocate workspace clone
 			var thumb_box = ActorBox ();
-			float thumb_width = box.get_width ();
-			float thumb_height = thumb_width * monitor_whr;
+			float thumb_width = Math.floorf(box.get_width ());
+			float thumb_height = Math.floorf(box.get_height ());
 			thumb_box.set_size (thumb_width, thumb_height);
 			thumb_box.set_origin (0, 0);
 			workspace_clone.allocate (thumb_box, flags);
 			workspace_shadow.allocate (thumb_box, flags);
 			window_container.allocate (thumb_box, flags);
 
-            background.set_size (box.get_width (), box.get_height ());
+            background.set_size (thumb_width, thumb_height);
 
 			var thumb_shape_box = ActorBox ();
 			thumb_shape_box.set_size (thumb_width+2, thumb_height+2);
 			thumb_shape_box.set_origin (-1, -1);
-			thumb_shape.allocate (thumb_shape_box, flags);
+            thumb_shape.allocate (thumb_shape_box, flags);
 
             thumb_shape_box.set_size (thumb_width+6, thumb_height+6);
             thumb_shape_box.set_origin (-3, -3);
@@ -233,7 +230,6 @@ namespace Gala
             close_box.set_size (close_button.width, close_button.height);
             close_box.set_origin (box.get_width () - close_box.get_width () * 0.50f,
                                   -close_button.height * 0.50f);
-
             close_button.allocate (close_box, flags);
 		}
 	}
@@ -477,15 +473,10 @@ namespace Gala
 		{
 			base.allocate (box, flags);
 
-			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-
-			// calculate ratio for monitor width and height
-			float monitor_whr = (float)monitor_geom.height / monitor_geom.width;
-
 			// allocate workspace clone
 			var thumb_box = ActorBox ();
-			float thumb_width = box.get_width ();
-			float thumb_height = thumb_width * monitor_whr;
+			float thumb_width = Math.floorf(box.get_width ());
+            float thumb_height = Math.floorf(box.get_height ());
 			thumb_box.set_size (thumb_width, thumb_height);
 			thumb_box.set_origin (0, 0);
 			thumb_clone.allocate (thumb_box, flags);
