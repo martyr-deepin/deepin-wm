@@ -26,7 +26,7 @@ namespace Gala
 		const int POPUP_DELAY_TIMEOUT = 150;
 
 		// milliseconds, repeat key pressing minimum delta
-		const int MIN_DELTA = 100;
+		const int MIN_DELTA = 400;
 
 		// time after popup shown
 		const int POPUP_SCREEN_PADDING = 40;
@@ -243,6 +243,8 @@ namespace Gala
 		{
             background.visible = false;
 			popup.opacity = 0;
+            popup_border.visible = false;
+            popup_lighter.visible = false;
             shape.visible = false;
 		}
 
