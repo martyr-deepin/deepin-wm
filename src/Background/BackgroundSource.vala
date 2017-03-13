@@ -267,7 +267,6 @@ namespace Gala
 				var monitor_index = indexes[0].to_int ();
 				var workspace_index = indexes[1].to_int ();
 				if (monitor_index < n) {
-					background.update_resolution ();
 					continue;
 				}
 
@@ -301,7 +300,7 @@ namespace Gala
 			string key = "%d:%d".printf (monitor_index, workspace_index);
             Meta.verbose ("%s: key = %s\n", Log.METHOD, key);
 			if (!backgrounds.has_key (key)) {
-				var background = new Background (screen, monitor_index, workspace_index, filename,
+				var background = new Background (screen, workspace_index, filename,
 												 this, (GDesktop.BackgroundStyle) style);
 				backgrounds[key] = background;
 			}

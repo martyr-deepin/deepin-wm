@@ -23,9 +23,9 @@ namespace Gala
 		const double ANIMATION_MIN_WAKEUP_INTERVAL = 1.0;
 
 		public signal void loaded ();
+		public signal void destroyed ();
 
 		public Meta.Screen screen { get; construct; }
-		public int monitor_index { get; construct; }
 		public int workspace_index { get; construct; }
 		public weak BackgroundSource background_source { get; construct; }
 		public bool is_loaded { get; private set; default = false; }
@@ -38,12 +38,11 @@ namespace Gala
 		uint update_animation_timeout_id = 0;
         ulong handler = 0;
 
-		public Background (Meta.Screen screen, int monitor_index, int workspace_index,
+		public Background (Meta.Screen screen, int workspace_index,
 						   string? filename, BackgroundSource background_source,
 						   GDesktop.BackgroundStyle style)
 		{
 			Object (screen: screen,
-					monitor_index: monitor_index,
 					workspace_index: workspace_index,
 					background_source: background_source,
 					style: style,
@@ -58,7 +57,7 @@ namespace Gala
 
             int load_count = 0;
             handler = background.changed.connect (() => {
-                if (++load_count > 1) set_loaded ();
+                set_loaded ();
             });
 
 			load ();
@@ -69,18 +68,9 @@ namespace Gala
             Meta.verbose ("%s\n", Log.METHOD);
 
 			cancellable.cancel ();
-			remove_animation_timeout ();
 
             SignalHandler.disconnect (background, handler);
             handler = 0;
-		}
-
-		public void update_resolution ()
-		{
-			if (animation != null) {
-				remove_animation_timeout ();
-				update_animation ();
-			}
 		}
 
 		void set_loaded ()
@@ -121,106 +111,6 @@ namespace Gala
 			cache.monitor_file (filename);
 		}
 
-		void remove_animation_timeout ()
-		{
-			if (update_animation_timeout_id != 0) {
-				Source.remove (update_animation_timeout_id);
-				update_animation_timeout_id = 0;
-			}
-		}
-
-		void update_animation ()
-		{
-			update_animation_timeout_id = 0;
-
-			animation.update (screen.get_monitor_geometry (monitor_index));
-			var files = animation.key_frame_files;
-
-			Clutter.Callback finish = () => {
-				set_loaded ();
-
-				if (files.length > 1)
-#if HAS_MUTTER316
-					background.set_blend (File.new_for_path (files[0]), File.new_for_path (files[1]), animation.transition_progress, style);
-				else if (files.length > 0)
-					background.set_file (File.new_for_path (files[0]), style);
-				else
-					background.set_file (null, style);
-#else
-					background.set_blend (files[0], files[1], animation.transition_progress, style);
-				else if (files.length > 0)
-					background.set_filename (files[0], style);
-				else
-					background.set_filename (null, style);
-#endif
-
-				queue_update_animation ();
-			};
-
-			var cache = Meta.BackgroundImageCache.get_default ();
-			var num_pending_images = files.length;
-			for (var i = 0; i < files.length; i++) {
-				watch_file (files[i]);
-
-#if HAS_MUTTER316
-				var image = cache.load (File.new_for_path (files[i]));
-#else
-				var image = cache.load (files[i]);
-#endif
-
-				if (image.is_loaded ()) {
-					num_pending_images--;
-					if (num_pending_images == 0)
-						finish (null);
-				} else {
-					ulong handler = 0;
-					handler = image.loaded.connect (() => {
-						SignalHandler.disconnect (image, handler);
-						if (--num_pending_images == 0)
-							finish (null);
-					});
-				}
-			}
-		}
-
-		void queue_update_animation () {
-			if (update_animation_timeout_id != 0)
-				return;
-
-			if (cancellable == null || cancellable.is_cancelled ())
-				return;
-
-			if (animation.transition_duration == 0)
-				return;
-
-			var n_steps = 255.0 / ANIMATION_OPACITY_STEP_INCREMENT;
-			var time_per_step = (animation.transition_duration * 1000) / n_steps;
-
-			var interval = (uint32) Math.fmax (ANIMATION_MIN_WAKEUP_INTERVAL * 1000, time_per_step);
-
-			if (interval > uint32.MAX)
-				return;
-
-			update_animation_timeout_id = Timeout.add (interval, () => {
-				update_animation_timeout_id = 0;
-				update_animation ();
-				return false;
-			});
-		}
-
-		async void load_animation (string filename)
-		{
-			animation = yield BackgroundCache.get_default ().get_animation (filename);
-
-			if (animation == null || cancellable.is_cancelled ()) {
-				set_loaded();
-				return;
-			}
-
-			update_animation ();
-			watch_file (filename);
-		}
-
 		void load_image (string filename)
         {
             var cache = Meta.BackgroundImageCache.get_default ();
@@ -234,14 +124,6 @@ namespace Gala
             watch_file (filename);
         }
 
-		void load_file (string filename)
-		{
-			if (filename.has_suffix (".xml"))
-				load_animation.begin (filename);
-			else
-				load_image (filename);
-		}
-
 		void load ()
 		{
 			load_pattern ();
@@ -249,7 +131,7 @@ namespace Gala
 			if (filename == null)
 				set_loaded ();
 			else
-				load_file (filename);
+				load_image (filename);
 		}
 	}
 }
