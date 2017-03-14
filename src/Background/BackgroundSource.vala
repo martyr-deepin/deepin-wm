@@ -17,6 +17,12 @@
 
 namespace Gala
 {
+    [DBus (name="com.deepin.daemon.Appearance")]
+    interface Appearance : Object 
+    {
+        public abstract string List(string name) throws IOError;
+    }
+
 	public class BackgroundSource : Object
 	{
 		public signal void changed (int[] workspaces);
@@ -24,11 +30,19 @@ namespace Gala
 		public Meta.Screen screen { get; construct; }
 		public Settings settings { get; construct; }
 		public Settings extra_settings { get; construct; }
+        //TODO: randomize it
+        public string default_uri { get; set; }
 
 		internal int use_count { get; set; default = 0; }
 
 		Gee.HashMap<string,Background> backgrounds;
+
         string fallback_background_name = "/usr/share/backgrounds/default_background.jpg";
+
+        //This is used in DDE 
+        Gee.ArrayList<string> preinstalled_wallpapers;
+
+        Appearance? appearance_intf = null;
 
 		public BackgroundSource (Meta.Screen screen, string settings_schema,
 								 string extra_settings_schema)
@@ -45,24 +59,53 @@ namespace Gala
 
 			settings_hash_cache = get_current_settings_hash_cache ();
 			cache_extra_picture_uris = get_current_extra_picture_uris ();
+            
+            default_uri = @"file://$fallback_background_name";
+            preinstalled_wallpapers = new Gee.ArrayList<string> ();
+            //request_new_default_uri ();
 
             screen.workspace_added.connect (on_workspace_added);
             screen.workspace_removed.connect (on_workspace_removed);
 		}
+
+        public void request_new_default_uri ()
+        {
+            try {
+                if (appearance_intf == null) {
+                    appearance_intf = Bus.get_proxy_sync (BusType.SESSION,
+                            "com.deepin.daemon.Appearance", "/com/deepin/daemon/Appearance");
+                    var root = Json.from_string (appearance_intf.List ("background"));
+                    root.get_array ().foreach_element ((array, index, node) => {
+                        var obj = node.get_object ();
+                        if (obj.get_boolean_member ("Deletable") == false) {
+                            preinstalled_wallpapers.add (obj.get_member ("Id").dup_string ());
+                            //Meta.verbose ("add %s\n", obj.get_string_member ("Id"));
+                        }
+                    });
+                }
+
+            } catch (IOError e) {
+                GLib.warning ("%s\n", e.message);
+            } catch (GLib.Error e) {
+                GLib.warning ("%s\n", e.message);
+            }
+
+            if (preinstalled_wallpapers.size > 0) {
+                int index = Random.int_range (0, preinstalled_wallpapers.size);
+                default_uri = preinstalled_wallpapers[index];
+                Meta.verbose ("new_default_uri %s\n", default_uri);
+            }
+        }
 
         void on_workspace_removed (int index)
         {
             delete_background (index);
         }
 
-        string default_uri ()
-        {
-            return @"file://$fallback_background_name";
-        }
 
         void on_workspace_added (int index)
         {
-            change_background (index, default_uri ());
+            change_background (index, default_uri);
         }
 
         // change background for workspace index, this may not expand array
@@ -85,7 +128,7 @@ namespace Gala
                 int oldsz = extra_uris.length;
                 extra_uris.resize (nr_ws);
                 for (int i = oldsz; i < nr_ws; i++) {
-                    extra_uris[i] = default_uri ();
+                    extra_uris[i] = default_uri;
                 }
             }
 
@@ -201,7 +244,7 @@ namespace Gala
                 int oldsz = extra_uris.length;
                 extra_uris.resize (nr_ws);
                 for (int i = oldsz; i < nr_ws; i++) {
-                    extra_uris[i] = default_uri ();
+                    extra_uris[i] = default_uri;
                 }
             }
             extra_uris += null;
@@ -252,7 +295,7 @@ namespace Gala
             if (index >= 0 && index < extra_uris.length) {
                 return extra_uris[index];
             } else {
-                return default_uri ();
+                return default_uri;
             }
         }
 
@@ -289,23 +332,22 @@ namespace Gala
 				filename = get_picture_filename (monitor_index, workspace_index);
 			}
 
-			// Animated backgrounds are (potentially) per-monitor, since
-			// they can have variants that depend on the aspect ratio and
-			// size of the monitor; for other backgrounds we can use the
-			// same background object for all monitors.
-			//if (filename == null || !filename.has_suffix (".xml"))
-			if (filename == null)
-				monitor_index = 0;
+            if (workspace_index >= screen.get_n_workspaces ()) {
+                // we don't cache background here, since its primary usage is to do random previewing,
+                // which makes caching useless.
+                return new Background (screen, workspace_index, filename, this, (GDesktop.BackgroundStyle) style);
 
-			string key = "%d:%d".printf (monitor_index, workspace_index);
-            Meta.verbose ("%s: key = %s\n", Log.METHOD, key);
-			if (!backgrounds.has_key (key)) {
-				var background = new Background (screen, workspace_index, filename,
-												 this, (GDesktop.BackgroundStyle) style);
-				backgrounds[key] = background;
-			}
+            } else {
+                string key = "%d:%d".printf (monitor_index, workspace_index);
+                Meta.verbose ("%s: key = %s\n", Log.METHOD, key);
+                if (!backgrounds.has_key (key)) {
+                    var background = new Background (screen, workspace_index, filename,
+                            this, (GDesktop.BackgroundStyle) style);
+                    backgrounds[key] = background;
+                }
 
-			return backgrounds[key];
+                return backgrounds[key];
+            }
 		}
 
 		string get_picture_filename (int monitor_index, int workspace_index)
@@ -318,10 +360,10 @@ namespace Gala
             if (extra_uris.length > 0 && extra_uris.length > workspace_index) {
                 uri = extra_uris[workspace_index];
                 if (uri == "") {
-                    uri = default_uri ();
+                    uri = default_uri;
                 }
             } else {
-                uri = default_uri ();
+                uri = default_uri;
             }
 
 			if (Uri.parse_scheme (uri) != null) {

@@ -85,7 +85,6 @@ namespace Gala
 		{
             background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
-			background_source.changed.connect (() => update_background_actor ());
             background_actor = new BlurredBackgroundActor (screen, screen.get_primary_monitor ());
             update_background_actor ();
             background_actor.opacity = 0;
@@ -105,6 +104,9 @@ namespace Gala
 				DragDropActionType.DESTINATION, "deepin-multitaskingview-window");
 			add_action (window_drop_action);
             window_drop_action.crossed.connect((hover) => {
+                if (hover) {
+                    update_background_actor ();
+                }
                 background_animate (hover, true);
             });
 		}
@@ -134,6 +136,7 @@ namespace Gala
 
         void update_background_actor ()
         {
+            background_source.request_new_default_uri ();
             //assign a non-exist workspace will give us default background
             var background = background_source.get_background (screen.get_primary_monitor (), 
                     screen.get_n_workspaces ());
@@ -195,6 +198,7 @@ namespace Gala
 
         public override bool enter_event (Clutter.CrossingEvent ev)
         {
+            update_background_actor ();
             background_animate (true, false);
             return false;
         }
