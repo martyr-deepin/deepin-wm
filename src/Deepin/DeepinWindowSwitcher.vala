@@ -26,7 +26,8 @@ namespace Gala
 		const int POPUP_DELAY_TIMEOUT = 150;
 
 		// milliseconds, repeat key pressing minimum delta
-		const int MIN_DELTA = 400;
+		const int TAB_MIN_DELTA = 100;
+		const int HOLDING_MIN_DELTA = 400;
 
 		// time after popup shown
 		const int POPUP_SCREEN_PADDING = 40;
@@ -50,6 +51,7 @@ namespace Gala
 
 		uint modifier_mask;
 		int64 last_switch_time = 0;
+        int holding_count = 0;
 		bool closing = false;
 		ModalProxy modal_proxy;
 
@@ -294,8 +296,9 @@ namespace Gala
 		{
 			if ((get_current_modifiers () & modifier_mask) == 0) {
 				close (event.time);
-			}
+            }
 
+            holding_count = 0;
 			return true;
 		}
 
@@ -315,10 +318,13 @@ namespace Gala
             if ((wm as WindowManagerGala).hiding_windows) 
                 return;
 
+            holding_count++;
 			var now = get_monotonic_time () / 1000;
-			if (now - last_switch_time < MIN_DELTA) {
-				return;
-			}
+			if (holding_count > 1 && now - last_switch_time < HOLDING_MIN_DELTA) {
+                return;
+			} else if (holding_count <= 1 && now - last_switch_time < TAB_MIN_DELTA) {
+                return;
+            }
 
 			// if we were still closing while the next invocation comes in, we need to cleanup
 			// things right away
