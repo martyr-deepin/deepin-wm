@@ -65,6 +65,7 @@ gala_VALASOURCES = \
 	Deepin/DeepinWorkspaceIndicator.vala \
 	Deepin/DeepinIMText.vala \
 	Deepin/DeepinIcon.vala \
+	Deepin/DeepinAnimationImage.vala \
 	Deepin/DeepinMenu.vala \
 	Background/Animation.vala \
 	Background/Background.vala \

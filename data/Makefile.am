@@ -13,6 +13,12 @@ styles_DATA = deepin-wm.css texture.png close.png \
 	unsticked_hover.png \
 	unsticked_normal.png \
 	unsticked_press.png \
+	close_marker_1.png \
+	close_marker_2.png \
+	close_marker_3.png \
+	close_marker_4.png \
+	close_marker_5.png \
+	close_marker_6.png \
 	topleft.png \
 	topright.png \
 	bottomleft.png \
@@ -43,6 +49,12 @@ EXTRA_DIST = \
 	gala-multitaskingview.desktop.in \
 	texture.png \
 	close.png \
+	close_marker_1.png \
+	close_marker_2.png \
+	close_marker_3.png \
+	close_marker_4.png \
+	close_marker_5.png \
+	close_marker_6.png \
 	close_hover.png \
 	close_normal.png \
 	close_press.png \

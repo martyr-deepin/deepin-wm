@@ -48,8 +48,23 @@ namespace Gala
         public Meta.ScreenCorner direction {get; construct;}
         public WindowManagerGala wm {get; construct;}
         public string key {get; construct;}
-        public string action {get; set;}
+        public Meta.Screen screen {get; construct;}
+        public string action {
+            get { return _action; }
+            set {
+                _action = value;
+                if (direction == Meta.ScreenCorner.TOPRIGHT) {
+                    if (_action == "!wm:close") {
+                        blind_close = true;
+                        Meta.verbose (@"blind_close = $blind_close\n");
+                    }
+                    effect.visible = !blind_close;
+                    effect_2nd.visible = !blind_close;
+                } 
+            }
+        }
 
+        private string _action;
         bool startRecord = false;
 
         [CCode(notify = true)]
@@ -60,14 +75,17 @@ namespace Gala
 
         bool animating = false;
 
-        GtkClutter.Texture? effect;
-        GtkClutter.Texture? effect_2nd;
+        GtkClutter.Texture? effect = null;
+        GtkClutter.Texture? effect_2nd = null;
 
         Gdk.Device pointer;
+        DeepinAnimationImage? dai = null;
 
-		public DeepinCornerIndicator (WindowManagerGala wm, Meta.ScreenCorner dir, string key)
+        bool blind_close = false;
+
+		public DeepinCornerIndicator (WindowManagerGala wm, Meta.ScreenCorner dir, string key, Meta.Screen screen)
 		{
-			Object (wm: wm, direction: dir, key: key);
+			Object (wm: wm, direction: dir, key: key, screen: screen);
 		}
 
 		construct
@@ -99,7 +117,7 @@ namespace Gala
 			effect_2nd.set_pivot_point (px, py);
 
             notify["last-distance-factor"].connect(() => {
-                if (!animating) {
+                if (!blind_close && !animating) {
                     effect.opacity = (uint)(last_distance_factor * 255.0f);
                     effect.set_scale (last_distance_factor, last_distance_factor);
                 }
@@ -108,6 +126,20 @@ namespace Gala
             (wm as Meta.Plugin).get_screen ().corner_entered.connect (corner_entered);
 
             pointer = Gdk.Display.get_default ().get_device_manager ().get_client_pointer ();
+
+            if (direction == Meta.ScreenCorner.TOPRIGHT) {
+                dai = new DeepinAnimationImage( new string[]{
+                        "close_marker_1.png",
+                        "close_marker_2.png",
+                        "close_marker_3.png",
+                        "close_marker_4.png",
+                        "close_marker_5.png",
+                        "close_marker_6.png"
+                });
+                dai.visible = false;
+                dai.set_position (CORNER_SIZE - dai.width, 0);
+                add_child (dai);
+            }
 		}
 
         bool blocked ()
@@ -191,6 +223,9 @@ namespace Gala
                 last_distance_factor = 0.0f;
                 effect.opacity = 0;
                 effect_2nd.set_scale (0.0f, 0.0f);
+                if (blind_close) {
+                    dai.deactivate ();
+                }
 
                 if (polling_id != 0) {
                     Source.remove (polling_id);
@@ -244,6 +279,35 @@ namespace Gala
             return true;
         }
 
+        bool is_blind_close_viable (Clutter.Point pos)
+        {
+            if (!blind_close) return false;
+            var active_window = wm.get_screen ().get_display ().get_focus_window ();
+            if (active_window == null) 
+                return false;
+
+            if (active_window.get_maximized() == Meta.MaximizeFlags.BOTH) {
+                var id = active_window.get_monitor ();
+                if (screen.get_current_monitor_for_pos ((int)pos.x, (int)pos.y) == id) {
+                    Meta.verbose ("blind_close is viable\n");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool inside_close_region (Clutter.Point pos)
+        {
+            //must be topright
+            var box = Clutter.ActorBox ();
+            int sz = 4;
+            box.set_origin (this.x + this.width - sz, this.y);
+            box.set_size (sz, sz);
+
+            return pos.x >= box.x1 && pos.x <= box.x2 && pos.y >= box.y1 && pos.y <= box.y2;
+        }
+
         public void mouse_move (Clutter.Point pos)
         {
             if (!inside_effect_region (pos)) {
@@ -252,8 +316,20 @@ namespace Gala
             }
 
             if (blocked()) return;
-
             update_distance_factor (pos);
+
+            if (blind_close) {
+                if (!is_blind_close_viable (pos)) {
+                    return;
+                } 
+                
+                if (inside_close_region (pos)) {
+                    dai.activate ();
+                } else {
+                    dai.deactivate ();
+                }
+            }
+
             if (!at_trigger_point (pos)) {
                 return;
             }
@@ -414,6 +490,15 @@ namespace Gala
 
         bool exec_delayed_action ()
         {
+            if (blind_close) {
+                var active_window = wm.get_screen ().get_display ().get_focus_window ();
+                if (active_window == null) 
+                    return false;
+                active_window.@delete (screen.get_display ().get_current_time ());
+                dai.deactivate ();
+                return false;
+            } 
+
             start_animations ();
             var trans = new Clutter.TransitionGroup ();
             try {
@@ -880,7 +965,7 @@ namespace Gala
 
 			// if the hot corner already exists, just reposition it, create it otherwise
 			if (hot_corner == null) {
-				hot_corner = new DeepinCornerIndicator (this, dir, key);
+				hot_corner = new DeepinCornerIndicator (this, dir, key, get_screen ());
 				hot_corner.width = CORNER_SIZE;
 				hot_corner.height = CORNER_SIZE;
                 hot_corner.name = key;
