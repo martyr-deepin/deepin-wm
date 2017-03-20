@@ -54,10 +54,8 @@ namespace Gala
             set {
                 _action = value;
                 if (direction == Meta.ScreenCorner.TOPRIGHT) {
-                    if (_action == "!wm:close") {
-                        blind_close = true;
-                        Meta.verbose (@"blind_close = $blind_close\n");
-                    }
+                    blind_close = (_action == "!wm:close");
+                    Meta.verbose (@"blind_close = $blind_close\n");
                     effect.visible = !blind_close;
                     effect_2nd.visible = !blind_close;
                 } 

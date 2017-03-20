@@ -70,8 +70,10 @@ namespace Gala
                 content.invalidate ();
                 current_frame++;
                 Meta.verbose (@"current_frame = $current_frame, frames = $(frames.size)\n");
-                if (current_frame == frames.size)
+                if (current_frame == frames.size) {
+                    animation_id = 0;
                     return false;
+                }
                 return true;
             });
         }
