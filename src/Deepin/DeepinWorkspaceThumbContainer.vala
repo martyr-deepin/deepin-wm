@@ -92,9 +92,10 @@ namespace Gala
 
             btn = new DeepinWorkspaceAddButton ();
             notify["allocation"].connect (() => {
-                background_actor.set_size (width, height);
+                float w = Math.floorf(width), h = Math.floorf(height);
+                background_actor.set_size (w, h);
                 set_rounded_radius (background_actor, 6);
-                btn.set_size (width-1, height);
+                btn.set_size (w, h);
             });
 
 			add_child (background_actor);
