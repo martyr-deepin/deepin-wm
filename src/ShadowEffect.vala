@@ -101,7 +101,7 @@ namespace Gala
 			// fill a new texture for this size
 			var buffer = new Granite.Drawing.BufferSurface (width, height);
             Granite.Drawing.Utilities.cairo_rounded_rectangle (buffer.context, 
-                    shadow_size - shadow_spread, shadow_size - shadow_spread + shadow_yoffset,
+                    shadow_size - shadow_spread - 2, shadow_size - shadow_spread + shadow_yoffset,
                     actor_width + shadow_spread * 2 + 4, actor_height + shadow_spread * 2, 
                     6);
             buffer.context.set_source_rgba (0, 0, 0, 1.0);
