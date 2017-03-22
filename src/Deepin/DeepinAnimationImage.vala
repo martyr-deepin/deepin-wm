@@ -32,6 +32,10 @@ namespace Gala
         protected Gee.ArrayList<Surface> frames;
         protected int current_frame = 0;
 
+        uint animation_id = 0;
+        bool reverse_animation = false;
+        bool activated = false;
+
         public signal void pressed ();
 
 		public DeepinAnimationImage (string[] frames)
@@ -64,17 +68,27 @@ namespace Gala
 			notify["allocation"].connect (() => canvas.set_size ((int)width, (int)height));
 		}
 
-        uint animation_id = 0;
         void start_animation ()
         {
             stop_animation ();
             animation_id = Timeout.add(duration / frames.size, () => {
                 content.invalidate ();
-                current_frame++;
-                Meta.verbose (@"current_frame = $current_frame, frames = $(frames.size)\n");
-                if (current_frame == frames.size) {
-                    animation_id = 0;
-                    return false;
+                if (reverse_animation) {
+                    current_frame--;
+                    stderr.printf (@"reverse current_frame = $current_frame, frames = $(frames.size)\n");
+                    if (current_frame < 0) {
+                        visible = false;
+                        animation_id = 0;
+                        return false;
+                    }
+                } else {
+                    current_frame++;
+                    Meta.verbose (@"current_frame = $current_frame, frames = $(frames.size)\n");
+                    stderr.printf (@"current_frame = $current_frame, frames = $(frames.size)\n");
+                    if (current_frame == frames.size - 1) {
+                        animation_id = 0;
+                        return false;
+                    }
                 }
                 return true;
             });
@@ -86,23 +100,29 @@ namespace Gala
                 Source.remove (animation_id);
                 animation_id = 0;
             }
-            current_frame = -1;
-            content.invalidate ();
+            if (reverse_animation) {
+                current_frame = frames.size - 1;
+            } else {
+                current_frame = -1;
+            }
         }
 
 		public void activate ()
 		{
-            if (visible == false) {
+            if (activated == false) {
+                activated = true;
                 visible = true;
+                reverse_animation = false;
                 start_animation ();
             }
         }
 
 		public void deactivate ()
         {
-            if (visible == true) {
-                visible = false;
-                stop_animation ();
+            if (activated == true) {
+                activated = false;
+                reverse_animation = true;
+                start_animation ();
             }
         }
 
