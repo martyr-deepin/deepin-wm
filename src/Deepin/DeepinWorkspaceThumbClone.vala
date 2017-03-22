@@ -308,6 +308,8 @@ namespace Gala
 			var icon_x = (box.get_width () - total)/2;
             var msg_x = icon_x + icon.width + 9;
 
+            var icon_y = box.get_height () * MESSAGE_PERCENT + message.height/2 - icon.height/2;
+
 			// allocate workspace clone
 			var message_box = ActorBox ();
 			message_box.set_size (message.width, message.height);
@@ -316,7 +318,7 @@ namespace Gala
 
 			var icon_box = ActorBox ();
 			icon_box.set_size (icon.width, icon.height);
-			icon_box.set_origin (icon_x, box.get_height () * MESSAGE_PERCENT);
+			icon_box.set_origin (icon_x, icon_y);
             icon.allocate (icon_box, flags);
 		}
 	}
