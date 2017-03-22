@@ -32,6 +32,8 @@ namespace Gala
         protected Gee.ArrayList<Surface> frames;
         protected int current_frame = 0;
 
+        public signal void pressed ();
+
 		public DeepinAnimationImage (string[] frames)
 		{
 			Object (frame_names: frames);
@@ -129,6 +131,12 @@ namespace Gala
 			nat_height_p = 38;
 			min_height_p = 38;
 		}
+
+		public override bool button_release_event (Clutter.ButtonEvent event)
+        {
+            pressed ();
+            return true;
+        }
 	}
 }
 

@@ -136,6 +136,8 @@ namespace Gala
                 });
                 dai.visible = false;
                 dai.set_position (CORNER_SIZE - dai.width, 0);
+                dai.reactive = true;
+                dai.pressed.connect (do_blind_close);
                 add_child (dai);
             }
 		}
@@ -306,6 +308,18 @@ namespace Gala
             return pos.x >= box.x1 && pos.x <= box.x2 && pos.y >= box.y1 && pos.y <= box.y2;
         }
 
+        void do_blind_close ()
+        {
+            if (blind_close) {
+                var active_window = wm.get_screen ().get_display ().get_focus_window ();
+                if (active_window == null) 
+                    return;
+
+                active_window.@delete (screen.get_display ().get_current_time ());
+                dai.deactivate ();
+            } 
+        }
+
         public void mouse_move (Clutter.Point pos)
         {
             if (!inside_effect_region (pos)) {
@@ -326,6 +340,7 @@ namespace Gala
                 } else {
                     dai.deactivate ();
                 }
+                return;
             }
 
             if (!at_trigger_point (pos)) {
@@ -488,15 +503,6 @@ namespace Gala
 
         bool exec_delayed_action ()
         {
-            if (blind_close) {
-                var active_window = wm.get_screen ().get_display ().get_focus_window ();
-                if (active_window == null) 
-                    return false;
-                active_window.@delete (screen.get_display ().get_current_time ());
-                dai.deactivate ();
-                return false;
-            } 
-
             start_animations ();
             var trans = new Clutter.TransitionGroup ();
             try {
@@ -955,6 +961,8 @@ namespace Gala
 			add_hotcorner (tr_x - CORNER_SIZE, tr_y, Meta.ScreenCorner.TOPRIGHT, "right-up");
 			add_hotcorner (bl_x, bl_y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMLEFT, "left-down");
 			add_hotcorner (br_x - CORNER_SIZE, br_y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
+
+            update_input_area ();
 		}
 
 		void add_hotcorner (float x, float y, Meta.ScreenCorner dir, string key)
@@ -1233,8 +1241,14 @@ namespace Gala
 
 			if (is_modal ())
 				InternalUtils.set_input_area (screen, InputArea.FULLSCREEN);
-			else
-				InternalUtils.set_input_area (screen, InputArea.DEFAULT);
+			else {
+                Clutter.Actor? hot_corner = stage.find_child_by_name ("right-up");
+                if (hot_corner != null && (hot_corner as DeepinCornerIndicator).action == "!wm:close") {
+                    InternalUtils.set_input_area (screen, InputArea.BLIND_CLOSE);
+                } else {
+                    InternalUtils.set_input_area (screen, InputArea.DEFAULT);
+                }
+            }
 		}
 
 		public uint32[] get_all_xids ()
