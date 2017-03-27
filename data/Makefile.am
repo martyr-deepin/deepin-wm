@@ -19,6 +19,7 @@ styles_DATA = deepin-wm.css texture.png close.png \
 	close_marker_4.png \
 	close_marker_5.png \
 	close_marker_6.png \
+	close_marker_press.png \
 	topleft.png \
 	topright.png \
 	bottomleft.png \
@@ -55,6 +56,7 @@ EXTRA_DIST = \
 	close_marker_4.png \
 	close_marker_5.png \
 	close_marker_6.png \
+	close_marker_press.png \
 	close_hover.png \
 	close_normal.png \
 	close_press.png \

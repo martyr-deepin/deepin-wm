@@ -25,7 +25,8 @@ namespace Gala
 		NONE,
 		FULLSCREEN,
 		DEFAULT,
-        BLIND_CLOSE // special area for hot zone blind close functionality
+        BLIND_CLOSE_ENTER,    // special area for  hot zone blind close activating
+        BLIND_CLOSE_RESPONSE, // special area for hot zone blind close responding
 	}
 
 	public class InternalUtils
@@ -95,8 +96,11 @@ namespace Gala
 						}
 					}
 					break;
-                case InputArea.BLIND_CLOSE:
-					X.Xrectangle topright = {(short)(geometry.x + geometry.width - 4), (short)geometry.y, 4, 4};
+                case InputArea.BLIND_CLOSE_ENTER:
+                case InputArea.BLIND_CLOSE_RESPONSE:
+                    ushort sz = 4;
+                    if (area == InputArea.BLIND_CLOSE_RESPONSE) sz = 24;
+					X.Xrectangle topright = {(short)(geometry.x + geometry.width - sz), (short)geometry.y, sz, sz};
                     rects += topright;
                     break;
 				case InputArea.NONE:

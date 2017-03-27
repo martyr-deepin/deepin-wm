@@ -58,7 +58,18 @@ namespace Gala
                     Meta.verbose (@"blind_close = $blind_close\n");
                     effect.visible = !blind_close;
                     effect_2nd.visible = !blind_close;
+
+                    wm.update_input_area ();
                 } 
+            }
+        }
+        public bool blind_close_activated {
+            get {
+                if (blind_close) {
+                    return dai.visible;
+                } else {
+                    return false;
+                }
             }
         }
 
@@ -126,18 +137,20 @@ namespace Gala
             pointer = Gdk.Display.get_default ().get_device_manager ().get_client_pointer ();
 
             if (direction == Meta.ScreenCorner.TOPRIGHT) {
-                dai = new DeepinAnimationImage( new string[]{
+                dai = new DeepinAnimationImage (new string[]{
                         "close_marker_1.png",
                         "close_marker_2.png",
                         "close_marker_3.png",
                         "close_marker_4.png",
                         "close_marker_5.png",
                         "close_marker_6.png"
-                });
+                }, "close_marker_press.png");
                 dai.visible = false;
                 dai.set_position (CORNER_SIZE - dai.width, 0);
                 dai.reactive = true;
                 dai.pressed.connect (do_blind_close);
+                dai.activated.connect (wm.update_input_area);
+                dai.deactivated.connect (wm.update_input_area);
                 add_child (dai);
             }
 		}
@@ -302,6 +315,10 @@ namespace Gala
             //must be topright
             var box = Clutter.ActorBox ();
             int sz = 4;
+            if (dai.visible) {
+                // close_region expanded after dai activated
+                sz = 24;
+            }
             box.set_origin (this.x + this.width - sz, this.y);
             box.set_size (sz, sz);
 
@@ -961,8 +978,6 @@ namespace Gala
 			add_hotcorner (tr_x - CORNER_SIZE, tr_y, Meta.ScreenCorner.TOPRIGHT, "right-up");
 			add_hotcorner (bl_x, bl_y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMLEFT, "left-down");
 			add_hotcorner (br_x - CORNER_SIZE, br_y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
-
-            update_input_area ();
 		}
 
 		void add_hotcorner (float x, float y, Meta.ScreenCorner dir, string key)
@@ -1221,7 +1236,7 @@ namespace Gala
             });
 		}
 
-		void update_input_area ()
+		public void update_input_area ()
 		{
 			var screen = get_screen ();
 
@@ -1242,9 +1257,13 @@ namespace Gala
 			if (is_modal ())
 				InternalUtils.set_input_area (screen, InputArea.FULLSCREEN);
 			else {
-                Clutter.Actor? hot_corner = stage.find_child_by_name ("right-up");
-                if (hot_corner != null && (hot_corner as DeepinCornerIndicator).action == "!wm:close") {
-                    InternalUtils.set_input_area (screen, InputArea.BLIND_CLOSE);
+                var hot_corner = stage.find_child_by_name ("right-up") as DeepinCornerIndicator;
+                if (hot_corner.action == "!wm:close") {
+                    if (hot_corner.blind_close_activated) {
+                        InternalUtils.set_input_area (screen, InputArea.BLIND_CLOSE_RESPONSE);
+                    } else {
+                        InternalUtils.set_input_area (screen, InputArea.BLIND_CLOSE_ENTER);
+                    }
                 } else {
                     InternalUtils.set_input_area (screen, InputArea.DEFAULT);
                 }

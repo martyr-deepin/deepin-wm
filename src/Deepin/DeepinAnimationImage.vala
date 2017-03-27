@@ -29,14 +29,20 @@ namespace Gala
 		//public string style_class { get; construct; }
         public int duration {get; set; default = 240; }  // in ms, 6 frames total
         public string[] frame_names {get; construct; }
+        public string frame_hold {get; construct; }
+
         protected Gee.ArrayList<Surface> frames;
+        protected Surface press_down_frame;
         protected int current_frame = 0;
+        protected bool press_down = false;
 
         public signal void pressed ();
+        public signal void activated ();
+        public signal void deactivated ();
 
-		public DeepinAnimationImage (string[] frames)
+		public DeepinAnimationImage (string[] frames, string hold)
 		{
-			Object (frame_names: frames);
+			Object (frame_names: frames, frame_hold: hold);
 		}
 
 		construct
@@ -57,6 +63,19 @@ namespace Gala
                 if (pixbuf != null) {
                     var surface = Gdk.cairo_surface_create_from_pixbuf (pixbuf, 1, null);
                     frames.add (surface);
+                }
+            }
+
+            {
+                Gdk.Pixbuf? pixbuf;
+                try {
+                    pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/" + frame_hold);
+                } catch (Error e) {
+                    warning (e.message);
+                }
+
+                if (pixbuf != null) {
+                    press_down_frame = Gdk.cairo_surface_create_from_pixbuf (pixbuf, 1, null);
                 }
             }
 
@@ -94,6 +113,7 @@ namespace Gala
 		{
             if (visible == false) {
                 visible = true;
+                activated ();
                 start_animation ();
             }
         }
@@ -102,6 +122,8 @@ namespace Gala
         {
             if (visible == true) {
                 visible = false;
+                press_down = false;
+                deactivated ();
                 stop_animation ();
             }
         }
@@ -111,6 +133,10 @@ namespace Gala
             if (current_frame >= 0 && current_frame < frames.size) {
                 cr.set_operator (Cairo.Operator.SOURCE);
                 cr.set_source_surface (frames[current_frame], 0, 0);
+                cr.paint ();
+            } else if (press_down) {
+                cr.set_operator (Cairo.Operator.SOURCE);
+                cr.set_source_surface (press_down_frame, 0, 0);
                 cr.paint ();
             } else {
                 Clutter.cairo_clear (cr);
@@ -132,8 +158,16 @@ namespace Gala
 			min_height_p = 38;
 		}
 
+		public override bool button_press_event (Clutter.ButtonEvent event)
+        {
+            press_down = true;
+            content.invalidate ();
+            return true;
+        }
+
 		public override bool button_release_event (Clutter.ButtonEvent event)
         {
+            press_down = false;
             pressed ();
             return true;
         }
