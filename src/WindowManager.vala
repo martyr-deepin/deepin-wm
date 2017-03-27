@@ -143,7 +143,8 @@ namespace Gala
                         "close_marker_3.png",
                         "close_marker_4.png",
                         "close_marker_5.png",
-                        "close_marker_6.png"
+                        "close_marker_6.png",
+                        "close_marker_7.png"
                 }, "close_marker_press.png");
                 dai.visible = false;
                 dai.set_position (CORNER_SIZE - dai.width, 0);
