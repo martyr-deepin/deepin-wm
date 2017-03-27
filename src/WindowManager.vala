@@ -165,8 +165,8 @@ namespace Gala
                 return false;
 
             var isLauncherShowing = false;
-            var wm_class = active_window.wm_class;
-            if (wm_class.length > 0) {
+            unowned string? wm_class = active_window.wm_class;
+            if (wm_class != null && wm_class.length > 0) {
                 if (wm_class == "dde-launcher") {
                     isLauncherShowing = true;
                 }
