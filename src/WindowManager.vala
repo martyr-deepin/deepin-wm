@@ -300,6 +300,10 @@ namespace Gala
             if (active_window == null) 
                 return false;
 
+            if (active_window.window_type == Meta.WindowType.DESKTOP) {
+                return false;
+            }
+
             if (active_window.get_maximized() == Meta.MaximizeFlags.BOTH) {
                 var id = active_window.get_monitor ();
                 if (screen.get_current_monitor_for_pos ((int)pos.x, (int)pos.y) == id) {
@@ -329,6 +333,13 @@ namespace Gala
         void do_blind_close ()
         {
             if (blind_close) {
+                // do second check right before action, in case user alt-tab into another
+                // client while keep mouse pressing.
+                Clutter.Point pos = Clutter.Point.alloc ();
+                pointer.get_position (null, out pos.x, out pos.y);
+                if (!is_blind_close_viable (pos))
+                    return;
+
                 var active_window = wm.get_screen ().get_display ().get_focus_window ();
                 if (active_window == null) 
                     return;

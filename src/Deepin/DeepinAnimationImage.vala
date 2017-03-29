@@ -27,13 +27,13 @@ namespace Gala
 	public class DeepinAnimationImage : Actor
 	{
 		//public string style_class { get; construct; }
-        public int duration {get; set; default = 240; }  // in ms, 6 frames total
+        public int duration {get; set; default = 280; }  // in ms, 7 frames total
         public string[] frame_names {get; construct; }
         public string frame_hold {get; construct; }
 
         protected Gee.ArrayList<Surface> frames;
         protected Surface press_down_frame;
-        protected int current_frame = 0;
+        protected int current_frame = -1;
         protected bool press_down = false;
 
         public signal void pressed ();
