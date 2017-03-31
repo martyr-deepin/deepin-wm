@@ -27,7 +27,7 @@ namespace Gala
 	public class DeepinAnimationImage : Actor
 	{
 		//public string style_class { get; construct; }
-        public int duration {get; set; default = 280; }  // in ms, 7 frames total
+        public int duration {get; set; default = 210; }  // in ms, 7 frames total
         public string[] frame_names {get; construct; }
         public string frame_hold {get; construct; }
 
