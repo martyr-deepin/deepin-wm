@@ -129,7 +129,7 @@ msgstr ""
 
 #: ../data/gala-multitaskingview.desktop.in.h:1
 msgid "Multitasking View"
-msgstr "多工作業檢視"
+msgstr "多工檢視"
 
 #: ../data/gala-multitaskingview.desktop.in.h:2
 msgid "View all open windows and workspaces"
