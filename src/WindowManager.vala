@@ -156,6 +156,22 @@ namespace Gala
             }
 		}
 
+        bool is_active_fullscreen (Meta.Window active_window)
+        {
+            if (active_window.is_fullscreen ()) {
+                var white_list = DeepinZoneSettings.get_default ().white_list;
+                var pid = active_window.get_pid ();
+                if (is_app_in_list(pid, white_list)) {
+                    GLib.debug("active window is fullscreen, and in whiteList");
+                    return false;
+                }
+                GLib.debug("active window is fullscreen, and not in whiteList, do block");
+                return true;
+            }
+
+            return false;
+        }
+
         bool blocked ()
         {
             if (action.length == 0)
@@ -164,6 +180,10 @@ namespace Gala
             var active_window = wm.get_screen ().get_display ().get_focus_window ();
             if (active_window == null) 
                 return false;
+
+            if (is_active_fullscreen (active_window)) {
+                return true;
+            }
 
             var isLauncherShowing = false;
             unowned string? wm_class = active_window.wm_class;
@@ -211,16 +231,6 @@ namespace Gala
                 GLib.debug("active window app in blacklist");
                 return false;
             }
-
-           if (active_window.is_fullscreen ()) {
-               var white_list = DeepinZoneSettings.get_default ().white_list;
-               if (is_app_in_list(pid, white_list)) {
-                   GLib.debug("active window is fullscreen, and in whiteList");
-                   return true;
-               }
-               GLib.debug("active window is fullscreen, and not in whiteList");
-               return false;
-           }
 
            return true;
         }
@@ -301,6 +311,10 @@ namespace Gala
                 return false;
 
             if (active_window.window_type == Meta.WindowType.DESKTOP) {
+                return false;
+            }
+
+            if (is_active_fullscreen (active_window)) {
                 return false;
             }
 
