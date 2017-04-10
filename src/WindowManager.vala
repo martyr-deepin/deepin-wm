@@ -1632,7 +1632,6 @@ namespace Gala
 		 */
 
 
-#if HAS_MUTTER318
 		public override void size_change (Meta.WindowActor actor, Meta.SizeChange which_change, Meta.Rectangle old_frame_rect, Meta.Rectangle old_buffer_rect)
 		{
 			kill_window_effects (actor);
@@ -1655,7 +1654,6 @@ namespace Gala
                     break;
             }
 		}
-#endif
 
 		public override void minimize (WindowActor actor)
 		{
@@ -1720,18 +1718,51 @@ namespace Gala
 			}
 		}
 
-#if HAS_MUTTER318
 		inline void maximize_completed (WindowActor actor)
 		{
 		}
 		
 		void maximize (WindowActor actor, int ex, int ey, int ew, int eh)
-#else
-		public override void maximize (WindowActor actor, int ex, int ey, int ew, int eh)
-#endif
 		{
             do_maximize_effect (actor, ex, ey, ew, eh);
 		}
+
+        enum CPU {
+            Invalid,
+            X86,
+            3A3000,
+            3A2000,
+            Other
+        }
+
+        CPU cpu = CPU.Invalid;
+        CPU get_cpu_spec() 
+        {
+            if (cpu == CPU.Invalid) {
+                cpu = CPU.Other;
+                var file = File.new_for_path ("/proc/cpuinfo");
+                try {
+                    uint8[] contents;
+                    if (file.load_contents (null, out contents, null)) {
+                        //var s = new string(contents);
+                        string s = (string)contents;
+                        if ("Intel" in s) {
+                            cpu = CPU.X86;
+                        } else if ("AMD" in s) {
+                            cpu = CPU.X86;
+                        } else if ("3A2000" in s) {
+                            cpu = CPU.3A2000;
+                        } else if ("3A3000" in s) {
+                            cpu = CPU.3A3000;
+                        }
+                    }
+                } catch (Error e) {
+                    warning (e.message);
+                }
+            }
+
+            return cpu;
+        }
 
 		private void do_maximize_effect (WindowActor actor, int ex, int ey, int ew, int eh)
 		{
@@ -1740,11 +1771,7 @@ namespace Gala
 
 			if (!animation_settings.enable_animations
 				|| duration == 0) {
-#if !HAS_MUTTER318
-				maximize_completed (actor);
-#else
                 size_change_completed (actor);
-#endif
 				return;
 			}
 
@@ -1758,11 +1785,7 @@ namespace Gala
 
                 var old_actor = Utils.get_window_actor_snapshot (actor, old_inner_rect, old_outer_rect);
 				if (old_actor == null) {
-#if !HAS_MUTTER318
-                    maximize_completed (actor);
-#else
                     size_change_completed (actor);
-#endif
 					return;
 				}
 
@@ -1784,8 +1807,7 @@ namespace Gala
 				var scale_x = (double) ew / old_inner_rect.width;
 				var scale_y = (double) eh / old_inner_rect.height;
 
-
-                if (Config.DEEPIN_ARCH.has_prefix("mips")) {
+                if (Config.DEEPIN_ARCH.has_prefix("mips") && get_cpu_spec () == CPU.3A3000) {
                     actor.opacity = 0;
                     Timeout.add (duration, () => {
                             actor.opacity = 255;
@@ -1828,34 +1850,26 @@ namespace Gala
                 if (transition != null) {
                     transition.stopped.connect (() => {
                         old_actor.destroy ();
-                        if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
-                            actor.set_translation (0.0f, 0.0f, 0.0f);
-                        } else {
-#if !HAS_MUTTER318
-                            maximize_completed (actor);
-#else
+                        if (Config.DEEPIN_ARCH.has_prefix("mips") && get_cpu_spec () == CPU.3A3000) {
                             size_change_completed (actor);
-#endif
+                        } else {
+                            actor.set_translation (0.0f, 0.0f, 0.0f);
                         }
                     });
                 } else {
                     old_actor.transitions_completed.connect (() => {
                         old_actor.destroy ();
-                        if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
-                            actor.set_translation (0.0f, 0.0f, 0.0f);
-                        } else {
-#if !HAS_MUTTER318
-                            maximize_completed (actor);
-#else
+                        if (Config.DEEPIN_ARCH.has_prefix("mips") && get_cpu_spec () == CPU.3A3000) {
                             size_change_completed (actor);
-#endif
+                        } else {
+                            actor.set_translation (0.0f, 0.0f, 0.0f);
                         }
                     });
                 }
 				old_actor.restore_easing_state ();
 
 
-                if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
+                if (!(Config.DEEPIN_ARCH.has_prefix("mips") && get_cpu_spec () == CPU.3A3000)) {
                     actor.set_pivot_point (0.0f, 0.0f);
                     actor.set_translation (old_inner_rect.x - ex, old_inner_rect.y - ey, 0.0f);
                     actor.set_scale (1.0f / scale_x, 1.0f / scale_y);
@@ -1866,21 +1880,13 @@ namespace Gala
                     actor.set_scale (1.0f, 1.0f);
                     actor.set_translation (0.0f, 0.0f, 0.0f);
                     actor.restore_easing_state ();
-#if !HAS_MUTTER318
-                    maximize_completed (actor);
-#else
                     size_change_completed (actor);
-#endif
                 }
 
 				return;
 			}
 
-#if !HAS_MUTTER318
-            maximize_completed (actor);
-#else
             size_change_completed (actor);
-#endif
 		}
 
 		public override void unminimize (WindowActor actor)
@@ -2221,12 +2227,6 @@ namespace Gala
 			}
 		}
 
-#if !HAS_MUTTER318
-		public override void unmaximize (Meta.WindowActor actor, int ex, int ey, int ew, int eh)
-        {
-            do_unmaximize_effect (actor, ex, ey, ew, eh);
-        }
-#endif
 
 		private void do_unmaximize_effect (Meta.WindowActor actor, int ex, int ey, int ew, int eh)
 		{
@@ -2235,11 +2235,7 @@ namespace Gala
 
 			if (!animation_settings.enable_animations
 				|| duration == 0) {
-#if !HAS_MUTTER318
-                unmaximize_completed (actor);
-#else
                 size_change_completed (actor);
-#endif
 				return;
 			}
 
@@ -2266,11 +2262,7 @@ namespace Gala
 				var old_actor = Utils.get_window_actor_snapshot (actor, old_rect, old_rect);
 
 				if (old_actor == null) {
-#if !HAS_MUTTER318
-                    unmaximize_completed (actor);
-#else
                     size_change_completed (actor);
-#endif
 					return;
 				}
 
@@ -2278,7 +2270,7 @@ namespace Gala
 
 				ui_group.add_child (old_actor);
 
-                if (Config.DEEPIN_ARCH.has_prefix("mips")) {
+                if (Config.DEEPIN_ARCH.has_prefix("mips") && get_cpu_spec () == CPU.3A3000) {
                     actor.opacity = 0;
                     Timeout.add (duration, () => {
                             actor.opacity = 255;
@@ -2290,7 +2282,7 @@ namespace Gala
 				var scale_y = (float) eh / old_rect.height;
 
 				old_actor.save_easing_state ();
-                if (Config.DEEPIN_ARCH.has_prefix("mips")) {
+                if (Config.DEEPIN_ARCH.has_prefix("mips") && get_cpu_spec () == CPU.3A3000) {
                     old_actor.set_easing_delay (80);
                     old_actor.set_easing_mode (Clutter.AnimationMode.LINEAR);
                 } else {
@@ -2299,7 +2291,7 @@ namespace Gala
 				old_actor.set_easing_duration (duration);
 				old_actor.set_position (ex, ey);
 				old_actor.set_scale (scale_x, scale_y);
-                if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
+                if (!(Config.DEEPIN_ARCH.has_prefix("mips") && get_cpu_spec () == CPU.3A3000)) {
                     old_actor.opacity = 0U;
                 }
 				old_actor.restore_easing_state ();
@@ -2312,12 +2304,9 @@ namespace Gala
 
 				var maximized_x = actor.x;
 				var maximized_y = actor.y;
-#if !HAS_MUTTER318
-				unmaximize_completed (actor);
-#else
                 size_change_completed (actor);
-#endif
-                if (!Config.DEEPIN_ARCH.has_prefix("mips")) {
+
+                if (!(Config.DEEPIN_ARCH.has_prefix("mips") && get_cpu_spec () == CPU.3A3000)) {
                     actor.set_pivot_point (0.0f, 0.0f);
                     //NOTE: this sets wrong position, It seems insane
                     //actor.set_position (ex, ey);
@@ -2335,11 +2324,7 @@ namespace Gala
 				return;
 			}
 
-#if !HAS_MUTTER318
-            unmaximize_completed (actor);
-#else
             size_change_completed (actor);
-#endif
 		}
 
 		// Cancel attached animation of an actor and reset it
@@ -2372,17 +2357,9 @@ namespace Gala
 			if (end_animation (ref minimizing, actor))
 				minimize_completed (actor);
 			if (end_animation (ref maximizing, actor))
-#if HAS_MUTTER318
-				size_change_completed (actor);
-#else
-				maximize_completed (actor);
-#endif
+                size_change_completed (actor);
 			if (end_animation (ref unmaximizing, actor))
-#if HAS_MUTTER318
-				size_change_completed (actor);
-#else
-				unmaximize_completed (actor);
-#endif
+                size_change_completed (actor);
 			if (end_animation (ref destroying, actor))
 				destroy_completed (actor);
 		}
