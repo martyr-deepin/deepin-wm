@@ -160,6 +160,10 @@ namespace Gala
 
 		public void shape_move (DeepinWindowSwitcherItem? target, bool animating = true)
 		{
+            if (target == null) {
+                return;
+            }
+
             var box = target.get_allocation_box ();
             float tx, ty, cx, cy;
             target.get_transformed_position (out tx, out ty);
@@ -170,7 +174,7 @@ namespace Gala
             cx += (box.x2 - box.x1)/2;
             cy += (box.y2 - box.y1)/2;
 
-            if (animating && shape.visible) {
+            if (animating) {
                 shape.save_easing_state ();
 
                 shape.set_easing_duration (200);
@@ -180,6 +184,7 @@ namespace Gala
 
                 shape.restore_easing_state ();
             } else {
+                shape.remove_all_transitions ();
                 shape.x = cx - shape.width / 2;
                 shape.y = cy - shape.height / 2;
             }
@@ -231,14 +236,17 @@ namespace Gala
             popup_lighter.add_effect_with_name ( "shadow",
                     new ShadowEffect ((int)popup_lighter.width, (int)popup_lighter.height, 18, 0, 30, 3));
 
-            update_shape_size ();
-            shape_move (current_item, false);
+            Timeout.add(10, () => {
+                update_shape_size ();
+                shape_move (current_item, false);
+                shape.visible = true;
+                return false;
+            });
 			popup.opacity = 255;
             window_clones.opacity = 255;
             background.visible = true;
             popup_border.visible = true;
             popup_lighter.visible = true;
-            shape.visible = true;
 		}
 
 		void hide_popup ()
@@ -638,7 +646,8 @@ namespace Gala
                 clone.restore_easing_state ();
             }
 
-            shape_move (current_item);
+            if (current_item != null)
+                shape_move (current_item);
 		}
 
 		void show_clones ()
