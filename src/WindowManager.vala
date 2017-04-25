@@ -663,6 +663,7 @@ namespace Gala
 		DeepinWindowSwitcher? winswitcher = null;
 		DeepinMultitaskingView? workspace_view = null;
 		ActivatableComponent? window_overview = null;
+        WindowPreviewer? window_previewer = null;
         ScreenTilePreview? tile_preview = null;
 
         DeepinWorkspaceIndicator? workspace_indicator = null;
@@ -876,6 +877,9 @@ namespace Gala
 				ui_group.add_child ((Clutter.Actor) window_overview);
 			}
 
+            window_previewer = new WindowPreviewer (this);
+            ui_group.add_child ((Clutter.Actor) window_previewer);
+
             workspace_indicator = new DeepinWorkspaceIndicator (this, get_screen ());
             workspace_indicator.visible = false;
             ui_group.add_child (workspace_indicator);
@@ -895,7 +899,7 @@ namespace Gala
             update_background_dark_mask_layer ();
 
 			display.add_keybinding ("expose-windows", keybinding_schema, 0, () => {
-                if (hiding_windows) return;
+                if (hiding_windows || window_previewer.is_opened ()) return;
 
 				if (window_overview.is_opened ())
 					window_overview.close ();
@@ -903,7 +907,7 @@ namespace Gala
 					window_overview.open ();
 			});
 			display.add_keybinding ("expose-all-windows", keybinding_schema, 0, () => {
-                if (hiding_windows) return;
+                if (hiding_windows || window_previewer.is_opened ()) return;
 
 				if (window_overview.is_opened ())
 					window_overview.close ();
@@ -914,7 +918,7 @@ namespace Gala
 				}
 			});
 			display.add_keybinding ("preview-workspace", keybinding_schema, 0, () => {
-                if (hiding_windows) return;
+                if (hiding_windows || window_previewer.is_opened ()) return;
 
 				if (workspace_view.is_opened ())
 					workspace_view.close ();
@@ -1408,6 +1412,9 @@ namespace Gala
 			var display = screen.get_display ();
 			var current = display.get_focus_window ();
 
+            if (hiding_windows || window_previewer.is_opened ()) 
+                return;
+
 			switch (type) {
 				case ActionType.NONE:
 					// ignore none action
@@ -1561,10 +1568,29 @@ namespace Gala
             hiding_windows = false;
         }
 
+        public void preview_window (uint32 xid)
+        {
+            Meta.verbose ("%s\n", Log.METHOD);
+            if (hiding_windows || is_modal ()) return;
+
+            if (window_previewer.is_opened ()) {
+                window_previewer.change_preview (xid);
+            } else {
+                window_previewer.open (xid);
+            }
+        }
+
+        public void finish_preview_window ()
+        {
+            if (window_previewer.is_opened ()) {
+                window_previewer.close ();
+            }
+        }
+
         public void present_windows (uint32[] xids)
         {
             Meta.verbose ("%s\n", Log.METHOD);
-            if (hiding_windows) return;
+            if (hiding_windows || is_modal()) return;
 
             if (window_overview.is_opened ())
                 window_overview.close ();

@@ -73,6 +73,18 @@ namespace Gala
             Meta.set_verbose (val);
         }
 
+        public void cancel_preview_window ()
+        {
+            (wm as WindowManagerGala).finish_preview_window ();
+        }
+
+        // if not in previewing mode, show modal and do preview. 
+        // if already in previewing mode, fade out previous preview, fade in the new.
+        public void preview_window (uint32 xid)
+        {
+            (wm as WindowManagerGala).preview_window (xid);
+        }
+
         public void present_windows (uint32[] xids)
         {
             (wm as WindowManagerGala).present_windows (xids);
