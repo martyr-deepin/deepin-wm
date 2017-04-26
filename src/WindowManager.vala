@@ -804,8 +804,6 @@ namespace Gala
 
 			display.add_keybinding ("switch-to-workspace-first", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_switch_to_workspace_end);
 			display.add_keybinding ("move-to-workspace-first", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_move_to_workspace_end);
-			display.add_keybinding ("cycle-workspaces-next", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_cycle_workspaces);
-			display.add_keybinding ("cycle-workspaces-previous", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_cycle_workspaces);
 			display.add_keybinding ("switch-input-source", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_switch_input_source);
 			display.add_keybinding ("switch-input-source-backward", keybinding_schema, 0, (Meta.KeyHandlerFunc) handle_switch_input_source);
 
@@ -1078,20 +1076,6 @@ namespace Gala
 				new_index = (current_index - 1 + n_sources) % n_sources;
 
 			keyboard_input_settings.set_uint ("current", new_index);
-		}
-
-		[CCode (instance_pos = -1)]
-		void handle_cycle_workspaces (Meta.Display display, Meta.Screen screen, Meta.Window? window,
-			Clutter.KeyEvent event, Meta.KeyBinding binding)
-		{
-			var direction = (binding.get_name () == "cycle-workspaces-next" ? 1 : -1);
-			var index = screen.get_active_workspace_index () + direction;
-			if (index < 0)
-				index = screen.get_n_workspaces () - 1;
-			else if (index > screen.get_n_workspaces () - 1)
-				index = 0;
-
-			screen.get_workspace_by_index (index).activate (display.get_current_time ());
 		}
 
 		[CCode (instance_pos = -1)]

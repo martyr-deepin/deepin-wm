@@ -59,7 +59,7 @@ namespace Gala
 
 		private KeybindingSettings ()
 		{
-			base (Config.SCHEMA + ".keybindings");
+			base (Config.WM_SCHEMA + ".keybindings");
 		}
 
 		public static unowned KeybindingSettings get_default ()

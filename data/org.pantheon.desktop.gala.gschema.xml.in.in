@@ -95,68 +95,6 @@
 
 	</schema>
 
-	<schema path="/com/deepin/wrap/pantheon/desktop/gala/keybindings/" id="com.deepin.wrap.pantheon.desktop.gala.keybindings" gettext-domain="@GETTEXT_PACKAGE@">
-		<key type="as" name="switch-to-workspace-first">
-			<default><![CDATA[['<Super>Home']]]></default>
-			<_summary>Shortcut to move to first workspace</_summary>
-			<_description></_description>
-		</key>
-		<key type="as" name="switch-to-workspace-last">
-			<default><![CDATA[['<Super>End', '<Super>0']]]></default>
-			<_summary>Shortcut to move to last workspace</_summary>
-			<_description></_description>
-		</key>
-		<key type="as" name="move-to-workspace-first">
-			<default><![CDATA[['<Super><Shift>Home']]]></default>
-			<_summary>Shortcut to move the current window to first workspace</_summary>
-			<_description></_description>
-		</key>
-		<key type="as" name="move-to-workspace-last">
-			<default><![CDATA[['<Super><Shift>End', '<Super>0']]]></default>
-			<_summary>Shortcut to move the current window to last workspace</_summary>
-			<_description></_description>
-		</key>
-		<key type="as" name="zoom-in">
-			<default><![CDATA[['<Super>plus', '<Super>KP_Add']]]></default>
-			<_summary>Zoom in</_summary>
-			<_description></_description>
-		</key>
-		<key type="as" name="zoom-out">
-			<default><![CDATA[['<Super>minus', '<Super>KP_Subtract']]]></default>
-			<_summary>Zoom out</_summary>
-		</key>
-		<key type="as" name="expose-windows">
-			<default><![CDATA[['<Super>w']]]></default>
-			<_summary>Shortcut to open the window overview</_summary>
-			<_description></_description>
-		</key>
-		<key type="as" name="expose-all-windows">
-			<default><![CDATA[['<Super>a']]]></default>
-			<_summary>Shortcut to open the window overview for all windows</_summary>
-			<_description></_description>
-		</key>
-		<key type="as" name="cycle-workspaces-next">
-			<default><![CDATA[['<Super>Tab']]]></default>
-			<_summary>Cycle to the next workspace to the right or to back to the first</_summary>
-		</key>
-		<key type="as" name="cycle-workspaces-previous">
-			<default><![CDATA[['<Super><Shift>Tab']]]></default>
-			<_summary>Cycle to the next workspace to the right or to back to the first</_summary>
-		</key>
-		<key type="as" name="switch-input-source">
-			<default><![CDATA[['<Shift>space']]]></default>
-			<_summary>Cycle to next keyboard layout</_summary>
-		</key>
-		<key type="as" name="switch-input-source-backward">
-			<default><![CDATA[['']]]></default>
-			<_summary>Cycle to previous keyboard layout</_summary>
-		</key>
-		<key type="as" name="preview-workspace">
-			<default><![CDATA[['<Super>s']]]></default>
-			<summary>Preview all workspaces</summary>
-		</key>
-	</schema>
-
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/appearance/" id="com.deepin.wrap.pantheon.desktop.gala.appearance" gettext-domain="@GETTEXT_PACKAGE@">
 
 		<key type="b" name="attach-modal-dialogs">

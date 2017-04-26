@@ -11,6 +11,7 @@ AM_CPPFLAGS = \
 	-DLIBDIR=\"$(libdir)\" \
 	-DPKGLIBDIR=\"$(pkglibdir)\" \
 	-DPLUGINDIR=\"$(pkglibdir)/plugins\" \
+	-DWM_SCHEMA=\"com.deepin.wrap.gnome.desktop.wm\" \
 	-DSCHEMA=\"com.deepin.wrap.pantheon.desktop.gala\" \
 	-DDEEPIN_SCHEMA=\"com.deepin.dde\" \
 	$(NULL)
