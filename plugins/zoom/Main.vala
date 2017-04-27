@@ -31,7 +31,7 @@ namespace Gala.Plugins.Zoom
 		{
 			this.wm = wm;
 			var display = wm.get_screen ().get_display ();
-			var schema = new GLib.Settings (Config.SCHEMA + ".keybindings");
+			var schema = new GLib.Settings (Config.WM_SCHEMA + ".keybindings");
 
 			display.add_keybinding ("zoom-in", schema, 0, (Meta.KeyHandlerFunc) zoom_in);
 			display.add_keybinding ("zoom-out", schema, 0, (Meta.KeyHandlerFunc) zoom_out);
