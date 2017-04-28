@@ -31,7 +31,7 @@ namespace Gala
 		public const int WORKSPACE_SWITCH_DURATION = 400;
 		public const AnimationMode WORKSPACE_SWITCH_MODE = AnimationMode.EASE_OUT_QUINT;
 		public const int WORKSPACE_FADE_DURATION = 400;
-		public const AnimationMode WORKSPACE_FADE_MODE = AnimationMode.EASE_IN_OUT_QUINT;
+		public const AnimationMode WORKSPACE_FADE_MODE = AnimationMode.EASE_IN_OUT_CUBIC;
 
 		const int SMOOTH_SCROLL_DELAY = 500;
 
