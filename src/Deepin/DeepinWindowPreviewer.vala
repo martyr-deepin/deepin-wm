@@ -222,7 +222,8 @@ namespace Gala
             foreach (var window in workspace.list_windows ())
 				if (window.showing_on_its_workspace ()) {
 					var actor = window.get_compositor_private () as Actor;
-                    if (window != target_window && duration != 0) {
+                    actor.remove_all_transitions ();
+                    if (window != target_window && !actor.visible && duration != 0) {
                         actor.opacity = 0;
                         actor.show ();
 
@@ -238,6 +239,7 @@ namespace Gala
                             actor.opacity = 255;
                         });
                     } else {
+                        actor.opacity = 255;
                         actor.show ();
                     }
                 }
@@ -262,8 +264,16 @@ namespace Gala
 		public void open (uint32 xid)
 		{
 			if (visible) {
-				close ();
+                warning ("preview already opened\n");
 				return;
+			}
+
+            Meta.verbose ("preview opened\n");
+
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.preview_duration;
+			if (!animation_settings.enable_animations) {
+                duration = 0;
 			}
 
             open_workspace = screen.get_active_workspace ();
@@ -296,6 +306,10 @@ namespace Gala
 			if (!visible)
 				return;
 
+            Meta.verbose ("preview close\n");
+
+            preview_group.destroy_all_children ();
+            dock_actors.destroy_all_children ();
 			visible = false;
 
             restore_windows (open_workspace);
@@ -304,8 +318,6 @@ namespace Gala
             target_clone = null;
             open_workspace = null;
 
-            preview_group.destroy_all_children ();
-            dock_actors.destroy_all_children ();
 		}
 	}
 }
