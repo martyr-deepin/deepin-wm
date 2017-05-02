@@ -25,12 +25,14 @@ namespace Gala
 		public WindowManager wm { get; construct; }
 
 		Meta.Screen screen;
+		ModalProxy modal_proxy;
 
         Meta.Window? target_window = null;
         Actor? target_clone = null;
         Workspace? open_workspace = null;
         Actor? dock_actors = null;
         Actor? preview_group = null;
+        bool ready = true;
 
 		public WindowPreviewer (WindowManager wm)
 		{
@@ -50,8 +52,8 @@ namespace Gala
             dock_actors = new Actor ();
             add_child (dock_actors);
 
+            reactive = true;
 			visible = false;
-			reactive = true;
 		}
 
 		~WindowPreviewer ()
@@ -268,7 +270,17 @@ namespace Gala
 				return;
 			}
 
+            if (!ready) {
+                warning ("preview is not ready!\n");
+                return;
+            }
+
+			grab_key_focus ();
+			modal_proxy = wm.push_modal ();
+
             Meta.verbose ("preview opened\n");
+            ready = false;
+			visible = true;
 
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 			var duration = animation_settings.preview_duration;
@@ -281,13 +293,20 @@ namespace Gala
             hide_windows (open_workspace);
             collect_dock_windows ();
             update_previewer ();
-			visible = true;
 
             change_preview (xid);
 			if (target_window == null) {
+                wm.pop_modal (modal_proxy);
                 close ();
 				return;
             }
+
+            Timeout.add(duration, () => {
+                wm.pop_modal (modal_proxy);
+                ready = true;
+                Meta.verbose ("preview opened done\n");
+                return false;
+            });
 		}
 
         public void update_previewer ()
@@ -307,12 +326,25 @@ namespace Gala
 				return;
 
             Meta.verbose ("preview close\n");
+			visible = false;
+
+			modal_proxy = wm.push_modal ();
 
             preview_group.destroy_all_children ();
             dock_actors.destroy_all_children ();
-			visible = false;
 
             restore_windows (open_workspace);
+
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.preview_duration;
+			if (!animation_settings.enable_animations) {
+                duration = 0;
+			}
+            Timeout.add(duration, () => {
+                wm.pop_modal (modal_proxy);
+                ready = true;
+                return false;
+            });
 
             target_window = null;
             target_clone = null;

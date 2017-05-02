@@ -1523,17 +1523,21 @@ namespace Gala
         public void request_hide_windows ()
         {
             Meta.verbose ("%s\n", Log.METHOD);
-            if (hiding_windows) {
-                warning ("already in hiding windows state");
+            if (hiding_windows || window_previewer.is_opened ()) {
+                warning ("already in hiding windows state or in preview mode");
                 return;
             }
 
+            var workspace = get_screen ().get_active_workspace ();
 			hided_windows = new Gee.HashSet<WindowActor> ();
             foreach (var actor in Compositor.get_window_actors (get_screen ())) {
                 if (actor.is_destroyed ())
                     continue;
 
                 var window = actor.get_meta_window ();
+                if (window.get_workspace () != workspace)
+                    continue;
+
                 if (window.is_hidden () || window.minimized) {
                     hided_windows.add (actor);
                 } else {
@@ -1553,6 +1557,9 @@ namespace Gala
         public void cancel_hide_windows ()
         {
             Meta.verbose ("%s\n", Log.METHOD);
+            if (!hiding_windows) 
+                return;
+
             foreach (var actor in Compositor.get_window_actors (get_screen ())) {
                 if (actor.is_destroyed () || hided_windows.contains (actor)) 
                     continue;
@@ -1582,9 +1589,7 @@ namespace Gala
 
         public void finish_preview_window ()
         {
-            if (window_previewer.is_opened ()) {
-                window_previewer.close ();
-            }
+            window_previewer.close ();
         }
 
         public void present_windows (uint32[] xids)
