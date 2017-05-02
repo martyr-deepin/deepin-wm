@@ -26,12 +26,11 @@ namespace Gala
 
 		Meta.Screen screen;
 
-		ModalProxy modal_proxy;
-		bool ready;
-
         Meta.Window? target_window = null;
-
-		List<Workspace> workspaces;
+        Actor? target_clone = null;
+        Workspace? open_workspace = null;
+        Actor? dock_actors = null;
+        Actor? preview_group = null;
 
 		public WindowPreviewer (WindowManager wm)
 		{
@@ -45,8 +44,13 @@ namespace Gala
 			screen.workspace_switched.connect (close);
             screen.monitors_changed.connect (update_previewer);
 
+            preview_group = new Actor ();
+            add_child (preview_group);
+
+            dock_actors = new Actor ();
+            add_child (dock_actors);
+
 			visible = false;
-			ready = true;
 			reactive = true;
 		}
 
@@ -86,7 +90,7 @@ namespace Gala
 
         Meta.Window? find_window_by_xid (uint32 xid)
         {
-            foreach (var workspace in workspaces) {
+            foreach (var workspace in screen.get_workspaces ()) {
                 foreach (var window in workspace.list_windows ()) {
                     if ((uint32)window.get_xwindow () == xid) {
                         return window;
@@ -99,166 +103,209 @@ namespace Gala
 
         public void change_preview (uint32 xid)
         {
-            int duration = 500;
+            bool first_selection = target_window == null;
+
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.preview_duration;
+			if (!animation_settings.enable_animations) {
+                duration = 0;
+			}
 
             if (target_window != null) {
+                var clone = target_clone;
+
                 //fade out
-                var actor = target_window.get_compositor_private () as WindowActor;
                 target_window = null;
-                //actor.remove_all_transitions ();
+                target_clone = null;
 
-                actor.show ();
-                actor.opacity = 255;
+                if (duration != 0) {
+                    clone.opacity = 255;
 
-				actor.save_easing_state ();
-				actor.set_easing_mode (Clutter.AnimationMode.LINEAR);
-				actor.set_easing_duration (duration);
-                actor.opacity = 0;
-				actor.restore_easing_state ();
+                    clone.save_easing_state ();
+                    clone.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
+                    clone.set_easing_duration (duration);
+                    clone.opacity = 0;
+                    clone.restore_easing_state ();
 
-                ulong handler_id = 0UL;
-				handler_id = actor.transition_stopped.connect (() => {
-                    actor.disconnect (handler_id);
-                    actor.hide ();
-                    actor.opacity = 255;
-				});
+                    ulong handler_id = 0UL;
+                    handler_id = clone.transition_stopped.connect (() => {
+                        clone.disconnect (handler_id);
+                        clone.destroy ();
+                    });
+                } else {
+                    clone.hide ();
+                    clone.destroy ();
+                }
             }
 
             target_window = find_window_by_xid (xid);
             if (target_window != null) {
                 var actor = target_window.get_compositor_private () as WindowActor;
-                //actor.remove_all_transitions ();
+                var clone = new SafeWindowClone (target_window, true);
+                target_clone = clone;
+                preview_group.add_child (clone);
+                clone.x = actor.x;
+                clone.y = actor.y;
 
-                int n = target_window.get_monitor();
-                var geometry = screen.get_monitor_geometry (n);
+                if (duration != 0 && 
+                        (!first_selection || !target_window.showing_on_its_workspace ())) {
+                    clone.opacity = 0;
+                    clone.show ();
+                    clone.save_easing_state ();
+                    clone.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
+                    clone.set_easing_duration (duration);
+                    clone.opacity = 255;
+                    clone.restore_easing_state ();
 
-                actor.opacity = 0;
-                actor.show ();
-				actor.save_easing_state ();
-				actor.set_easing_mode (Clutter.AnimationMode.LINEAR);
-				actor.set_easing_duration (duration);
-                actor.opacity = 255;
-				actor.restore_easing_state ();
-
-                ulong handler_id = 0UL;
-				handler_id = actor.transition_stopped.connect (() => {
-                    actor.disconnect (handler_id);
-                    actor.opacity = 255;
-				});
+                    ulong handler_id = 0UL;
+                    handler_id = clone.transition_stopped.connect (() => {
+                        clone.disconnect (handler_id);
+                        clone.opacity = 255;
+                    });
+                } 
             }
         }
 
+		void hide_windows (Workspace workspace)
+		{
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.preview_duration;
+			if (!animation_settings.enable_animations) {
+                duration = 0;
+			}
+
+            foreach (var window in workspace.list_windows ()) {
+                if (window.window_type == WindowType.DOCK)
+                    continue;
+
+                if (window.is_on_all_workspaces () && window.get_workspace () != workspace)
+                    continue;
+
+                var actor = window.get_compositor_private () as WindowActor;
+                if (actor != null && actor.visible) {
+                    if (duration != 0) {
+                        actor.opacity = 255;
+
+                        actor.save_easing_state ();
+                        actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
+                        actor.set_easing_duration (duration);
+                        actor.opacity = 0;
+                        actor.restore_easing_state ();
+
+                        ulong handler_id = 0UL;
+                        handler_id = actor.transition_stopped.connect (() => {
+                            actor.disconnect (handler_id);
+                            actor.hide ();
+                            actor.opacity = 255;
+                        });
+                    } else {
+                        actor.hide ();
+                    }
+                } 
+            }
+		}
+
+		void restore_windows (Workspace workspace)
+		{
+			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+			var duration = animation_settings.preview_duration;
+			if (!animation_settings.enable_animations) {
+                duration = 0;
+			}
+
+			var screen = wm.get_screen ();
+
+            // if ws changed, there is nothing to do
+            if (workspace != screen.get_active_workspace ())
+                return;
+
+            foreach (var window in workspace.list_windows ())
+				if (window.showing_on_its_workspace ()) {
+					var actor = window.get_compositor_private () as Actor;
+                    if (window != target_window && duration != 0) {
+                        actor.opacity = 0;
+                        actor.show ();
+
+                        actor.save_easing_state ();
+                        actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
+                        actor.set_easing_duration (duration);
+                        actor.opacity = 255;
+                        actor.restore_easing_state ();
+
+                        ulong handler_id = 0UL;
+                        handler_id = actor.transition_stopped.connect (() => {
+                            actor.disconnect (handler_id);
+                            actor.opacity = 255;
+                        });
+                    } else {
+                        actor.show ();
+                    }
+                }
+		}
+
+		void collect_dock_windows ()
+		{
+            dock_actors.destroy_all_children ();
+
+			foreach (var actor in Compositor.get_window_actors (screen)) {
+				var window = actor.get_meta_window ();
+
+                if (window.wm_class == "dde-dock") {
+                    var clone = new SafeWindowClone (window);
+                    clone.x = actor.x;
+                    clone.y = actor.y;
+                    dock_actors.add_child (clone);
+                }
+			}
+		}
+
 		public void open (uint32 xid)
 		{
-			if (!ready)
-				return;
-
 			if (visible) {
 				close ();
 				return;
 			}
 
+            open_workspace = screen.get_active_workspace ();
 
-			workspaces = new List<Workspace> ();
+            hide_windows (open_workspace);
+            collect_dock_windows ();
+            update_previewer ();
+			visible = true;
 
-            foreach (var workspace in screen.get_workspaces ())
-                workspaces.append (workspace);
-
-
-            foreach (var workspace in workspaces) {
-                foreach (var window in workspace.list_windows ()) {
-                    if (window.window_type != WindowType.NORMAL &&
-                            window.window_type != WindowType.DOCK) {
-                        var actor = window.get_compositor_private () as WindowActor;
-                        if (actor != null) {
-                            actor.hide ();
-                        }
-                        continue;
-                    }
-
-                    if (window.window_type == WindowType.DOCK)
-                        continue;
-
-                    // skip windows that are on all workspace except we're currently
-                    // processing the workspace it actually belongs to
-                    if (window.is_on_all_workspaces () && window.get_workspace () != workspace)
-                        continue;
-
-                    var actor = window.get_compositor_private () as WindowActor;
-                    if (actor != null) {
-                        actor.hide ();
-                    } 
-                }
-			}
-
-            target_window = find_window_by_xid (xid);
+            change_preview (xid);
 			if (target_window == null) {
-                cleanup ();
+                close ();
 				return;
             }
-
-            //(wm as WindowManagerGala).toggle_background_blur (true);
-			grab_key_focus ();
-
-			//modal_proxy = wm.push_modal ();
-			//modal_proxy.keybinding_filter = keybinding_filter;
-
-            update_previewer ();
-
-			visible = true;
-			ready = true;
-
-            target_window = null;
-            change_preview (xid);
 		}
 
         public void update_previewer ()
         {
-            int n = target_window.get_monitor();
-            var geometry = screen.get_monitor_geometry (n);
+            if (visible && target_window != null) {
+                int n = target_window.get_monitor();
+                var geometry = screen.get_monitor_geometry (n);
 
-            set_position (geometry.x, geometry.y);
-            set_size (geometry.width, geometry.height);
+                set_position (geometry.x, geometry.y);
+                set_size (geometry.width, geometry.height);
+            }
         }
-
-		bool keybinding_filter (KeyBinding binding)
-		{
-			var name = binding.get_name ();
-			return (name != "expose-windows" && name != "expose-all-windows");
-		}
 
 		public void close ()
 		{
-			if (!visible || !ready)
+			if (!visible)
 				return;
 
-            //(wm as WindowManagerGala).toggle_background_blur (false);
-
-			ready = false;
-
-            if (target_window != null)
-                (target_window.get_compositor_private () as WindowActor).hide ();
-            target_window = null;
-
-			//wm.pop_modal (modal_proxy);
-
-			Clutter.Threads.Timeout.add (10, () => {
-				cleanup ();
-
-				return false;
-			});
-		}
-
-		void cleanup ()
-		{
-			ready = true;
 			visible = false;
 
-            foreach (var window in screen.get_active_workspace ().list_windows ())
-				if (window.showing_on_its_workspace ())
-					((Actor) window.get_compositor_private ()).show ();
+            restore_windows (open_workspace);
 
-			destroy_all_children ();
+            target_window = null;
+            target_clone = null;
+            open_workspace = null;
+
+            preview_group.destroy_all_children ();
+            dock_actors.destroy_all_children ();
 		}
 	}
 }

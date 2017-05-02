@@ -156,6 +156,9 @@
 			<default>150</default>
 			<_summary>Duration of the menu mapping animation</_summary>
 		</key>
+		<key type="i" name="preview-duration">
+			<default>150</default>
+		</key>
 		<key type="i" name="multitasking-toggle-duration">
 			<default>450</default>
 			<summary>Duration of the multitasking view toggle animation</summary>

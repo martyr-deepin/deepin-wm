@@ -135,6 +135,7 @@ namespace Gala
 	{
 		public bool enable_animations { get; set; }
 		public int open_duration { get; set; }
+		public int preview_duration { get; set; }
 		public int snap_duration { get; set; }
 		public int close_duration { get; set; }
 		public int minimize_duration { get; set; }
