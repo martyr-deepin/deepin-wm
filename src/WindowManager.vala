@@ -2357,10 +2357,17 @@ namespace Gala
 		{
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 			var animation_duration = animation_settings.workspace_switch_duration;
+            if (Config.DEEPIN_ARCH.has_prefix("sw_64")) {
+                animation_duration = 0;
+            }
 
 			if (!animation_settings.enable_animations
 				|| animation_duration == 0
                 || (direction != MotionDirection.LEFT && direction != MotionDirection.RIGHT)) {
+
+                if (!workspace_view.is_opened ()) {
+                    workspace_indicator.open ();
+                }
 
                 var screen = get_screen ();
                 foreach (var key in backgrounds.keys) {
