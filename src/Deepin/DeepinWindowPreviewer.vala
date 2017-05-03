@@ -32,7 +32,8 @@ namespace Gala
         Workspace? open_workspace = null;
         Actor? dock_actors = null;
         Actor? preview_group = null;
-        bool ready = true;
+        bool opening = false;
+        bool closing = false;
 
 		public WindowPreviewer (WindowManager wm)
 		{
@@ -265,21 +266,24 @@ namespace Gala
 
 		public void open (uint32 xid)
 		{
-			if (visible) {
+			if (visible || opening) {
                 warning ("preview already opened\n");
 				return;
 			}
 
-            if (!ready) {
-                warning ("preview is not ready!\n");
-                return;
+            if (closing) {
+                warning ("preview is closing!\n");
+                closing = false;
             }
 
 			grab_key_focus ();
-			modal_proxy = wm.push_modal ();
+            if (!wm.is_modal ()) {
+                modal_proxy = wm.push_modal ();
+            }
+            opening = true;
+
 
             Meta.verbose ("preview opened\n");
-            ready = false;
 			visible = true;
 
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
@@ -302,9 +306,11 @@ namespace Gala
             }
 
             Timeout.add(duration, () => {
-                wm.pop_modal (modal_proxy);
-                ready = true;
-                Meta.verbose ("preview opened done\n");
+                if (opening) {
+                    Meta.verbose ("preview open pop_modal\n");
+                    wm.pop_modal (modal_proxy);
+                    opening = false;
+                }
                 return false;
             });
 		}
@@ -322,13 +328,20 @@ namespace Gala
 
 		public void close ()
 		{
-			if (!visible)
+			if (!visible || closing)
 				return;
 
             Meta.verbose ("preview close\n");
 			visible = false;
 
-			modal_proxy = wm.push_modal ();
+            if (opening) {
+                opening = false;
+            }
+
+            if (!wm.is_modal ()) {
+                modal_proxy = wm.push_modal ();
+            }
+            closing = true;
 
             preview_group.destroy_all_children ();
             dock_actors.destroy_all_children ();
@@ -341,8 +354,11 @@ namespace Gala
                 duration = 0;
 			}
             Timeout.add(duration, () => {
-                wm.pop_modal (modal_proxy);
-                ready = true;
+                if (closing) {
+                    Meta.verbose ("preview close pop_modal \n");
+                    wm.pop_modal (modal_proxy);
+                }
+                closing = false;
                 return false;
             });
 
