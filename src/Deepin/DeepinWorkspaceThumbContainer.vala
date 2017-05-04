@@ -47,7 +47,10 @@ namespace Gala
 		protected override bool on_draw_content (Cairo.Context cr, int width, int height)
 		{
 			style_context.set_state (state);
+
+            cr.set_operator (Cairo.Operator.SOURCE);
             style_context.render_background (cr, 0, 0, width, height);
+            cr.set_operator (Cairo.Operator.OVER);
             style_context.render_frame (cr, 0, 0, width, height);
 
 			// draw tha plus button
