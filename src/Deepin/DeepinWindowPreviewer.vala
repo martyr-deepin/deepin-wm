@@ -114,6 +114,9 @@ namespace Gala
                 duration = 0;
 			}
 
+            if (target_window != null && (uint32)target_window.get_xwindow () == xid)
+                return;
+
             if (target_window != null) {
                 var clone = target_clone;
 
