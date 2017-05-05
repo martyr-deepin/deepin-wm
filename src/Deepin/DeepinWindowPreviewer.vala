@@ -259,7 +259,11 @@ namespace Gala
 				var window = actor.get_meta_window ();
 
                 if (window.wm_class == "dde-dock") {
-                    var clone = new SafeWindowClone (window);
+                    var clone = new SafeWindowClone (window, true);
+                    actor.notify["position"].connect(() => {
+                        clone.x = actor.x;
+                        clone.y = actor.y;
+                    });
                     clone.x = actor.x;
                     clone.y = actor.y;
                     dock_actors.add_child (clone);
