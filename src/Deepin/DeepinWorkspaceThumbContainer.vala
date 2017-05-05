@@ -79,6 +79,8 @@ namespace Gala
         BackgroundSource background_source;
         DragDropAction window_drop_action;
 
+        bool init = true;
+
 		public DeepinWorkspaceAdder (Meta.Screen screen)
 		{
             Object (screen: screen);
@@ -140,7 +142,10 @@ namespace Gala
 
         void update_background_actor ()
         {
-            background_source.request_new_default_uri ();
+            if (!init) {
+                background_source.request_new_default_uri ();
+            }
+            init = false;
             //assign a non-exist workspace will give us default background
             var background = background_source.get_background (screen.get_primary_monitor (), 
                     screen.get_n_workspaces ());
