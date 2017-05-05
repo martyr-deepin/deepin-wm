@@ -128,7 +128,7 @@ namespace Gala
                     clone.opacity = 255;
 
                     clone.save_easing_state ();
-                    clone.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
+                    clone.set_easing_mode (Clutter.AnimationMode.LINEAR);
                     clone.set_easing_duration (duration);
                     clone.opacity = 0;
                     clone.restore_easing_state ();
@@ -158,7 +158,7 @@ namespace Gala
                     clone.opacity = 0;
                     clone.show ();
                     clone.save_easing_state ();
-                    clone.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
+                    clone.set_easing_mode (Clutter.AnimationMode.LINEAR);
                     clone.set_easing_duration (duration);
                     clone.opacity = 255;
                     clone.restore_easing_state ();
