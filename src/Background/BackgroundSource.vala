@@ -323,13 +323,30 @@ namespace Gala
 			}
 		}
 
-		public Background get_background (int monitor_index, int workspace_index)
+        public Background get_transient_background (int monitor_index, int workspace_index, string uri)
+        {
+            return get_background (monitor_index, screen.get_n_workspaces (), uri);
+        }
+
+		public Background get_background (int monitor_index, int workspace_index, string? transient_uri = null)
 		{
 			string? filename = null;
 
 			var style = settings.get_enum ("picture-options");
 			if (style != GDesktop.BackgroundStyle.NONE) {
-				filename = get_picture_filename (monitor_index, workspace_index);
+                if (transient_uri == null) {
+                    filename = get_picture_filename (monitor_index, workspace_index);
+                } else {
+                    filename = transient_uri;
+                    if (Uri.parse_scheme (transient_uri) != null) {
+                        var file = File.new_for_uri (transient_uri);
+                        if (file.query_exists ()) {
+                            filename = file.get_path ();
+                        }
+                    } else {
+                        filename = transient_uri;
+                    }
+                }
 			}
 
             if (workspace_index >= screen.get_n_workspaces ()) {

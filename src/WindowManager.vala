@@ -1506,9 +1506,17 @@ namespace Gala
         public void change_workspace_background (string uri)
         {
 			var source = BackgroundCache.get_default ().get_background_source (
-				get_screen (), BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
+				get_screen (), BackgroundManager.BACKGROUND_SCHEMA,
+                BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
 			var active_workspace = get_screen ().get_active_workspace ();
             source.change_background (active_workspace.index (), uri);
+        }
+
+        public void set_transient_background (string uri)
+        {
+            foreach (var bg in backgrounds) {
+                bg.set_transient_background (uri);
+            }
         }
 
         public string get_current_workspace_background ()

@@ -105,6 +105,11 @@ namespace Gala
             (wm as WindowManagerGala).change_workspace_background (uri);
         }
 
+        public void set_transient_background (string uri)
+        {
+            (wm as WindowManagerGala).set_transient_background (uri);
+        }
+
         public string get_current_workspace_background ()
         {
             return (wm as WindowManagerGala).get_current_workspace_background ();

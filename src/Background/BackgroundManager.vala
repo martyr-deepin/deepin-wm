@@ -95,6 +95,17 @@ namespace Gala
                 return false;
             });
         }
+
+        public void set_transient_background (string uri)
+        {
+            if (actors.size > 0) {
+                var actor = actors[actors.size - 1];
+                var background = background_source.get_transient_background (
+                        monitor_index, workspace_index, uri);
+                actor.background = background.background;
+            }
+        }
+
         public void set_rounds (int rounds)
         {
             this.rounds = rounds;
