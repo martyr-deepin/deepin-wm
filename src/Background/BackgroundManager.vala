@@ -100,9 +100,15 @@ namespace Gala
         {
             if (actors.size > 0) {
                 var actor = actors[actors.size - 1];
-                var background = background_source.get_transient_background (
-                        monitor_index, workspace_index, uri);
-                actor.background = background.background;
+                if (uri.length == 0) {
+                    var background = background_source.get_background (
+                            monitor_index, workspace_index, uri);
+                    actor.background = background.background;
+                } else {
+                    var background = background_source.get_transient_background (
+                            monitor_index, workspace_index, uri);
+                    actor.background = background.background;
+                }
             }
         }
 
