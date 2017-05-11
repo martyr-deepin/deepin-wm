@@ -25,7 +25,6 @@ namespace Gala
 		public WindowManager wm { get; construct; }
 
 		Meta.Screen screen;
-		ModalProxy modal_proxy;
 
         Meta.Window? target_window = null;
         Actor? target_clone = null;
@@ -284,9 +283,6 @@ namespace Gala
             }
 
 			grab_key_focus ();
-            if (!wm.is_modal ()) {
-                modal_proxy = wm.push_modal ();
-            }
             opening = true;
 
 
@@ -307,15 +303,12 @@ namespace Gala
 
             change_preview (xid);
 			if (target_window == null) {
-                wm.pop_modal (modal_proxy);
                 close ();
 				return;
             }
 
             Timeout.add(duration, () => {
                 if (opening) {
-                    Meta.verbose ("preview open pop_modal\n");
-                    wm.pop_modal (modal_proxy);
                     opening = false;
                 }
                 return false;
@@ -345,9 +338,6 @@ namespace Gala
                 opening = false;
             }
 
-            if (!wm.is_modal ()) {
-                modal_proxy = wm.push_modal ();
-            }
             closing = true;
 
             preview_group.destroy_all_children ();
@@ -362,8 +352,6 @@ namespace Gala
 			}
             Timeout.add(duration, () => {
                 if (closing) {
-                    Meta.verbose ("preview close pop_modal \n");
-                    wm.pop_modal (modal_proxy);
                 }
                 closing = false;
                 return false;
