@@ -256,6 +256,7 @@ namespace Gala
 
 			foreach (var actor in Compositor.get_window_actors (screen)) {
 				var window = actor.get_meta_window ();
+                actor.opacity = 0;
 
                 if (window.wm_class == "dde-dock") {
                     var clone = new SafeWindowClone (window, true);
@@ -351,8 +352,6 @@ namespace Gala
                 duration = 0;
 			}
             Timeout.add(duration, () => {
-                if (closing) {
-                }
                 closing = false;
                 return false;
             });
