@@ -225,12 +225,18 @@ namespace Gala
 
 			transition_to_original_state (false);
 
-			if (enable_shadow) {
-				var outer_rect = window.get_frame_rect ();
-				add_effect_with_name (
-					"shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5, SHADOW_OPACITY, -1, true, false));
-				window.size_changed.connect (update_shadow_size);
-			}
+            var show_callback_id = 0UL;
+            show_callback_id = notify["realized"].connect(() => {
+                if (enable_shadow && visible && get_effect ("shadow") == null) {
+                    stderr.printf("lazy add shadow effect\n");
+                    var outer_rect = window.get_frame_rect ();
+                    add_effect_with_name (
+                        "shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5, SHADOW_OPACITY, -1, true, false));
+                    window.size_changed.connect (update_shadow_size);
+                }
+                SignalHandler.disconnect (this, show_callback_id);
+                show_callback_id = 0UL;
+            });
 
 			// If we were waiting the view was most probably already opened when our window finally
 			// got available. So we fade-in and make sure we took the took place.  If the slot is
