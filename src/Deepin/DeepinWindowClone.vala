@@ -228,7 +228,7 @@ namespace Gala
             var show_callback_id = 0UL;
             show_callback_id = notify["realized"].connect(() => {
                 if (enable_shadow && visible && get_effect ("shadow") == null) {
-                    stderr.printf("lazy add shadow effect\n");
+                    Meta.verbose ("lazy add shadow effect\n");
                     var outer_rect = window.get_frame_rect ();
                     add_effect_with_name (
                         "shadow", new ShadowEffect (outer_rect.width, outer_rect.height, 40, 5, SHADOW_OPACITY, -1, true, false));
@@ -855,7 +855,7 @@ namespace Gala
 			Clutter.Callback finished = () => {
 				var shadow_effect = get_effect ("shadow") as ShadowEffect;
 				if (shadow_effect != null) {
-					shadow_effect.shadow_opacity = 255;
+					shadow_effect.shadow_opacity = SHADOW_OPACITY;
 				}
 				if (_select) {
 					shape.opacity = 255;
