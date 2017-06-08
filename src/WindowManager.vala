@@ -90,6 +90,7 @@ namespace Gala
         Gdk.Device pointer;
         DeepinAnimationImage? dai = null;
 
+        unowned Meta.Window? last_killed_window = null;
         bool blind_close = false;
 
 		public DeepinCornerIndicator (WindowManagerGala wm, Meta.ScreenCorner dir, string key, Meta.Screen screen)
@@ -310,6 +311,14 @@ namespace Gala
             if (active_window == null) 
                 return false;
 
+            // kill window takes time, so there is a time gap between current activate window
+            // really gets killed
+            if (last_killed_window == active_window) {
+                return false;
+            }
+            // its safe to set to null since previous active window should have be killed or changed
+            last_killed_window = null;
+
             if (active_window.window_type == Meta.WindowType.DESKTOP) {
                 return false;
             }
@@ -356,6 +365,7 @@ namespace Gala
                     return;
 
                 active_window.@delete (screen.get_display ().get_current_time ());
+                last_killed_window = active_window;
                 dai.deactivate ();
             } 
         }
