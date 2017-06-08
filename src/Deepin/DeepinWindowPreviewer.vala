@@ -224,9 +224,9 @@ namespace Gala
             if (workspace != screen.get_active_workspace ())
                 return;
 
-            foreach (var window in workspace.list_windows ())
-				if (window.showing_on_its_workspace ()) {
-					var actor = window.get_compositor_private () as Actor;
+            foreach (var window in workspace.list_windows ()) {
+                if (window.showing_on_its_workspace ()) {
+                    var actor = window.get_compositor_private () as Actor;
                     actor.remove_all_transitions ();
                     if (window != target_window && !actor.visible && duration != 0) {
                         actor.opacity = 0;
@@ -240,14 +240,22 @@ namespace Gala
 
                         ulong handler_id = 0UL;
                         handler_id = actor.transition_stopped.connect (() => {
-                            actor.disconnect (handler_id);
-                            actor.opacity = 255;
-                        });
+                                actor.disconnect (handler_id);
+                                actor.opacity = 255;
+                                });
                     } else {
                         actor.opacity = 255;
                         actor.show ();
                     }
-                }
+                } 
+            }
+
+            var actor = target_window.get_compositor_private () as Actor;
+            actor.opacity = 255;
+            // target_window could reside in another workspace
+            if (target_window.showing_on_its_workspace ()) {
+                actor.show ();
+            }
 		}
 
 		void collect_dock_windows ()
@@ -362,5 +370,6 @@ namespace Gala
 
 		}
 	}
+
 }
 

@@ -1604,6 +1604,7 @@ namespace Gala
 
         public void finish_preview_window ()
         {
+            stderr.printf ("finish_preview_window\n");
             window_previewer.close ();
         }
 
@@ -2380,6 +2381,7 @@ namespace Gala
             if (Config.DEEPIN_ARCH.has_prefix("sw_64")) {
                 animation_duration = 0;
             }
+            stderr.printf ("switch_workspace started\n");
 
 			if (!animation_settings.enable_animations
 				|| animation_duration == 0
