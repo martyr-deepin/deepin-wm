@@ -67,6 +67,10 @@ namespace Gala
 
 		DeepinFramedBackground background;
 
+        // when item is too small, show desktop icon instead
+        bool show_icon = false;
+        GtkClutter.Texture desktop_icon;
+
 		public DeepinWindowSwitcherDesktopItem (Screen screen)
 		{
 			Object (screen: screen);
@@ -82,8 +86,57 @@ namespace Gala
 
 			background = new DeepinFramedBackground (screen, screen.get_active_workspace_index (),
 													 false, false, scale);
+            desktop_icon = load_icon ();
+            desktop_icon.visible = show_icon;
+            set_show_icon (false);
+
 			add_child (background);
+            add_child (desktop_icon);
 		}
+
+        public void set_show_icon (bool val) 
+        {
+            if (show_icon != val) {
+                show_icon = val;
+
+                background.visible = !show_icon;
+                desktop_icon.visible = show_icon;
+            }
+        }
+
+		GtkClutter.Texture load_icon ()
+		{
+			var texture = new GtkClutter.Texture ();
+			var pixbuf = get_button_pixbuf ();
+
+
+			if (pixbuf != null) {
+				try {
+					texture.set_from_pixbuf (pixbuf);
+				} catch (Error e) {}
+			} else {
+				// we'll just make this red so there's at least something as an
+				// indicator that loading failed. Should never happen and this
+				// works as good as some weird fallback-image-failed-to-load pixbuf
+				texture.background_color = { 255, 0, 0, 255 };
+			}
+
+			return texture;
+		}
+
+		Gdk.Pixbuf? get_button_pixbuf ()
+        {
+            Gdk.Pixbuf? pixbuf;
+
+            try {
+                pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/" + "deepin-toggle-desktop.svg");
+            } catch (Error e) {
+                warning (e.message);
+                return null;
+            }
+
+            return pixbuf;
+        }
 
 		/**
 		 * Calculate the preferred size for background.
@@ -116,11 +169,22 @@ namespace Gala
 			bg_box.set_origin ((box.get_width () - bg_box.get_width ()) / 2,
 							   (box.get_height () - bg_box.get_height ()) / 2);
 
-			// scale background to relative to preferred size
-            background.scale_x = scale;
-            background.scale_y = scale;
+            if (background.visible) {
+                // scale background to relative to preferred size
+                background.scale_x = scale;
+                background.scale_y = scale;
 
-			background.allocate (bg_box, flags);
+                background.allocate (bg_box, flags);
+            }
+
+            if (desktop_icon.visible) {
+                var icon_box = ActorBox ();
+				icon_box.set_size (48, 48);
+				icon_box.set_origin (
+					(box.get_width () - icon_box.get_width ()) / 2,
+					(box.get_height () - icon_box.get_height ()) / 2);
+                desktop_icon.allocate (icon_box, flags);
+            }
 		}
 	}
 
@@ -172,6 +236,11 @@ namespace Gala
 
 			window.size_changed.disconnect (on_window_size_changed);
 		}
+
+        public bool show_icon_only ()
+        {
+            return clone_container == null || !clone_container.visible;
+        }
 
 		/**
 		 * The window unmanaged by the compositor, so we need to destroy ourselves too.

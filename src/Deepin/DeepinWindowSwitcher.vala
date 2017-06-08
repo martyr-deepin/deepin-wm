@@ -236,6 +236,11 @@ namespace Gala
             popup_lighter.add_effect_with_name ( "shadow",
                     new ShadowEffect ((int)popup_lighter.width, (int)popup_lighter.height, 18, 0, 30, 3));
 
+            var referent = (DeepinWindowSwitcherWindowItem)item_container.get_child_at_index (0);
+            var desktop_item = (DeepinWindowSwitcherDesktopItem)item_container.get_last_child ();
+            if (referent != null && desktop_item != null)
+                desktop_item.set_show_icon (referent.show_icon_only ());
+
             Timeout.add(10, () => {
                 update_shape_size ();
                 shape_move (current_item, false);
@@ -591,6 +596,11 @@ namespace Gala
 			var item = new DeepinWindowSwitcherDesktopItem (wm.get_screen ());
 			item.reactive = true;
 			item.button_release_event.connect (on_clicked_item);
+
+            var referent = (DeepinWindowSwitcherWindowItem)item_container.get_child_at_index (0);
+            referent.notify["allocation"].connect(() => {
+                item.set_show_icon (referent.show_icon_only ());
+            });
 
 			item_container.add_child (item);
 		}
