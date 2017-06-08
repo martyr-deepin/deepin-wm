@@ -319,11 +319,8 @@ namespace Gala
             }
 
             if (active_window.get_maximized() == Meta.MaximizeFlags.BOTH) {
-                var id = active_window.get_monitor ();
-                if (screen.get_current_monitor_for_pos ((int)pos.x, (int)pos.y) == id) {
-                    Meta.verbose ("blind_close is viable\n");
-                    return true;
-                }
+                Meta.verbose ("blind_close is viable\n");
+                return true;
             }
 
             return false;
@@ -1888,13 +1885,18 @@ namespace Gala
                 return;
             }
 
+            if (!window.located_on_workspace (get_screen ().get_active_workspace ())) {
+                unminimize_completed (actor);
+                return;
+            }
+
             kill_window_effects (actor);
             unminimizing.add (actor);
 
             actor.opacity = 25;
 
 			Rectangle icon = {};
-			if (actor.get_meta_window ().get_icon_geometry (out icon)) {
+			if (window.get_icon_geometry (out icon)) {
 				float scale_x  = (float)icon.width  / actor.width;
 				float scale_y  = (float)icon.height / actor.height;
 				float anchor_x = (float)(actor.x - icon.x) / (icon.width  - actor.width);
