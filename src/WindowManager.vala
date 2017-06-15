@@ -83,6 +83,7 @@ namespace Gala
         int64 last_reset_time = 0; // 0 is invalid
 
         bool animating = false;
+        bool delayed_action_scheduled = false;
 
         GtkClutter.Texture? effect = null;
         GtkClutter.Texture? effect_2nd = null;
@@ -222,6 +223,9 @@ namespace Gala
 
         bool should_perform_action ()
         {
+            if (delayed_action_scheduled) 
+                return false;
+
             var black_list = DeepinZoneSettings.get_default ().black_list;
             var active_window = wm.get_screen ().get_display ().get_focus_window ();
             if (active_window == null) 
@@ -547,12 +551,14 @@ namespace Gala
                 if ("com.deepin.dde.ControlCenter" in this.action) 
                     d = DeepinZoneSettings.get_default ().delay;
 
+                delayed_action_scheduled = true;
                 Timeout.add(d, exec_delayed_action);
             }
         }
 
         bool exec_delayed_action ()
         {
+            delayed_action_scheduled = false;
             start_animations ();
             var trans = new Clutter.TransitionGroup ();
             try {
