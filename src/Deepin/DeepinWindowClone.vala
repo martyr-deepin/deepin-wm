@@ -89,6 +89,7 @@ namespace Gala
 		uint prev_opacity = 255;
 		ulong check_confirm_dialog_cb = 0;
 		uint shadow_update_timeout = 0;
+        ulong show_callback_id = 0UL;
 
 		Actor shape;
 		DeepinIconActor? close_button = null;
@@ -225,9 +226,9 @@ namespace Gala
 
 			transition_to_original_state (false);
 
-            var show_callback_id = 0UL;
             show_callback_id = notify["realized"].connect(() => {
-                if (enable_shadow && visible && get_effect ("shadow") == null) {
+                if (!actor.is_destroyed() && enable_shadow &&
+                        visible && get_effect ("shadow") == null) {
                     Meta.verbose ("lazy add shadow effect\n");
                     var outer_rect = window.get_frame_rect ();
                     add_effect_with_name (
@@ -603,6 +604,11 @@ namespace Gala
 		 */
 		void unmanaged ()
 		{
+            if (show_callback_id != 0) {
+                SignalHandler.disconnect (this, show_callback_id);
+                show_callback_id = 0UL;
+            }
+
 			if (drag_action != null && drag_action.dragging) {
 				drag_action.cancel ();
 			}
