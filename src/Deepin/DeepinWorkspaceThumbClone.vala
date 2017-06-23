@@ -93,6 +93,7 @@ namespace Gala
 			workspace_clone.add_child (background);
 
 			window_container = new DeepinWindowThumbContainer (workspace);
+            window_container.clip_to_allocation = true;
 			window_container.window_activated.connect ((w) => selected ());
 			window_container.window_dragging.connect ((w) => {
 				// If window is dragging in thumbnail workspace, make close button manually or it
