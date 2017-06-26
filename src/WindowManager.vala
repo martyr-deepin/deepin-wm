@@ -318,6 +318,7 @@ namespace Gala
             // kill window takes time, so there is a time gap between current activate window
             // really gets killed
             if (last_killed_window == active_window) {
+                GLib.debug ("last killed window still messing around");
                 return false;
             }
             // its safe to set to null since previous active window should have be killed or changed
@@ -328,6 +329,7 @@ namespace Gala
             }
 
             if (is_active_fullscreen (active_window)) {
+                GLib.debug ("active is fullscreen");
                 return false;
             }
 
@@ -361,13 +363,16 @@ namespace Gala
                 // client while keep mouse pressing.
                 Clutter.Point pos = Clutter.Point.alloc ();
                 pointer.get_position (null, out pos.x, out pos.y);
-                if (!is_blind_close_viable (pos))
+                if (!is_blind_close_viable (pos)) {
+                    GLib.debug ("blind_close is not viable");
                     return;
+                }
 
                 var active_window = wm.get_screen ().get_display ().get_focus_window ();
                 if (active_window == null) 
                     return;
 
+                GLib.debug ("do_blind_close");
                 active_window.@delete (screen.get_display ().get_current_time ());
                 last_killed_window = active_window;
                 dai.deactivate ();
@@ -978,47 +983,17 @@ namespace Gala
 
 		void configure_hotcorners ()
 		{
-            int width, height;
-			get_screen ().get_size (out width, out height);
+            Clutter.Point tl;
+            Clutter.Point tr;
+            Clutter.Point bl;
+            Clutter.Point br;
 
-            int n = get_screen ().get_n_monitors ();
-            int tl_x, tl_y, tr_x, tr_y, bl_x, bl_y, br_x, br_y;
+            InternalUtils.get_corner_positions (get_screen (), out tl, out tr, out bl, out br);
 
-            tl_x = 0;
-            tl_y = height;
-            bl_x = 0;
-            bl_y = 0;
-            for (var i = 0; i < n; i++) {
-                // test if monitor is on the left
-                var geo = get_screen ().get_monitor_geometry (i);
-                if (geo.x != 0) {
-                    continue;
-                }
-
-                tl_y = int.min (geo.y, tl_y);
-                bl_y = int.max (geo.y + geo.height, bl_y);
-            }
-
-
-            tr_x = width;
-            tr_y = height;
-            br_x = width;
-            br_y = 0;
-            for (var i = 0; i < n; i++) {
-                // test if monitor is on the right
-                var geo = get_screen ().get_monitor_geometry (i);
-                if (geo.x + geo.width != width) {
-                    continue;
-                }
-
-                tr_y = int.min (geo.y, tr_y);
-                br_y = int.max (geo.y + geo.height, br_y);
-            }
-
-			add_hotcorner (tl_x, tl_y, Meta.ScreenCorner.TOPLEFT, "left-up");
-			add_hotcorner (tr_x - CORNER_SIZE, tr_y, Meta.ScreenCorner.TOPRIGHT, "right-up");
-			add_hotcorner (bl_x, bl_y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMLEFT, "left-down");
-			add_hotcorner (br_x - CORNER_SIZE, br_y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
+			add_hotcorner (tl.x, tl.y, Meta.ScreenCorner.TOPLEFT, "left-up");
+			add_hotcorner (tr.x - CORNER_SIZE, tr.y, Meta.ScreenCorner.TOPRIGHT, "right-up");
+			add_hotcorner (bl.x, bl.y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMLEFT, "left-down");
+			add_hotcorner (br.x - CORNER_SIZE, br.y - CORNER_SIZE, Meta.ScreenCorner.BOTTOMRIGHT, "right-down");
 		}
 
 		void add_hotcorner (float x, float y, Meta.ScreenCorner dir, string key)

@@ -81,7 +81,6 @@ namespace Gala
 			X.Xrectangle[] rects = {};
 			int width, height;
 			screen.get_size (out width, out height);
-			var geometry = screen.get_monitor_geometry (screen.get_primary_monitor ());
 
 			switch (area) {
 				case InputArea.FULLSCREEN:
@@ -97,12 +96,19 @@ namespace Gala
 					}
 					break;
                 case InputArea.BLIND_CLOSE_ENTER:
-                case InputArea.BLIND_CLOSE_RESPONSE:
+                case InputArea.BLIND_CLOSE_RESPONSE: {
+                    Clutter.Point tl;
+                    Clutter.Point tr;
+                    Clutter.Point bl;
+                    Clutter.Point br;
+                    get_corner_positions (screen, out tl, out tr, out bl, out br);
+
                     ushort sz = 4;
                     if (area == InputArea.BLIND_CLOSE_RESPONSE) sz = 24;
-					X.Xrectangle topright = {(short)(geometry.x + geometry.width - sz), (short)geometry.y, sz, sz};
+					X.Xrectangle topright = {(short)(tr.x - sz), (short)tr.y, sz, sz};
                     rects += topright;
                     break;
+                }
 				case InputArea.NONE:
 				default:
 					Util.empty_stage_input_region (screen);
@@ -112,6 +118,62 @@ namespace Gala
 			var xregion = X.Fixes.create_region (display.get_xdisplay (), rects);
 			Util.set_stage_input_region (screen, xregion);
 		}
+
+        public static void get_corner_positions(Screen screen,
+                out Clutter.Point tl, out Clutter.Point tr, 
+                out Clutter.Point bl, out Clutter.Point br)
+        {
+            tl = Clutter.Point.alloc ();
+            tr = Clutter.Point.alloc ();
+            bl = Clutter.Point.alloc ();
+            br = Clutter.Point.alloc ();
+
+            int width, height;
+			screen.get_size (out width, out height);
+
+            int n = screen.get_n_monitors ();
+            int tl_x, tl_y, tr_x, tr_y, bl_x, bl_y, br_x, br_y;
+
+            tl_x = 0;
+            tl_y = height;
+            bl_x = 0;
+            bl_y = 0;
+            for (var i = 0; i < n; i++) {
+                // test if monitor is on the left
+                var geo = screen.get_monitor_geometry (i);
+                if (geo.x != 0) {
+                    continue;
+                }
+
+                tl_y = int.min (geo.y, tl_y);
+                bl_y = int.max (geo.y + geo.height, bl_y);
+            }
+
+
+            tr_x = width;
+            tr_y = height;
+            br_x = width;
+            br_y = 0;
+            for (var i = 0; i < n; i++) {
+                // test if monitor is on the right
+                var geo = screen.get_monitor_geometry (i);
+                if (geo.x + geo.width != width) {
+                    continue;
+                }
+
+                tr_y = int.min (geo.y, tr_y);
+                br_y = int.max (geo.y + geo.height, br_y);
+            }
+
+            tl.x = tl_x;
+            tl.y = tl_y;
+            tr.x = tr_x;
+            tr.y = tr_y;
+            bl.x = bl_x;
+            bl.y = bl_y;
+            br.x = br_x;
+            br.y = br_y;
+        }
 
 		public static string get_system_background_path ()
 		{
