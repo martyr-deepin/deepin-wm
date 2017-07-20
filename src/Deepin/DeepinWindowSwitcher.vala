@@ -236,8 +236,8 @@ namespace Gala
             popup_lighter.add_effect_with_name ( "shadow",
                     new ShadowEffect ((int)popup_lighter.width, (int)popup_lighter.height, 18, 0, 30, 3));
 
-            var referent = (DeepinWindowSwitcherWindowItem)item_container.get_child_at_index (0);
-            var desktop_item = (DeepinWindowSwitcherDesktopItem)item_container.get_last_child ();
+            var referent = item_container.get_child_at_index (0) as DeepinWindowSwitcherWindowItem;
+            var desktop_item = item_container.get_last_child () as DeepinWindowSwitcherDesktopItem;
             if (referent != null && desktop_item != null)
                 desktop_item.set_show_icon (referent.show_icon_only ());
 
