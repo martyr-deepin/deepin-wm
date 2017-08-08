@@ -52,7 +52,7 @@ namespace Gala
             dock_actors = new Actor ();
             add_child (dock_actors);
 
-            reactive = true;
+            reactive = false;
 			visible = false;
 		}
 
@@ -183,6 +183,9 @@ namespace Gala
                 if (window.window_type == WindowType.DOCK)
                     continue;
 
+                if (window.window_type == WindowType.DESKTOP)
+                    continue;
+
                 if (window.is_on_all_workspaces () && window.get_workspace () != workspace)
                     continue;
 
@@ -253,7 +256,7 @@ namespace Gala
             var actor = target_window.get_compositor_private () as Actor;
             actor.opacity = 255;
             // target_window could reside in another workspace
-            if (target_window.showing_on_its_workspace ()) {
+            if (target_window != null && target_window.showing_on_its_workspace ()) {
                 actor.show ();
             }
 		}
@@ -264,9 +267,9 @@ namespace Gala
 
 			foreach (var actor in Compositor.get_window_actors (screen)) {
 				var window = actor.get_meta_window ();
-                actor.opacity = 0;
 
                 if (window.wm_class == "dde-dock") {
+                    actor.opacity = 0;
                     var clone = new SafeWindowClone (window, true);
                     actor.notify["position"].connect(() => {
                         clone.x = actor.x;
