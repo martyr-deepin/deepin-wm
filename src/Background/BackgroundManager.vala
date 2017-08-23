@@ -107,7 +107,16 @@ namespace Gala
                 } else {
                     var background = background_source.get_transient_background (
                             monitor_index, workspace_index, uri);
-                    actor.background = background.background;
+                    if (background.is_loaded) {
+                        actor.background = background.background;
+                    } else {
+                        ulong loaded_id = 0;
+                        loaded_id = background.loaded.connect(() => {
+                            Meta.verbose ("transient loaded: %s\n", uri);
+                            actor.background = background.background;
+                            SignalHandler.disconnect (background, loaded_id);
+                        });
+                    }
                 }
             }
         }

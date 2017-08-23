@@ -36,6 +36,11 @@ namespace Gala
 		internal int use_count { get; set; default = 0; }
 
 		Gee.HashMap<string,Background> backgrounds;
+        // caches 16 transient backgrounds, since some platform has low disk io
+		Gee.HashMap<string,Background> transient_cache;
+        // record cache order of transients
+        Gee.ArrayList<string> transient_cache_order;
+        const int MAX_CACHE_SIZE = 16;
 
         string fallback_background_name = "/usr/share/backgrounds/default_background.jpg";
 
@@ -54,6 +59,9 @@ namespace Gala
 		construct
 		{
 			backgrounds = new Gee.HashMap<string,Background> ();
+
+			transient_cache = new Gee.HashMap<string,Background> ();
+            transient_cache_order = new Gee.ArrayList<string> ();
 
 			screen.monitors_changed.connect (monitors_changed);
 
@@ -350,9 +358,20 @@ namespace Gala
 			}
 
             if (workspace_index >= screen.get_n_workspaces ()) {
-                // we don't cache background here, since its primary usage is to do random previewing,
-                // which makes caching useless.
-                return new Background (screen, workspace_index, filename, this, (GDesktop.BackgroundStyle) style);
+                if (!transient_cache.has_key (filename)) {
+                    if (transient_cache_order.size >= MAX_CACHE_SIZE) {
+                        Meta.verbose ("remove transient_cache %s\n", transient_cache_order[0]);
+                        transient_cache.remove (transient_cache_order[0]);
+                        transient_cache_order.remove_at (0);
+                    }
+                    var background = new Background (screen, workspace_index, filename,
+                            this, (GDesktop.BackgroundStyle) style);
+                    transient_cache_order.add (filename);
+                    transient_cache[filename] = background;
+                    Meta.verbose ("cache transient %s\n", filename);
+                }
+
+                return transient_cache[filename];
 
             } else {
                 string key = "%d:%d".printf (monitor_index, workspace_index);
