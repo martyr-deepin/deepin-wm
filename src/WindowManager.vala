@@ -1094,15 +1094,21 @@ namespace Gala
 			workspace.activate_with_focus (window, display.get_current_time ());
 		}
 
+
+        public void do_switch_to_workspace (MotionDirection direction)
+        {
+            if (workspace_view.is_toggling())
+                return;
+
+            switch_to_next_workspace (direction);
+        }
+
 		[CCode (instance_pos = -1)]
 		void handle_switch_to_workspace (Meta.Display display, Meta.Screen screen, Meta.Window? window,
 			Clutter.KeyEvent event, Meta.KeyBinding binding)
 		{
-			if (workspace_view.is_toggling())
-				return;
-
 			var direction = (binding.get_name () == "switch-to-workspace-left" ? MotionDirection.LEFT : MotionDirection.RIGHT);
-			switch_to_next_workspace (direction);
+            do_switch_to_workspace (direction);
 		}
 
 		[CCode (instance_pos = -1)]

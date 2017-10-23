@@ -16,6 +16,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using Meta;
+
 namespace Gala
 {
 	[DBus (name="com.deepin.wm")]
@@ -127,6 +129,30 @@ namespace Gala
             var ws = gala.get_screen().get_workspace_by_index(index);
             gala.get_screen().reorder_workspace(ws, new_index, 0);
         }
+
+        public void switch_application(bool backward)
+        {
+            var gala = (wm as WindowManagerGala);
+            var screen = gala.get_screen ();
+            var display = screen.get_display ();
+            var workspace = screen.get_active_workspace ();
+
+            var current = display.get_tab_current (Meta.TabList.NORMAL, workspace);
+            var window = display.get_tab_next (Meta.TabList.NORMAL, workspace,
+                    current, backward);
+            if (window == null) {
+                window = current;
+            }
+
+            window.activate (display.get_current_time_roundtrip ());
+        }
+
+        public void switch_to_workspace(bool backward)
+        {
+            var gala = (wm as WindowManagerGala);
+            gala.do_switch_to_workspace (backward ? MotionDirection.LEFT: MotionDirection.RIGHT);
+        }
+
 
         public signal void workspace_removed (int index);
         public signal void workspace_added (int index);
