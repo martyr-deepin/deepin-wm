@@ -144,7 +144,9 @@ namespace Gala
                 window = current;
             }
 
-            window.activate (display.get_current_time_roundtrip ());
+            if (window != null) {
+                window.activate (display.get_current_time_roundtrip ());
+            }
         }
 
         public void switch_to_workspace(bool backward)
