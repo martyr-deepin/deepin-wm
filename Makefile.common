@@ -14,4 +14,5 @@ AM_CPPFLAGS = \
 	-DWM_SCHEMA=\"com.deepin.wrap.gnome.desktop.wm\" \
 	-DSCHEMA=\"com.deepin.wrap.pantheon.desktop.gala\" \
 	-DDEEPIN_SCHEMA=\"com.deepin.dde\" \
+	-DDEEPIN_XSETTINGS_SCHEMA=\"com.deepin.xsettings\" \
 	$(NULL)

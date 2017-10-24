@@ -211,4 +211,24 @@ namespace Gala
 		}
 	}
 
+	public class DeepinXSettings : Granite.Services.Settings
+	{
+		public double scale_factor { get; set; }
+		public int window_scale { get; set; }
+
+		static DeepinXSettings? instance = null;
+
+		private DeepinXSettings ()
+		{
+			base (Config.DEEPIN_XSETTINGS_SCHEMA);
+		}
+
+		public static unowned DeepinXSettings get_default ()
+		{
+			if (instance == null)
+				instance = new DeepinXSettings ();
+
+			return instance;
+		}
+	}
 }

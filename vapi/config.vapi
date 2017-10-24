@@ -28,4 +28,5 @@ namespace Config
 	public const string WM_SCHEMA;
 	public const string DEEPIN_SCHEMA;
 	public const string DEEPIN_ARCH;
+	public const string DEEPIN_XSETTINGS_SCHEMA;
 }

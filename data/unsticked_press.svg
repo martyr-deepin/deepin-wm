@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.2 (44496) - http://www.bohemiancoding.com/sketch -->
+    <title>unsticked_press</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <circle id="path-1" cx="12" cy="12" r="12"></circle>
+        <filter x="-58.3%" y="-50.0%" width="216.7%" height="216.7%" filterUnits="objectBoundingBox" id="filter-2">
+            <feMorphology radius="1" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="2" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="4" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="最大化最小化" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="unsticked_press">
+            <g id="Group-6" transform="translate(12.000000, 12.000000)">
+                <g id="Oval">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                    <use fill="#ECECEC" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    <circle stroke-opacity="0.15" stroke="#000000" stroke-width="1" cx="12" cy="12" r="12.5"></circle>
+                </g>
+                <path d="M14.4240823,12.70887 L10.5541783,10.4708532 C10.3158697,10.3257959 10.0646134,10.2895321 9.80040172,10.3620598 C9.53619022,10.4345894 9.3315587,10.5900052 9.1865014,10.8283152 C9.05180527,11.0666232 9.02072201,11.3178799 9.0932507,11.5820912 C9.16577939,11.8463025 9.32119559,12.0457526 9.55950419,12.1804494 L13.4294081,14.4184661 C13.6677161,14.5635234 13.9189728,14.5997872 14.1831841,14.5272576 C14.4473954,14.4547299 14.6520277,14.2993141 14.797085,14.0610061 C14.9317818,13.8226961 14.9628654,13.5714394 14.8903357,13.3072281 C14.8178061,13.0430168 14.6623903,12.8435668 14.4240823,12.70887 L14.4240823,12.70887 Z M11.222475,10.2843518 L14.2375809,12.0250315 L15.2633385,9.16534346 L13.1807396,7.96862717 L11.222475,10.2843518 L11.222475,10.2843518 Z M9,17.6200734 L11.8907726,14.1076304 L10.6008036,13.3616249 L9,17.6200734 L9,17.6200734 Z M16.522222,7.59562438 L13.9267452,6.10361321 C13.7506043,6 13.5641049,5.9740967 13.367241,6.0259033 C13.1703771,6.07770991 13.0201415,6.19168166 12.9165283,6.36782253 C12.8129171,6.55432392 12.7870138,6.74600558 12.8388204,6.9428675 C12.890627,7.13973141 13.0045987,7.28996699 13.1807396,7.3935802 L15.7762164,8.88559137 C15.9523592,8.98920458 16.1388586,9.01510589 16.3357206,8.96330128 C16.5325845,8.91149467 16.6828201,8.79234067 16.7864333,8.60583928 C16.8900465,8.42969841 16.9159478,8.243199 16.8641432,8.04633509 C16.8123366,7.84947118 16.6983648,7.6992356 16.522222,7.59562438 L16.522222,7.59562438 Z" id="Page-1" fill="#2CA7F8"></path>
+            </g>
+        </g>
+    </g>
+</svg>

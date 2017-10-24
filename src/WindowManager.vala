@@ -39,9 +39,11 @@ namespace Gala
         public Meta.Rectangle  tile_rect;
     }
 
-    const int CORNER_SIZE = 32;
+    const int CORNER_BASE_SIZE = 32;
     const int CORNER_THRESHOLD = 150;
     const int REACTIVATION_THRESHOLD = 550; // cooldown time for consective reactivation
+
+    static int CORNER_SIZE;  // CORNER_BASE_SIZE * scale
 
 	class DeepinCornerIndicator : Clutter.Actor
 	{
@@ -49,6 +51,26 @@ namespace Gala
         public WindowManagerGala wm {get; construct;}
         public string key {get; construct;}
         public Meta.Screen screen {get; construct;}
+        public int window_scale {
+            get { return _window_scale; }
+            set {
+                var old = _window_scale;
+                _window_scale = value;
+                if (old != _window_scale) {
+                    stderr.printf ("scale %s (%f, %f, %f, %f) to %d\n", key,
+                            x, y, width, height, value);
+
+                    if (dai != null) {
+                        dai.set_size (38 * value, 38 * value);
+                        dai.set_position (CORNER_SIZE - dai.width, 0);
+                    }
+
+                    create_effect_textures ();
+                    create_close_marker ();
+                }
+            }
+        }
+
         public string action {
             get { return _action; }
             set {
@@ -73,6 +95,7 @@ namespace Gala
             }
         }
 
+        private int _window_scale = 1;
         private string _action;
         bool startRecord = false;
 
@@ -101,6 +124,75 @@ namespace Gala
 
 		construct
 		{
+            create_effect_textures ();
+            notify["last-distance-factor"].connect(on_last_distance_factor_changed);
+
+            (wm as Meta.Plugin).get_screen ().corner_entered.connect (corner_entered);
+
+            pointer = Gdk.Display.get_default ().get_device_manager ().get_client_pointer ();
+
+            create_close_marker ();
+		}
+
+        void create_close_marker ()
+        {
+            if (direction != Meta.ScreenCorner.TOPRIGHT) {
+                return;
+            }
+
+            if (dai != null) {
+                dai.pressed.disconnect (do_blind_close);
+                dai.activated.disconnect (wm.update_input_area);
+                dai.deactivated.disconnect (wm.update_input_area);
+                remove_child (dai);
+            }
+
+            if (window_scale == 2) {
+                dai = new DeepinAnimationImage (new string[]{
+                        "close_marker_1@2x.png",
+                        "close_marker_2@2x.png",
+                        "close_marker_3@2x.png",
+                        "close_marker_4@2x.png",
+                        "close_marker_5@2x.png",
+                        "close_marker_6@2x.png",
+                        "close_marker_7@2x.png"
+                        }, "close_marker_press@2x.png");
+            } else {
+                dai = new DeepinAnimationImage (new string[]{
+                        "close_marker_1.png",
+                        "close_marker_2.png",
+                        "close_marker_3.png",
+                        "close_marker_4.png",
+                        "close_marker_5.png",
+                        "close_marker_6.png",
+                        "close_marker_7.png"
+                        }, "close_marker_press.png");
+            }
+            dai.set_size (38 * window_scale, 38 * window_scale);
+            dai.visible = false;
+            dai.set_position (CORNER_SIZE - dai.width, 0);
+            dai.reactive = true;
+            dai.pressed.connect (do_blind_close);
+            dai.activated.connect (wm.update_input_area);
+            dai.deactivated.connect (wm.update_input_area);
+            add_child (dai);
+
+        }
+
+        void on_last_distance_factor_changed () {
+            if (!blind_close && !animating) {
+                effect.opacity = (uint)(last_distance_factor * 255.0f);
+                effect.set_scale (last_distance_factor, last_distance_factor);
+            }
+        }
+
+        void create_effect_textures ()
+        {
+            if (effect != null) {
+                remove_child (effect);
+                remove_child (effect_2nd);
+            }
+
             effect = create_texture ();
             effect_2nd = create_texture ();
             add_child (effect);
@@ -127,36 +219,7 @@ namespace Gala
 			effect.set_pivot_point (px, py);
 			effect_2nd.set_pivot_point (px, py);
 
-            notify["last-distance-factor"].connect(() => {
-                if (!blind_close && !animating) {
-                    effect.opacity = (uint)(last_distance_factor * 255.0f);
-                    effect.set_scale (last_distance_factor, last_distance_factor);
-                }
-            });
-
-            (wm as Meta.Plugin).get_screen ().corner_entered.connect (corner_entered);
-
-            pointer = Gdk.Display.get_default ().get_device_manager ().get_client_pointer ();
-
-            if (direction == Meta.ScreenCorner.TOPRIGHT) {
-                dai = new DeepinAnimationImage (new string[]{
-                        "close_marker_1.png",
-                        "close_marker_2.png",
-                        "close_marker_3.png",
-                        "close_marker_4.png",
-                        "close_marker_5.png",
-                        "close_marker_6.png",
-                        "close_marker_7.png"
-                }, "close_marker_press.png");
-                dai.visible = false;
-                dai.set_position (CORNER_SIZE - dai.width, 0);
-                dai.reactive = true;
-                dai.pressed.connect (do_blind_close);
-                dai.activated.connect (wm.update_input_area);
-                dai.deactivated.connect (wm.update_input_area);
-                add_child (dai);
-            }
-		}
+        }
 
         bool is_active_fullscreen (Meta.Window active_window)
         {
@@ -437,7 +500,9 @@ namespace Gala
             }
 
             try {
-                pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/" + icon_name + ".png");
+                pixbuf = new Gdk.Pixbuf.from_file_at_scale (
+                        Config.PKGDATADIR + "/" + icon_name + ".svg", 
+                        CORNER_SIZE, CORNER_SIZE, true);
             } catch (Error e) {
                 warning (e.message);
                 return null;
@@ -903,9 +968,11 @@ namespace Gala
             ui_group.add_child (workspace_indicator);
 
 			/*hot corner, getting enum values from GraniteServicesSettings did not work, so we use GSettings directly*/
+            CORNER_SIZE = CORNER_BASE_SIZE * DeepinXSettings.get_default ().window_scale;
             configure_hotcorners ();
             screen.monitors_changed.connect (configure_hotcorners);
 			DeepinZoneSettings.get_default ().schema.changed.connect (configure_hotcorners);
+			DeepinXSettings.get_default ().schema.changed.connect (recreate_hotcorners);
 
 			screen.monitors_changed.connect (update_background_mask_layer);
 			screen.workspace_added.connect (update_background_mask_layer);
@@ -981,6 +1048,44 @@ namespace Gala
             }
         }
 
+        void recreate_hotcorners ()
+        {
+
+            Clutter.Point tl;
+            Clutter.Point tr;
+            Clutter.Point bl;
+            Clutter.Point br;
+
+            InternalUtils.get_corner_positions (get_screen (), out tl, out tr, out bl, out br);
+
+            var scale = DeepinXSettings.get_default ().window_scale; 
+            CORNER_SIZE = CORNER_BASE_SIZE * scale;
+            stderr.printf ("recreate_hotcorners: scale %d, factor %g, CORNER_SIZE: %d\n", 
+                    DeepinXSettings.get_default ().window_scale, 
+                    DeepinXSettings.get_default ().scale_factor, CORNER_SIZE);
+
+            string[] names = {"left-up", "right-up", "left-down", "right-down"};
+            foreach (var key in names) {
+                Clutter.Actor? hot_corner = stage.find_child_by_name (key);
+                var dci = hot_corner as DeepinCornerIndicator;
+
+                if (dci.window_scale != scale) {
+                    dci.width = CORNER_SIZE;
+                    dci.height = CORNER_SIZE;
+                    if (key  == "left-up") {
+                        dci.set_position(tl.x, tl.y);
+                    } else if (key  == "right-up") {
+                        dci.set_position(tr.x - CORNER_SIZE, tr.y);
+                    } else if (key  == "left-down") {
+                        dci.set_position(bl.x, bl.y - CORNER_SIZE);
+                    } else if (key  == "right-down") {
+                        dci.set_position(br.x - CORNER_SIZE, br.y - CORNER_SIZE);
+                    }
+                    dci.window_scale = scale;
+                }
+            }
+        }
+
 		void configure_hotcorners ()
 		{
             Clutter.Point tl;
@@ -1005,6 +1110,8 @@ namespace Gala
 				hot_corner = new DeepinCornerIndicator (this, dir, key, get_screen ());
 				hot_corner.width = CORNER_SIZE;
 				hot_corner.height = CORNER_SIZE;
+                (hot_corner as DeepinCornerIndicator).window_scale = 
+                    DeepinXSettings.get_default ().window_scale; 
                 hot_corner.name = key;
 
                 stage.add_child (hot_corner);

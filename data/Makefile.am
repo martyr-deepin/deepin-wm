@@ -4,15 +4,15 @@ SUBDIRS = \
 
 stylesdir = $(pkgdatadir)
 styles_DATA = deepin-wm.css texture.png close.png \
-	close_hover.png \
-	close_normal.png \
-	close_press.png \
-	sticked_hover.png \
-	sticked_normal.png \
-	sticked_press.png \
-	unsticked_hover.png \
-	unsticked_normal.png \
-	unsticked_press.png \
+	close_hover.svg \
+	close_normal.svg \
+	close_press.svg \
+	sticked_hover.svg \
+	sticked_normal.svg \
+	sticked_press.svg \
+	unsticked_hover.svg \
+	unsticked_normal.svg \
+	unsticked_press.svg \
 	deepin-toggle-desktop.svg \
 	close_marker_1.png \
 	close_marker_2.png \
@@ -22,10 +22,10 @@ styles_DATA = deepin-wm.css texture.png close.png \
 	close_marker_6.png \
 	close_marker_7.png \
 	close_marker_press.png \
-	topleft.png \
-	topright.png \
-	bottomleft.png \
-	bottomright.png \
+	topleft.svg \
+	topright.svg \
+	bottomleft.svg \
+	bottomright.svg \
 	path.svg
 
 applicationsdir = $(datadir)/applications
@@ -61,19 +61,19 @@ EXTRA_DIST = \
 	close_marker_6.png \
 	close_marker_7.png \
 	close_marker_press.png \
-	close_hover.png \
-	close_normal.png \
-	close_press.png \
-	sticked_hover.png \
-	sticked_normal.png \
-	sticked_press.png \
-	unsticked_hover.png \
-	unsticked_normal.png \
-	unsticked_press.png \
-	topleft.png \
-	topright.png \
-	bottomleft.png \
-	bottomright.png \
+	close_hover.svg \
+	close_normal.svg \
+	close_press.svg \
+	sticked_hover.svg \
+	sticked_normal.svg \
+	sticked_press.svg \
+	unsticked_hover.svg \
+	unsticked_normal.svg \
+	unsticked_press.svg \
+	topleft.svg \
+	topright.svg \
+	bottomleft.svg \
+	bottomright.svg \
 	path.svg \
 	org.pantheon.desktop.gala.gschema.xml.in.in \
 	$(NULL)

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 46.2 (44496) - http://www.bohemiancoding.com/sketch -->
+    <title>close_normal</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#FFFFFF" offset="0%"></stop>
+            <stop stop-color="#F2F2F2" offset="100%"></stop>
+        </linearGradient>
+        <circle id="path-2" cx="12" cy="12" r="12"></circle>
+        <filter x="-58.3%" y="-50.0%" width="216.7%" height="216.7%" filterUnits="objectBoundingBox" id="filter-3">
+            <feMorphology radius="1" operator="dilate" in="SourceAlpha" result="shadowSpreadOuter1"></feMorphology>
+            <feOffset dx="0" dy="2" in="shadowSpreadOuter1" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="4" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feComposite in="shadowBlurOuter1" in2="SourceAlpha" operator="out" result="shadowBlurOuter1"></feComposite>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.2 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="最大化最小化" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="close_normal">
+            <g id="Group-7" transform="translate(12.000000, 12.000000)">
+                <g id="Oval">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-3)" xlink:href="#path-2"></use>
+                    <use fill="url(#linearGradient-1)" fill-rule="evenodd" xlink:href="#path-2"></use>
+                    <circle stroke-opacity="0.1" stroke="#000000" stroke-width="1" cx="12" cy="12" r="12.5"></circle>
+                </g>
+                <polygon id="Combined-Shape" fill="#303030" fill-rule="nonzero" points="12.2426407 12.9497475 9.06066017 16.131728 8.70710678 16.4852814 8 15.7781746 8.35355339 15.4246212 11.5355339 12.2426407 8.35355339 9.06066017 8 8.70710678 8.70710678 8 9.06066017 8.35355339 12.2426407 11.5355339 15.4246212 8.35355339 15.7781746 8 16.4852814 8.70710678 16.131728 9.06066017 12.9497475 12.2426407 16.131728 15.4246212 16.4852814 15.7781746 15.7781746 16.4852814 15.4246212 16.131728"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>
