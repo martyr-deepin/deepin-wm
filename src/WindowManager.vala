@@ -57,16 +57,12 @@ namespace Gala
                 var old = _scale_factor;
                 _scale_factor = value;
                 if (old != _scale_factor) {
-                    stderr.printf ("scale %s (%f, %f, %f, %f) to %g\n", key,
-                            x, y, width, height, value);
-
                     if (dai != null) {
                         dai.scale_factor = scale_factor;
                         dai.set_position (CORNER_SIZE - dai.width, 0);
                     }
 
                     create_effect_textures ();
-                    //create_close_marker ();
                 }
             }
         }
@@ -1049,10 +1045,6 @@ namespace Gala
 
             var scale = DeepinXSettings.get_default ().scale_factor; 
             CORNER_SIZE = (int)(CORNER_BASE_SIZE * scale);
-            stderr.printf ("reposition_hotcorners: scale %d, factor %g, CORNER_SIZE: %d\n", 
-                    DeepinXSettings.get_default ().window_scale, 
-                    DeepinXSettings.get_default ().scale_factor, CORNER_SIZE);
-
             string[] names = {"left-up", "right-up", "left-down", "right-down"};
             foreach (var key in names) {
                 Clutter.Actor? hot_corner = stage.find_child_by_name (key);
@@ -1723,8 +1715,10 @@ namespace Gala
                         if (window_menu == null)
                             window_menu = new DeepinWindowMenu ();
 
+                        var scale = DeepinXSettings.get_default ().scale_factor; 
                         window_menu.current_window = window;
-                        window_menu.Menu(x, y);
+                        var sx = (x / scale), sy = (y / scale);
+                        window_menu.Menu((int)sx, (int)sy);
 
                         return false;
                     });
