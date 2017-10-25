@@ -31,9 +31,12 @@ namespace Gala
         public string[] frame_names {get; construct; }
         public string frame_hold {get; construct; }
 
+        public double scale_factor { get; set; default = 1.0; }
+
         protected Gee.ArrayList<Surface> frames;
         protected Surface press_down_frame;
         protected int current_frame = -1;
+
         protected bool press_down = false;
 
         public signal void pressed ();
@@ -81,6 +84,10 @@ namespace Gala
 
 			content = canvas;
 			notify["allocation"].connect (() => canvas.set_size ((int)width, (int)height));
+            notify["scale-factor"].connect (() => {
+                stderr.printf ("DeepinAnimationImage.scale_factor changed");
+                set_size (38 * (float)scale_factor, 38 * (float)scale_factor);
+            });
 		}
 
         uint animation_id = 0;
@@ -130,6 +137,7 @@ namespace Gala
 
 		protected virtual bool on_draw_content (Cairo.Context cr, int width, int height)
 		{
+            cr.scale (scale_factor / 2.0, scale_factor / 2.0);
             if (current_frame >= 0 && current_frame < frames.size) {
                 cr.set_operator (Cairo.Operator.SOURCE);
                 cr.set_source_surface (frames[current_frame], 0, 0);
@@ -147,15 +155,15 @@ namespace Gala
 		public override void get_preferred_width (float for_height,
 												  out float min_width_p, out float nat_width_p)
 		{
-			nat_width_p = 38;
-			min_width_p = 38;
+			nat_width_p = 38 * (float)scale_factor;
+			min_width_p = 38 * (float)scale_factor;
 		}
 
 		public override void get_preferred_height (float for_width,
 												   out float min_height_p, out float nat_height_p)
 		{
-			nat_height_p = 38;
-			min_height_p = 38;
+			nat_height_p = 38 * (float)scale_factor;
+			min_height_p = 38 * (float)scale_factor;
 		}
 
 		public override bool button_press_event (Clutter.ButtonEvent event)

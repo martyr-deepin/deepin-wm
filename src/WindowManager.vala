@@ -51,22 +51,22 @@ namespace Gala
         public WindowManagerGala wm {get; construct;}
         public string key {get; construct;}
         public Meta.Screen screen {get; construct;}
-        public int window_scale {
-            get { return _window_scale; }
+        public double scale_factor {
+            get { return _scale_factor; }
             set {
-                var old = _window_scale;
-                _window_scale = value;
-                if (old != _window_scale) {
-                    stderr.printf ("scale %s (%f, %f, %f, %f) to %d\n", key,
+                var old = _scale_factor;
+                _scale_factor = value;
+                if (old != _scale_factor) {
+                    stderr.printf ("scale %s (%f, %f, %f, %f) to %g\n", key,
                             x, y, width, height, value);
 
                     if (dai != null) {
-                        dai.set_size (38 * value, 38 * value);
+                        dai.scale_factor = scale_factor;
                         dai.set_position (CORNER_SIZE - dai.width, 0);
                     }
 
                     create_effect_textures ();
-                    create_close_marker ();
+                    //create_close_marker ();
                 }
             }
         }
@@ -95,7 +95,7 @@ namespace Gala
             }
         }
 
-        private int _window_scale = 1;
+        private double _scale_factor = 1.0;
         private string _action;
         bool startRecord = false;
 
@@ -147,28 +147,17 @@ namespace Gala
                 remove_child (dai);
             }
 
-            if (window_scale == 2) {
-                dai = new DeepinAnimationImage (new string[]{
-                        "close_marker_1@2x.png",
-                        "close_marker_2@2x.png",
-                        "close_marker_3@2x.png",
-                        "close_marker_4@2x.png",
-                        "close_marker_5@2x.png",
-                        "close_marker_6@2x.png",
-                        "close_marker_7@2x.png"
-                        }, "close_marker_press@2x.png");
-            } else {
-                dai = new DeepinAnimationImage (new string[]{
-                        "close_marker_1.png",
-                        "close_marker_2.png",
-                        "close_marker_3.png",
-                        "close_marker_4.png",
-                        "close_marker_5.png",
-                        "close_marker_6.png",
-                        "close_marker_7.png"
-                        }, "close_marker_press.png");
-            }
-            dai.set_size (38 * window_scale, 38 * window_scale);
+            dai = new DeepinAnimationImage (new string[]{
+                    "close_marker_1@2x.png",
+                    "close_marker_2@2x.png",
+                    "close_marker_3@2x.png",
+                    "close_marker_4@2x.png",
+                    "close_marker_5@2x.png",
+                    "close_marker_6@2x.png",
+                    "close_marker_7@2x.png"
+                    }, "close_marker_press@2x.png");
+            dai.scale_factor = scale_factor;
+            //dai.set_size (38 * scale_factor, 38 * scale_factor);
             dai.visible = false;
             dai.set_position (CORNER_SIZE - dai.width, 0);
             dai.reactive = true;
@@ -968,11 +957,11 @@ namespace Gala
             ui_group.add_child (workspace_indicator);
 
 			/*hot corner, getting enum values from GraniteServicesSettings did not work, so we use GSettings directly*/
-            CORNER_SIZE = CORNER_BASE_SIZE * DeepinXSettings.get_default ().window_scale;
+            CORNER_SIZE = (int)(CORNER_BASE_SIZE * DeepinXSettings.get_default ().scale_factor);
             configure_hotcorners ();
             screen.monitors_changed.connect (configure_hotcorners);
 			DeepinZoneSettings.get_default ().schema.changed.connect (configure_hotcorners);
-			DeepinXSettings.get_default ().schema.changed.connect (recreate_hotcorners);
+			DeepinXSettings.get_default ().schema.changed.connect (reposition_hotcorners);
 
 			screen.monitors_changed.connect (update_background_mask_layer);
 			screen.workspace_added.connect (update_background_mask_layer);
@@ -1048,7 +1037,7 @@ namespace Gala
             }
         }
 
-        void recreate_hotcorners ()
+        void reposition_hotcorners ()
         {
 
             Clutter.Point tl;
@@ -1058,9 +1047,9 @@ namespace Gala
 
             InternalUtils.get_corner_positions (get_screen (), out tl, out tr, out bl, out br);
 
-            var scale = DeepinXSettings.get_default ().window_scale; 
-            CORNER_SIZE = CORNER_BASE_SIZE * scale;
-            stderr.printf ("recreate_hotcorners: scale %d, factor %g, CORNER_SIZE: %d\n", 
+            var scale = DeepinXSettings.get_default ().scale_factor; 
+            CORNER_SIZE = (int)(CORNER_BASE_SIZE * scale);
+            stderr.printf ("reposition_hotcorners: scale %d, factor %g, CORNER_SIZE: %d\n", 
                     DeepinXSettings.get_default ().window_scale, 
                     DeepinXSettings.get_default ().scale_factor, CORNER_SIZE);
 
@@ -1069,7 +1058,7 @@ namespace Gala
                 Clutter.Actor? hot_corner = stage.find_child_by_name (key);
                 var dci = hot_corner as DeepinCornerIndicator;
 
-                if (dci.window_scale != scale) {
+                if (dci.scale_factor != scale) {
                     dci.width = CORNER_SIZE;
                     dci.height = CORNER_SIZE;
                     if (key  == "left-up") {
@@ -1081,7 +1070,7 @@ namespace Gala
                     } else if (key  == "right-down") {
                         dci.set_position(br.x - CORNER_SIZE, br.y - CORNER_SIZE);
                     }
-                    dci.window_scale = scale;
+                    dci.scale_factor = scale;
                 }
             }
         }
@@ -1110,8 +1099,8 @@ namespace Gala
 				hot_corner = new DeepinCornerIndicator (this, dir, key, get_screen ());
 				hot_corner.width = CORNER_SIZE;
 				hot_corner.height = CORNER_SIZE;
-                (hot_corner as DeepinCornerIndicator).window_scale = 
-                    DeepinXSettings.get_default ().window_scale; 
+                (hot_corner as DeepinCornerIndicator).scale_factor = 
+                    DeepinXSettings.get_default ().scale_factor; 
                 hot_corner.name = key;
 
                 stage.add_child (hot_corner);

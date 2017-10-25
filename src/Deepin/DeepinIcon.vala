@@ -131,7 +131,7 @@ namespace Gala
 
             var st_name = state == IconState.Normal ? "_normal" : state == IconState.Prelight ? "_hover" : "_press";
             try {
-                pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/" + icon_name + st_name + ".png");
+                pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/" + icon_name + st_name + ".svg");
             } catch (Error e) {
                 warning (e.message);
                 return null;

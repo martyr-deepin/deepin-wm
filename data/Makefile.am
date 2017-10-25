@@ -22,6 +22,14 @@ styles_DATA = deepin-wm.css texture.png close.png \
 	close_marker_6.png \
 	close_marker_7.png \
 	close_marker_press.png \
+	close_marker_1@2x.png \
+	close_marker_2@2x.png \
+	close_marker_3@2x.png \
+	close_marker_4@2x.png \
+	close_marker_5@2x.png \
+	close_marker_6@2x.png \
+	close_marker_7@2x.png \
+	close_marker_press@2x.png \
 	topleft.svg \
 	topright.svg \
 	bottomleft.svg \
@@ -61,6 +69,14 @@ EXTRA_DIST = \
 	close_marker_6.png \
 	close_marker_7.png \
 	close_marker_press.png \
+	close_marker_1@2x.png \
+	close_marker_2@2x.png \
+	close_marker_3@2x.png \
+	close_marker_4@2x.png \
+	close_marker_5@2x.png \
+	close_marker_6@2x.png \
+	close_marker_7@2x.png \
+	close_marker_press@2x.png \
 	close_hover.svg \
 	close_normal.svg \
 	close_press.svg \
