@@ -724,6 +724,8 @@ namespace Meta {
 		public bool is_shaded ();
 		public bool is_skip_taskbar ();
 		public void kill ();
+		public void tile_by_side (TileSide side);
+		public void begin_to_move ();
 		public bool located_on_workspace (Meta.Workspace workspace);
 		public void lower ();
 		public void make_above ();
@@ -1231,6 +1233,13 @@ namespace Meta {
 		HORIZONTAL,
 		VERTICAL,
 		BOTH
+	}
+	[CCode (cheader_filename = "meta/window.h", cprefix = "META_TILE_SIDE_", type_id = "meta_tile_side_flags_get_type ()")]
+	[Flags]
+	public enum TileSide {
+        NONE,
+        LEFT,
+        RIGHT
 	}
 	[CCode (cheader_filename = "meta/meta-plugin.h", cprefix = "META_MODAL_", type_id = "meta_modal_options_get_type ()")]
 	[Flags]

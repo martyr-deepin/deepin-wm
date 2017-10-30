@@ -155,6 +155,39 @@ namespace Gala
             gala.do_switch_to_workspace (backward ? MotionDirection.LEFT: MotionDirection.RIGHT);
         }
 
+        public void tile_active_window (Meta.TileSide side)
+        {
+            var gala = (wm as WindowManagerGala);
+            var screen = gala.get_screen ();
+            var display = screen.get_display ();
+			var current = display.get_focus_window ();
+
+            if (current == null || current.window_type != WindowType.NORMAL)
+                return;
+
+            if ((current.get_maximized () & MaximizeFlags.HORIZONTAL) != 0 || 
+                    (current.get_maximized () & MaximizeFlags.VERTICAL) != 0) {
+                return;
+            }
+
+            current.tile_by_side (side);
+        }
+
+        public void begin_to_move_active_window ()
+        {
+            var gala = (wm as WindowManagerGala);
+            var screen = gala.get_screen ();
+            var display = screen.get_display ();
+			var current = display.get_focus_window ();
+
+            if (current == null || current.window_type != WindowType.NORMAL)
+                return;
+
+            if (current.allows_move ()) {
+                current.begin_to_move ();
+            }
+        }
+
 
         public signal void workspace_removed (int index);
         public signal void workspace_added (int index);
