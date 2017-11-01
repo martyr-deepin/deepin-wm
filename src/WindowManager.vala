@@ -1507,10 +1507,15 @@ namespace Gala
 
 					if (workspace_view.is_opened ())
 						workspace_view.close ();
-					else
+					else {
+                        if (is_modal ()) return;
 						workspace_view.open ();
+                    }
 					break;
 				case ActionType.MAXIMIZE_CURRENT:
+                    if (is_modal ())
+                        return;
+
 					if (current == null || current.window_type != WindowType.NORMAL)
 						break;
 
@@ -1519,10 +1524,15 @@ namespace Gala
 					else
 						current.maximize (MaximizeFlags.HORIZONTAL | MaximizeFlags.VERTICAL);
 					break;
+
 				case ActionType.MINIMIZE_CURRENT:
+                    if (is_modal ())
+                        return;
+
 					if (current != null && current.window_type == WindowType.NORMAL)
 						current.minimize ();
 					break;
+
 				case ActionType.OPEN_LAUNCHER:
 					try {
 						Process.spawn_command_line_async (BehaviorSettings.get_default ().panel_main_menu_action);
@@ -1564,8 +1574,10 @@ namespace Gala
 
 					if (window_overview.is_opened ())
 						window_overview.close ();
-					else
+					else {
+                        if (is_modal ()) return;
 						window_overview.open ();
+                    }
 					break;
 				case ActionType.WINDOW_OVERVIEW_ALL:
 					if (window_overview == null)
@@ -1574,6 +1586,7 @@ namespace Gala
 					if (window_overview.is_opened ())
 						window_overview.close ();
 					else {
+                        if (is_modal ()) return;
 						var hints = new HashTable<string,Variant> (str_hash, str_equal);
 						hints.@set ("all-windows", true);
 						window_overview.open (hints);
