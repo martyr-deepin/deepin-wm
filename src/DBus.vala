@@ -165,11 +165,6 @@ namespace Gala
             if (current == null || current.window_type != WindowType.NORMAL)
                 return;
 
-            if ((current.get_maximized () & MaximizeFlags.HORIZONTAL) != 0 || 
-                    (current.get_maximized () & MaximizeFlags.VERTICAL) != 0) {
-                return;
-            }
-
             current.tile_by_side (side);
         }
 
