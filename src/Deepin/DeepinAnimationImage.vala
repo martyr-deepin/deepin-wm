@@ -85,7 +85,6 @@ namespace Gala
 			content = canvas;
 			notify["allocation"].connect (() => canvas.set_size ((int)width, (int)height));
             notify["scale-factor"].connect (() => {
-                stderr.printf ("DeepinAnimationImage.scale_factor changed");
                 set_size (38 * (float)scale_factor, 38 * (float)scale_factor);
             });
 		}

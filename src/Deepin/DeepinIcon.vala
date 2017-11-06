@@ -29,6 +29,9 @@ namespace Gala
         public signal void pressed ();
         public signal void released ();
 
+        const int BASE_SIZE = 48;
+        double scale_factor = 1.0;
+
         public enum IconState {
             Normal, 
             Prelight,
@@ -63,6 +66,10 @@ namespace Gala
             hover_icon = create_button (IconState.Prelight);
             pressed_icon = create_button (IconState.Pressed);
 
+            scale_factor = DeepinXSettings.get_default ().schema.get_double ("scale-factor"); 
+			DeepinXSettings.get_default ().schema.changed.connect (on_scale_changed);
+            on_scale_changed ();
+
             hover_icon.visible = false;
             pressed_icon.visible = false;
 
@@ -74,6 +81,17 @@ namespace Gala
             state = IconState.Normal;
 		}
 
+		private void on_scale_changed() 
+        {
+            scale_factor = DeepinXSettings.get_default ().scale_factor; 
+            int real_size = (int)(BASE_SIZE * scale_factor);
+
+            normal_icon.set_scale (scale_factor / 2.0, scale_factor / 2.0);
+            hover_icon.set_scale (scale_factor / 2.0, scale_factor / 2.0);
+            pressed_icon.set_scale (scale_factor / 2.0, scale_factor / 2.0);
+            set_size (real_size, real_size);
+        }
+
 		~DeepinIconActor ()
 		{
 		}
@@ -81,15 +99,15 @@ namespace Gala
 		public override void get_preferred_width (float for_height,
 												  out float min_width_p, out float nat_width_p)
 		{
-			nat_width_p = 48;
-			min_width_p = 48;
+			nat_width_p = (int)(BASE_SIZE * scale_factor);
+			min_width_p = (int)(BASE_SIZE * scale_factor);
 		}
 
 		public override void get_preferred_height (float for_width,
 												   out float min_height_p, out float nat_height_p)
 		{
-			nat_height_p = 48;
-			min_height_p = 48;
+			nat_height_p = (int)(BASE_SIZE * scale_factor);
+			min_height_p = (int)(BASE_SIZE * scale_factor);
 		}
 
 		public override bool enter_event (Clutter.CrossingEvent event)
@@ -128,10 +146,13 @@ namespace Gala
 		Gdk.Pixbuf? get_button_pixbuf (IconState state)
         {
             Gdk.Pixbuf? pixbuf;
+            var size = (int)(BASE_SIZE * 2);
 
             var st_name = state == IconState.Normal ? "_normal" : state == IconState.Prelight ? "_hover" : "_press";
             try {
-                pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/" + icon_name + st_name + ".svg");
+                pixbuf = new Gdk.Pixbuf.from_file_at_scale (
+                        Config.PKGDATADIR + "/" + icon_name + st_name + ".svg",
+                        size, size, true);
             } catch (Error e) {
                 warning (e.message);
                 return null;

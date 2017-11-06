@@ -953,7 +953,8 @@ namespace Gala
             ui_group.add_child (workspace_indicator);
 
 			/*hot corner, getting enum values from GraniteServicesSettings did not work, so we use GSettings directly*/
-            CORNER_SIZE = (int)(CORNER_BASE_SIZE * DeepinXSettings.get_default ().scale_factor);
+            CORNER_SIZE = (int)(CORNER_BASE_SIZE * DeepinXSettings.get_default ()
+                    .schema.get_double ("scale-factor"));
             configure_hotcorners ();
             screen.monitors_changed.connect (configure_hotcorners);
 			DeepinZoneSettings.get_default ().schema.changed.connect (configure_hotcorners);
