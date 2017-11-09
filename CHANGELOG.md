@@ -1,3 +1,13 @@
+##  1.9.20 (2017-11-09)
+
+
+#### Bug Fixes
+
+*   break if can not maximize ([82fae120](82fae120))
+*   check relative functionality before action ([6a730b59](6a730b59))
+
+
+
 ##  1.9.19 (2017-11-06)
 
 
