@@ -1520,9 +1520,12 @@ namespace Gala
 					if (current == null || current.window_type != WindowType.NORMAL)
 						break;
 
+                    if (!current.can_maximize ())
+                        break;
+
 					if (current.get_maximized () == (MaximizeFlags.HORIZONTAL | MaximizeFlags.VERTICAL)) {
 						current.unmaximize (MaximizeFlags.HORIZONTAL | MaximizeFlags.VERTICAL);
-                    } else if (current.can_maximize ()) {
+                    } else {
 						current.maximize (MaximizeFlags.HORIZONTAL | MaximizeFlags.VERTICAL);
                     }
 					break;
