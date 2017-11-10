@@ -1006,7 +1006,7 @@ namespace Gala
                         sound_effect = Bus.get_proxy_sync (BusType.SESSION,
                                 "com.deepin.daemon.SoundEffect", "/com/deepin/daemon/SoundEffect");
                     }
-                    sound_effect.PlaySystemSound ("app-error");
+                    sound_effect.PlaySystemSound ("dialog-error");
 
                 } catch (IOError e) {
                     Meta.verbose ("%s\n", e.message);
