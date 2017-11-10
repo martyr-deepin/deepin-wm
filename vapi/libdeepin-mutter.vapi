@@ -681,6 +681,7 @@ namespace Meta {
 		public unowned string get_gtk_theme_variant ();
 		public unowned string get_gtk_unique_bus_name ();
 		public unowned string get_gtk_window_object_path ();
+		public unowned string get_flatpak_appid ();
 		public bool get_icon_geometry (out Meta.Rectangle rect);
 		public Meta.StackLayer get_layer ();
 		public Meta.MaximizeFlags get_maximized ();

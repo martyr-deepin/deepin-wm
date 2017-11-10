@@ -32,6 +32,8 @@ namespace Gala
 
 		static Gdk.Pixbuf? close_pixbuf = null;
 
+        static string[]? xdg_dirs = null;
+
 		static construct
 		{
 			xid_pixbuf_cache = new HashTable<string, Gdk.Pixbuf> (str_hash, str_equal);
@@ -275,6 +277,55 @@ namespace Gala
 			
 			return source.scale_simple (scaled_width, scaled_height, Gdk.InterpType.HYPER);
 		}
+
+        private static string? build_desktop_path_for (string appid)
+        {
+            if (xdg_dirs == null) {
+                var xdg_dirs_string = GLib.Environment.get_variable ("XDG_DATA_DIRS");
+                if (xdg_dirs_string == null) {
+                    xdg_dirs_string = "/usr/share";
+                }
+                xdg_dirs = xdg_dirs_string.split (":");
+            }
+
+            foreach (var dir in xdg_dirs) {
+                var path = @"$dir/applications/$appid.desktop";
+                var file = File.new_for_path (path);
+                if (file != null && file.query_exists ()) {
+                    return path;
+                }
+            }
+            return null;
+        }
+
+        public static Gdk.Pixbuf? get_icon_for_flatpak_app (string appid, int size)
+        {
+			Gdk.Pixbuf? image = null;
+
+            var idx = appid.index_of_char('/', 4);
+            if (idx < 4) idx = 4;
+            var id = appid[4:idx];
+            var appinfo = new DesktopAppInfo.from_filename ( build_desktop_path_for (id));
+            if (appinfo != null) {
+                var icon = get_icon_from_gicon (appinfo.get_icon ());
+                image = load_icon (icon, size, size);
+            }
+
+            if (image == null) {
+                try {
+                    unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
+                    var icon = "application-default-icon";
+                    var icon_key = "%s::%i".printf (icon, size);
+                    if ((image = icon_pixbuf_cache.get (icon_key)) == null) {
+                        image = icon_theme.load_icon (icon, size, 0);
+                    }
+                } catch (Error e) {
+                    warning (e.message);
+                }
+            }
+
+            return image;
+        }
 
 		/**
 		 * Returns a pixbuf for this application or a default icon

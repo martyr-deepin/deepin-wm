@@ -77,11 +77,22 @@ namespace Gala
 					destroy_on_unmanaged: destroy_on_unmanaged);
 		}
 
+
 		construct
 		{
 			width = icon_size + SHADOW_SIZE * 2;;
 			height = icon_size + SHADOW_SIZE + SHADOW_DISTANCE;
 			xid = (uint32) window.get_xwindow ();
+
+            var flatpak_appid = window.get_flatpak_appid ();
+            if (flatpak_appid != null) {
+                var pixbuf = Utils.get_icon_for_flatpak_app (flatpak_appid, icon_size);
+                try {
+                    set_from_pixbuf (pixbuf);
+                } catch (Error e) {}
+                loaded = true;
+                return;
+            }
 
 			// new windows often reach mutter earlier than bamf, that's why
 			// we have to wait until the next window opens and hope that it's
