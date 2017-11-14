@@ -30,6 +30,8 @@ namespace Gala
 		const double PLUS_SIZE = 45.0;
 		const double PLUS_LINE_WIDTH = 2.0;
 
+        private double scale_factor = 1.0;
+
 		Gdk.RGBA color;
 
 		public DeepinWorkspaceAddButton ()
@@ -40,6 +42,7 @@ namespace Gala
 		construct
 		{
 			color = DeepinUtils.get_css_color_gdk_rgba (style_class);
+            scale_factor = DeepinXSettings.get_default ().schema.get_double ("scale-factor");
 
 			//(content as Canvas).draw.connect (on_draw_content);
 		}
@@ -48,17 +51,19 @@ namespace Gala
 		{
 			style_context.set_state (state);
 
+            var plus_size = PLUS_SIZE * scale_factor;
+
             cr.set_operator (Cairo.Operator.SOURCE);
             style_context.render_background (cr, 0, 0, width, height);
             cr.set_operator (Cairo.Operator.OVER);
             style_context.render_frame (cr, 0, 0, width, height);
 
 			// draw tha plus button
-			cr.move_to (width / 2 - PLUS_SIZE / 2, height / 2);
-			cr.line_to (width / 2 + PLUS_SIZE / 2, height / 2);
+			cr.move_to (width / 2 - plus_size / 2, height / 2);
+			cr.line_to (width / 2 + plus_size / 2, height / 2);
 
-			cr.move_to (width / 2, height / 2 - PLUS_SIZE / 2);
-			cr.line_to (width / 2, height / 2 + PLUS_SIZE / 2);
+			cr.move_to (width / 2, height / 2 - plus_size / 2);
+			cr.line_to (width / 2, height / 2 + plus_size / 2);
 
 			cr.set_line_width (PLUS_LINE_WIDTH);
 			cr.set_source_rgba (color.red, color.green, color.blue, color.alpha);

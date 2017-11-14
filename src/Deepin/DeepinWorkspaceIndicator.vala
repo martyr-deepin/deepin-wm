@@ -20,6 +20,12 @@ using Clutter;
 
 namespace Gala
 {
+    private float workspace_scale ()
+    {
+        float sx = (float)DeepinXSettings.get_default ().schema.get_double ("scale-factor");
+        return (float)DeepinWorkspaceIndicator.WORKSPACE_SCALE * sx / 2.0f;
+    }
+
 	public class DeepinWindowSnapshotContainer : Actor
 	{
 		public Workspace workspace { get; construct; }
@@ -127,7 +133,7 @@ namespace Gala
             screen = workspace.get_screen ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-			float scale = DeepinWorkspaceIndicator.WORKSPACE_SCALE;
+			float scale = workspace_scale ();
             thumb_width = monitor_geom.width * scale;
             thumb_height = monitor_geom.height * scale;
 
@@ -226,7 +232,7 @@ namespace Gala
             workspace_clone.set_pivot_point (0.5f, 0.5f);
 
             background = new DeepinFramedBackground (workspace.get_screen (), workspace.index (), 
-                    false, false, DeepinWorkspaceIndicator.WORKSPACE_SCALE);
+                    false, false, workspace_scale ());
             background.set_rounded_radius (6);
             workspace_clone.add_child (background);
 
@@ -275,13 +281,13 @@ namespace Gala
         int get_thumb_workspace_prefer_width ()
         {
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-            return (int)(monitor_geom.width * DeepinWorkspaceIndicator.WORKSPACE_SCALE);
+            return (int)(monitor_geom.width * workspace_scale () );
         }
 
         int get_thumb_workspace_prefer_heigth ()
         {
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-            return (int)(monitor_geom.height * DeepinWorkspaceIndicator.WORKSPACE_SCALE);
+            return (int)(monitor_geom.height * workspace_scale ());
         }
 
         public override void allocate (ActorBox box, AllocationFlags flags)
@@ -474,8 +480,8 @@ namespace Gala
 
         public void get_prefer_thumb_size (out float width, out float height)
         {
-            width = monitor_geom.width * WORKSPACE_SCALE;
-            height = monitor_geom.height * WORKSPACE_SCALE;
+            width = monitor_geom.width * workspace_scale ();
+            height = monitor_geom.height * workspace_scale ();
         }
 
         void place_child (Actor child, int index)

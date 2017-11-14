@@ -28,16 +28,43 @@ namespace Gala
 		/**
 		 * Prefer size for current item.
 		 */
-		public const int PREFER_WIDTH = 300;
-		public const int PREFER_HEIGHT = 200;
+		public const int BASE_PREFER_WIDTH = 300;
+		public const int BASE_PREFER_HEIGHT = 200;
+
+		protected int PREFER_WIDTH {
+            get {
+                return (int)(300 * scale_factor);
+            }
+        }
+		protected int PREFER_HEIGHT {
+            get {
+                return (int)(200 * scale_factor);
+            }
+        }
 
 		/**
 		 * Prefer size for the inner item's rectangle.
 		 */
-		public const int RECT_PREFER_WIDTH = PREFER_WIDTH - SHAPE_PADDING * 2;
-		public const int RECT_PREFER_HEIGHT = PREFER_HEIGHT - SHAPE_PADDING * 2;
+        protected int RECT_PREFER_WIDTH {
+            get {
+                return PREFER_WIDTH - SHAPE_PADDING * 2;
+            }
+        }
+        protected int RECT_PREFER_HEIGHT {
+            get {
+                return PREFER_HEIGHT - SHAPE_PADDING * 2;
+            }
+        }
 
 		protected const int SHAPE_PADDING = 10;
+
+        protected double scale_factor {
+            get {
+                return DeepinXSettings.get_default ().schema.get_double ("scale-factor");
+            }
+        }
+
+        //private double _scale_factor = 1.0;
 
 		/**
 		 * The window was resized and a relayout of the tiling layout may
@@ -203,7 +230,7 @@ namespace Gala
 
 		Actor? clone_container = null;  // container for clone to add shadow effect
 		Clone? clone = null;
-		GtkClutter.Texture window_icon;
+		GtkClutter.Texture? window_icon = null;
 
 		public DeepinWindowSwitcherWindowItem (Window window)
 		{
@@ -216,13 +243,28 @@ namespace Gala
 			window.workspace_changed.connect (on_workspace_changed);
 			window.notify["on-all-workspaces"].connect (on_all_workspaces_changed);
 
-			window_icon = new WindowIcon (window, ICON_SIZE);
-			window_icon.set_pivot_point (0.5f, 0.5f);
-
-			add_child (window_icon);
+            reload_icon ();
+            DeepinXSettings.get_default ().schema.changed.connect (reload_icon);
 
 			load_clone ();
 		}
+
+        void reload_icon ()
+        {
+            if (window_icon != null) {
+                remove_child (window_icon);
+            }
+            var icon_size = (int)(ICON_SIZE * DeepinXSettings.get_default ()
+                    .schema.get_double ("scale-factor"));
+            window_icon = new WindowIcon (window, icon_size);
+            window_icon.set_pivot_point (0.5f, 0.5f);
+            add_child (window_icon);
+
+            if (clone_container != null)
+                set_child_above_sibling (window_icon, clone_container);
+
+            queue_relayout ();
+        }
 
 		~DeepinWindowSwitcherWindowItem ()
 		{

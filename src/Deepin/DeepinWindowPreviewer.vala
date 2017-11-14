@@ -250,7 +250,7 @@ namespace Gala
                         actor.opacity = 255;
                         actor.show ();
                     }
-                } 
+                }
             }
 
             var actor = target_window.get_compositor_private () as Actor;

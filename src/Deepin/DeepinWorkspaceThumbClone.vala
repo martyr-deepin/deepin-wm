@@ -258,11 +258,15 @@ namespace Gala
 
 		construct
 		{
+            var scale_factor = DeepinXSettings.get_default ().schema.get_double ("scale-factor");
+
 			color = DeepinUtils.get_css_color_gdk_rgba (style_class);
 
 			(content as Canvas).draw.connect (on_draw_content);
 
 			var name_font = DeepinUtils.get_css_font ("deepin-workspace-thumb-remove-tip");
+            var font_sz = (int)(name_font.get_size () * scale_factor);
+            name_font.set_size (font_sz);
 
 			message = new Text ();
 			message.set_font_description (name_font);
@@ -272,7 +276,8 @@ namespace Gala
 
             icon = new Clutter.Actor ();
 
-            var pixbuf = new Gdk.Pixbuf.from_file (Config.PKGDATADIR + "/path.svg");
+            var pixbuf = new Gdk.Pixbuf.from_file_at_scale (Config.PKGDATADIR + "/path.svg",
+                    (int)(15 * scale_factor), (int)(15 * scale_factor), true);
             var image = new Clutter.Image ();
 
             image.set_data (pixbuf.get_pixels (),

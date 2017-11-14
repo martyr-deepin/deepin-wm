@@ -97,7 +97,7 @@ namespace Gala
 
 		DeepinIconActor close_button;
 		Actor active_shape;
-		GtkClutter.Texture window_icon;
+		GtkClutter.Texture? window_icon = null;
 
 		public WindowClone (Meta.Window window, bool overview_mode = false)
 		{
@@ -137,20 +137,36 @@ namespace Gala
 				return true;
 			});
 
-			window_icon = new WindowIcon (window, WINDOW_ICON_SIZE);
-			window_icon.opacity = 0;
-			window_icon.set_pivot_point (0.5f, 0.5f);
-
 			active_shape = new Clutter.Actor ();
 			active_shape.background_color = { 255, 255, 255, 200 };
 			active_shape.opacity = 0;
 
 			add_child (active_shape);
-			add_child (window_icon);
 			add_child (close_button);
+
+            reload_icon ();
+            DeepinXSettings.get_default ().schema.changed.connect (reload_icon);
 
 			load_clone ();
 		}
+
+        void reload_icon ()
+        {
+            if (window_icon != null) {
+                remove_child (window_icon);
+            }
+            var icon_size = (int)(WINDOW_ICON_SIZE * DeepinXSettings.get_default ()
+                    .schema.get_double ("scale-factor"));
+            window_icon = new WindowIcon (window, icon_size);
+            window_icon.opacity = 0;
+            window_icon.set_pivot_point (0.5f, 0.5f);
+            add_child (window_icon);
+
+            if (clone != null)
+                set_child_above_sibling (window_icon, clone);
+
+            queue_relayout ();
+        }
 
 		~WindowClone ()
 		{
@@ -360,6 +376,9 @@ namespace Gala
 			alloc.set_size (actor.width * scale_factor, actor.height * scale_factor);
 
 			clone.allocate (alloc, flags);
+
+            window_icon.set_position ((box.get_width () - window_icon.width) / 2,
+                    box.get_height () - window_icon.height * 0.75f);
 		}
 
 		public override bool button_press_event (Clutter.ButtonEvent event)
@@ -409,7 +428,8 @@ namespace Gala
 				window_icon.save_easing_state ();
 				window_icon.set_easing_duration (0);
 
-				window_icon.set_position ((dest_width - WINDOW_ICON_SIZE) / 2, dest_height - WINDOW_ICON_SIZE * 0.75f);
+				window_icon.set_position ((dest_width - window_icon.width) / 2,
+                        dest_height - window_icon.height * 0.75f);
 
 				window_icon.restore_easing_state ();
 			}
@@ -696,7 +716,8 @@ namespace Gala
 			window_icon.save_easing_state ();
 			window_icon.set_easing_duration (250);
 			window_icon.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
-			window_icon.set_position ((slot.width - WINDOW_ICON_SIZE) / 2, slot.height - WINDOW_ICON_SIZE * 0.75f);
+			window_icon.set_position ((slot.width - window_icon.width) / 2,
+                    slot.height - window_icon.height * 0.75f);
 			window_icon.restore_easing_state ();
 
 			dragging = false;

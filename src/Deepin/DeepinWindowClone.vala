@@ -160,10 +160,8 @@ namespace Gala
 			}
 
 			if (enable_icon) {
-				window_icon = new WindowIcon (window, ICON_SIZE);
-				window_icon.opacity = 0;
-				window_icon.set_pivot_point (0.5f, 0.5f);
-				add_child (window_icon);
+                reload_icon ();
+                DeepinXSettings.get_default ().schema.changed.connect (reload_icon);
 			}
 
 			shape = new DeepinCssStaticActor ("deepin-window-clone", Gtk.StateFlags.SELECTED);
@@ -172,6 +170,19 @@ namespace Gala
 
 			load_clone ();
 		}
+
+        void reload_icon ()
+        {
+            if (window_icon != null) {
+                remove_child (window_icon);
+            }
+            var icon_size = (int)(ICON_SIZE * DeepinXSettings.get_default ()
+                    .schema.get_double ("scale-factor"));
+            window_icon = new WindowIcon (window, icon_size);
+            window_icon.opacity = 0;
+            window_icon.set_pivot_point (0.5f, 0.5f);
+            add_child (window_icon);
+        }
 
 		~DeepinWindowClone ()
 		{

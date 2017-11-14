@@ -43,6 +43,7 @@ namespace Gala
 		public DeepinWindowSwitcherLayout ()
 		{
 			Object ();
+
 		}
 
 		public override void get_preferred_width (Clutter.Container container, float for_height,
@@ -72,16 +73,17 @@ namespace Gala
 									out float item_height, out int max_items_each_row)
 		{
 			var actor = container as Actor;
+            var screen_scale = (float)DeepinXSettings.get_default ().schema.get_double ("scale-factor");
 
 			bool item_need_scale = false;
-			item_width = DeepinWindowSwitcherItem.PREFER_WIDTH;
-			item_height = DeepinWindowSwitcherItem.PREFER_HEIGHT;
+			item_width = DeepinWindowSwitcherItem.BASE_PREFER_WIDTH * screen_scale;
+			item_height = DeepinWindowSwitcherItem.BASE_PREFER_HEIGHT * screen_scale;
 
 			// Calculate maximize item numuber in each row. Firstly, each row must could own at
 			// least 7 items, if the screen width is limitation, just decrease the size of
 			// item. Secondly, limite the row numbers.
 			max_items_each_row = (int)((_max_width + COLUMN_SPACING) /
-									   (DeepinWindowSwitcherItem.PREFER_WIDTH + COLUMN_SPACING));
+									   (DeepinWindowSwitcherItem.BASE_PREFER_WIDTH * screen_scale + COLUMN_SPACING));
 			if (max_items_each_row < MIN_ITEMS_EACH_ROW &&
 				actor.get_n_children () > max_items_each_row) {
 				item_need_scale = true;
@@ -98,8 +100,8 @@ namespace Gala
 
 			if (item_need_scale) {
 				item_width = (_max_width + COLUMN_SPACING) / max_items_each_row - COLUMN_SPACING;
-				float item_scale = item_width / DeepinWindowSwitcherItem.PREFER_WIDTH;
-				item_height = DeepinWindowSwitcherItem.PREFER_HEIGHT * item_scale;
+				float item_scale = item_width / (DeepinWindowSwitcherItem.BASE_PREFER_WIDTH * screen_scale);
+				item_height = DeepinWindowSwitcherItem.BASE_PREFER_HEIGHT * screen_scale * item_scale;
 			}
 
 			if (actor.get_n_children () < max_items_each_row) {
