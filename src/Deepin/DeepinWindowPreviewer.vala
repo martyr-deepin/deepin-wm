@@ -256,7 +256,8 @@ namespace Gala
             var actor = target_window.get_compositor_private () as Actor;
             actor.opacity = 255;
             // target_window could reside in another workspace
-            if (target_window != null && target_window.showing_on_its_workspace ()) {
+            if (target_window != null && target_window.showing_on_its_workspace () &&
+                    screen.get_active_workspace () == target_window.get_workspace ()) {
                 actor.show ();
             }
 		}
