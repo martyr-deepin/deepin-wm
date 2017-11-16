@@ -1,3 +1,18 @@
+##  1.9.21 (2017-11-16)
+
+
+#### Features
+
+*   ui elements adapt to screen scale factor ([b9d013d0](b9d013d0))
+*   support flatpak app icon search ([6ba17d09](6ba17d09))
+
+#### Bug Fixes
+
+*   dont show target win from inactive workspace ([2897b5a5](2897b5a5))
+*   update system sound name to play it correctly ([fc65b885](fc65b885))
+
+
+
 ##  1.9.20 (2017-11-09)
 
 
