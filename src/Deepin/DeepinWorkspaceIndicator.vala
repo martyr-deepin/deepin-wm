@@ -20,10 +20,22 @@ using Clutter;
 
 namespace Gala
 {
-    private float workspace_scale ()
+    // min width after applying all scales, this can constrain scaling for small resolution
+    static const float MINIMAL_THUMB_WIDTH = 136;
+
+    static float _cached_scale = 0.0f;
+    private float workspace_scale (Screen screen)
     {
-        float sx = (float)DeepinXSettings.get_default ().schema.get_double ("scale-factor");
-        return (float)DeepinWorkspaceIndicator.WORKSPACE_SCALE * sx / 2.0f;
+        if (_cached_scale == 0.0f) {
+            float sx = (float)DeepinXSettings.get_default ().schema.get_double ("scale-factor");
+            _cached_scale = (float)DeepinWorkspaceIndicator.WORKSPACE_SCALE * sx / 2.0f;
+            var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
+            if (monitor_geom.width * _cached_scale < MINIMAL_THUMB_WIDTH) {
+                _cached_scale = MINIMAL_THUMB_WIDTH / (float)monitor_geom.width;
+            }
+        }
+
+        return _cached_scale;
     }
 
 	public class DeepinWindowSnapshotContainer : Actor
@@ -133,7 +145,7 @@ namespace Gala
             screen = workspace.get_screen ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-			float scale = workspace_scale ();
+			float scale = workspace_scale (screen);
             thumb_width = monitor_geom.width * scale;
             thumb_height = monitor_geom.height * scale;
 
@@ -232,7 +244,7 @@ namespace Gala
             workspace_clone.set_pivot_point (0.5f, 0.5f);
 
             background = new DeepinFramedBackground (workspace.get_screen (), workspace.index (), 
-                    false, false, workspace_scale ());
+                    false, false, workspace_scale (workspace.get_screen ()));
             background.set_rounded_radius (6);
             workspace_clone.add_child (background);
 
@@ -281,13 +293,13 @@ namespace Gala
         int get_thumb_workspace_prefer_width ()
         {
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-            return (int)(monitor_geom.width * workspace_scale () );
+            return (int)(monitor_geom.width * workspace_scale (workspace.get_screen ()) );
         }
 
         int get_thumb_workspace_prefer_heigth ()
         {
             var monitor_geom = DeepinUtils.get_primary_monitor_geometry (workspace.get_screen ());
-            return (int)(monitor_geom.height * workspace_scale ());
+            return (int)(monitor_geom.height * workspace_scale (workspace.get_screen ()));
         }
 
         public override void allocate (ActorBox box, AllocationFlags flags)
@@ -331,10 +343,10 @@ namespace Gala
         /**
          * The distance measure in percentage of the monitor width between workspaces
          */
-        public const float SPACING_PERCENT = 0.0156f;
+        private const float SPACING_PERCENT = 0.0156f;
 
-        public const int MARGIN_HORIZONTAL = 22;
-        public const int MARGIN_VERTICAL   = 21;
+        private const int MARGIN_HORIZONTAL = 22;
+        private const int MARGIN_VERTICAL   = 21;
 
         int POPUP_TIMEOUT = 2000;
 
@@ -480,8 +492,8 @@ namespace Gala
 
         public void get_prefer_thumb_size (out float width, out float height)
         {
-            width = monitor_geom.width * workspace_scale ();
-            height = monitor_geom.height * workspace_scale ();
+            width = monitor_geom.width * workspace_scale (screen);
+            height = monitor_geom.height * workspace_scale (screen);
         }
 
         void place_child (Actor child, int index)
@@ -500,6 +512,7 @@ namespace Gala
 
 		public void relayout ()
         {
+            _cached_scale = 0.0f; // recalculate
             monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
             set_position (monitor_geom.x, monitor_geom.y);
