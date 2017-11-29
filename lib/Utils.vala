@@ -301,6 +301,8 @@ namespace Gala
         public static Gdk.Pixbuf? get_icon_for_flatpak_app (string appid, int size)
         {
 			Gdk.Pixbuf? image = null;
+            string? icon_key = null;
+            bool need_cache = false;
 
             var idx = appid.index_of_char('/', 4);
             if (idx < 4) idx = 4;
@@ -308,20 +310,34 @@ namespace Gala
             var appinfo = new DesktopAppInfo.from_filename ( build_desktop_path_for (id));
             if (appinfo != null) {
                 var icon = get_icon_from_gicon (appinfo.get_icon ());
-                image = load_icon (icon, size, size);
+                icon_key = "%s::%i".printf (icon, size);
+                if ((image = icon_pixbuf_cache.get (icon_key)) == null) {
+                    image = load_icon (icon, size, size);
+                    need_cache = true;
+                }
             }
 
             if (image == null) {
                 try {
                     unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
                     var icon = "application-default-icon";
-                    var icon_key = "%s::%i".printf (icon, size);
+                    icon_key = "%s::%i".printf (icon, size);
                     if ((image = icon_pixbuf_cache.get (icon_key)) == null) {
                         image = icon_theme.load_icon (icon, size, 0);
+                        need_cache = true;
                     }
                 } catch (Error e) {
                     warning (e.message);
                 }
+            }
+            
+            if (need_cache && image != null) {
+				if (size != image.width || size != image.height)
+                    image = ar_scale (image, size, size);
+				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE,
+												 WindowIcon.SHADOW_DISTANCE,
+												 WindowIcon.SHADOW_OPACITY);
+                icon_pixbuf_cache.set (icon_key, image);
             }
 
             return image;
