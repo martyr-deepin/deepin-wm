@@ -283,6 +283,19 @@ namespace Gala
 			}
 		}
 
+		void restore_dock_windows ()
+		{
+            dock_actors.destroy_all_children ();
+
+			foreach (var actor in Compositor.get_window_actors (screen)) {
+				var window = actor.get_meta_window ();
+
+                if (window.wm_class == "dde-dock") {
+                    actor.opacity = 255;
+                }
+			}
+		}
+
 		public void open (uint32 xid)
 		{
 			if (visible || opening) {
@@ -354,7 +367,7 @@ namespace Gala
             closing = true;
 
             preview_group.destroy_all_children ();
-            dock_actors.destroy_all_children ();
+            restore_dock_windows();
 
             restore_windows (open_workspace);
 
