@@ -94,15 +94,6 @@ namespace Gala
 
             background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
-			background_source.changed.connect ((indexes) => {
-                var active_index = screen.get_active_workspace ().index ();
-                foreach (var idx in indexes) {
-                    if (idx == active_index) {
-                        update_background_actors ();
-                        break;
-                    }
-                }
-			});
 
             dark_mask = new DeepinCssStaticActor("deepin-window-manager-background-mask");
 
@@ -167,7 +158,6 @@ namespace Gala
 
 		~DeepinMultitaskingView ()
 		{
-			background_source.changed.disconnect (update_background_actors);
             screen.monitors_changed.disconnect (on_monitors_changed);
 			screen.workspace_added.disconnect (add_workspace);
 			screen.workspace_removed.disconnect (remove_workspace);
@@ -191,17 +181,10 @@ namespace Gala
 
         void update_background_actors ()
         {
-            var active_index = screen.get_active_workspace ().index ();
+            var active_index = screen.get_active_workspace_index ();
             foreach (var background_actor in background_actors) {
                 var background = background_source.get_background (background_actor.monitor, active_index);
-
                 background_actor.background = background.background;
-                background_actor.set_rounds (8);
-                background_actor.set_radius (9);
-
-                var monitor = screen.get_monitor_geometry (background_actor.monitor);
-                background_actor.set_size (monitor.width, monitor.height);
-                background_actor.set_position (monitor.x, monitor.y);
             }
         }
 
@@ -220,7 +203,15 @@ namespace Gala
             for (var monitor = 0; monitor < screen.get_n_monitors (); monitor++) {
                 var background_actor = new BlurredBackgroundActor (screen, monitor);
                 background_actors.append (background_actor);
+
+                background_actor.set_rounds (8);
+                background_actor.set_radius (9);
 				background_actor.visible = opened;
+
+                var m = screen.get_monitor_geometry (background_actor.monitor);
+                background_actor.set_size (m.width, m.height);
+                background_actor.set_position (m.x, m.y);
+
                 wm.ui_group.insert_child_below (background_actor, null);
             }
 
@@ -233,10 +224,7 @@ namespace Gala
 
 		void on_workspace_switched (int from, int to, Meta.MotionDirection direction)
 		{
-            foreach (var background_actor in background_actors) {
-                var background = background_source.get_background (background_actor.monitor, to);
-                background_actor.background = background.background;
-            }
+            update_background_actors ();
 
             thumb_container.select_workspace (screen.get_active_workspace_index (), true);
             if (expected_workspace_switch_by_removal) {
@@ -737,7 +725,6 @@ namespace Gala
 				child.remove_all_transitions ();
 			}
 			update_positions (false);
-            update_background_actors ();
         }
          
 		/**
