@@ -45,7 +45,7 @@ namespace Gala
 		Actor thumb_shape;
 		Actor thumb_shape_selected;
 
-		Actor workspace_shadow;
+        Actor workspace_shadow;
 		Actor workspace_clone;
 
 		DeepinFramedBackground background;
@@ -59,10 +59,10 @@ namespace Gala
 
 		construct
 		{
-			workspace_shadow = new Actor ();
-			workspace_shadow.add_effect_with_name (
-				"shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
-											get_thumb_workspace_prefer_heigth (), 10, 0, 26, 3));
+            workspace_shadow = new Actor ();
+            workspace_shadow.add_effect_with_name (
+                "shadow", new ShadowEffect (get_thumb_workspace_prefer_width (),
+                                            get_thumb_workspace_prefer_heigth (), 10, 0, 26, 3));
             add_child (workspace_shadow);
 
 			workspace.get_screen ().monitors_changed.connect (update_workspace_shadow);
@@ -179,11 +179,11 @@ namespace Gala
 
 		void update_workspace_shadow ()
 		{
-			var shadow_effect = workspace_shadow.get_effect ("shadow") as ShadowEffect;
-			if (shadow_effect != null) {
-				shadow_effect.update_size (
-					get_thumb_workspace_prefer_width (), get_thumb_workspace_prefer_heigth ());
-			}
+            var shadow_effect = workspace_shadow.get_effect ("shadow") as ShadowEffect;
+            if (shadow_effect != null) {
+                shadow_effect.update_size (
+                    get_thumb_workspace_prefer_width (), get_thumb_workspace_prefer_heigth ());
+            }
 		}
 
 		int get_thumb_workspace_prefer_width ()
@@ -213,7 +213,7 @@ namespace Gala
 			thumb_box.set_size (thumb_width, thumb_height);
 			thumb_box.set_origin (0, 0);
 			workspace_clone.allocate (thumb_box, flags);
-			workspace_shadow.allocate (thumb_box, flags);
+            workspace_shadow.allocate (thumb_box, flags);
 			window_container.allocate (thumb_box, flags);
 
             background.set_size (thumb_width, thumb_height);
@@ -412,7 +412,13 @@ namespace Gala
 				this,
 				DeepinMultitaskingView.WORKSPACE_FADE_DURATION,
 				DeepinMultitaskingView.WORKSPACE_FADE_MODE,
-				() => DeepinUtils.remove_workspace (workspace.get_screen (), workspace),
+                () => {
+                    Timeout.add((int)(DeepinMultitaskingView.WORKSPACE_FADE_DURATION*0.4), () => {
+                        DeepinUtils.remove_workspace (workspace.get_screen (), workspace);
+                        return false;
+                    });
+                    hide();
+                },
                 0.6);
 		}
 
