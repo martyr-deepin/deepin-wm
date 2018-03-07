@@ -1,3 +1,19 @@
+##  1.9.22 (2018-03-07)
+
+
+#### Features
+
+*   improve WindowIcon loading ([873699cf](873699cf))
+*   set a minimum scaling boundary ([76d9d05c](76d9d05c))
+
+#### Bug Fixes
+
+*   optimize workspace close progress ([4ec86d7a](4ec86d7a))
+*   set correct background after reordering ([b6426a2a](b6426a2a))
+*   restore dock windows when close ([bd0faf26](bd0faf26))
+
+
+
 ##  1.9.21 (2017-11-16)
 
 
