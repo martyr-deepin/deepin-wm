@@ -128,7 +128,7 @@ namespace Gala
 
 		void update_texture (bool initial)
 		{
-			var pixbuf = Gala.Utils.get_icon_for_xid (xid, icon_size, !initial);
+			var pixbuf = Gala.Utils.get_icon_for_window (window, icon_size, !initial);
 
 			try {
 				set_from_pixbuf (pixbuf);

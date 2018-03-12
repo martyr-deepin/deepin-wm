@@ -99,6 +99,48 @@ namespace Gala
 		 */
 		public static Gdk.Pixbuf get_icon_for_window (Meta.Window window, int size, bool ignore_cache = false)
 		{
+            if ("Wine" in window.get_wm_class ()) {
+                var pid = window.get_pid ();
+                if (pid > 0) {
+                    var proc_env = @"/proc/$pid/environ";
+                    if (Posix.access(proc_env, Posix.F_OK) < 0) {
+                        return get_icon_for_xid ((uint32)window.get_xwindow (), size, ignore_cache);
+                    }
+                
+                    var fp = Posix.FILE.open (proc_env, "r");
+                    size_t sz = 0, cap = 1024;
+                    char* buf = (char*)GLib.malloc(cap);
+
+                    var buf2 = new char[128];
+                    size_t len = 0;
+                    while ((len = fp.read(buf2, 1, 128)) != 0) {
+                        if (sz + len > cap) {
+                            cap *= 2;
+                            buf = GLib.realloc(buf, cap);
+                        }
+                        GLib.Memory.copy(buf+sz, buf2, len);
+                        sz += len;
+                    }
+
+                    char *s = buf;
+                    while (s - buf < sz) {
+                        var l = Posix.strlen((string)s);
+
+                        char *sp = Posix.strchr((string)s, '=');
+                        if (sp == null) break;
+                        *sp = '\0';
+                        sp++;
+                        stderr.printf ("%s\n", (string)s);
+
+                        if (GLib.strcmp((string)s, "GIO_LAUNCHED_DESKTOP_FILE") == 0) {
+                            return get_icon_from_desktop_file ((string)sp, size);
+                        }
+
+                        s += l+1;
+                    }
+                }
+            }
+
 			return get_icon_for_xid ((uint32)window.get_xwindow (), size, ignore_cache);
 		}
 
@@ -121,6 +163,43 @@ namespace Gala
 			xid_pixbuf_cache.set (xid_key, result);
 
 			return result;
+		}
+
+		/**
+		 * Returns a pixbuf from the given desktop file
+		 */
+		public static Gdk.Pixbuf get_icon_from_desktop_file (string desktop_file, int size, bool ignore_cache = false)
+		{
+			Gdk.Pixbuf? image = null;
+			bool not_cached = false;
+			string? icon_key = null;
+
+            var appinfo = new DesktopAppInfo.from_filename (desktop_file);
+            if (appinfo != null) {
+                unowned Gtk.IconTheme icon_theme = Gtk.IconTheme.get_default ();
+                var icon_info = icon_theme.lookup_by_gicon ( appinfo.get_icon (), size, 
+                        Gtk.IconLookupFlags.FORCE_SIZE);
+
+                icon_key = "%s::%i".printf (icon_info.get_filename (), size);
+                if ((ignore_cache || (image = icon_pixbuf_cache.get (icon_key)) == null)) {
+                    try {
+                    image = icon_info.load_icon ();
+                    not_cached = true;
+                    } catch {}
+                }
+            }
+
+			if (not_cached) {
+				if (size != image.width || size != image.height)
+                    image = ar_scale (image, size, size);
+				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE,
+												 WindowIcon.SHADOW_DISTANCE,
+												 WindowIcon.SHADOW_OPACITY);
+
+				icon_pixbuf_cache.set (icon_key, image);
+			}
+
+			return image;
 		}
 
 		public static string? get_icon_from_gicon (Icon? icon)
