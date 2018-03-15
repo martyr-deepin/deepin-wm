@@ -99,7 +99,9 @@ namespace Gala
 		 */
 		public static Gdk.Pixbuf get_icon_for_window (Meta.Window window, int size, bool ignore_cache = false)
 		{
-            if ("Wine" in window.get_wm_class ()) {
+            // check if app has GIO_LAUNCHED_DESKTOP_FILE defined and use that info to 
+            // load icon
+            {
                 var pid = window.get_pid ();
                 if (pid > 0) {
                     var proc_env = @"/proc/$pid/environ";
@@ -130,14 +132,20 @@ namespace Gala
                         if (sp == null) break;
                         *sp = '\0';
                         sp++;
-                        stderr.printf ("%s\n", (string)s);
 
                         if (GLib.strcmp((string)s, "GIO_LAUNCHED_DESKTOP_FILE") == 0) {
-                            return get_icon_from_desktop_file ((string)sp, size);
+                            var image = get_icon_from_desktop_file ((string)sp, size);
+                            if (image != null) {
+                                return image;
+                            } else {
+                                break;
+                            }
                         }
 
                         s += l+1;
                     }
+
+                    GLib.free(buf);
                 }
             }
 
@@ -168,7 +176,7 @@ namespace Gala
 		/**
 		 * Returns a pixbuf from the given desktop file
 		 */
-		public static Gdk.Pixbuf get_icon_from_desktop_file (string desktop_file, int size, bool ignore_cache = false)
+		public static Gdk.Pixbuf? get_icon_from_desktop_file (string desktop_file, int size, bool ignore_cache = false)
 		{
 			Gdk.Pixbuf? image = null;
 			bool not_cached = false;
@@ -185,11 +193,13 @@ namespace Gala
                     try {
                     image = icon_info.load_icon ();
                     not_cached = true;
-                    } catch {}
+                    } catch {
+                        return null;
+                    }
                 }
             }
 
-			if (not_cached) {
+			if (image != null && not_cached) {
 				if (size != image.width || size != image.height)
                     image = ar_scale (image, size, size);
 				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE,
@@ -268,7 +278,7 @@ namespace Gala
 			icon_theme_mutex.lock ();
 			
 			try {
-				pbuf = icon_theme.load_icon (icon, size, 0);
+				pbuf = icon_theme.load_icon (icon, size, Gtk.IconLookupFlags.FORCE_SIZE);
 			} catch { }
 			
 			try {
