@@ -101,15 +101,15 @@ namespace Gala
 		{
             // check if app has GIO_LAUNCHED_DESKTOP_FILE defined and use that info to 
             // load icon
-            {
-                var pid = window.get_pid ();
-                if (pid > 0) {
-                    var proc_env = @"/proc/$pid/environ";
-                    if (Posix.access(proc_env, Posix.F_OK) < 0) {
-                        return get_icon_for_xid ((uint32)window.get_xwindow (), size, ignore_cache);
-                    }
-                
-                    var fp = Posix.FILE.open (proc_env, "r");
+            var pid = window.get_pid ();
+            if (pid > 0) {
+                var proc_env = @"/proc/$pid/environ";
+                if (Posix.access(proc_env, Posix.F_OK) < 0) {
+                    return get_icon_for_xid ((uint32)window.get_xwindow (), size, ignore_cache);
+                }
+            
+                var fp = Posix.FILE.open (proc_env, "r");
+                if (fp != null) {
                     size_t sz = 0, cap = 1024;
                     char* buf = (char*)GLib.malloc(cap);
 
