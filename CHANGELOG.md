@@ -1,3 +1,17 @@
+##  1.9.23 (2018-03-16)
+
+
+#### Features
+
+*   search icon through desktop file first ([1c8a6efe](1c8a6efe))
+*   support wine app icon lookup ([489af07f](489af07f))
+
+#### Bug Fixes
+
+*   check if environ is really opened ([851aa01d](851aa01d))
+
+
+
 ##  1.9.22 (2018-03-07)
 
 
