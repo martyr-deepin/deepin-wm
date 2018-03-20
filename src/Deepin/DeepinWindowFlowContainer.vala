@@ -47,6 +47,9 @@ namespace Gala
 		 */
 		public override void on_actor_added (Actor new_actor)
 		{
+            if (!opened)
+                return;
+
 			// apply new child only when calculating positions success
 			if (update_window_positions ()) {
 				base.on_actor_added (new_actor);
@@ -65,7 +68,7 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public override void relayout (bool selecting = false)
+		public override void relayout (bool selecting = false, bool animated = true)
 		{
 			if (!opened) {
 				return;
@@ -79,7 +82,7 @@ namespace Gala
 				var window_clone = child as DeepinWindowClone;
 				var box = get_layout_box_for_window (window_clone);
 				var rect = DeepinUtils.new_rect_for_actor_box (box);
-				window_clone.take_slot (rect, true, selecting);
+				window_clone.take_slot (rect, animated, selecting);
 			}
 		}
 
@@ -106,7 +109,7 @@ namespace Gala
 		/**
 		 * When opened the WindowClones will animate to a clone layout
 		 */
-		public override void open (Window? focus_window = null)
+		public override void open (Window? focus_window = null, bool animate = true)
 		{
 			base.open (focus_window);
 
@@ -130,7 +133,7 @@ namespace Gala
 				window_clone.opacity = 255;
 			}
 
-			relayout ();
+			relayout (false, animate);
 		}
 
 		/**

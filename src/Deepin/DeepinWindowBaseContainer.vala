@@ -51,7 +51,7 @@ namespace Gala
 		 *
 		 * @param selecting Check if is action that window clone is selecting.
 		 */
-		public abstract void relayout (bool selecting = false);
+		public abstract void relayout (bool selecting = false, bool animated = true);
 
 		/**
 		 * Get position rectangle for target window.
@@ -360,7 +360,7 @@ namespace Gala
 		/**
 		 * Multitasking view opened.
 		 */
-		public virtual void open (Window? focus_window = null)
+		public virtual void open (Window? focus_window = null, bool animate = true)
 		{
 			if (opened) {
 				return;

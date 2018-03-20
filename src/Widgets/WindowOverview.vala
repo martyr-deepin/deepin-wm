@@ -70,10 +70,22 @@ namespace Gala
 
 		public override bool key_press_event (Clutter.KeyEvent event)
 		{
-			if (event.keyval == Clutter.Key.Escape) {
+			switch (event.keyval) {
+			case Clutter.Key.Escape:
 				close ();
-
 				return true;
+
+			case Clutter.Key.Tab:
+			case Clutter.Key.ISO_Left_Tab:
+				bool backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
+				select_window_by_order (backward);
+				break;
+			case Clutter.Key.Return:
+			case Clutter.Key.KP_Enter:
+                activate_selected_window ();
+				break;
+            default:
+				break;
 			}
 
 			return false;
@@ -192,44 +204,43 @@ namespace Gala
 
 			screen.window_left_monitor.connect (window_left_monitor);
 
-			// sort windows by stacking order
-			var windows = screen.get_display ().sort_windows_by_stacking (used_windows);
-
 			grab_key_focus ();
 
 			modal_proxy = wm.push_modal ();
 			modal_proxy.keybinding_filter = keybinding_filter;
 
-			visible = true;
-
 			for (var i = 0; i < screen.get_n_monitors (); i++) {
 				var geometry = screen.get_monitor_geometry (i);
 
-				var container = new WindowCloneContainer (true);
+				var container = new DeepinWindowFlowContainer (screen.get_active_workspace ());
 				container.padding_top = TOP_GAP;
 				container.padding_left = container.padding_right = BORDER;
 				container.padding_bottom = BOTTOM_GAP;
 				container.set_position (geometry.x, geometry.y);
 				container.set_size (geometry.width, geometry.height);
-				container.window_selected.connect (thumb_selected);
+
+				container.window_activated.connect (thumb_activated);
+                container.window_entered.connect (on_window_entered);
 
 				add_child (container);
 			}
 
-			foreach (var window in windows) {
+			foreach (var window in used_windows) {
 				unowned WindowActor actor = window.get_compositor_private () as WindowActor;
 				if (actor != null)
 					actor.hide ();
 
-				unowned WindowCloneContainer container = get_child_at_index (window.get_monitor ()) as WindowCloneContainer;
+				unowned DeepinWindowFlowContainer container = get_child_at_index (window.get_monitor ()) as DeepinWindowFlowContainer;
 				if (container == null)
 					continue;
 
 				container.add_window (window);
 			}
 
+			visible = true;
+
 			foreach (var child in get_children ())
-				((WindowCloneContainer) child).open ();
+				((DeepinWindowFlowContainer) child).open ();
 
 			ready = true;
 		}
@@ -243,12 +254,12 @@ namespace Gala
 		void restack_windows (Screen screen)
 		{
 			foreach (var child in get_children ())
-				((WindowCloneContainer) child).restack_windows (screen);
+				((DeepinWindowFlowContainer) child).restack_windows (screen);
 		}
 
 		void window_left_monitor (int num, Window window)
 		{
-			unowned WindowCloneContainer container = get_child_at_index (num) as WindowCloneContainer;
+			unowned DeepinWindowFlowContainer container = get_child_at_index (num) as DeepinWindowFlowContainer;
 			if (container == null)
 				return;
 
@@ -266,7 +277,7 @@ namespace Gala
 				|| (window.window_type != WindowType.NORMAL && window.window_type != WindowType.DIALOG))
 				return;
 
-			unowned WindowCloneContainer container = get_child_at_index (window.get_monitor ()) as WindowCloneContainer;
+			unowned DeepinWindowFlowContainer container = get_child_at_index (window.get_monitor ()) as DeepinWindowFlowContainer;
 			if (container == null)
 				return;
 
@@ -280,14 +291,42 @@ namespace Gala
 
 		void remove_window (Window window)
 		{
-			unowned WindowCloneContainer container = get_child_at_index (window.get_monitor ()) as WindowCloneContainer;
+			unowned DeepinWindowFlowContainer container = get_child_at_index (window.get_monitor ()) as DeepinWindowFlowContainer;
 			if (container == null)
 				return;
 
 			container.remove_window (window);
 		}
 
-		void thumb_selected (Window window)
+        void on_window_entered (Window window)
+        {
+			unowned DeepinWindowFlowContainer container = get_child_at_index (window.get_monitor ()) as DeepinWindowFlowContainer;
+			if (container == null)
+				return;
+
+            container.select_window (window, true);
+        }
+
+        void activate_selected_window ()
+        {
+            var monitor = screen.get_current_monitor ();
+            unowned DeepinWindowFlowContainer container = get_child_at_index (monitor) as DeepinWindowFlowContainer;
+            if (container == null || !container.has_selected_window ())
+                return;
+
+            thumb_activated (container.get_selected_clone ().window);
+        }
+
+		void select_window_by_order (bool backward)
+		{
+            var monitor = screen.get_current_monitor ();
+            unowned DeepinWindowFlowContainer container = get_child_at_index (monitor) as DeepinWindowFlowContainer;
+            if (container == null)
+                return;
+			container.select_window_by_order (backward);
+		}
+
+		void thumb_activated (Window window)
 		{
 			if (window.get_workspace () == screen.get_active_workspace ()) {
 				window.activate (screen.get_display ().get_current_time ());
@@ -295,7 +334,7 @@ namespace Gala
 			} else {
 				close ();
 				//wait for the animation to finish before switching
-				Timeout.add (400, () => {
+				Timeout.add (DeepinMultitaskingView.WORKSPACE_FADE_DURATION, () => {
 					window.get_workspace ().activate_with_focus (window, screen.get_display ().get_current_time ());
 					return false;
 				});
@@ -323,7 +362,7 @@ namespace Gala
 			wm.pop_modal (modal_proxy);
 
 			foreach (var child in get_children ()) {
-				((WindowCloneContainer) child).close ();
+				((DeepinWindowFlowContainer) child).close ();
 			}
 
 			Clutter.Threads.Timeout.add (300, () => {

@@ -71,7 +71,7 @@ namespace Gala
 		/**
 		 * {@inheritDoc}
 		 */
-		public override void relayout (bool selecting = false)
+		public override void relayout (bool selecting = false, bool animated = true)
 		{
 
             var screen = workspace.get_screen ();
@@ -183,7 +183,7 @@ namespace Gala
 		/**
 		 * Adjust window clone's opacity when opened.
 		 */
-		public virtual void open (Window? focus_window = null)
+		public virtual void open (Window? focus_window = null, bool animate = true)
 		{
 			base.open ();
 
