@@ -130,6 +130,11 @@ namespace Gala
             create_close_marker ();
 		}
 
+		public override bool enter_event (Clutter.CrossingEvent event)
+		{
+            return false;
+        }
+
         void create_close_marker ()
         {
             if (direction != Meta.ScreenCorner.TOPRIGHT) {
@@ -227,6 +232,11 @@ namespace Gala
             if (action.length == 0)
                 return true;
 
+            if (wm.window_overview_is_opened ()) {
+                return !("com.deepin.wm.PerformAction" in action &&
+                        ("int32:6" in action || "int32:6" in action));
+            }
+
             var active_window = wm.get_screen ().get_display ().get_focus_window ();
             if (active_window == null) 
                 return false;
@@ -289,6 +299,8 @@ namespace Gala
         }
 
         uint polling_id = 0;
+        uint polling_enter_id = 0;
+
         void corner_leaved (Meta.ScreenCorner corner)
         {
             if (corner != this.direction)
@@ -310,7 +322,40 @@ namespace Gala
                 }
 
                 (wm as Meta.Plugin).get_screen ().leave_corner (this.direction);
+
+                if (wm.window_overview_is_opened ()) {
+                    polling_for_enter ();
+                }
             }
+        }
+
+        // polling for corner enter event
+        // this is used when there is a modal actor presented (e.g window overview)
+        public void polling_for_enter ()
+        {
+            if (polling_enter_id != 0) {
+                Source.remove (polling_enter_id);
+                polling_enter_id = 0;
+            }
+            polling_enter_id = Timeout.add(50, polling_enter_timeout);
+        }
+
+        bool polling_enter_timeout ()
+        {
+            if (!wm.window_overview_is_opened ()) {
+                polling_enter_id = 0;
+                return false;
+            }
+
+            Clutter.Point pos = Clutter.Point.alloc ();
+            pointer.get_position (null, out pos.x, out pos.y);
+
+            if (inside_effect_region (pos)) {
+                polling_enter_id = 0;
+                corner_entered (this.direction);
+                return false;
+            }
+            return true;
         }
 
         void corner_entered (Meta.ScreenCorner corner)
@@ -1031,6 +1076,21 @@ namespace Gala
             if (hotcorner_enabeld != val) {
                 hotcorner_enabeld = val;
                 get_screen ().enable_corner_actions (val);
+            }
+        }
+
+        public bool window_overview_is_opened ()
+        {
+            return window_overview != null && window_overview.is_opened ();
+        }
+
+        public void polling_hotcorners ()
+        {
+            string[] names = {"left-up", "right-up", "left-down", "right-down"};
+            foreach (var key in names) {
+                Clutter.Actor? hot_corner = stage.find_child_by_name (key);
+                var dci = hot_corner as DeepinCornerIndicator;
+                dci.polling_for_enter ();
             }
         }
 
