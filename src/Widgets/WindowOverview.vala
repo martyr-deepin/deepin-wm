@@ -195,6 +195,7 @@ namespace Gala
             }
 
             (wm as WindowManagerGala).toggle_background_blur (true);
+            (wm as WindowManagerGala).polling_hotcorners ();
 			ready = false;
 
 			foreach (var workspace in workspaces) {
@@ -243,6 +244,8 @@ namespace Gala
 				((DeepinWindowFlowContainer) child).open ();
 
 			ready = true;
+
+
 		}
 
 		bool keybinding_filter (KeyBinding binding)
