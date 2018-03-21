@@ -26,7 +26,6 @@ namespace Gala
 		public signal void destroyed ();
 
 		public Meta.Screen screen { get; construct; }
-		public int workspace_index { get; construct; }
 		public weak BackgroundSource background_source { get; construct; }
 		public bool is_loaded { get; private set; default = false; }
 		public GDesktop.BackgroundStyle style { get; construct; }
@@ -38,12 +37,11 @@ namespace Gala
 		uint update_animation_timeout_id = 0;
         ulong handler = 0;
 
-		public Background (Meta.Screen screen, int workspace_index,
+		public Background (Meta.Screen screen,
 						   string? filename, BackgroundSource background_source,
 						   GDesktop.BackgroundStyle style)
 		{
 			Object (screen: screen,
-					workspace_index: workspace_index,
 					background_source: background_source,
 					style: style,
 					filename: filename);

@@ -198,7 +198,7 @@ namespace Gala
             news += null;
             extra_settings.set_strv ("background-uris", news);
 
-            notify_switched (from, to);
+            notify_switched (from, to, false);
         }
 
         void notify_switched (int from, int to, bool send_signal = true)
@@ -364,7 +364,7 @@ namespace Gala
                         transient_cache.remove (transient_cache_order[0]);
                         transient_cache_order.remove_at (0);
                     }
-                    var background = new Background (screen, workspace_index, filename,
+                    var background = new Background (screen, filename,
                             this, (GDesktop.BackgroundStyle) style);
                     transient_cache_order.add (filename);
                     transient_cache[filename] = background;
@@ -377,7 +377,7 @@ namespace Gala
                 string key = "%d:%d".printf (monitor_index, workspace_index);
                 Meta.verbose ("%s: key = %s\n", Log.METHOD, key);
                 if (!backgrounds.has_key (key)) {
-                    var background = new Background (screen, workspace_index, filename,
+                    var background = new Background (screen, filename,
                             this, (GDesktop.BackgroundStyle) style);
                     backgrounds[key] = background;
                 }

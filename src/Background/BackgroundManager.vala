@@ -52,7 +52,7 @@ namespace Gala
 		construct
 		{
             workspace = screen.get_workspace_by_index (workspace_index);
-            workspace.notify["workspace-index"].connect_after (on_workspace_index_changed);
+            workspace.notify["workspace-index"].connect (on_workspace_index_changed);
 
 			background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);

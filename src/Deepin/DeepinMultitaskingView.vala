@@ -95,6 +95,15 @@ namespace Gala
             background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
 
+			background_source.changed.connect ((indexes) => {
+                foreach (var idx in indexes) {
+                    if (idx == screen.get_active_workspace_index ()) {
+                        update_background_actors ();
+                        break;
+                    }
+                }
+            });
+
             dark_mask = new DeepinCssStaticActor("deepin-window-manager-background-mask");
 
 			flow_container = new Actor ();
