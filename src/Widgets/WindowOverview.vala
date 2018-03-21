@@ -296,6 +296,16 @@ namespace Gala
 				return;
 
 			container.remove_window (window);
+
+            var total = 0;
+			foreach (var child in get_children ()) {
+				total += ((DeepinWindowFlowContainer) child).get_n_children ();
+			}
+
+            if (total == 0) {
+                close ();
+            }
+
 		}
 
         void on_window_entered (Window window)

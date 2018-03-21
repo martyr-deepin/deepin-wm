@@ -2197,7 +2197,7 @@ namespace Gala
 			switch (window.window_type) {
 				case WindowType.NORMAL:
 					var duration = animation_settings.close_duration;
-					if (duration == 0) {
+					if (duration == 0 || window_overview.is_opened ()) {
 						destroy_completed (actor);
 						return;
 					}
