@@ -1,3 +1,18 @@
+##  1.9.24 (2018-03-22)
+
+
+#### Features
+
+*   quit overview if no previews exists ([2d4ebcb1](2d4ebcb1))
+*   window overview enhancement ([44f08898](44f08898))
+
+#### Bug Fixes
+
+*   update active background when wallpager changed ([a7039563](a7039563))
+*   take care of undergoing window effect ([8018c3d8](8018c3d8))
+
+
+
 ##  1.9.23 (2018-03-16)
 
 
