@@ -49,30 +49,57 @@ namespace Gala
 
 			restack_windows (workspace.get_screen ());
             relayout ();
+
+			workspace.window_added.connect (on_window_added);
+			workspace.window_removed.connect (on_window_removed);
 		}
 
 		~DeepinWindowSnapshotContainer ()
 		{
 		}
 
+		void on_window_removed (Window window)
+		{
+            Actor? target = null;
+			foreach (var child in get_children ()) {
+				if (((DeepinWindowClone)child).window == window) {
+                    target = child;
+					break;
+				}
+			}
+
+            if (target != null) {
+                remove_child (target);
+            }
+		}
+
+		void on_window_added (Window window)
+		{
+            if (window.window_type != WindowType.NORMAL ||
+                    window.get_workspace () != workspace ||
+                    window.on_all_workspaces) {
+				return;
+			}
+
+			foreach (var child in get_children ()) {
+				if (((DeepinWindowClone)child).window == window) {
+					return;
+				}
+			}
+
+			add_window (window);
+
+			restack_windows (workspace.get_screen ());
+            relayout ();
+		}
+
 		public virtual DeepinWindowClone? add_window (Window window, bool thumbnail_mode = true)
 		{
 			var new_window = new DeepinWindowClone (window, thumbnail_mode);
             new_window.reactive = false;
-			new_window.destroy.connect (on_window_destroyed);
             add_child (new_window);
 
 			return new_window;
-		}
-
-		void on_window_destroyed (Actor actor)
-		{
-			var window = actor as DeepinWindowClone;
-			if (window == null) {
-				return;
-			}
-
-			window.destroy.disconnect (on_window_destroyed);
 		}
 
 		/**
