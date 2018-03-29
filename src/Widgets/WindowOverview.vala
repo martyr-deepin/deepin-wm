@@ -70,24 +70,44 @@ namespace Gala
 
 		public override bool key_press_event (Clutter.KeyEvent event)
 		{
+            bool backward = false;
+            bool select = false;
+
 			switch (event.keyval) {
 			case Clutter.Key.Escape:
 				close ();
 				return true;
 
-			case Clutter.Key.Tab:
-			case Clutter.Key.ISO_Left_Tab:
-				bool backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
-				select_window_by_order (backward);
-				break;
 			case Clutter.Key.Return:
 			case Clutter.Key.KP_Enter:
                 activate_selected_window ();
+                return false;
 				break;
+
+			case Clutter.Key.Tab:
+			case Clutter.Key.ISO_Left_Tab:
+				backward = (event.modifier_state & ModifierType.SHIFT_MASK) != 0;
+                select = true;
+				break;
+
+			case Clutter.Key.Left:
+			case Clutter.Key.KP_Left:
+                backward = true;
+                select = true;
+                break;
+
+			case Clutter.Key.Right:
+			case Clutter.Key.KP_Right:
+                backward = false;
+                select = true;
+                break;
             default:
 				break;
 			}
 
+            if (select) {
+                select_window_by_order (backward);
+            }
 			return false;
 		}
 

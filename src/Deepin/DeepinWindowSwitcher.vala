@@ -305,6 +305,42 @@ namespace Gala
 			}
 		}
 
+		public override bool key_press_event (Clutter.KeyEvent event)
+		{
+            bool backward = false;
+            bool handle = false;
+
+			switch (event.keyval) {
+			case Clutter.Key.Left:
+			case Clutter.Key.KP_Left:
+			case Clutter.Key.Down:
+			case Clutter.Key.KP_Down:
+                backward = true;
+                handle = true;
+                break;
+
+			case Clutter.Key.Right:
+			case Clutter.Key.KP_Right:
+			case Clutter.Key.Up:
+			case Clutter.Key.KP_Up:
+                backward = false;
+                handle = true;
+                break;
+            default:
+				break;
+			}
+
+                if (visible && !closing) {
+                    if (event.keyval == Clutter.Key.Left || 
+                            event.keyval == Clutter.Key.KP_Left)
+                        backward = true;
+                    var workspace = wm.get_screen ().get_active_workspace ();
+                    current_item = next_item (workspace, backward);
+                    dim_items ();
+                }
+			return false;
+		}
+
 		public override bool key_release_event (Clutter.KeyEvent event)
 		{
 			if ((get_current_modifiers () & modifier_mask) == 0) {
