@@ -1170,8 +1170,9 @@ namespace Gala
         {
             var screen = get_screen ();
             foreach (var background in backgrounds) {
+                background.set_blurred (on);
                 background.set_rounds (6);
-                background.set_radius (on ? 9:0);
+                background.set_radius (9);
             }
         }
 

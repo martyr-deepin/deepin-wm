@@ -140,6 +140,14 @@ namespace Gala
             }
         }
 
+        public void set_blurred (bool on)
+        {
+            if (actors.size > 0) {
+                var actor = actors[actors.size - 1];
+                actor.set_enabled (on);
+            }
+        }
+
         public void set_rounded_radius (int rd)
         {
             rounded_radius = rd;
