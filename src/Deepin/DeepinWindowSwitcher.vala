@@ -356,7 +356,8 @@ namespace Gala
 			close (wm.get_screen ().get_display ().get_current_time ());
 		}
 
-		[CCode (instance_pos = -1)] public void handle_switch_windows (
+		[CCode (instance_pos = -1)]
+        public void handle_switch_windows (
 			Display display, Screen screen, Window? window,
 #if HAS_MUTTER314
 			Clutter.KeyEvent event, KeyBinding binding)
@@ -411,9 +412,10 @@ namespace Gala
 
 			current_item = next_item (workspace, backward);
 
-			visible = true;
-			closing = false;
 			modal_proxy = wm.push_modal ();
+            if (!modal_proxy.grabbed) {
+				close (wm.get_screen ().get_display ().get_current_time ());
+            }
 			modal_proxy.keybinding_filter = (binding) =>
 			{
 				// if it's not built-in, we can block it right away
@@ -428,8 +430,9 @@ namespace Gala
 						 name == "switch-windows" || name == "switch-windows-backward" ||
 						 name == "switch-group" || name == "switch-group-backward");
 			};
+			visible = true;
+			closing = false;
 
-            //dim_items ();
 			grab_key_focus ();
 
 			if ((get_current_modifiers () & modifier_mask) == 0) {

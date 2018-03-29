@@ -1485,7 +1485,7 @@ namespace Gala
 			var time = screen.get_display ().get_current_time ();
 
 			update_input_area ();
-			var res = begin_modal (0, time);
+			proxy.grabbed = begin_modal (0, time);
 
 			Meta.Util.disable_unredirect_for_screen (screen);
 

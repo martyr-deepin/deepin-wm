@@ -48,6 +48,11 @@ namespace Gala
 		 */
 		public KeybindingFilter? keybinding_filter { get; owned set; default = () => true; }
 
+        /**
+         * grab may fail
+         */
+        public bool grabbed {get; set; default = false;}
+
 		public ModalProxy ()
 		{
 		}
