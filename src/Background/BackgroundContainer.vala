@@ -58,7 +58,11 @@ namespace Gala
 			string key = @"$monitor_index:$workspace_index";
 			if (backgrounds.has_key (key)) {
 				return backgrounds[key];
-			}
+			} else {
+                var background = new BackgroundManager (screen, monitor_index, workspace_index);
+                insert_background (monitor_index, workspace_index, background);
+                return background;
+            }
 			return null;
 		}
 
@@ -79,15 +83,6 @@ namespace Gala
                 background.destroy ();
 			}
 			backgrounds.clear ();
-
-			for (var i = 0; i < screen.get_n_monitors (); i++) {
-				for (var j = 0; j < screen.get_n_workspaces (); j++) {
-					var background = new BackgroundManager (screen, i, j);
-
-					insert_background (i, j, background);
-				}
-			}
-
             structure_changed ();
 		}
 
@@ -133,11 +128,14 @@ namespace Gala
 
         void on_workspace_added (int index)
         {
-			foreach (var background in backgrounds.values) {
+            // keep the fact that workspace can only be appended
+            assert (index + 1 == screen.get_n_workspaces ());
+
+            foreach (var background in backgrounds.values) {
                 if (background.get_parent () != null) {
                     background.get_parent ().remove_child (background);
                 }
-			}
+            }
 
 			for (var i = 0; i < screen.get_n_monitors (); i++) {
                 var background = new BackgroundManager (screen, i, index);
