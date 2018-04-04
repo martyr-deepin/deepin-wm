@@ -778,6 +778,7 @@ namespace Gala
 		ActivatableComponent? window_overview = null;
         WindowPreviewer? window_previewer = null;
         ScreenTilePreview? tile_preview = null;
+		DeepinTileSelector? tile_selector = null;
 
         DeepinWorkspaceIndicator? workspace_indicator = null;
         Clutter.Texture? tex_actor = null;
@@ -992,6 +993,9 @@ namespace Gala
 
             window_previewer = new WindowPreviewer (this);
             ui_group.add_child ((Clutter.Actor) window_previewer);
+
+            tile_selector = new DeepinTileSelector (this);
+            ui_group.add_child ((Clutter.Actor) tile_selector);
 
             workspace_indicator = new DeepinWorkspaceIndicator (this, get_screen ());
             workspace_indicator.visible = false;
@@ -1481,7 +1485,7 @@ namespace Gala
 			var time = screen.get_display ().get_current_time ();
 
 			update_input_area ();
-			begin_modal (0, time);
+			var res = begin_modal (0, time);
 
 			Meta.Util.disable_unredirect_for_screen (screen);
 
@@ -2883,6 +2887,24 @@ namespace Gala
             }
 
             return tile_preview;
+        }
+
+		public override void tile (Meta.WindowActor actor)
+		{
+            stderr.printf ("tile\n");
+
+            kill_window_effects (actor);
+            tile_completed (actor);
+
+            if (tile_selector.is_opened ()) {
+                return;
+            }
+
+            Timeout.add(0, () => {
+                tile_selector.tile_target = actor;
+                tile_selector.open ();
+                return false;
+            });
         }
 
         public override void show_tile_preview (Meta.Window window,

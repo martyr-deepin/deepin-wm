@@ -318,6 +318,7 @@ namespace Meta {
 		public static unowned Clutter.Actor? get_window_group_for_screen (Meta.Screen screen);
 		public void hide_tile_preview ();
 		public void hide_window (Meta.Window window, Meta.CompEffect effect);
+		public void tile_window (Meta.Window window);
 		public void manage ();
 #if !HAS_MUTTER318
 		public void maximize_window (Meta.Window window, Meta.Rectangle old_rect, Meta.Rectangle new_rect);
@@ -523,6 +524,9 @@ namespace Meta {
  		[NoWrapper]
 		public virtual void unminimize (Meta.WindowActor actor);
 		public void unminimize_completed (Meta.WindowActor actor);
+		[NoWrapper]
+		public virtual void tile (Meta.WindowActor actor);
+		public void tile_completed (Meta.WindowActor actor);
 		[NoWrapper]
 		public virtual bool xevent_filter (X.Event event);
 	}
@@ -964,6 +968,7 @@ namespace Meta {
 		UNMINIMIZE,
 		DESTROY,
 		MINIMIZE,
+        TILE,
 		NONE
 	}
 	[CCode (cheader_filename = "meta/common.h", cprefix = "META_CURSOR_", type_id = "meta_cursor_get_type ()")]
