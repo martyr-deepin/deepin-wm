@@ -2891,8 +2891,6 @@ namespace Gala
 
 		public override void tile (Meta.WindowActor actor)
 		{
-            stderr.printf ("tile\n");
-
             kill_window_effects (actor);
             tile_completed (actor);
 

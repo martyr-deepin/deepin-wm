@@ -174,24 +174,28 @@ namespace Gala
 				return;
             }
 
-            (wm as WindowManagerGala).toggle_background_blur (true);
 			ready = false;
+
+			modal_proxy = wm.push_modal ();
+            if (!modal_proxy.grabbed) {
+                cleanup ();
+            }
+			modal_proxy.keybinding_filter = keybinding_filter;
+
+			grab_key_focus ();
+
+            (wm as WindowManagerGala).toggle_background_blur (true);
 
             target_workspace = screen.get_active_workspace ();
             target_workspace.window_removed.connect (remove_window);
 
-			grab_key_focus ();
-
-			modal_proxy = wm.push_modal ();
-			modal_proxy.keybinding_filter = keybinding_filter;
-
             var target_window = (tile_target as WindowActor).get_meta_window ();
             var target_rect = target_window.get_frame_rect ();
 
-            var geometry = screen.get_monitor_geometry (screen.get_current_monitor ());
+            var geometry = target_window.get_work_area_current_monitor ();
 
             target_side = TileSide.LEFT;
-            if (target_rect.x > geometry.x + 10) {
+            if (target_rect.x - geometry.x >= geometry.width/2) {
                 target_side = TileSide.RIGHT;
             }
 
@@ -199,16 +203,18 @@ namespace Gala
             container.padding_top = TOP_GAP;
             container.padding_left = container.padding_right = BORDER;
             container.padding_bottom = BOTTOM_GAP;
-            if (target_side == TileSide.LEFT) {
-                container.set_position (geometry.x + geometry.width / 2, geometry.y);
-            } else {
-                container.set_position (geometry.x, geometry.y);
-            }
             container.set_size (geometry.width / 2, geometry.height);
 
             container.window_activated.connect (thumb_activated);
             container.window_entered.connect (on_window_entered);
             add_child (container);
+
+            if (target_side == TileSide.LEFT) {
+                this.set_position (geometry.x + geometry.width / 2, geometry.y);
+            } else {
+                this.set_position (geometry.x, geometry.y);
+            }
+            this.set_size (geometry.width / 2, geometry.height);
 
 			foreach (var window in used_windows) {
 				unowned WindowActor actor = window.get_compositor_private () as WindowActor;
@@ -272,7 +278,7 @@ namespace Gala
 			if (window.get_workspace () == target_workspace) {
 				close ();
 
-				window.activate (screen.get_display ().get_current_time ());
+				window.activate (screen.get_display ().get_current_time_roundtrip ());
                 window.tile_by_side (target_side == TileSide.LEFT ? TileSide.RIGHT : TileSide.LEFT);
 			} 
 		}
