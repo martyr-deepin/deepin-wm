@@ -357,7 +357,8 @@ namespace Gala
 		Meta.Rectangle get_window_outer_rect ()
 		{
 			var outer_rect = window.get_frame_rect ();
-			return outer_rect;
+            var client_rect = window.frame_rect_to_client_rect (outer_rect);
+			return client_rect;
 		}
 
 		/**
