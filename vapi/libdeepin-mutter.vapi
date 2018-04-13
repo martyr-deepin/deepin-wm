@@ -655,6 +655,7 @@ namespace Meta {
 		public bool can_maximize ();
 		public bool can_minimize ();
 		public bool can_shade ();
+		public bool can_tile_side_by_side ();
 		public void change_workspace (Meta.Workspace workspace);
 		public void change_workspace_by_index (int space_index, bool append);
 		public void check_alive (uint32 timestamp);
@@ -730,6 +731,7 @@ namespace Meta {
 		public bool is_skip_taskbar ();
 		public void kill ();
 		public void tile_by_side (TileSide side);
+        public TileSide get_tile_mode ();
 		public void begin_to_move ();
 		public bool located_on_workspace (Meta.Workspace workspace);
 		public void lower ();
@@ -1065,7 +1067,9 @@ namespace Meta {
 		IS_FLASHING,
 		ABOVE,
 		TILED_LEFT,
-		TILED_RIGHT
+		TILED_RIGHT,
+        ALLOWS_TILED_RESIZE_LEFT,
+        ALLOWS_TILED_RESIZE_RIGHT,
 	}
 	[CCode (cheader_filename = "meta/common.h", cprefix = "META_FRAME_TYPE_", type_id = "meta_frame_type_get_type ()")]
 	public enum FrameType {

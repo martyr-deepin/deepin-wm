@@ -140,14 +140,17 @@ namespace Gala
 				return;
 			}
 
+            //TODO: what if tile_target is not the active workspace and the same monitor
             if (tile_target == null)
                 return;
+
+            var target_window = (tile_target as WindowActor).get_meta_window ();
+            var target_rect = target_window.get_frame_rect ();
 
 			var used_windows = new SList<Window> ();
             foreach (var window in screen.get_active_workspace ().list_windows ()) {
                 var actor = window.get_compositor_private () as WindowActor;
 
-                //TODO: check tilable window
                 if (window.window_type != WindowType.NORMAL &&
                     window.window_type != WindowType.DOCK) {
                     if (actor != null) {
@@ -159,11 +162,19 @@ namespace Gala
                 if (actor == tile_target)
                     continue;
 
-                if (window.window_type == WindowType.DOCK)
+                if (window.window_type == WindowType.DOCK || window.is_on_all_workspaces ())
                     continue;
 
-                if (window.is_on_all_workspaces ())
+                if (!window.can_tile_side_by_side () ||
+                        window.is_shaded () ||
+                        window.is_fullscreen () ||
+                        window.get_maximized () == Meta.MaximizeFlags.BOTH ||
+                        window.get_monitor () != target_window.get_monitor ()) {
+                    if (actor != null) {
+                        actor.hide ();
+                    }
                     continue;
+                }
 
                 used_windows.append (window);
             }
@@ -189,15 +200,10 @@ namespace Gala
             target_workspace = screen.get_active_workspace ();
             target_workspace.window_removed.connect (remove_window);
 
-            var target_window = (tile_target as WindowActor).get_meta_window ();
-            var target_rect = target_window.get_frame_rect ();
-
             var geometry = target_window.get_work_area_current_monitor ();
 
-            target_side = TileSide.LEFT;
-            if (target_rect.x - geometry.x >= geometry.width/2) {
-                target_side = TileSide.RIGHT;
-            }
+            target_side = target_window.get_tile_mode ();
+            assert (target_side == TileSide.LEFT || target_side == TileSide.RIGHT);
 
             container = new DeepinWindowFlowContainer (target_workspace);
             container.padding_top = TOP_GAP;
