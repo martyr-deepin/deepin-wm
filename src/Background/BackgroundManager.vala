@@ -57,14 +57,7 @@ namespace Gala
 			background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BACKGROUND_SCHEMA, EXTRA_BACKGROUND_SCHEMA);
 
-			changed_handler = background_source.changed.connect ((indexes) => {
-                foreach (var idx in indexes) {
-                    if (idx == workspace_index) {
-                        create_background_actor ();
-                        break;
-                    }
-                }
-            });
+			changed_handler = background_source.changed.connect (on_background_source_changed);
 
             actors = new Gee.ArrayList<Meta.BlurredBackgroundActor> ();
             create_background_actor ();
@@ -72,7 +65,7 @@ namespace Gala
 
 		~BackgroundManager ()
 		{
-            background_source.changed.disconnect (create_background_actor);
+            background_source.changed.disconnect (on_background_source_changed);
             workspace.notify["workspace-index"].disconnect (on_workspace_index_changed);
             changed_handler = 0;
 
@@ -82,6 +75,16 @@ namespace Gala
             actors.clear ();
             actors = null;
 		}
+
+        void on_background_source_changed(int[] indexes)
+        {
+            foreach (var idx in indexes) {
+                if (idx == workspace_index) {
+                    create_background_actor ();
+                    break;
+                }
+            }
+        }
 
         void on_workspace_index_changed(Object o, ParamSpec p)
         {
