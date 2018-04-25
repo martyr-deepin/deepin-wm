@@ -32,6 +32,12 @@ namespace Gala
 		public signal void prepare_for_sleep (bool suspending);
 	}
 
+	[DBus (name = "com.deepin.SessionManager")]
+	public interface DDESessionManager : GLib.Object
+	{
+		public abstract bool Register (string cookie) throws IOError;
+	}
+
     class ScreenTilePreview
     {
         public Clutter.Actor   actor;
@@ -721,6 +727,9 @@ namespace Gala
 		const string LOGIND_DBUS_NAME = "org.freedesktop.login1";
 		const string LOGIND_DBUS_OBJECT_PATH = "/org/freedesktop/login1";
 
+        const string DDE_SESSION_MANAGER_NAME = "com.deepin.SessionManager";
+        const string DDE_SESSION_MANAGER_OBJECT_PATH = "/com/deepin/SessionManager";
+
 		delegate unowned string? GlQueryFunc (uint id);
 
 		static bool is_nvidia ()
@@ -790,6 +799,7 @@ namespace Gala
 		Window? moving; //place for the window that is being moved over
 
 		LoginDRemote? logind_proxy = null;
+        DDESessionManager? dde_session_manager = null;
 
 		Gee.LinkedList<ModalProxy> modal_stack = new Gee.LinkedList<ModalProxy> ();
 
@@ -824,12 +834,32 @@ namespace Gala
 			if (logind_proxy == null
 				&& is_nvidia ()) {
 				try {
-					logind_proxy = Bus.get_proxy_sync (BusType.SYSTEM, LOGIND_DBUS_NAME, LOGIND_DBUS_OBJECT_PATH);
+					logind_proxy = Bus.get_proxy_sync (BusType.SYSTEM, 
+                            LOGIND_DBUS_NAME, LOGIND_DBUS_OBJECT_PATH);
 					logind_proxy.prepare_for_sleep.connect (prepare_for_sleep);
 				} catch (Error e) {
 					warning ("Failed to get LoginD proxy: %s", e.message);
 				}				
 			}
+
+            if (dde_session_manager == null) {
+                string? cookie = GLib.Environment.get_variable ("DDE_SESSION_PROCESS_COOKIE_ID");
+                GLib.Environment.unset_variable ("DDE_SESSION_PROCESS_COOKIE_ID");
+
+                if (cookie == null) {
+                    Meta.verbose ("registered to DDE session manager failed, no cookie\n");
+                    return;
+                }
+
+				try {
+					dde_session_manager = Bus.get_proxy_sync (BusType.SESSION, 
+                            DDE_SESSION_MANAGER_NAME, DDE_SESSION_MANAGER_OBJECT_PATH);
+                    dde_session_manager.Register(cookie);
+                    Meta.verbose ("registered to DDE session manager\n");
+				} catch (Error e) {
+					warning ("Failed to register to DDE session: %s", e.message);
+				}
+            }
 		}
 
 		void prepare_for_sleep (bool suspending)
