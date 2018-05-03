@@ -327,6 +327,7 @@ namespace Gala
                 handle = true;
                 break;
             default:
+                return true;
 				break;
 			}
 
