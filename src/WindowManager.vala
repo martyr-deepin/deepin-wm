@@ -830,9 +830,7 @@ namespace Gala
 			DeepinUtils.fix_workspace_max_num (get_screen (), MAX_WORKSPACE_NUM);
 			Util.later_add (LaterType.BEFORE_REDRAW, show_stage);
 
-			// Handle FBO issue with nvidia blob
-			if (logind_proxy == null
-				&& is_nvidia ()) {
+			if (logind_proxy == null) {
 				try {
 					logind_proxy = Bus.get_proxy_sync (BusType.SYSTEM, 
                             LOGIND_DBUS_NAME, LOGIND_DBUS_OBJECT_PATH);
@@ -864,10 +862,20 @@ namespace Gala
 
 		void prepare_for_sleep (bool suspending)
 		{
-			if (suspending)
-				return;
+			if (suspending) {
+                if (window_previewer.is_opened ())
+                    window_previewer.close ();
 
-			Meta.Background.refresh_all ();
+				else if (window_overview.is_opened ())
+					window_overview.close ();
+
+				else if (workspace_view.is_opened ())
+					workspace_view.close ();
+
+            } else if (/* opposite of suspending and */ is_nvidia ()) {
+                // Handle FBO issue with nvidia blob
+                Meta.Background.refresh_all ();
+            }
 		}
 
 		bool show_stage ()
