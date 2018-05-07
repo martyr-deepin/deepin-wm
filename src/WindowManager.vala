@@ -1538,7 +1538,8 @@ namespace Gala
 			update_input_area ();
 
 			var screen = get_screen ();
-			end_modal (screen.get_display ().get_current_time ());
+            if (proxy.grabbed)
+                end_modal (screen.get_display ().get_current_time ());
 
 			Meta.Util.enable_unredirect_for_screen (screen);
 		}

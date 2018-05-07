@@ -405,17 +405,13 @@ namespace Gala
 			if (binding_name == "switch-group" || binding_name == "switch-group-backward") {
 				only_group_windows = true;
 			}
-			if (!collect_windows (workspace, only_group_windows)) {
-				return;
-			}
 
 			set_primary_modifier (binding.get_mask ());
-
-			current_item = next_item (workspace, backward);
 
 			modal_proxy = wm.push_modal ();
             if (!modal_proxy.grabbed) {
 				close (wm.get_screen ().get_display ().get_current_time ());
+                return;
             }
 			modal_proxy.keybinding_filter = (binding) =>
 			{
@@ -431,6 +427,12 @@ namespace Gala
 						 name == "switch-windows" || name == "switch-windows-backward" ||
 						 name == "switch-group" || name == "switch-group-backward");
 			};
+
+			if (!collect_windows (workspace, only_group_windows)) {
+				return;
+			}
+			current_item = next_item (workspace, backward);
+
 			visible = true;
 			closing = false;
 
