@@ -147,6 +147,14 @@ namespace Gala
 				return;
 			}
 
+			modal_proxy = wm.push_modal ();
+			modal_proxy.keybinding_filter = keybinding_filter;
+            if (!modal_proxy.grabbed) {
+                close ();
+                return;
+            }
+
+
 			var all_windows = hints != null && "all-windows" in hints;
 
             var present_window_xids = new Gee.HashSet<uint32>();
@@ -226,9 +234,6 @@ namespace Gala
 			screen.window_left_monitor.connect (window_left_monitor);
 
 			grab_key_focus ();
-
-			modal_proxy = wm.push_modal ();
-			modal_proxy.keybinding_filter = keybinding_filter;
 
 			for (var i = 0; i < screen.get_n_monitors (); i++) {
 				var geometry = screen.get_monitor_geometry (i);

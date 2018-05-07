@@ -760,6 +760,14 @@ namespace Gala
 			if (opening) {
 				modal_proxy = wm.push_modal ();
 				modal_proxy.keybinding_filter = keybinding_filter;
+                if (!modal_proxy.grabbed) {
+					hide ();
+					wm.pop_modal (modal_proxy);
+                    opening = false;
+                    opened = false;
+					toggling = false;
+					return;
+                }
 
 				wm.window_group.hide ();
 				wm.top_window_group.hide ();

@@ -405,6 +405,10 @@ namespace Gala
 			if (binding_name == "switch-group" || binding_name == "switch-group-backward") {
 				only_group_windows = true;
 			}
+			if (!collect_windows (workspace, only_group_windows)) {
+				return;
+			}
+			current_item = next_item (workspace, backward);
 
 			set_primary_modifier (binding.get_mask ());
 
@@ -428,10 +432,6 @@ namespace Gala
 						 name == "switch-group" || name == "switch-group-backward");
 			};
 
-			if (!collect_windows (workspace, only_group_windows)) {
-				return;
-			}
-			current_item = next_item (workspace, backward);
 
 			visible = true;
 			closing = false;
