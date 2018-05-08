@@ -272,9 +272,9 @@ namespace Gala
 
         bool is_app_in_list (int pid, string[] list)
         {
-            char cmd[256] = {};
+            string cmd;
             string proc = @"/proc/$pid/cmdline";
-            Posix.readlink (proc, cmd);
+            FileUtils.get_contents(proc, out cmd);
 
             foreach (var app in list) {
                 if (app in (string)cmd) {
