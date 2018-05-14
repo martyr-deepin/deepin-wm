@@ -2933,6 +2933,10 @@ namespace Gala
             kill_window_effects (actor);
             tile_completed (actor);
 
+            bool disabled = true;
+            if (disabled)
+                return;
+
             if (tile_selector.is_opened ()) {
                 return;
             }
