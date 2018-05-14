@@ -1,3 +1,31 @@
+##  1.9.25 (2018-05-14)
+
+
+#### Bug Fixes
+
+*   read cmdline ([5fbec072](5fbec072))
+*   quit all modal modes early when grab failed ([ab766f05](ab766f05))
+*   quit early when grab failed ([65f9c150](65f9c150))
+*   prevent irrelavant keys to navigate ([1946648e](1946648e))
+*   disconnect correct callback ([8cdf24fd](8cdf24fd))
+*   use client rect to scale thumb ([d1c077b1](d1c077b1))
+
+#### Features
+
+*   auto quit modal mode before sleep ([0bb84ab2](0bb84ab2))
+*   register to DDE session manager ([6947d39c](6947d39c))
+*   optimize interactive tiling handling ([c45046d1](c45046d1))
+*   handle begin_modal grab failure ([84051c29](84051c29))
+*   support interactive tiling ([aa8c2edf](aa8c2edf))
+*   optimize background caches management ([c903902e](c903902e))
+*   toggle blur by enabled flag ([b974ab7a](b974ab7a))
+*   activate zone in window overview mode ([92589a84](92589a84))
+*   track window add/removal dynamically ([0455fe32](0455fe32))
+*   support arrow navigation ([8ac896a7](8ac896a7))
+* **tile:**  optimize windows filter ([0d8a6147](0d8a6147))
+
+
+
 ##  1.9.24 (2018-03-22)
 
 
