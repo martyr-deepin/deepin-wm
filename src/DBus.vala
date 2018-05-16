@@ -55,7 +55,10 @@ namespace Gala
 
 		public void perform_action (ActionType type)
 		{
-			wm.perform_action (type);
+            Timeout.add(200, () => {
+                wm.perform_action (type);
+                return false;
+            });
 		}
 
         public void toggle_debug ()
@@ -84,12 +87,18 @@ namespace Gala
         // if already in previewing mode, fade out previous preview, fade in the new.
         public void preview_window (uint32 xid)
         {
-            (wm as WindowManagerGala).preview_window (xid);
+            Timeout.add(200, () => {
+                (wm as WindowManagerGala).preview_window (xid);
+                return false;
+            });
         }
 
         public void present_windows (uint32[] xids)
         {
-            (wm as WindowManagerGala).present_windows (xids);
+            Timeout.add(200, () => {
+                (wm as WindowManagerGala).present_windows (xids);
+                return false;
+            });
         }
 
         public void request_hide_windows ()
