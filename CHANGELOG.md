@@ -1,3 +1,12 @@
+##  1.9.24.1 (2018-05-23)
+
+
+#### Features
+
+*   register to DDE session manager ([fbd4cda0](fbd4cda0))
+
+
+
 ##  1.9.24 (2018-03-22)
 
 
