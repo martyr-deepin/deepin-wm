@@ -44,6 +44,12 @@ namespace Gala
 				() => warning ("Could not acquire name\n") );
 		}
 
+		[DBus (visible = false)]
+		public static void notify_startup ()
+        {
+            instance.startup_ready ("deepin-wm");
+        }
+
 		private DBus ()
 		{
             var screen = wm.get_screen ();
@@ -187,6 +193,7 @@ namespace Gala
         public signal void workspace_removed (int index);
         public signal void workspace_added (int index);
         public signal void workspace_switched (int from, int to);
+        public signal void startup_ready (string wm_name);
 
 	}
 }
