@@ -55,8 +55,9 @@ namespace Gala
 
 		public void perform_action (ActionType type)
 		{
+            ActionType at = type;
             Timeout.add(200, () => {
-                wm.perform_action (type);
+                wm.perform_action (at);
                 return false;
             });
 		}
@@ -87,16 +88,20 @@ namespace Gala
         // if already in previewing mode, fade out previous preview, fade in the new.
         public void preview_window (uint32 xid)
         {
+            uint32 copy = xid;
             Timeout.add(200, () => {
-                (wm as WindowManagerGala).preview_window (xid);
+                (wm as WindowManagerGala).preview_window (copy);
                 return false;
             });
         }
 
         public void present_windows (uint32[] xids)
         {
+            // xids will become invalid when present_windows gets executed.
+            // vala has no way to capture by value-copy, so this is a workaround.
+            uint32[] copy = xids.copy();
             Timeout.add(200, () => {
-                (wm as WindowManagerGala).present_windows (xids);
+                (wm as WindowManagerGala).present_windows (copy);
                 return false;
             });
         }
