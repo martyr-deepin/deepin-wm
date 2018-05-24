@@ -1,3 +1,15 @@
+<a name=""></a>
+##  1.9.26 (2018-05-24)
+
+
+#### Bug Fixes
+
+*   workaround capture by value ([8d24a59e](8d24a59e))
+
+#### Features
+
+*   Delay dbus activated model operations ([3f1e5d60](3f1e5d60))
+
 ##  1.9.25 (2018-05-14)
 
 
