@@ -1107,6 +1107,7 @@ namespace Gala
 
 			Idle.add (() => {
 				plugin_manager.load_waiting_plugins ();
+                DBus.notify_startup ();
 				return false;
 			});
 
