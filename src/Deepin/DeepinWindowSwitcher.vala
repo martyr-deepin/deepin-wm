@@ -45,7 +45,6 @@ namespace Gala
 		Actor item_container;
 		Actor window_clones;
 		Actor shape;
-		List<Actor> clone_sort_order;
 
 		uint popup_delay_timeout_id = 0;
 
@@ -103,7 +102,6 @@ namespace Gala
 
 			window_clones = new Actor ();
             window_clones.set_name ("window_clones");
-			window_clones.actor_removed.connect (on_clone_removed);
             window_clones.opacity = 0;
 
 			add_child (window_clones);
@@ -236,11 +234,6 @@ namespace Gala
             popup_lighter.add_effect_with_name ( "shadow",
                     new ShadowEffect ((int)popup_lighter.width, (int)popup_lighter.height, 18, 0, 30, 3));
 
-            var referent = item_container.get_child_at_index (0) as DeepinWindowSwitcherWindowItem;
-            var desktop_item = item_container.get_last_child () as DeepinWindowSwitcherDesktopItem;
-            if (referent != null && desktop_item != null)
-                desktop_item.set_show_icon (referent.show_icon_only ());
-
             Timeout.add(10, () => {
                 update_shape_size ();
                 shape_move (current_item, false);
@@ -281,11 +274,6 @@ namespace Gala
 			}
 
 			return true;
-		}
-
-		void on_clone_removed (Actor actor)
-		{
-			clone_sort_order.remove (actor);
 		}
 
 		void on_item_removed (Actor actor)
@@ -488,30 +476,6 @@ namespace Gala
 			closing = true;
 			last_switch_time = 0;
 
-			foreach (var actor in clone_sort_order) {
-				unowned SafeWindowClone clone = (SafeWindowClone)actor;
-
-				// current clone stays on top
-				if (current_item is DeepinWindowSwitcherWindowItem &&
-					clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
-					continue;
-				}
-
-				// reset order
-				window_clones.set_child_below_sibling (clone, null);
-
-				if (!clone.window.minimized) {
-					clone.save_easing_state ();
-					clone.set_easing_duration (150);
-					clone.set_easing_mode (AnimationMode.EASE_OUT_CUBIC);
-
-					clone.z_position = 0;
-					clone.opacity = 255;
-
-					clone.restore_easing_state ();
-				}
-			}
-
 			if (current_item != null) {
 				if (current_item is DeepinWindowSwitcherWindowItem) {
 					(current_item as DeepinWindowSwitcherWindowItem).window.activate (time);
@@ -601,8 +565,6 @@ namespace Gala
 				}
 			}
 
-			clone_sort_order = window_clones.get_children ().copy ();
-
 			if (current_item == null) {
 				current_item = (DeepinWindowSwitcherItem)item_container.get_child_at_index (0);
 			}
@@ -639,11 +601,6 @@ namespace Gala
 			item.reactive = true;
 			item.button_release_event.connect (on_clicked_item);
 
-            var referent = (DeepinWindowSwitcherWindowItem)item_container.get_child_at_index (0);
-            referent.notify["allocation"].connect(() => {
-                item.set_show_icon (referent.show_icon_only ());
-            });
-
 			item_container.add_child (item);
 		}
 
@@ -676,27 +633,32 @@ namespace Gala
             foreach (var child in window_clones.get_children ()) {
                 var clone = child as SafeWindowClone;
 
-                clone.save_easing_state ();
-                clone.set_easing_duration (animate ? 250 : 0);
-                clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+                uint new_opacity = clone.opacity;
 
                 if (current_item is DeepinWindowSwitcherWindowItem) {
                     if (clone.window == (current_item as DeepinWindowSwitcherWindowItem).window) {
                         window_clones.set_child_above_sibling (clone, null);
-                        clone.z_position = 0;
-                        clone.opacity = 255;
+                        new_opacity = 255;
                     } else {
-                        clone.z_position = -200;
-                        clone.opacity = window_opacity;
+                        new_opacity = window_opacity;
                     }
                 } else {
                     // when desktop item selected, hide all clones
-                    clone.z_position = -200;
-                    clone.opacity = 0;
+                    new_opacity = 0;
                 }
 
-                clone.restore_easing_state ();
+                if (clone.opacity != new_opacity) {
+                    clone.save_easing_state ();
+                    clone.set_easing_duration (animate ? 250 : 0);
+                    clone.set_easing_mode (AnimationMode.EASE_OUT_QUAD);
+
+                    clone.opacity = new_opacity;
+
+                    clone.restore_easing_state ();
+                }
+
             }
+
 
             if (current_item != null)
                 shape_move (current_item);

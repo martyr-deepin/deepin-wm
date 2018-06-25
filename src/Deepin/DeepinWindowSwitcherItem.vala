@@ -28,17 +28,17 @@ namespace Gala
 		/**
 		 * Prefer size for current item.
 		 */
-		public const int BASE_PREFER_WIDTH = 300;
-		public const int BASE_PREFER_HEIGHT = 200;
+		public const int BASE_PREFER_WIDTH = 128;
+		public const int BASE_PREFER_HEIGHT = 128;
 
 		protected int PREFER_WIDTH {
             get {
-                return (int)(300 * scale_factor);
+                return (int)(128 * scale_factor);
             }
         }
 		protected int PREFER_HEIGHT {
             get {
-                return (int)(200 * scale_factor);
+                return (int)(128 * scale_factor);
             }
         }
 
@@ -221,15 +221,10 @@ namespace Gala
 	 */
 	public class DeepinWindowSwitcherWindowItem : DeepinWindowSwitcherItem
 	{
-		const int ICON_SIZE = 58;
+		const int ICON_SIZE = 128;
 
 		public Window window { get; construct; }
 
-		uint shadow_update_timeout_id = 0;
-		bool enable_shadow = false;
-
-		Actor? clone_container = null;  // container for clone to add shadow effect
-		Clone? clone = null;
 		GtkClutter.Texture? window_icon = null;
 
 		public DeepinWindowSwitcherWindowItem (Window window)
@@ -245,8 +240,6 @@ namespace Gala
 
             reload_icon ();
             DeepinXSettings.get_default ().schema.changed.connect (reload_icon);
-
-			load_clone ();
 		}
 
         void reload_icon ()
@@ -260,9 +253,6 @@ namespace Gala
             window_icon.set_pivot_point (0.5f, 0.5f);
             add_child (window_icon);
 
-            if (clone_container != null)
-                set_child_above_sibling (window_icon, clone_container);
-
             queue_relayout ();
         }
 
@@ -272,32 +262,14 @@ namespace Gala
 			window.workspace_changed.disconnect (on_workspace_changed);
 			window.notify["on-all-workspaces"].disconnect (on_all_workspaces_changed);
 
-			if (shadow_update_timeout_id != 0) {
-				Source.remove (shadow_update_timeout_id);
-			}
-
 			window.size_changed.disconnect (on_window_size_changed);
 		}
-
-        public bool show_icon_only ()
-        {
-            return clone_container == null || !clone_container.visible;
-        }
 
 		/**
 		 * The window unmanaged by the compositor, so we need to destroy ourselves too.
 		 */
 		void on_unmanaged ()
 		{
-			if (clone_container != null) {
-				clone_container.destroy ();
-			}
-
-			if (shadow_update_timeout_id != 0) {
-				Source.remove (shadow_update_timeout_id);
-				shadow_update_timeout_id = 0;
-			}
-
 			destroy ();
 		}
 
@@ -322,38 +294,6 @@ namespace Gala
 			request_reposition ();
 		}
 
-		/**
-		 * Waits for the texture of a new WindowActor to be available and makes a close of it. If it
-		 * was already was assigned a slot at this point it will animate to it. Otherwise it will
-		 * just place itself at the location of the original window. Also adds the shadow effect and
-		 * makes sure the shadow is updated on size changes.
-		 */
-		void load_clone ()
-		{
-			var actor = window.get_compositor_private () as WindowActor;
-			if (actor == null) {
-				Idle.add (() => {
-					if (window.get_compositor_private () != null) {
-						load_clone ();
-					}
-					return false;
-				});
-
-				return;
-			}
-
-			clone_container = new Actor ();
-			clone = new Clone (actor.get_texture ());
-			clone.add_constraint (new BindConstraint (clone_container, BindCoordinate.SIZE, 0));
-			clone_container.add_child (clone);
-
-			add_child (clone_container);
-
-			set_child_above_sibling (window_icon, clone_container);
-
-			window.size_changed.connect (on_window_size_changed);
-		}
-
 		Meta.Rectangle get_window_outer_rect ()
 		{
 			var outer_rect = window.get_frame_rect ();
@@ -361,47 +301,6 @@ namespace Gala
 			return client_rect;
 		}
 
-		/**
-		 * Calculate the preferred size for window clone.
-		 */
-		void get_clone_preferred_size (out float width, out float height)
-		{
-			var outer_rect = get_window_outer_rect ();
-			float scale_x = RECT_PREFER_WIDTH / (float)outer_rect.width;
-			float scale_y = RECT_PREFER_HEIGHT / (float)outer_rect.height;
-			float scale = Math.fminf (scale_x, scale_y);
-
-			width = outer_rect.width * scale;
-			height = outer_rect.height * scale;
-		}
-
-		void update_shadow_async (uint interval, int width, int height)
-		{
-			if (shadow_update_timeout_id != 0) {
-				Source.remove (shadow_update_timeout_id);
-				shadow_update_timeout_id = 0;
-			}
-
-			shadow_update_timeout_id = Timeout.add (interval, () => {
-				do_update_shadow (width, height);
-				shadow_update_timeout_id = 0;
-				return false;
-			});
-		}
-		void do_update_shadow (int width, int height)
-		{
-			if (clone_container == null) {
-				return;
-			}
-
-			var shadow_effect = clone_container.get_effect ("shadow") as ShadowEffect;
-			if (shadow_effect == null) {
-				shadow_effect = new ShadowEffect (width, height, 40, 5);
-				clone_container.add_effect_with_name ("shadow", shadow_effect);
-			} else {
-				shadow_effect.update_size (width, height);
-			}
-		}
 
 		/**
 		 * Except for the texture clone and the highlight all children are placed according to their
@@ -438,37 +337,6 @@ namespace Gala
 					WindowIcon.SHADOW_SIZE);
 			}
 			window_icon.allocate (icon_box, flags);
-
-			// if actor's size is really small, just show icon only
-			if (box.get_width () <= icon_width * 1.75f) {
-				if (clone_container != null) {
-					// set clone visible to false manually to hide shadow effect
-					clone_container.visible = false;
-				}
-				return;
-			}
-
-			if (clone_container == null) {
-				return;
-			}
-
-			clone_container.visible = true;  // reset clone visible
-
-			var clone_box = ActorBox ();
-			float clone_width, clone_height;
-			float clone_prefer_width, clone_prefer_height;
-			get_clone_preferred_size (out clone_prefer_width, out clone_prefer_height);
-			clone_width = clone_prefer_width * scale;
-			clone_height = clone_prefer_height * scale;
-			clone_box.set_size (clone_width, clone_height);
-			clone_box.set_origin ((box.get_width () - clone_box.get_width ()) / 2,
-								  (box.get_height () - clone_box.get_height ()) / 2);
-
-			clone_container.allocate (clone_box, flags);
-
-			if (enable_shadow) {
-				update_shadow_async (0, (int)clone_width, (int)clone_height);
-			}
 		}
 	}
 }
