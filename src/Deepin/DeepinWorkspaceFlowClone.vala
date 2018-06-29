@@ -58,9 +58,7 @@ namespace Gala
 		 */
 		public DeepinWorkspaceThumbClone thumb_workspace { get; private set; }
 
-		Actor thumb_shape;
-		DeepinFramedBackground background;
-		float background_scale;
+		Actor background;
 		bool opened;
 
 		uint hover_activate_timeout = 0;
@@ -77,13 +75,12 @@ namespace Gala
 			var screen = workspace.get_screen ();
 			var monitor_geom = DeepinUtils.get_primary_monitor_geometry (screen);
 
-            background = new DeepinFramedBackground (screen, workspace.index (), true, false, 1.0f, 28, 6, 40, 6);
+            background = new Actor ();
             background.reactive = true;
             background.button_press_event.connect (() => {
                 selected (true);
                 return false;
             });
-            background.set_rounded_radius (10);
 
 			thumb_workspace = new DeepinWorkspaceThumbClone (workspace);
             thumb_workspace.set_pivot_point (0.5f, 0.5f);
@@ -161,11 +158,7 @@ namespace Gala
 			workspace.window_added.connect (add_window);
 			workspace.window_removed.connect (remove_window);
 
-            thumb_shape =
-                new DeepinCssStaticActor ("deepin-workspace-clone", Gtk.StateFlags.NORMAL);
-
 			add_child (background);
-            add_child (thumb_shape);
 			add_child (window_container);
 
 			// add existing windows
@@ -256,11 +249,9 @@ namespace Gala
             float scale = (1.0f - DeepinMultitaskingView.HORIZONTAL_OFFSET_PERCENT -
                     DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT);
 			float pivot_y =  DeepinMultitaskingView.FLOW_WORKSPACE_TOP_OFFSET_PERCENT / (1.0f - scale);
-			background_scale = scale;
 			background.set_pivot_point (0.5f, pivot_y);
+            background.set_size (monitor_geom.width, monitor_geom.height);
 
-            thumb_shape.set_size (monitor_geom.width, monitor_geom.height);
-			thumb_shape.set_pivot_point (0.5f, pivot_y);
 
 			window_container.width = monitor_geom.width;
 			window_container.height = monitor_geom.height;
@@ -268,8 +259,6 @@ namespace Gala
 			window_container.padding_left = window_container.padding_right =
 				(int)(monitor_geom.width - monitor_geom.width * scale) / 2;
 			window_container.padding_bottom = bottom_offset;
-
-            //thumb_shape.set_position (top_offset, window_container.padding_left);
 		}
 
 		/**
@@ -285,10 +274,6 @@ namespace Gala
 			}
 
 			opened = true;
-
-			if (animate) {
-				scale_in (true);
-			}
 
 			var screen = workspace.get_screen ();
 			var display = screen.get_display ();
@@ -319,8 +304,6 @@ namespace Gala
 
             window_container.window_entered.disconnect (on_window_entered);
 
-			scale_out (true);
-
 			window_container.close ();
 			thumb_workspace.window_container.close ();
 		}
@@ -329,71 +312,5 @@ namespace Gala
         {
             if (opened) window_container.select_window (w, true);
         }
-
-		public void scale_in (bool animate)
-		{
-            unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
-			if (animate) {
-				var scale_value = GLib.Value (typeof (float));
-				scale_value.set_float (background_scale);
-				DeepinUtils.start_animation_group (background, "open",
-                                                   animation_settings.multitasking_toggle_duration,
-												   DeepinUtils.clutter_set_mode_ease_out_quint,
-												   "scale-x", &scale_value,
-												   "scale-y", &scale_value);
-				DeepinUtils.start_animation_group (thumb_shape, "open",
-                                                   animation_settings.multitasking_toggle_duration,
-												   DeepinUtils.clutter_set_mode_ease_out_quint,
-												   "scale-x", &scale_value,
-												   "scale-y", &scale_value);
-			} else {
-				background.set_scale (background_scale, background_scale);
-                thumb_shape.set_scale (background_scale, background_scale);
-			}
-		}
-
-		public void scale_out (bool animate)
-		{
-            unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
-			if (animate) {
-                var screen = workspace.get_screen ();
-                var active_index = screen.get_active_workspace ().index ();
-                var index = workspace.index ();
-
-				var scale_value = GLib.Value (typeof (float));
-				scale_value.set_float (1.0f);
-
-                float orig_x = background.x;
-				var x_value = GLib.Value (typeof (float));
-				float offset = background.width * (DeepinMultitaskingView.FLOW_WORKSPACE_DISTANCE_PERCENT * 2);
-                x_value.set_float (orig_x + (index - active_index) * offset);
-
-                var duration = screen.get_active_workspace () == workspace ?
-                    animation_settings.multitasking_toggle_duration : 
-                    animation_settings.multitasking_toggle_duration * 7 / 10; 
-
-				var ag = DeepinUtils.start_animation_group (background, "close", 
-                                                   duration,
-												   DeepinUtils.clutter_set_mode_ease_out_quint,
-												   "scale-x", &scale_value, "scale-y", &scale_value,
-                                                   "x", &x_value);
-                ag.stopped.connect ((is_finished) => {
-                    background.x = orig_x;
-                });
-
-				ag = DeepinUtils.start_animation_group (thumb_shape, "close", 
-                                                   duration,
-												   DeepinUtils.clutter_set_mode_ease_out_quint,
-												   "scale-x", &scale_value, "scale-y", &scale_value,
-                                                   "x", &x_value);
-                ag.stopped.connect ((is_finished) => {
-                    thumb_shape.x = orig_x;
-                });
-
-			} else {
-				background.set_scale (1.0f, 1.0f);
-                thumb_shape.set_scale (1.0f, 1.0f);
-			}
-		}
 	}
 }

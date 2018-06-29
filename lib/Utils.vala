@@ -202,10 +202,6 @@ namespace Gala
 			if (image != null && not_cached) {
 				if (size != image.width || size != image.height)
                     image = ar_scale (image, size, size);
-				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE,
-												 WindowIcon.SHADOW_DISTANCE,
-												 WindowIcon.SHADOW_OPACITY);
-
 				icon_pixbuf_cache.set (icon_key, image);
 			}
 
@@ -423,9 +419,6 @@ namespace Gala
             if (need_cache && image != null) {
 				if (size != image.width || size != image.height)
                     image = ar_scale (image, size, size);
-				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE,
-												 WindowIcon.SHADOW_DISTANCE,
-												 WindowIcon.SHADOW_OPACITY);
                 icon_pixbuf_cache.set (icon_key, image);
             }
 
@@ -517,10 +510,6 @@ namespace Gala
 			if (not_cached) {
 				if (size != image.width || size != image.height)
                     image = ar_scale (image, size, size);
-				image = add_outline_blur_effect (image, WindowIcon.SHADOW_SIZE,
-												 WindowIcon.SHADOW_DISTANCE,
-												 WindowIcon.SHADOW_OPACITY);
-
 				icon_pixbuf_cache.set (icon_key, image);
 			}
 
