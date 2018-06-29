@@ -71,7 +71,6 @@ namespace Gala
         BackgroundSource background_source;
 		uint changed_handler = -1;
 
-		Actor dock_clones;
 		Actor flow_container;
 		DeepinWorkspaceThumbContainer thumb_container;
 
@@ -116,12 +115,9 @@ namespace Gala
                 }
 			});
 
-			dock_clones = new Actor ();
-
             add_child (dark_mask);
-			add_child (thumb_container);
 			add_child (flow_container);
-			add_child (dock_clones);
+			add_child (thumb_container);
 
 			foreach (var workspace in screen.get_workspaces ()) {
 				add_workspace (workspace.index ());
@@ -151,8 +147,7 @@ namespace Gala
 							flow_workspace.window_activated.disconnect (activate_window);
 							flow_workspace.selected.disconnect (activate_workspace);
 
-							thumb_container.remove_workspace (
-								flow_workspace.thumb_workspace);
+							thumb_container.remove_workspace (flow_workspace.thumb_workspace);
 
 							flow_workspace.destroy ();
 						}
@@ -383,7 +378,7 @@ namespace Gala
 			var box = ActorBox ();
 
 			float child_x =
-				(index - active_index) * (monitor_geom.width * (1 - FLOW_WORKSPACE_DISTANCE_PERCENT * 2));
+				(index - active_index) * monitor_geom.width;
 			float child_y = 0;
 
 			box.set_size (monitor_geom.width, monitor_geom.height);
@@ -406,9 +401,6 @@ namespace Gala
 										   () => update_positions (opened));
 
 			flow_workspace.opacity = 0;
-			if (opened) {
-				flow_workspace.scale_in (false);
-			}
 			flow_container.add_child (flow_workspace);
 			do_place_flow_workspace (flow_workspace, index, false);
 
@@ -830,35 +822,9 @@ namespace Gala
 			}
 
 			if (opening) {
-				unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
-
-				foreach (var actor in actors) {
-					// const int MAX_OFFSET = 100;
-
-					var window = actor.get_meta_window ();
-
-					if (window.window_type != WindowType.DOCK) {
-						continue;
-					}
-
-					var dock = new SafeWindowClone (window, true);
-					dock.x = actor.x;
-					dock.y = actor.y;
-					dock.opacity = 0;
-					dock_clones.add_child (dock);
-				}
-
                 foreach (var background_actor in background_actors) {
                     background_actor.visible = opened;
                 }
-			} else {
-				foreach (var child in dock_clones.get_children ()) {
-					var dock = (Clone)child;
-
-					dock.set_easing_duration (toggle_duration);
-					dock.set_easing_mode (TOGGLE_MODE);
-					dock.opacity = 255;
-				}
 			}
 
 			if (!opening) {
@@ -871,8 +837,6 @@ namespace Gala
 
 					wm.window_group.show ();
 					wm.top_window_group.show ();
-
-					dock_clones.destroy_all_children ();
 
 					wm.pop_modal (modal_proxy);
 

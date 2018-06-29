@@ -1402,12 +1402,6 @@ namespace Gala
                 mask_group.add_child (dm);
             }
 
-            foreach (var bg in backgrounds) {
-                var geom = screen.get_monitor_geometry (bg.monitor_index);
-                var shadow_effect = new ShadowEffect (geom.width, geom.height, 40, 8, 100, 0, false, true);
-                bg.add_child_effect_with_name ("shadow", shadow_effect);
-            }
-
             var dest = (direction == MotionDirection.LEFT ? 32.0f : -32.0f);
 
 			double[] keyframes = { 0.5, 1.0 };
@@ -1425,12 +1419,6 @@ namespace Gala
             nudge.set_modes (modes);
 
 			ui_group.add_transition ("nudge", nudge);
-
-            nudge.stopped.connect(() => {
-                foreach (var bg in backgrounds) {
-                    bg.remove_child_effect_by_name ("shadow");
-                }
-            });
 		}
 
 		public void update_input_area ()
