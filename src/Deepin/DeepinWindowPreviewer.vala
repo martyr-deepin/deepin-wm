@@ -147,6 +147,8 @@ namespace Gala
             if (target_window != null) {
                 var actor = target_window.get_compositor_private () as WindowActor;
                 var clone = new SafeWindowClone (target_window, true);
+                clone.destroy.connect (clone_destroyed);
+
                 target_clone = clone;
                 preview_group.add_child (clone);
                 clone.x = actor.x;
@@ -168,6 +170,19 @@ namespace Gala
                         clone.opacity = 255;
                     });
                 } 
+            }
+        }
+
+        void clone_destroyed ()
+        {
+            if (target_clone != null && (target_clone as Clutter.Clone).source == null) {
+                target_clone = null;
+                target_window = null;
+                Meta.verbose ("target destroyed, force close");
+                Idle.add (() => {
+                    close ();
+                    return false;
+                });
             }
         }
 
