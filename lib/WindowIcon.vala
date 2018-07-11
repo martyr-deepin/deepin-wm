@@ -86,6 +86,7 @@ namespace Gala
 
             var flatpak_appid = window.get_flatpak_appid ();
             if (flatpak_appid != null) {
+                stderr.printf ("%s: flatpak_appid\n", Log.METHOD);
                 var pixbuf = Utils.get_icon_for_flatpak_app (flatpak_appid, icon_size);
                 try {
                     set_from_pixbuf (pixbuf);

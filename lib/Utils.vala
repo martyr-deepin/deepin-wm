@@ -124,6 +124,10 @@ namespace Gala
                         sz += len;
                     }
 
+                    int launch_info = 0;
+                    bool pid_match = false;
+                    string? desktop_file = null;
+
                     char *s = buf;
                     while (s - buf < sz) {
                         var l = Posix.strlen((string)s);
@@ -132,13 +136,22 @@ namespace Gala
                         if (sp == null) break;
                         *sp = '\0';
                         sp++;
+                        string key = (string)s;
+                        string val = (string)sp;
 
-                        if (GLib.strcmp((string)s, "GIO_LAUNCHED_DESKTOP_FILE") == 0) {
-                            var image = get_icon_from_desktop_file ((string)sp, size);
-                            if (image != null) {
-                                return image;
-                            } else {
-                                break;
+                        if (launch_info >= 2) break;
+
+                        if (GLib.strcmp(key, "GIO_LAUNCHED_DESKTOP_FILE") == 0) {
+                            desktop_file = val;
+                            launch_info++;
+                        }
+
+                        if (GLib.strcmp(key, "GIO_LAUNCHED_DESKTOP_FILE_PID") == 0) {
+                            launch_info++;
+                            int desktop_pid = -1;
+                            val.scanf("%d", &desktop_pid);
+                            if (pid == desktop_pid) {
+                                pid_match = true;
                             }
                         }
 
@@ -146,6 +159,13 @@ namespace Gala
                     }
 
                     GLib.free(buf);
+
+                    if (pid_match && desktop_file != null) {
+                        var image = get_icon_from_desktop_file (desktop_file, size);
+                        if (image != null) {
+                            return image;
+                        }
+                    }
                 }
             }
 
