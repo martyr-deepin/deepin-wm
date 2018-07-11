@@ -1,4 +1,21 @@
 <a name=""></a>
+##  1.9.28 (2018-07-11)
+
+
+#### Features
+
+*   support tuning expose windows duration ([ff6c5ddd](ff6c5ddd))
+*   redesign multitasking view ([5a0b4a30](5a0b4a30))
+*   redesign window switcher for performance ([7cfd725a](7cfd725a))
+
+#### Bug Fixes
+
+*   match GIO icon only if PID matched ([50f6d065](50f6d065))
+*   close preview if target gets destroyed ([bebb093a](bebb093a))
+
+
+
+<a name=""></a>
 ##  1.9.27 (2018-05-29)
 
 
