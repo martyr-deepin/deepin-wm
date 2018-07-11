@@ -47,7 +47,7 @@ namespace Gala
 		{
 			window_clone.save_easing_state ();
 
-			window_clone.set_easing_duration (animate ? DeepinWindowClone.LAYOUT_DURATION : 0);
+			window_clone.set_easing_duration (animate ? LAYOUT_DURATION : 0);
 			window_clone.set_easing_mode (DeepinWindowClone.LAYOUT_MODE);
 
 			if (select) {

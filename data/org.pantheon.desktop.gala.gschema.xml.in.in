@@ -163,6 +163,10 @@
 			<default>450</default>
 			<summary>Duration of the multitasking view toggle animation</summary>
 		</key>
+		<key type="i" name="expose-windows-duration">
+			<default>250</default>
+			<summary>duration of expose windows presentation</summary>
+		</key>
 	</schema>
 
 	<schema path="/com/deepin/wrap/pantheon/desktop/gala/shadows/" id="com.deepin.wrap.pantheon.desktop.gala.shadows" gettext-domain="@GETTEXT_PACKAGE@">

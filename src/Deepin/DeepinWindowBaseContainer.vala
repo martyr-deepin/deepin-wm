@@ -35,6 +35,10 @@ namespace Gala
 
 		public Workspace workspace { get; construct; }
 
+		public const int LAYOUT_DURATION = 400;
+
+		public int layout_duration { get; set; default = LAYOUT_DURATION; }
+
 		/**
 		 * The window that is currently selected via keyboard shortcuts. It is not necessarily the
 		 * same as the active window.
@@ -186,6 +190,7 @@ namespace Gala
 			var windows_ordered = display.sort_windows_by_stacking (windows);
 
 			var new_window = new DeepinWindowClone (window, thumbnail_mode);
+            new_window.layout_duration = layout_duration;
 
 			new_window.activated.connect (on_window_activated);
 			new_window.closing.connect (on_window_closing);

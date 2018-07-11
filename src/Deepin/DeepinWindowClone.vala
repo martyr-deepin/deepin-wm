@@ -27,7 +27,6 @@ namespace Gala
 	 */
 	public class DeepinWindowClone : Actor
 	{
-		public const int LAYOUT_DURATION = 400;
 		public const AnimationMode LAYOUT_MODE = AnimationMode.EASE_OUT_QUAD;
         public const uint8 SHADOW_OPACITY = 50;
 
@@ -64,6 +63,8 @@ namespace Gala
 		public Meta.Rectangle? slot { get; private set; default = null; }
 
 		public bool dragging { get; private set; default = false; }
+
+		public int layout_duration { get; set; default = 400; }
 
 		/**
 		 * When selected fades a highlighted border around the window in. Used for the visually
@@ -311,7 +312,7 @@ namespace Gala
 
 			shape.save_easing_state ();
 
-			shape.set_easing_duration (animate ? LAYOUT_DURATION : 0);
+			shape.set_easing_duration (animate ? layout_duration : 0);
 			shape.set_easing_mode (LAYOUT_MODE);
 			shape.opacity = _select ? 255 : 0;
 
@@ -429,7 +430,7 @@ namespace Gala
 													   "size", &size_value);
 				} else {
 					DeepinUtils.start_animation_group (this, "window-slot",
-													   LAYOUT_DURATION,
+													   layout_duration,
 													   DeepinUtils.clutter_set_mode_ease_out_quad,
 													   "position", &position_value,
 													   "size", &size_value);

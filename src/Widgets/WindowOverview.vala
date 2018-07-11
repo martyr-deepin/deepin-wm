@@ -238,6 +238,15 @@ namespace Gala
 				var geometry = screen.get_monitor_geometry (i);
 
 				var container = new DeepinWindowFlowContainer (screen.get_active_workspace ());
+
+                unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
+                var duration = animation_settings.expose_windows_duration;
+
+                if (!animation_settings.enable_animations) {
+                    duration = 0;
+                }
+
+                container.layout_duration = duration;
 				container.padding_top = TOP_GAP;
 				container.padding_left = container.padding_right = BORDER;
 				container.padding_bottom = BOTTOM_GAP;
