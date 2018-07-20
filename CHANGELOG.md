@@ -1,4 +1,14 @@
 <a name=""></a>
+##  1.9.29 (2018-07-20)
+
+
+#### Bug Fixes
+
+* **switcher:**  keep icons in the center ([1c3affba](1c3affba))
+
+
+
+<a name=""></a>
 ##  1.9.28 (2018-07-11)
 
 
