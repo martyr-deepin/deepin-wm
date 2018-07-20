@@ -326,16 +326,13 @@ namespace Gala
 					}
 					icon_box.set_size (fixed_icon_size, fixed_icon_size);
 				}
-				icon_box.set_origin ((box.get_width () - icon_box.get_width ()) / 2,
-									 (box.get_height () - icon_box.get_height ()) / 2 +
-									 WindowIcon.SHADOW_SIZE);
 			} else {
 				icon_box.set_size (icon_width, icon_height);
-				icon_box.set_origin (
-					(box.get_width () - icon_box.get_width ()) / 2,
-					box.get_height () - icon_box.get_height () - icon_box.get_height () * 0.25f +
-					WindowIcon.SHADOW_SIZE);
 			}
+
+            icon_box.set_origin (
+                    (box.get_width () - icon_box.get_width ()) / 2,
+                    (box.get_height () - icon_box.get_height ()) / 2);
 			window_icon.allocate (icon_box, flags);
 		}
 	}
