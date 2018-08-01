@@ -152,8 +152,7 @@ namespace Gala
             }
             init = false;
             //assign a non-exist workspace will give us default background
-            var background = background_source.get_background (screen.get_primary_monitor (), 
-                    screen.get_n_workspaces ());
+            var background = background_source.get_background (screen.get_n_workspaces ());
             background_actor.background = background.background;
         }
 

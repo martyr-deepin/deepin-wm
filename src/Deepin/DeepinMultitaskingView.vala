@@ -65,7 +65,7 @@ namespace Gala
 
 		bool is_smooth_scrolling = false;
 
-        List<BlurredBackgroundActor> background_actors;
+        Gee.ArrayList<BlurredBackgroundActor>? background_actors;
 
         Actor dark_mask;
         BackgroundSource background_source;
@@ -90,6 +90,8 @@ namespace Gala
 
 			opened = false;
 			screen = wm.get_screen ();
+
+            background_actors = new Gee.ArrayList<Meta.BlurredBackgroundActor> ();
 
             background_source = BackgroundCache.get_default ().get_background_source (
 				screen, BackgroundManager.BACKGROUND_SCHEMA, BackgroundManager.EXTRA_BACKGROUND_SCHEMA);
@@ -186,8 +188,8 @@ namespace Gala
         void update_background_actors ()
         {
             var active_index = screen.get_active_workspace_index ();
+            var background = background_source.get_background (active_index);
             foreach (var background_actor in background_actors) {
-                var background = background_source.get_background (background_actor.monitor, active_index);
                 background_actor.background = background.background;
             }
         }
@@ -203,23 +205,26 @@ namespace Gala
             foreach (var background_actor in background_actors) {
 				background_actor.destroy ();
             }
+            background_actors.clear ();
                         
+            var active_index = screen.get_active_workspace_index ();
+            var background = background_source.get_background (active_index);
             for (var monitor = 0; monitor < screen.get_n_monitors (); monitor++) {
-                var background_actor = new BlurredBackgroundActor (screen, monitor);
-                background_actors.append (background_actor);
+                //NOTE: pass second arg 0 for monitor here to workaround a wierd rendering issue
+                var background_actor = new BlurredBackgroundActor (screen, 0);
+                background_actors.add (background_actor);
 
-                background_actor.set_rounds (8);
-                background_actor.set_radius (9);
-				background_actor.visible = opened;
-
-                var m = screen.get_monitor_geometry (background_actor.monitor);
+                var m = screen.get_monitor_geometry (monitor);
                 background_actor.set_size (m.width, m.height);
                 background_actor.set_position (m.x, m.y);
 
+                background_actor.background = background.background;
+                background_actor.set_rounds (8);
+                background_actor.set_radius (9);
+                background_actor.visible = opened;
+
                 wm.ui_group.insert_child_below (background_actor, null);
             }
-
-            update_background_actors ();
 
             dark_mask.set_size (primary_geometry.width, primary_geometry.height);
             update_positions (true);
@@ -446,7 +451,6 @@ namespace Gala
 				DeepinMultitaskingView.WORKSPACE_FADE_MODE, 
                 () => {
                     update_positions (opened);
-                    update_background_actors ();
                 }, 0.3);
 
             flow_workspace.transitions_completed.connect(() => {

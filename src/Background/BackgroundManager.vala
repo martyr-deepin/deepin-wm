@@ -92,7 +92,7 @@ namespace Gala
             Idle.add(() => {
                 if (actors.size > 0) {
                     var actor = actors[actors.size - 1];
-                    var background = background_source.get_background (monitor_index, workspace_index);
+                    var background = background_source.get_background (workspace_index);
                     actor.background = background.background;
                 }
                 return false;
@@ -104,8 +104,7 @@ namespace Gala
             if (actors.size > 0) {
                 var actor = actors[actors.size - 1];
                 if (uri.length == 0) {
-                    var background = background_source.get_background (
-                            monitor_index, workspace_index, uri);
+                    var background = background_source.get_background (workspace_index, uri);
                     actor.background = background.background;
                 } else {
                     var background = background_source.get_transient_background (
@@ -253,7 +252,7 @@ namespace Gala
         {
             Meta.verbose ("%s: count %d\n", Log.METHOD, actors.size);
 
-            var background = background_source.get_background (monitor_index, workspace_index);
+            var background = background_source.get_background (workspace_index);
             var background_actor = new Meta.BlurredBackgroundActor (screen, monitor_index);
             background_actor.name = @"bg$serial";
             serial++;

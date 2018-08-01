@@ -37,7 +37,7 @@ namespace Gala
 			screen.workspace_added.connect (on_workspace_added);
 			screen.workspace_removed.connect (on_workspace_removed);
 			screen.workspace_reordered.connect (on_workspace_reordered);
-			update ();
+            update ();
 		}
 
 		~BackgroundContainer ()

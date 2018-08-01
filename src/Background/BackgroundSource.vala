@@ -63,8 +63,6 @@ namespace Gala
 			transient_cache = new Gee.HashMap<string,Background> ();
             transient_cache_order = new Gee.ArrayList<string> ();
 
-			screen.monitors_changed.connect (monitors_changed);
-
 			settings_hash_cache = get_current_settings_hash_cache ();
 			cache_extra_picture_uris = get_current_extra_picture_uris ();
             
@@ -124,7 +122,7 @@ namespace Gala
             var nr_ws = screen.get_n_workspaces ();
             if (index >= nr_ws) return;
 
-            string old = get_picture_filename (0, index);
+            string old = get_picture_filename (index);
             if (old == uri) return;
 
 			string[] extra_uris = extra_settings.get_strv ("background-uris");
@@ -150,13 +148,11 @@ namespace Gala
 
         void notify_changed (int index, bool send_signal = true)
         {
-			var n = screen.get_n_monitors ();
 			string[] to_remove = {};
 
 			foreach (var key in backgrounds.keys) {
 				var background = backgrounds[key];
-				var indexes = key.split(":");
-				var workspace_index = indexes[1].to_int ();
+				var workspace_index = key.to_int ();
                 if (workspace_index == index) {
                     to_remove += key;
                     background.destroy ();
@@ -164,7 +160,7 @@ namespace Gala
 			}
 
             for (int i = 0; i < to_remove.length; i++) {
-				backgrounds.unset (to_remove[i]);
+                backgrounds.unset (to_remove[i]);
 			}
 
             if (send_signal)
@@ -203,15 +199,13 @@ namespace Gala
 
         void notify_switched (int from, int to, bool send_signal = true)
         {
-			var n = screen.get_n_monitors ();
 			string[] to_remove = {};
 
             if (from > to) {var t = to; to = from; from = t;}
 
 			foreach (var key in backgrounds.keys) {
 				var background = backgrounds[key];
-				var indexes = key.split(":");
-				var workspace_index = indexes[1].to_int ();
+				var workspace_index = key.to_int ();
                 if (workspace_index >= from && workspace_index <= to) {
                     to_remove += key;
                     background.destroy ();
@@ -263,29 +257,23 @@ namespace Gala
 
         void notify_delete (int index, bool send_signal = true)
         {
-			var n = screen.get_n_monitors ();
+            string curkey = @"$index";
+            if (backgrounds.has_key (curkey)) {
+                var background = backgrounds[curkey];
+                backgrounds.remove (curkey);
+                background.destroy ();
+            }
 
-            for (var i = 0; i < n; i++) {
-                string key = @"$i:$index";
+            for (var j = index+1; j < screen.get_n_workspaces ()+1; j++) {
+                string key = @"$j";
                 if (backgrounds.has_key (key)) {
                     var background = backgrounds[key];
                     backgrounds.remove (key);
-                    background.destroy ();
+
+                    string new_key = @"$(j-1)";
+                    backgrounds[new_key] = background;
                 }
             }
-
-			for (var i = 0; i < n; i++) {
-                for (var j = index+1; j < screen.get_n_workspaces ()+1; j++) {
-                    string key = @"$i:$j";
-                    if (backgrounds.has_key (key)) {
-                        var background = backgrounds[key];
-                        backgrounds.remove (key);
-
-                        string new_key = @"$i:$(j-1)";
-                        backgrounds[new_key] = background;
-                    }
-                }
-			}
 
             if (send_signal)
                 changed (new int[] {index});
@@ -307,43 +295,19 @@ namespace Gala
             }
         }
 
-		void monitors_changed ()
-		{
-			var n = screen.get_n_monitors ();
-			var keys_to_remove = new List<string> ();
-
-			foreach (var key in backgrounds.keys) {
-				var background = backgrounds[key];
-				var indexes = key.split(":");
-				var monitor_index = indexes[0].to_int ();
-				var workspace_index = indexes[1].to_int ();
-				if (monitor_index < n) {
-					continue;
-				}
-
-				background.destroy ();
-
-				keys_to_remove.append (key);
-			}
-
-			foreach (var key in  keys_to_remove) {
-				backgrounds.unset (key);
-			}
-		}
-
         public Background get_transient_background (int monitor_index, int workspace_index, string uri)
         {
-            return get_background (monitor_index, screen.get_n_workspaces (), uri);
+            return get_background (screen.get_n_workspaces (), uri);
         }
 
-		public Background get_background (int monitor_index, int workspace_index, string? transient_uri = null)
+		public Background get_background (int workspace_index, string? transient_uri = null)
 		{
 			string? filename = null;
 
 			var style = settings.get_enum ("picture-options");
 			if (style != GDesktop.BackgroundStyle.NONE) {
                 if (transient_uri == null) {
-                    filename = get_picture_filename (monitor_index, workspace_index);
+                    filename = get_picture_filename (workspace_index);
                 } else {
                     filename = transient_uri;
                     if (Uri.parse_scheme (transient_uri) != null) {
@@ -374,7 +338,7 @@ namespace Gala
                 return transient_cache[filename];
 
             } else {
-                string key = "%d:%d".printf (monitor_index, workspace_index);
+                string key = @"$workspace_index";
                 Meta.verbose ("%s: key = %s\n", Log.METHOD, key);
                 if (!backgrounds.has_key (key)) {
                     var background = new Background (screen, filename,
@@ -386,7 +350,7 @@ namespace Gala
             }
 		}
 
-		string get_picture_filename (int monitor_index, int workspace_index)
+		string get_picture_filename (int workspace_index)
 		{
 			string filename = null;
 
@@ -433,7 +397,6 @@ namespace Gala
 
 		public void destroy ()
 		{
-			screen.monitors_changed.disconnect (monitors_changed);
 
 			foreach (var background in backgrounds.values) {
 				background.destroy ();
