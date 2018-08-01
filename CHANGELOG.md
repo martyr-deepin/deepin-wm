@@ -1,4 +1,14 @@
 <a name=""></a>
+##  1.9.30 (2018-08-01)
+
+
+#### Bug Fixes
+
+*   optimize multi-monitor background utilization ([73d569f1](73d569f1))
+
+
+
+<a name=""></a>
 ##  1.9.29 (2018-07-20)
 
 
