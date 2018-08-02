@@ -387,10 +387,9 @@ namespace Gala
 
             closing = true;
 
-            preview_group.destroy_all_children ();
             restore_dock_windows();
-
             restore_windows (open_workspace);
+            preview_group.destroy_all_children ();
 
 			unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 			var duration = animation_settings.preview_duration;
