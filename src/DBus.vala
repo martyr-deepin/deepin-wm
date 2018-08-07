@@ -105,7 +105,7 @@ namespace Gala
         {
             // xids will become invalid when present_windows gets executed.
             // vala has no way to capture by value-copy, so this is a workaround.
-            uint32[] copy = xids.copy();
+            uint32[] copy = xids[0:xids.length];
             Timeout.add(200, () => {
                 (wm as WindowManagerGala).present_windows (copy);
                 return false;
