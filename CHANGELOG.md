@@ -1,4 +1,14 @@
 <a name=""></a>
+##  1.9.31 (2018-08-07)
+
+
+#### Bug Fixes
+
+*   make it compatible with old vala compiler ([84e4d8a8](84e4d8a8))
+
+
+
+<a name=""></a>
 ##  1.9.30 (2018-08-01)
 
 
