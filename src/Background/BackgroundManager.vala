@@ -223,7 +223,7 @@ namespace Gala
                 var actor = actors[actors.size - 2];
 
                 if (Config.DEEPIN_ARCH.has_prefix("mips")) {
-                    Timeout.add (50, () => {actor.visible = false; return false; });
+                    Timeout.add (3000, () => { actor.visible = false; return false; });
                     changed ();
 
                 } else {
