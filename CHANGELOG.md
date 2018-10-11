@@ -1,4 +1,8 @@
 <a name=""></a>
+##  1.9.32 (2018-10-11)
+
+* fix: delay disappear of last wallpaper
+
 ##  1.9.31 (2018-08-07)
 
 
