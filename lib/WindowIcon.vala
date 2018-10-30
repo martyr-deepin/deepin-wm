@@ -80,8 +80,8 @@ namespace Gala
 
 		construct
 		{
-			width = icon_size + SHADOW_BLUR * 2;;
-			height = icon_size + SHADOW_BLUR + SHADOW_DISTANCE;
+			width = icon_size;
+			height = icon_size;
 			xid = (uint32) window.get_xwindow ();
 
             var flatpak_appid = window.get_flatpak_appid ();
