@@ -1,3 +1,13 @@
+<a name="1.9.33"></a>
+## 1.9.33 (2018-11-01)
+
+
+#### Bug Fixes
+
+*   the window icon size is wrong on mutli-task view ([799f7a53](799f7a53))
+
+
+
 <a name=""></a>
 ##  1.9.32 (2018-10-11)
 
