@@ -212,6 +212,26 @@ namespace Gala
 		}
 	}
 
+	public class DeepinTouchscreenSettings : Granite.Services.Settings
+	{
+		public int longpress_duration { get; set; default = 700; }
+
+		static DeepinTouchscreenSettings? instance = null;
+
+		private DeepinTouchscreenSettings ()
+		{
+			base (Config.DEEPIN_SCHEMA + ".touchscreen");
+		}
+
+		public static unowned DeepinTouchscreenSettings get_default ()
+		{
+			if (instance == null)
+				instance = new DeepinTouchscreenSettings ();
+
+			return instance;
+		}
+	}
+
 	public class DeepinXSettings : Granite.Services.Settings
 	{
 		public double scale_factor { get; set; }

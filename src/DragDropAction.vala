@@ -310,7 +310,8 @@ namespace Gala
 						actor.get_stage ().captured_event.disconnect (follow_move);
 						clicked = false;
 						dragging = false;
-						return true;
+                        //NOTE: return false to allow other actions (ClickAction) to capture events
+						return false;
 					default:
 						return true;
 				}

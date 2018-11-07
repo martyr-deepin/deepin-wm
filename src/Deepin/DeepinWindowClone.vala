@@ -80,6 +80,7 @@ namespace Gala
 		public bool enable_buttons = true;
 
 		DragDropAction? drag_action = null;
+        ClickAction? long_press_action = null;
 		Clone? clone = null;
 
 		// shape border size could be override in css
@@ -130,8 +131,27 @@ namespace Gala
 			drag_action.drag_begin.connect (on_drag_begin);
 			drag_action.drag_end.connect (on_drag_end);
 			drag_action.drag_canceled.connect (on_drag_canceled);
-			drag_action.actor_clicked.connect (on_actor_clicked);
-			add_action (drag_action);
+			//drag_action.actor_clicked.connect (on_actor_clicked);
+            add_action (drag_action);
+
+            long_press_action = new Clutter.ClickAction ();
+            long_press_action.long_press_duration = DeepinTouchscreenSettings.get_default ().longpress_duration;
+            long_press_action.long_press_threshold = Clutter.Settings.get_default ().dnd_drag_threshold;
+            long_press_action.clicked.connect(() => {
+                    on_actor_clicked (long_press_action.get_button ());
+                });
+            long_press_action.long_press.connect((actor, state) => {
+                    switch (state) {
+                    case LongPressState.QUERY:
+                        return true;
+                    case LongPressState.ACTIVATE:
+                        animate_buttons (true);
+                        return true;
+                    default:
+                        return false;
+                    }
+                });
+            add_action (long_press_action);
 
 			if (enable_buttons) {
 				close_button = new DeepinIconActor ("close");
@@ -535,10 +555,10 @@ namespace Gala
 			}
 		}
 
-		public override bool button_press_event (Clutter.ButtonEvent event)
-		{
-			return true;
-		}
+		//public override bool button_press_event (Clutter.ButtonEvent event)
+		//{
+			//return true;
+		//}
 
         void animate_buttons (bool show)
         {
@@ -644,6 +664,9 @@ namespace Gala
 
 		void on_actor_clicked (uint32 button)
 		{
+            if (long_press_action.held)
+                return;
+
 			switch (button) {
 			case 1:
 				activated ();
@@ -661,6 +684,11 @@ namespace Gala
 		 */
 		Actor on_drag_begin (float click_x, float click_y)
 		{
+            if (long_press_action.held) {
+                long_press_action.release ();
+            }
+
+
 			float abs_x, abs_y;
 
 			// get abs_x and abs_y before reparent
