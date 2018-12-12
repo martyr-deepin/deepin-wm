@@ -1,3 +1,13 @@
+<a name="1.9.34"></a>
+## 1.9.34 (2018-12-12)
+
+
+#### Features
+
+*   support long press to show buttons ([78a441d4](78a441d4))
+
+
+
 <a name="1.9.33"></a>
 ## 1.9.33 (2018-11-01)
 
