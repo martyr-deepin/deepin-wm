@@ -1792,6 +1792,7 @@ namespace Gala
         public void present_windows (uint32[] xids)
         {
             Meta.verbose ("%s\n", Log.METHOD);
+            stderr.printf ("%s\n", Log.METHOD);
             if (hiding_windows || is_modal()) return;
 
             if (window_overview.is_opened ())
