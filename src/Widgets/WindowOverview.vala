@@ -139,6 +139,9 @@ namespace Gala
 		 */
 		public void open (HashTable<string,Variant>? hints = null)
 		{
+            Meta.verbose ("%s entry, ready = %d, visible = %d\n", Log.METHOD,
+                    (int)ready, (int)visible);
+
 			if (!ready)
 				return;
 
@@ -217,7 +220,9 @@ namespace Gala
 			modal_proxy = wm.push_modal ();
 			modal_proxy.keybinding_filter = keybinding_filter;
             if (!modal_proxy.grabbed) {
-                close ();
+                Meta.verbose ("%s grab failed\n", Log.METHOD);
+                wm.pop_modal (modal_proxy);
+                cleanup ();
                 return;
             }
 
@@ -276,9 +281,8 @@ namespace Gala
 			foreach (var child in get_children ())
 				((DeepinWindowFlowContainer) child).open ();
 
+            Meta.verbose ("%s done\n", Log.METHOD);
 			ready = true;
-
-
 		}
 
 		bool keybinding_filter (KeyBinding binding)
@@ -395,6 +399,8 @@ namespace Gala
 			if (!visible || !ready)
 				return;
 
+			ready = false;
+
             (wm as WindowManagerGala).toggle_background_blur (false);
 
 			foreach (var workspace in workspaces) {
@@ -402,8 +408,6 @@ namespace Gala
 				workspace.window_removed.disconnect (remove_window);
 			}
 			screen.window_left_monitor.disconnect (window_left_monitor);
-
-			ready = false;
 
 			wm.pop_modal (modal_proxy);
 
@@ -416,11 +420,11 @@ namespace Gala
 
 				return false;
 			});
+            Meta.verbose ("%s\n", Log.METHOD);
 		}
 
 		void cleanup ()
 		{
-			ready = true;
 			visible = false;
 
             foreach (var window in screen.get_active_workspace ().list_windows ())
@@ -428,6 +432,9 @@ namespace Gala
 					((Actor) window.get_compositor_private ()).show ();
 
 			destroy_all_children ();
+
+            Meta.verbose ("%s\n", Log.METHOD);
+			ready = true;
 		}
 	}
 }
