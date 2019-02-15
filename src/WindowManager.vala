@@ -2689,7 +2689,7 @@ namespace Gala
 
 			var to_has_fullscreened = false;
 			var from_has_fullscreened = false;
-			var docks = new List<WindowActor> ();
+			var docks = new List<unowned WindowActor> ();
 
 			// collect all windows and put them in the appropriate containers
 			foreach (var actor in Compositor.get_window_actors (screen)) {

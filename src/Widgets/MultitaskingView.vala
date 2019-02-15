@@ -500,7 +500,7 @@ namespace Gala
 			dock_clones.get_transformed_position (out clone_offset_x, out clone_offset_y);
 
 			if (opening) {
-				unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
+				unowned List<unowned WindowActor> actors = Compositor.get_window_actors (screen);
 
 				foreach (var actor in actors) {
 					const int MAX_OFFSET = 100;

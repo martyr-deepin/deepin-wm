@@ -180,7 +180,7 @@ namespace Gala
 			if (!opened)
 				return;
 
-			var windows = new List<InternalUtils.TilableWindow?> ();
+			var windows = new List<unowned InternalUtils.TilableWindow?> ();
 			foreach (var child in get_children ()) {
 				unowned WindowClone window = (WindowClone) child;
 				windows.prepend ({ window.window.get_frame_rect (), window });

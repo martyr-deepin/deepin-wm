@@ -393,7 +393,7 @@ namespace Meta {
 		public unowned Meta.Group lookup_group (X.Window group_leader);
 		public bool remove_keybinding (string name);
 		public void set_input_focus_window (Meta.Window window, bool focus_frame, uint32 timestamp);
-		public GLib.SList<weak Meta.Window> sort_windows_by_stacking (GLib.SList<Meta.Window> windows);
+		public GLib.SList<weak Meta.Window> sort_windows_by_stacking (GLib.SList<unowned Meta.Window> windows);
 		public bool supports_extended_barriers ();
 		public void unfreeze_keyboard (uint32 timestamp);
 		public bool ungrab_accelerator (uint action_id);

@@ -207,7 +207,7 @@ namespace Gala
         {
             if (target != null) return;
 
-            unowned List<WindowActor> actors = Compositor.get_window_actors (screen);
+            unowned List<unowned WindowActor> actors = Compositor.get_window_actors (screen);
 
             foreach (var actor in actors) {
                 var window = actor.get_meta_window ();

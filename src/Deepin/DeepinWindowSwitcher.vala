@@ -691,7 +691,7 @@ namespace Gala
 			var workspace = screen.get_active_workspace ();
 
 			// need to go through all the windows because of hidden dialogs
-			unowned List<WindowActor>? window_actors = Compositor.get_window_actors (screen);
+			unowned List<unowned WindowActor>? window_actors = Compositor.get_window_actors (screen);
 			foreach (var actor in window_actors) {
 				unowned Window window = actor.get_meta_window ();
 

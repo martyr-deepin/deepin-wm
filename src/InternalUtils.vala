@@ -199,7 +199,7 @@ namespace Gala
 		 */
 		public static void insert_workspace_with_window (int index, Window new_window)
 		{
-			unowned List<WindowActor> actors = Compositor.get_window_actors (new_window.get_screen ());
+			unowned List<unowned WindowActor> actors = Compositor.get_window_actors (new_window.get_screen ());
 
 			var workspace_manager = WorkspaceManager.get_default ();
 			workspace_manager.freeze_remove ();
@@ -269,8 +269,8 @@ namespace Gala
 			void *id;
 		}
 
-		public static List<TilableWindow?> calculate_grid_placement (Meta.Rectangle area,
-			List<TilableWindow?> windows, bool closest = true)
+		public static List<unowned TilableWindow?> calculate_grid_placement (Meta.Rectangle area,
+			List<unowned TilableWindow?> windows, bool closest = true)
 		{
 			uint window_count = windows.length ();
 			int columns = (int)Math.ceil (Math.sqrt (window_count));
@@ -298,7 +298,7 @@ namespace Gala
 
 				var tmplist = windows.copy ();
 				while (tmplist.length () > 0) {
-					unowned List<TilableWindow?> link = tmplist.nth (0);
+					unowned List<unowned TilableWindow?> link = tmplist.nth (0);
 					var window = link.data;
 					var rect = window.rect;
 
@@ -339,12 +339,12 @@ namespace Gala
 			} else {
 				// Assign each window as the origin order.
 				for (int i = 0; i < windows.length (); i++) {
-					unowned List<TilableWindow?> link = windows.nth (i);
+					unowned List<unowned TilableWindow?> link = windows.nth (i);
 					taken_slots[i] = link.data;
 				}
 			}
 
-			var result = new List<TilableWindow?> ();
+			var result = new List<unowned TilableWindow?> ();
 
 			// see how many windows we have on the last row
 			int left_over = (int)window_count - columns * (rows - 1);
