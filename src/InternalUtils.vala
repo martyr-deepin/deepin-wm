@@ -269,7 +269,7 @@ namespace Gala
 			void *id;
 		}
 
-		public static List<unowned TilableWindow?> calculate_grid_placement (Meta.Rectangle area,
+		public static List<TilableWindow?> calculate_grid_placement (Meta.Rectangle area,
 			List<unowned TilableWindow?> windows, bool closest = true)
 		{
 			uint window_count = windows.length ();
@@ -344,7 +344,7 @@ namespace Gala
 				}
 			}
 
-			var result = new List<unowned TilableWindow?> ();
+			var result = new List<TilableWindow?> ();
 
 			// see how many windows we have on the last row
 			int left_over = (int)window_count - columns * (rows - 1);
