@@ -1,4 +1,15 @@
 <a name=""></a>
+##  1.9.36 (2019-03-04)
+
+
+#### Bug Fixes
+
+*   window_positions should be owned instance ([429f9ad0](429f9ad0))
+*   build with vala 0.43.90 ([c223c168](c223c168))
+
+
+
+<a name=""></a>
 ##  1.9.35 (2018-12-26)
 
 
