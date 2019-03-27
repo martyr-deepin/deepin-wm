@@ -270,7 +270,7 @@ namespace Gala
 		}
 
 		public static List<TilableWindow?> calculate_grid_placement (Meta.Rectangle area,
-			List<unowned TilableWindow?> windows, bool closest = true)
+			List<TilableWindow?> windows, bool closest = true)
 		{
 			uint window_count = windows.length ();
 			int columns = (int)Math.ceil (Math.sqrt (window_count));
@@ -339,7 +339,7 @@ namespace Gala
 			} else {
 				// Assign each window as the origin order.
 				for (int i = 0; i < windows.length (); i++) {
-					unowned List<unowned TilableWindow?> link = windows.nth (i);
+					unowned List<TilableWindow?> link = windows.nth (i);
 					taken_slots[i] = link.data;
 				}
 			}

@@ -169,7 +169,7 @@ namespace Gala
 		 */
 		bool update_window_positions ()
 		{
-			var windows = new List <unowned InternalUtils.TilableWindow?> ();
+			var windows = new List <InternalUtils.TilableWindow?> ();
 			foreach (var child in get_children ()) {
 				unowned DeepinWindowClone window_clone = (DeepinWindowClone)child;
 				windows.prepend ({ window_clone.window.get_frame_rect (), window_clone });
