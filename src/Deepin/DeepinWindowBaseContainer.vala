@@ -179,7 +179,7 @@ namespace Gala
 			var display = window.get_display ();
 			var children = get_children ();
 
-			var windows = new GLib.SList<unowned Meta.Window> ();
+			var windows = new GLib.SList<Meta.Window> ();
 			foreach (var child in children) {
 				var window_clone = child as DeepinWindowClone;
 				windows.prepend (window_clone.window);
@@ -341,7 +341,7 @@ namespace Gala
 			var display = screen.get_display ();
 			var children = get_children ();
 
-			var windows = new GLib.SList<unowned Meta.Window> ();
+			var windows = new GLib.SList<Meta.Window> ();
 			foreach (var child in children) {
 				var window_clone = child as DeepinWindowClone;
 				windows.prepend (window_clone.window);
