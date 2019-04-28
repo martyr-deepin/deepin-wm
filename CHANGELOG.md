@@ -1,3 +1,11 @@
+<a name="1.9.39"></a>
+### 1.9.39 (2019-04-28)
+
+
+#### Features
+
+* **menu:**  Add a description of whether to scale ([d694b56c](d694b56c))
+
 <a name=""></a>
 ##  1.9.38 (2019-04-03)
 
