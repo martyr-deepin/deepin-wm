@@ -24,11 +24,11 @@ msgstr "顯示器畫面是否正常？"
 
 #: ../src/WindowManager.vala:1727
 msgid "Keep This Configuration"
-msgstr "保留此設定"
+msgstr "保留設定"
 
 #: ../src/WindowManager.vala:1728
 msgid "Restore Previous Configuration"
-msgstr "恢復先前設定"
+msgstr "還原設定"
 
 #: ../src/Widgets/WindowMenu.vala:58
 msgid "Minimize"
@@ -44,19 +44,19 @@ msgstr "調整大小"
 
 #: ../src/Widgets/WindowMenu.vala:87
 msgid "Always on Top"
-msgstr "永遠在最上層"
+msgstr "永遠在最畫面上層"
 
 #: ../src/Widgets/WindowMenu.vala:96
 msgid "Always on Visible Workspace"
-msgstr "永遠在顯示的工作區"
+msgstr "永遠在工作區顯示"
 
 #: ../src/Widgets/WindowMenu.vala:105
 msgid "Move to Workspace Left"
-msgstr "向左移動工作區"
+msgstr "移動到左側工作區"
 
 #: ../src/Widgets/WindowMenu.vala:113
 msgid "Move to Workspace Right"
-msgstr "向右移動工作區"
+msgstr "移動到右側工作區"
 
 #: ../src/Widgets/WindowMenu.vala:121
 msgid "Close"
@@ -64,7 +64,7 @@ msgstr "關閉"
 
 #: ../src/Widgets/WindowMenu.vala:133
 msgid "Unmaximize"
-msgstr "取消最大化"
+msgstr "還原視窗大小"
 
 #: ../src/Widgets/WindowMenu.vala:133
 msgid "Maximize"
@@ -76,7 +76,7 @@ msgstr ""
 
 #: ../src/Deepin/DeepinWorkspaceName.vala:152
 msgid "workspace"
-msgstr ""
+msgstr "工作區"
 
 #: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:77
 msgid "%l:%M:%S %p"
@@ -436,13 +436,13 @@ msgstr "僅在主螢幕上顯示轉角遮罩"
 #~ msgstr "重新啟動"
 
 #~ msgid "Are you sure you want to Shut Down?"
-#~ msgstr "您確定要關機？"
+#~ msgstr "確定關機？"
 
 #~ msgid "Shut Down"
 #~ msgstr "關機"
 
 #~ msgid "Are you sure you want to Log Out?"
-#~ msgstr "您確定要登出？"
+#~ msgstr "確定登出？"
 
 #~ msgid "Log Out"
 #~ msgstr "登出"
