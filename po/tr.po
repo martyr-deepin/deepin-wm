@@ -1,26 +1,27 @@
 # Turkish translation for beat-box
 # Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
 # This file is distributed under the same license as the beat-box package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2012.
+# Sadık Poyraz <sadikpoyraz01@gmail.com>, 2015.
+# Serdar Sağlam <teknomobil@yandex.com>, 2019.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: beat-box\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-12-09 18:23+0800\n"
-"PO-Revision-Date: 2015-05-19 03:41+0000\n"
-"Last-Translator: Sadık Poyraz <sadikpoyraz01@gmail.com>\n"
+"PO-Revision-Date: 2019-06-12 15:19+0300\n"
+"Last-Translator: Serdar Sağlam <teknomobil@yandex.com>\n"
 "Language-Team: Turkish <tr@li.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2015-09-23 06:25+0000\n"
-"X-Generator: Launchpad (build 17749)\n"
+"X-Generator: Poedit 2.2.1\n"
 
 #: ../src/WindowManager.vala:1724
 msgid "Does the display look OK?"
-msgstr "Ekranı sorunsuz görebiliyor musunuz?"
+msgstr "Ekran iyi görünüyor mu?"
 
 #: ../src/WindowManager.vala:1727
 msgid "Keep This Configuration"
@@ -32,7 +33,7 @@ msgstr "Önceki Yapılandırmaya Geri Dön"
 
 #: ../src/Widgets/WindowMenu.vala:58
 msgid "Minimize"
-msgstr "Simge Durumuna Küçült"
+msgstr "Küçült"
 
 #: ../src/Widgets/WindowMenu.vala:73
 msgid "Move"
@@ -72,11 +73,11 @@ msgstr "Ekranı Kapla"
 
 #: ../src/Deepin/DeepinWorkspaceThumbClone.vala:563
 msgid "Drag upwards to remove"
-msgstr ""
+msgstr "Kaldırmak için yukarı doğru sürükle"
 
 #: ../src/Deepin/DeepinWorkspaceName.vala:152
 msgid "workspace"
-msgstr ""
+msgstr "çalışma alanı"
 
 #: /home/sonald/stage/deepin-wm/lib/Granite/Widgets/Utils.vala:77
 msgid "%l:%M:%S %p"
@@ -145,7 +146,7 @@ msgstr "Pencere görünüm düzeni algoritması"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:3
 msgid "Choose the algorithm used for exposing the windows"
-msgstr "Pencerelerin gösterimi için kullanılacak algoritmayı seçin"
+msgstr "Pencerelerin gösterimi için kullanılacak algoritmayı seç"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:4
 msgid "Action for the top right corner"
@@ -215,11 +216,11 @@ msgid ""
 "workspaces instead of a static, fixed number"
 msgstr ""
 "Durağan ve sabit sayıda çalışma alanı yerine ihtiyaca göre dinamik olarak "
-"artan ya da azalan sayıda çalışma alanı kullanın."
+"artan ya da azalan sayıda çalışma alanı kullanın"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:15
 msgid "Names that are recognized as dock windows for the window switcher"
-msgstr ""
+msgstr "Pencere değiştirici için rıhtım pencere olarak tanınan adlar"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:16
 msgid ""
@@ -227,26 +228,33 @@ msgid ""
 "attempts to find a window matching the names. If it does, it will hide this "
 "window and fade it back in, once the the switcher is closed."
 msgstr ""
+"Pencere değiştiriciyi başlatırken, gala bu listenin üzerinde yinelenir ve "
+"adlarıyla eşleşen bir pencere bulmaya çalışır. Varsa, bu pencereyi gizler ve "
+"anahtarlayıcı kapatıldığında bir kez daha kaybolur."
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:17
 msgid "Window class names that will be focused automatically when shown"
-msgstr ""
+msgstr "Gösterildiğinde otomatik olarak odaklanacak pencere sınıfı adları"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:18
 msgid ""
 "Some windows could not grab focus correctly when shown, just put their class "
 "names here to avoid such issue."
 msgstr ""
+"Bazı pencereler gösterildiğinde netleme yapamadı, bu tür bir sorunu önlemek "
+"için sınıf adlarını buraya yazmanız yeterli."
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:19
 msgid "Enable show-desktop item in Alt-Tab popup window"
-msgstr ""
+msgstr "Alt-Tab açılır penceresinde masaüstünü göster ögesini etkinleştir"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:20
 msgid ""
 "The show-desktop item will be put at end of the window list. show-desktop "
 "action of window manager will be performed if selected."
 msgstr ""
+"Masaüstünü göster ögesi, pencere listesinin sonuna konur. Eğer seçildiyse, "
+"pencere yöneticisinin show-desktop işlemi gerçekleştirilecektir."
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:21
 msgid "Shortcut to move to first workspace"
@@ -290,11 +298,11 @@ msgstr "Sonraki klavye düzenine geçiş yap"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:31
 msgid "Cycle to previous keyboard layout"
-msgstr ""
+msgstr "Önceki klavye düzenine dön"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:32
 msgid "Attach modal dialogs"
-msgstr ""
+msgstr "Kalıcı iletişim kutuları ekle"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:33
 msgid ""
@@ -302,6 +310,9 @@ msgid ""
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
 msgstr ""
+"İşeretlendiğinde, bağımsız başlık çubuklarına sahip olmak yerine, ana "
+"pencerenin başlık çubuğuna eklenmiş kalıcı iletişim kutuları görünür ve üst "
+"pencere ile birlikte taşınır."
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:34
 msgid "Arrangement of buttons on the titlebar"
@@ -327,16 +338,16 @@ msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:36
 msgid "Make parent windows that spawn a modal attached dialog being dimmed"
-msgstr ""
+msgstr "Modal ekli bir iletişim kutusunu açan ana pencereleri soluklaştır"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:37
 msgid ""
 "The opacity of the windows located in the background in the alt-tab-switcher."
-msgstr ""
+msgstr "Alt Tab değiştiricideki arka planda bulunan pencerelerin opaklığı."
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:38
 msgid "Background-image used in the workspace-switcher"
-msgstr ""
+msgstr "Çalışma alanı değiştiricide kullanılan arka plan resmi"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:39
 msgid "Enable Animations"
@@ -352,7 +363,7 @@ msgstr ""
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:41
 msgid "Duration of the snap animation as used by maximize/unmaximize"
-msgstr ""
+msgstr "Çıtçıt canlandırmasının büyültme/küçülme olarak kullanıldığı süre"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:42
 msgid "Duration of the close animation"
@@ -372,7 +383,7 @@ msgstr "Menü haritalama animasyonu süresi"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:46
 msgid "Defines the shadow of normal focused windows"
-msgstr ""
+msgstr "Normal odaklı pencerelerin gölgesini tanımlar"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:47
 msgid ""
@@ -381,26 +392,30 @@ msgid ""
 "offset and the last the opacity. So [blur-radius, top-fade, x-offset, y-"
 "offset, opacity]"
 msgstr ""
+"İlk değer, gölgenin bulanıklığının yarıçapı, ikincisi en üst solma "
+"(genellikle sadece -1'dir), üçüncü ve dördüncü, x ve y ofseti ve son "
+"opaklıktır. Yani [bulanıklık yarıçapı, üst solma, x-uzaklık, y-uzaklık, "
+"opaklık]"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:48
 msgid "Defines the shadow of a normal unfocused window"
-msgstr ""
+msgstr "Normal odaklanmamış bir pencerenin gölgesini tanımlar"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:49
 msgid "See normal-focused"
-msgstr ""
+msgstr "Normal odaklı görün"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:50
 msgid "Defines the shadow of a menu"
-msgstr ""
+msgstr "Bir menünün gölgesini tanımlar"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:51
 msgid "Defines the shadow of a focused dialog"
-msgstr ""
+msgstr "Odaklanmış bir iletişimin gölgesini tanımlar"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:52
 msgid "Defines the shadow of an unfocused dialog"
-msgstr ""
+msgstr "Odaklanmamış bir iletişimin gölgesini tanımlar"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:53
 msgid "Disable all notifications"
@@ -408,19 +423,19 @@ msgstr "Tüm bildirimleri kapat"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:54
 msgid "Enable bubbles"
-msgstr ""
+msgstr "Kabarcıkları etkinleştir"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:55
 msgid "Enable sounds"
-msgstr ""
+msgstr "Sesleri etkinleştir"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:56
 msgid "Show missed notifications in notification center"
-msgstr ""
+msgstr "Bildirim merkezinde cevapsız bildirimleri göster"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:57
 msgid "Enable rounded corner mask"
-msgstr ""
+msgstr "Yuvarlak köşe maskesini etkinleştir"
 
 #: ../data/org.pantheon.desktop.gala.gschema.xml.in.in.h:58
 msgid "Corner radius"
@@ -435,4 +450,4 @@ msgid "Only show corner masks on primary monitor"
 msgstr "Köşe maskelerini sadece ana ekranda göster"
 
 #~ msgid "Cancel"
-#~ msgstr "Vazgeç"
+#~ msgstr "İptal"
