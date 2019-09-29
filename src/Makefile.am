@@ -45,7 +45,6 @@ gala_VALASOURCES = \
 	WindowListener.vala \
 	WindowManager.vala \
 	WorkspaceManager.vala \
-	Deepin/DeepinBlurEffect.vala \
 	Deepin/DeepinCssActor.vala \
 	Deepin/DeepinCssStaticActor.vala \
 	Deepin/DeepinFramedBackground.vala \
