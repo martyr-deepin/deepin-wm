@@ -374,13 +374,13 @@ namespace Gala
 				position.x = outer_rect.x - offset_x;
 				position.y = outer_rect.y - offset_y;
 				var position_value = GLib.Value (typeof (Point));
-				position_value.set_boxed (position);
+				position_value.set_boxed ((void*)position);
 
 				var size = Size.alloc ();
 				size.width = outer_rect.width;
 				size.height = outer_rect.height;
 				var size_value = GLib.Value (typeof (Size));
-				size_value.set_boxed (size);
+				size_value.set_boxed ((void*)size);
 
                 unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 				DeepinUtils.start_animation_group (this, "window-slot",
@@ -433,13 +433,13 @@ namespace Gala
 				position.x = rect.x;
 				position.y = rect.y;
 				var position_value = GLib.Value (typeof (Point));
-				position_value.set_boxed (position);
+				position_value.set_boxed ((void*)position);
 
 				var size = Size.alloc ();
 				size.width = rect.width;
 				size.height = rect.height;
 				var size_value = GLib.Value (typeof (Size));
-				size_value.set_boxed (size);
+				size_value.set_boxed ((void*)size);
 
                 unowned AnimationSettings animation_settings = AnimationSettings.get_default ();
 				if (!selecting) {

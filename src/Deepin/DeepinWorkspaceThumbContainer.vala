@@ -502,7 +502,7 @@ namespace Gala
 				position.x = child_box.get_x ();
 				position.y = child_box.get_y ();
 				var position_value = GLib.Value (typeof (Point));
-				position_value.set_boxed (position);
+				position_value.set_boxed ((void*)position);
 				DeepinUtils.start_animation_group (child, "thumb-workspace-slot", LAYOUT_DURATION,
                         (tl) => { tl.progress_mode = (AnimationMode.LINEAR); },
                         "position", &position_value);
