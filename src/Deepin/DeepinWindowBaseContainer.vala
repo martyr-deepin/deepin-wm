@@ -68,7 +68,7 @@ namespace Gala
 		public abstract void do_select_clone (DeepinWindowClone window_clone, bool select,
 											  bool animate = true);
 
-		public DeepinWindowBaseContainer (Workspace workspace)
+		DeepinWindowBaseContainer (Workspace workspace)
 		{
 			Object (workspace: workspace);
 		}
